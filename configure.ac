@@ -25,6 +25,7 @@ AC_CONFIG_FILES([
   database/Makefile
   subsystems/Makefile
   subsystems/example/Makefile
+  subsystems/calo/Makefile
 ])
 
 AC_OUTPUT

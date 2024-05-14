@@ -5,6 +5,7 @@
 #include <odbc++/drivermanager.h>
 #include <odbc++/resultset.h>
 #include <odbc++/preparedstatement.h>
+#include <odbc++/types.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -71,7 +72,7 @@ OnlProdRunDBodbc::FillFromdaqDB(const int runno)
     }
 
   query = con->createStatement();
-  cmd << "SELECT runtype,runstate,eventsinrun,brunixtime,erunixtime FROM RUN WHERE RUNNUMBER = "
+  cmd << "SELECT runtype,eventsinrun,brtimestamp,ertimestamp FROM RUN WHERE RUNNUMBER = "
       << runno;
   if (verbosity > 0)
     {
@@ -90,8 +91,10 @@ OnlProdRunDBodbc::FillFromdaqDB(const int runno)
     {
       runtype = rs->getString("runtype");
       eventsinrun = rs->getInt("eventsinrun");
-      brunixtime = rs->getInt("brunixtime");
-      erunixtime = rs->getInt("erunixtime");
+      odbc::Timestamp brtimestamp = rs->getTimestamp("brtimestamp");
+      brunixtime = brtimestamp.getTime();
+      odbc::Timestamp ertimestamp = rs->getTimestamp("ertimestamp");
+      erunixtime = ertimestamp.getTime();
     }
   delete rs;
   delete query;
