@@ -77,7 +77,7 @@ OnlProdClient::InitAll()
       exit(1);
     }
 
-  fHtml = new OnlProdHtml(getenv("ONLPROD_HTMLDIR"));
+  fHtml = new OnlProdHtml("/sphenix/WWW/subsystem/QAHtml/");
   TGFrame* rootWin = (TGFrame*) gClient->GetRoot();
   display_sizex = rootWin->GetDefaultWidth();
   display_sizey = rootWin->GetDefaultHeight();
