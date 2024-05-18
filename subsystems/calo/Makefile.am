@@ -2,7 +2,8 @@ AUTOMAKE_OPTIONS = foreign
 
 AM_CPPFLAGS = \
   -I$(includedir) \
-  -I$(OFFLINE_MAIN)/include \
+  -isystem$(OFFLINE_MAIN)/include \
+  -isystem$(OFFLINE_MAIN)/rootmacros \
   -isystem$(ROOTSYS)/include 
 
 lib_LTLIBRARIES = \
