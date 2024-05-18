@@ -1,4 +1,4 @@
-#include "OnlProdHtml.h"
+#include "QAHtml.h"
 
 #include "TSystem.h"
 
@@ -71,9 +71,7 @@ namespace {
 }
 
 //_____________________________________________________________________________
-OnlProdHtml::OnlProdHtml(const char* topdir) : 
-  fVerbosity(0),
-  runtype("unknown")
+QAHtml::QAHtml(const char* topdir)
 {
   if ( topdir ) 
     {
@@ -87,7 +85,7 @@ OnlProdHtml::OnlProdHtml(const char* topdir) :
 
 //_____________________________________________________________________________
 void
-OnlProdHtml::addMenu(const string& header, const string& path, 
+QAHtml::addMenu(const string& header, const string& path, 
 		    const string& relfilename)
 {
   ostringstream menufile;
@@ -153,7 +151,7 @@ OnlProdHtml::addMenu(const string& header, const string& path,
 
 //_____________________________________________________________________________
 void
-OnlProdHtml::plainHtmlMenu(const set<string>& olines)
+QAHtml::plainHtmlMenu(const set<string>& olines)
 {
   ostringstream htmlmenufile;
 
@@ -237,7 +235,7 @@ OnlProdHtml::plainHtmlMenu(const set<string>& olines)
 
 //_____________________________________________________________________________
 void
-OnlProdHtml::namer(const string& header, 
+QAHtml::namer(const string& header, 
 		   const string& basefilename,
 		   const string& ext, 
 		   string& fullfilename,
@@ -272,7 +270,7 @@ OnlProdHtml::namer(const string& header,
 
 //_____________________________________________________________________________
 string
-OnlProdHtml::registerPage(const string& header,
+QAHtml::registerPage(const string& header,
 			  const string& path,
 			  const string& basefilename,
 			  const string& ext)
@@ -292,7 +290,7 @@ OnlProdHtml::registerPage(const string& header,
 
 //_____________________________________________________________________________
 void
-OnlProdHtml::runInit()
+QAHtml::runInit()
 {
   // Check if html output directory for this run exist.
   // If not create it.
@@ -352,7 +350,7 @@ OnlProdHtml::runInit()
 
 //_____________________________________________________________________________
 string
-OnlProdHtml::runRange()
+QAHtml::runRange()
 {
   const int range = 1000;
   int start = runNumber()/range;
@@ -366,7 +364,7 @@ OnlProdHtml::runRange()
 }
 
 void
-OnlProdHtml:: RunType(const std::string &rtyp)
+QAHtml:: RunType(const std::string &rtyp)
 {
   runtype = rtyp;
   transform(runtype.begin(), runtype.end(), runtype.begin(), (int(*)(int))tolower);

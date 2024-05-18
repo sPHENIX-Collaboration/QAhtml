@@ -1,7 +1,9 @@
 #include "CaloDraw.h"
+
 #include <sPhenixStyle.C>
-#include <qahtml/OnlProdClient.h>
-#include <qahtml/OnlProdDB.h>
+
+#include <qahtml/QADrawClient.h>
+#include <qahtml/QADrawDB.h>
 
 #include <TCanvas.h>
 #include <TDatime.h>
@@ -26,8 +28,7 @@
 using namespace std;
 
 CaloDraw::CaloDraw(const string &name): 
-  OnlProdDraw(name),
-  db(NULL)
+  QADraw(name)
 {
   memset(TC,0,sizeof(TC));
   memset(transparent,0,sizeof(transparent));
@@ -83,7 +84,7 @@ int CaloDraw::Draw(const string &what)
 
 int CaloDraw::MakeCanvas(const string &name, int num)
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
   // xpos (-1) negative: do not draw menu bar
@@ -122,7 +123,7 @@ int CaloDraw::MakeCanvas(const string &name, int num)
 
 int CaloDraw::DrawCemc()
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH2 *cemc_e_chi2 = dynamic_cast <TH2 *> (cl->getHisto(Form("%scemc_e_chi2", histprefix)));
   TH2F *cemc_etaphi = dynamic_cast <TH2F *> (cl->getHisto(Form("%scemc_etaphi", histprefix)));
@@ -207,13 +208,13 @@ int CaloDraw::DrawCemc()
       etaphi_clus->DrawCopy("COLZ");
       gPad->SetRightMargin(0.15);
     }
-  TH2F *ohcal_etaphi = dynamic_cast <TH2F *> (cl->getHisto(Form("%sohcal_etaphi", histprefix)));
-  TH1F *ohcal_proj = (TH1F*) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
-  TH2F *ihcal_etaphi = dynamic_cast <TH2F *> (cl->getHisto(Form("%sihcal_etaphi", histprefix)));
-  TH1F *ihcal_proj = (TH1F*) proj(ihcal_etaphi)->Clone("h_ihcal_proj");
-  TH1F* h_fb_ratio_emcal = FBratio(emcal_proj);
-  TH1F* h_fb_ratio_ohcal = FBratio(ohcal_proj);
-  TH1F* h_fb_ratio_ihcal = FBratio(ihcal_proj);
+  TH2 *ohcal_etaphi = dynamic_cast <TH2 *> (cl->getHisto(Form("%sohcal_etaphi", histprefix)));
+  TH1 *ohcal_proj = (TH1F*) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
+  TH2 *ihcal_etaphi = dynamic_cast <TH2 *> (cl->getHisto(Form("%sihcal_etaphi", histprefix)));
+  TH1 *ihcal_proj = (TH1*) proj(ihcal_etaphi)->Clone("h_ihcal_proj");
+  TH1* h_fb_ratio_emcal = FBratio(emcal_proj);
+  TH1* h_fb_ratio_ohcal = FBratio(ohcal_proj);
+  TH1* h_fb_ratio_ihcal = FBratio(ihcal_proj);
   Pad[1][2]->cd();
   h_fb_ratio_emcal->Draw("ex0");
   h_fb_ratio_emcal->SetTitle("Calo North-South Ratio");
@@ -239,7 +240,7 @@ int CaloDraw::DrawCemc()
 
   /*
   // retrieve variables from previous runs
-  vector<OnlProdDBVar> history;
+  vector<QADrawDBVar> history;
   time_t current = cl->BeginRunUnixTime();
   // go back 24 hours
   time_t back =   current - 24*3600;
@@ -269,7 +270,7 @@ int CaloDraw::DrawCemc()
 
 int CaloDraw::DrawIhcal()
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH2 *ihcal_e_chi2 = dynamic_cast <TH2 *> (cl->getHisto(Form("%sihcal_e_chi2", histprefix)));
   TH2F *ihcal_etaphi = dynamic_cast <TH2F *> (cl->getHisto(Form("%sihcal_etaphi", histprefix)));
@@ -348,7 +349,7 @@ int CaloDraw::DrawIhcal()
 
 int CaloDraw::DrawOhcal()
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH2 *ohcal_e_chi2 = dynamic_cast <TH2 *> (cl->getHisto(Form("%sohcal_e_chi2", histprefix)));
   TH2F *ohcal_etaphi = dynamic_cast <TH2F *> (cl->getHisto(Form("%sohcal_etaphi", histprefix)));
@@ -427,7 +428,7 @@ int CaloDraw::DrawOhcal()
 
 int CaloDraw::DrawCorr()
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH2 *emcal_mbd = dynamic_cast <TH2 *> (cl->getHisto(Form("%semcal_mbd_correlation", histprefix)));
   TH2 *emcal_hcal = dynamic_cast <TH2 *> (cl->getHisto(Form("%semcal_hcal_correlation", histprefix)));
@@ -522,7 +523,7 @@ int CaloDraw::DrawCorr()
 
   /*
   // retrieve variables from previous runs
-  vector<OnlProdDBVar> history;
+  vector<QADrawDBVar> history;
   time_t current = cl->BeginRunUnixTime();
   // go back 24 hours
   time_t back =   current - 24*3600;
@@ -552,7 +553,7 @@ int CaloDraw::DrawCorr()
 
 int CaloDraw::DrawZdc()
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH1 *zdc_Northcalib = dynamic_cast <TH1 *> (cl->getHisto(Form("%szdcNorthcalib", histprefix)));
   TH1 *zdc_Southcalib = dynamic_cast <TH1 *> (cl->getHisto(Form("%szdcSouthcalib", histprefix)));
@@ -636,7 +637,7 @@ int CaloDraw::MakeHtml(const string &what)
       return iret;
     }
 
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   // Register the 1st canvas png file to the menu and produces the png file.
   string pngfile = cl->htmlRegisterPage(*this,"CEMC","1","png");
@@ -660,16 +661,16 @@ int CaloDraw::MakeHtml(const string &what)
 int
 CaloDraw::DBVarInit()
 {
-  /* db = new OnlProdDB(this); */
+  /* db = new QADrawDB(this); */
   /* db->DBInit(); */
   return 0;
 }
 
-TH1F* CaloDraw::proj(TH2F* h2)
+TH1* CaloDraw::proj(TH2* h2)
 {
   int x = h2->GetXaxis()->GetNbins();
   int y = h2->GetYaxis()->GetNbins();
-  TH1F* h = (TH1F*) h2->ProjectionX("temp");
+  TH1* h = (TH1F*) h2->ProjectionX("temp");
   h->Reset();
   for (int ix=1; ix<x+1; ix++){
     float sum = 0;
@@ -687,10 +688,10 @@ TH1F* CaloDraw::proj(TH2F* h2)
   return h;
 }
 
-TH1F* CaloDraw::FBratio(TH1F* h)
+TH1* CaloDraw::FBratio(TH1* h)
 {
   const int Nbin =  h->GetXaxis()->GetNbins();
-  TH1F* hfb = new TH1F("temp32","",Nbin/2,0,Nbin/2);
+  TH1* hfb = new TH1F("temp32","",Nbin/2,0,Nbin/2);
 
   for(int i=0; i<Nbin/2; i++){
     int b1 = i+1;

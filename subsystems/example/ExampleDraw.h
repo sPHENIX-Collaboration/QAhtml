@@ -1,17 +1,17 @@
 #ifndef EXAMPLEDRAW_H__
 #define EXAMPLEDRAW_H__
 
-#include <qahtml/OnlProdDraw.h>
+#include <qahtml/QADraw.h>
 
 #include <vector>
 
-class OnlProdDB;
-class OnlProdDBVar;
+class QADrawDB;
+class QADrawDBVar;
 class TCanvas;
 class TGraphErrors;
 class TPad;
 
-class ExampleDraw: public OnlProdDraw
+class ExampleDraw: public QADraw
 {
 
  public: 
@@ -25,8 +25,8 @@ class ExampleDraw: public OnlProdDraw
  protected:
   int MakeCanvas(const std::string &name);
   int DrawFirst(const std::string &what = "ALL");
-  int DrawGraph(TPad *pad, const std::vector<OnlProdDBVar> &history, const time_t begin, const time_t end);
-  OnlProdDB *db;
+  int DrawGraph(TPad *pad, const std::vector<QADrawDBVar> &history, const time_t begin, const time_t end);
+  QADrawDB *db {nullptr};
   TCanvas *TC[1];
   TPad *transparent[1];
   TPad *Pad[4];

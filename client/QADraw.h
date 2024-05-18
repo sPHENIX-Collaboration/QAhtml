@@ -1,16 +1,16 @@
-#ifndef __ONCALDRAW_H__
-#define __ONCALDRAW_H__
+#ifndef QA_CLIENT_DRAW_H
+#define QA_CLIENT_DRAW_H
 
 #include <fun4all/Fun4AllBase.h>
 #include <string>
 
 class Event;
 
-class OnlProdDraw: public Fun4AllBase
+class QADraw: public Fun4AllBase
 {
  public:
-  OnlProdDraw(const std::string &name = "NONE");
-  virtual ~OnlProdDraw() {}
+  QADraw(const std::string &name = "NONE");
+  virtual ~QADraw() {}
 
   virtual int Init() {return 0;}
   virtual int Draw(const std::string &what = "ALL");
@@ -19,5 +19,5 @@ class OnlProdDraw: public Fun4AllBase
  protected:
 };
 
-#endif /* __ONCALDRAW_H__ */
+#endif /* QA_CLIENT_DRAW_H */
 

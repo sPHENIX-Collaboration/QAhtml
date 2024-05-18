@@ -1,5 +1,5 @@
-#ifndef __ONCALHTML_H__
-#define __ONCALHTML_H__
+#ifndef QA_CLIENT_QAHTML_H
+#define QA_CLIENT_QAHTML_H
 
 #include <string>
 #include <set>
@@ -7,11 +7,11 @@
 /**@name Helper class to centralize HTML generation code.
  */
 
-class OnlProdHtml
+class QAHtml
 {
 public:
-  OnlProdHtml(const char* topdir);
-  virtual ~OnlProdHtml(){}
+  QAHtml(const char* topdir);
+  virtual ~QAHtml(){}
 
   /** Generate a bit of the navigation menu for a given file (link).
    *  @param path the path as it will appear in the menu
@@ -22,7 +22,7 @@ public:
 	       const std::string& relfilename);
   
   /** Generate filenames, to be used to produce e.g. gif or html files.
-   *  @param drawer the OnlProdDraw child class for which filename must be built
+   *  @param drawer the QADraw child class for which filename must be built
    *  @param basefilename the beginning of the filename 
    *  (will be completed e.g. with the run number by this method)
    *  @param ext the extension of the file (e.g. gif or html)
@@ -36,7 +36,7 @@ public:
 
   /** Generate a full filename from specified pieces, *and* register
     * the file to the navigation menu
-    * @param drawer the OnlProdDraw child class for which filename must be built
+    * @param drawer the QADraw child class for which filename must be built
     * @param path the path that will be used in the *navigation menu*
     * @param basefilename the beginning of the filename 
     * (will be completed e.g. with the run number by this method)
@@ -65,11 +65,11 @@ private:
 
 
 private:
-  int fVerbosity;
-  int fRunNumber;
+  int fVerbosity {0};
+  int fRunNumber {0};
   std::string fHtmlDir;
   std::string fHtmlRunDir;
-  std::string runtype;
+  std::string runtype {"unknown"};
 };
 
-#endif
+#endif // QA_CLIENT_QAHTML_H

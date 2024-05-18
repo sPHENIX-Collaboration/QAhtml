@@ -1,19 +1,19 @@
-#ifndef CALODRAW_H__
-#define CALODRAW_H__
+#ifndef CALO_CALODRAW_H
+#define CALO_CALODRAW_H
 
-#include <qahtml/OnlProdDraw.h>
+#include <qahtml/QADraw.h>
 
 #include <vector>
 
-class OnlProdDB;
-class OnlProdDBVar;
+class QADB;
+class QADBVar;
 class TCanvas;
 class TGraphErrors;
 class TPad;
-class TH1F;
-class TH2F;
+class TH1;
+class TH2;
 
-class CaloDraw: public OnlProdDraw
+class CaloDraw: public QADraw
 {
 
  public: 
@@ -24,17 +24,17 @@ class CaloDraw: public OnlProdDraw
   int MakeHtml(const std::string &what = "ALL");
   int DBVarInit();
 
- protected:
+ private:
   int MakeCanvas(const std::string &name, int num);
   int DrawCemc();
   int DrawIhcal();
   int DrawOhcal();
   int DrawCorr();
   int DrawZdc();
-  TH1F* proj(TH2F* h2);
-  TH1F* FBratio(TH1F* h);
+  TH1* proj(TH2* h2);
+  TH1* FBratio(TH1* h);
   void myText(double x,double y,int color, const char *text, double tsize=0.04);
-  OnlProdDB *db;
+  QADB *db {nullptr};
   TCanvas *TC[7];
   TPad *transparent[7];
   TPad *Pad[7][4];

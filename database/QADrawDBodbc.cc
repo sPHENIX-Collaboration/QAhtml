@@ -1,6 +1,6 @@
-#include "OnlProdDBodbc.h"
-#include "OnlProdDBVar.h"
-#include "OnlProdDBReturnCodes.h"
+#include "QADrawDBodbc.h"
+#include "QADrawDBVar.h"
+#include "QADrawDBReturnCodes.h"
 
 #include <odbc++/connection.h>
 #include <odbc++/setup.h>
@@ -30,15 +30,7 @@ static Connection *con = 0;
 
 #define VERBOSE
 
-OnlProdDBodbc::OnlProdDBodbc()
-{
-  dbname = "OnlProdDB";
-  dbowner = "phnxrc";
-  dbpasswd = "";
-  table = "aargh";
-}
-
-OnlProdDBodbc::~OnlProdDBodbc()
+QADrawDBodbc::~QADrawDBodbc()
 {
   if (con)
     {
@@ -48,7 +40,7 @@ OnlProdDBodbc::~OnlProdDBodbc()
 }
 
 int
-OnlProdDBodbc::CheckAndCreateTable(const string &name, const map<const string, OnlProdDBVar *> &varmap)
+QADrawDBodbc::CheckAndCreateTable(const string &name, const map<const string, QADrawDBVar *> &varmap)
 {
   if (GetConnection())
     {
@@ -73,13 +65,13 @@ OnlProdDBodbc::CheckAndCreateTable(const string &name, const map<const string, O
       cout << "Table " << name_lowercase << " does not exist, will create it" << endl;
       //      cout << "Message: " << e.getMessage() << endl;
     }
-  map<const string, OnlProdDBVar *>::const_iterator iter;
+  map<const string, QADrawDBVar *>::const_iterator iter;
   if (! rs)
     {
       cmd.str("");
       cmd << "CREATE TABLE " << name_lowercase << "(runnumber int NOT NULL, inserttime bigint NOT NULL, startvaltime bigint NOT NULL, endvaltime bigint NOT NULL, ";
       unsigned int ientry = 0;
-      for (iter = varmap.begin(); iter != varmap.end(); iter++)
+      for (iter = varmap.begin(); iter != varmap.end(); ++iter)
         {
           cmd << iter->first << addvarname[0] << " real, ";
           cmd << iter->first << addvarname[1] << " real";
@@ -102,7 +94,7 @@ OnlProdDBodbc::CheckAndCreateTable(const string &name, const map<const string, O
     {
       ResultSetMetaData* meta = rs->getMetaData();
       unsigned int nocolumn = rs->getMetaData()->getColumnCount();
-      for (iter = varmap.begin(); iter != varmap.end(); iter++)
+      for (iter = varmap.begin(); iter != varmap.end(); ++iter)
         {
           string varname = iter->first;
           // column names are lower case only, so convert string to lowercase
@@ -153,7 +145,7 @@ OnlProdDBodbc::CheckAndCreateTable(const string &name, const map<const string, O
 }
 
 void
-OnlProdDBodbc::identify() const
+QADrawDBodbc::identify() const
 {
   cout << "DB Name: " << dbname << endl;
   cout << "DB Owner: " << dbowner << endl;
@@ -163,9 +155,9 @@ OnlProdDBodbc::identify() const
 }
 
 int
-OnlProdDBodbc::AddRow(const int runnumber, const time_t inserttime, const time_t startvaltime, const time_t endvaltime, const map<const string, OnlProdDBVar *> &varmap)
+QADrawDBodbc::AddRow(const int runnumber, const time_t inserttime, const time_t startvaltime, const time_t endvaltime, const map<const string, QADrawDBVar *> &varmap)
 {
-  map<const string, OnlProdDBVar *>::const_iterator iter;
+  map<const string, QADrawDBVar *>::const_iterator iter;
   int iret = 0;
   ostringstream cmd, cmd1;
 
@@ -178,7 +170,7 @@ OnlProdDBodbc::AddRow(const int runnumber, const time_t inserttime, const time_t
   cmd << "INSERT INTO " << table << "(runnumber, inserttime, startvaltime, endvaltime ";
   cmd1 << "VALUES(" << runnumber << ", " << inserttime 
 << ", " << startvaltime << ", " << endvaltime;
-  for (iter = varmap.begin(); iter != varmap.end(); iter++)
+  for (iter = varmap.begin(); iter != varmap.end(); ++iter)
     {
       for (unsigned int j = 0; j < 2; j++)
         {
@@ -222,7 +214,7 @@ OnlProdDBodbc::AddRow(const int runnumber, const time_t inserttime, const time_t
 }
 
 int
-OnlProdDBodbc::GetVar(const string &name, const time_t begin, const time_t end, const std::string &varname, std::vector<OnlProdDBVar> &DBVars)
+QADrawDBodbc::GetVar(const string &name, const time_t begin, const time_t end, const std::string &varname, std::vector<QADrawDBVar> &DBVars)
 {
   if (GetConnection())
     {
@@ -260,7 +252,7 @@ OnlProdDBodbc::GetVar(const string &name, const time_t begin, const time_t end, 
   int lastrun = -1;
   while (rs->next())
     {
-      OnlProdDBVar newvar;
+      QADrawDBVar newvar;
       int thisrun = rs->getInt("runnumber");
       if (thisrun == lastrun)
 	{
@@ -279,7 +271,7 @@ OnlProdDBodbc::GetVar(const string &name, const time_t begin, const time_t end, 
 }
 
 int
-OnlProdDBodbc::GetConnection()
+QADrawDBodbc::GetConnection()
 {
   if (con)
     {

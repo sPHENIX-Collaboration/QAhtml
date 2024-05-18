@@ -1,6 +1,7 @@
 #include "ExampleDraw.h"
-#include <qahtml/OnlProdClient.h>
-#include <qahtml/OnlProdDB.h>
+
+#include <qahtml/QADrawClient.h>
+#include <qahtml/QADrawDB.h>
 
 #include <TCanvas.h>
 #include <TDatime.h>
@@ -24,8 +25,7 @@
 using namespace std;
 
 ExampleDraw::ExampleDraw(const string &name): 
-  OnlProdDraw(name),
-  db(NULL)
+  QADraw(name)
 {
   memset(TC,0,sizeof(TC));
   memset(transparent,0,sizeof(transparent));
@@ -64,7 +64,7 @@ int ExampleDraw::Draw(const string &what)
 
 int ExampleDraw::MakeCanvas(const string &name)
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
   if (name ==  "Example1")
@@ -97,7 +97,7 @@ int ExampleDraw::MakeCanvas(const string &name)
 
 int ExampleDraw::DrawFirst(const string &/*what*/)
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   TH1 *px = dynamic_cast <TH1 *> (cl->getHisto("example_px"));
   TH1 *pxpy    = dynamic_cast <TH2 *> (cl->getHisto("example_pxpy"));
   TH1 *prof       = dynamic_cast <TProfile *> (cl->getHisto("example_hprof"));
@@ -133,7 +133,7 @@ int ExampleDraw::DrawFirst(const string &/*what*/)
 
   /*
   // retrieve variables from previous runs
-  vector<OnlProdDBVar> history;
+  vector<QADrawDBVar> history;
   time_t current = cl->BeginRunUnixTime();
   // go back 24 hours
   time_t back =   current - 24*3600;
@@ -156,7 +156,7 @@ int ExampleDraw::DrawFirst(const string &/*what*/)
 }
 
 int
-ExampleDraw::DrawGraph(TPad *pad, const std::vector<OnlProdDBVar> &history, const time_t begin, const time_t end)
+ExampleDraw::DrawGraph(TPad *pad, const std::vector<QADrawDBVar> &history, const time_t begin, const time_t end)
 {
   pad->cd();
   unsigned int nhistory = history.size();
@@ -214,7 +214,7 @@ int ExampleDraw::MakeHtml(const string &what)
       return iret;
     }
 
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   // Register the 1st canvas png file to the menu and produces the png file.
   string pngfile = cl->htmlRegisterPage(*this,"ExamplePlots","1","png");
@@ -226,7 +226,7 @@ int ExampleDraw::MakeHtml(const string &what)
 int
 ExampleDraw::DBVarInit()
 {
-  db = new OnlProdDB(this);
+  db = new QADrawDB(this);
   db->registerVar("meanpx");
   db->registerVar("rms");
   db->DBInit();

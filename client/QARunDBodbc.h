@@ -1,17 +1,17 @@
-#ifndef ONLPRODRUNDBODBC_H__
-#define ONLPRODRUNDBODBC_H__
+#ifndef QA_CLIENT_QARUNDBODBC_H
+#define QA_CLIENT_QARUNDBODBC_H
 
 #include <ctime>
 #include <set>
 #include <string>
 
-class OnlProdRunDBodbc
+class QARunDBodbc
 {
 
  public:
-  OnlProdRunDBodbc();
-  OnlProdRunDBodbc(const int runnumber);
-  virtual ~OnlProdRunDBodbc() {}
+  QARunDBodbc();
+  QARunDBodbc(const int runnumber);
+  virtual ~QARunDBodbc() {}
   //  void Dump(const int nrows = 0) const;
   void identify() const;
   void Verbosity(const int i) {verbosity = i;}
@@ -34,4 +34,4 @@ class OnlProdRunDBodbc
   time_t erunixtime;
 };
 
-#endif
+#endif // QA_CLIENT_QARUNDBODBC_H
