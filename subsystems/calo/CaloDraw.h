@@ -13,15 +13,14 @@ class TPad;
 class TH1;
 class TH2;
 
-class CaloDraw: public QADraw
+class CaloDraw : public QADraw
 {
-
- public: 
+ public:
   CaloDraw(const std::string &name = "CaloQA");
-  virtual ~CaloDraw();
+  ~CaloDraw() override;
 
-  int Draw(const std::string &what = "ALL");
-  int MakeHtml(const std::string &what = "ALL");
+  int Draw(const std::string &what = "ALL") override;
+  int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
 
  private:
@@ -31,13 +30,13 @@ class CaloDraw: public QADraw
   int DrawOhcal();
   int DrawCorr();
   int DrawZdc();
-  TH1* proj(TH2* h2);
-  TH1* FBratio(TH1* h);
-  void myText(double x,double y,int color, const char *text, double tsize=0.04);
-  QADB *db {nullptr};
-  TCanvas *TC[7];
-  TPad *transparent[7];
-  TPad *Pad[7][4];
+  TH1 *proj(TH2 *h2);
+  TH1 *FBratio(TH1 *h);
+  void myText(double x, double y, int color, const char *text, double tsize = 0.04);
+  //  QADB *db {nullptr};
+  TCanvas *TC[7]{};
+  TPad *transparent[7]{};
+  TPad *Pad[7][4]{};
   const char *histprefix;
 };
 
