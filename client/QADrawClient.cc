@@ -1,7 +1,7 @@
-#include "OnlProdClient.h"
-#include "OnlProdDraw.h"
-#include "OnlProdHtml.h"
-#include "OnlProdRunDBodbc.h"
+#include "QADrawClient.h"
+#include "QADraw.h"
+#include "QAHtml.h"
+#include "QARunDBodbc.h"
 #include "ClientHistoList.h"
 
 #include <TCanvas.h>
@@ -35,19 +35,19 @@
 
 using namespace std;
 
-OnlProdClient *OnlProdClient::__instance = NULL;
+QADrawClient *QADrawClient::__instance = NULL;
 
-OnlProdClient *OnlProdClient::instance()
+QADrawClient *QADrawClient::instance()
 {
   if (__instance)
     {
       return __instance;
     }
-  __instance = new OnlProdClient();
+  __instance = new QADrawClient();
   return __instance;
 }
 
-OnlProdClient::OnlProdClient(): 
+QADrawClient::QADrawClient(): 
   Fun4AllBase("ONCALCLIENT"),
   fHtml(NULL),
   rdb(NULL),
@@ -66,7 +66,7 @@ OnlProdClient::OnlProdClient():
 }
 
 void
-OnlProdClient::InitAll()
+QADrawClient::InitAll()
 {
   if (!gClient)
     {
@@ -77,14 +77,14 @@ OnlProdClient::InitAll()
       exit(1);
     }
 
-  fHtml = new OnlProdHtml(getenv("QA_HTMLDIR"));
+  fHtml = new QAHtml(getenv("QA_HTMLDIR"));
   TGFrame* rootWin = (TGFrame*) gClient->GetRoot();
   display_sizex = rootWin->GetDefaultWidth();
   display_sizey = rootWin->GetDefaultHeight();
   return ;
 }
 
-OnlProdClient::~OnlProdClient()
+QADrawClient::~QADrawClient()
 {
   delete fHtml;
   delete rdb;
@@ -97,7 +97,7 @@ OnlProdClient::~OnlProdClient()
 }
 
 void
-OnlProdClient::registerHisto(const char *hname, const char *subsys)
+QADrawClient::registerHisto(const char *hname, const char *subsys)
 {
   map<string, ClientHistoList *>::const_iterator histoiter = Histo.find(hname);
   if (histoiter != Histo.end())
@@ -123,10 +123,10 @@ OnlProdClient::registerHisto(const char *hname, const char *subsys)
 }
 
 void
-OnlProdClient::registerDrawer(OnlProdDraw *Drawer)
+QADrawClient::registerDrawer(QADraw *Drawer)
 {
   const char *DrawerName = Drawer->Name().c_str();
-  map<string, OnlProdDraw *>::iterator iter = DrawerList.find(DrawerName);
+  map<string, QADraw *>::iterator iter = DrawerList.find(DrawerName);
   if (iter != DrawerList.end())
     {
       cout << "Drawer " << DrawerName << " already registered, I won't overwrite it" << endl;
@@ -141,12 +141,12 @@ OnlProdClient::registerDrawer(OnlProdDraw *Drawer)
   return ;
 }
 
-int OnlProdClient::Draw(const char *who, const char *what)
+int QADrawClient::Draw(const char *who, const char *what)
 {
   return DoSomething(who, what, "DRAW");
 }
 
-int OnlProdClient::MakeHtml(const char *who, const char *what)
+int QADrawClient::MakeHtml(const char *who, const char *what)
 {
   mode_t old_umask = 0;
   char *onlprod_real_html = getenv("ONLPROD_REAL_HTML");
@@ -165,11 +165,11 @@ int OnlProdClient::MakeHtml(const char *who, const char *what)
   return iret;
 }
 
-int OnlProdClient::DoSomething(const char *who, const char *what, const char *opt)
+int QADrawClient::DoSomething(const char *who, const char *what, const char *opt)
 {
   int i = 0;
 
-  map<string, OnlProdDraw *>::iterator iter;
+  map<string, QADraw *>::iterator iter;
   if (strcmp(who, "ALL"))
     {
       iter = DrawerList.find(who);
@@ -244,7 +244,7 @@ int OnlProdClient::DoSomething(const char *who, const char *what, const char *op
 
 
 void
-OnlProdClient::updateHistoMap(const char *hname, TNamed *h1d)
+QADrawClient::updateHistoMap(const char *hname, TNamed *h1d)
 {
   map<string, ClientHistoList *>::const_iterator histoiter = Histo.find(hname);
   if (histoiter != Histo.end())
@@ -271,7 +271,7 @@ OnlProdClient::updateHistoMap(const char *hname, TNamed *h1d)
 }
 
 TNamed *
-OnlProdClient::getHisto(const string &hname)
+QADrawClient::getHisto(const string &hname)
 {
   map<string, ClientHistoList *>::const_iterator histoiter = Histo.find(hname);
   if (histoiter != Histo.end())
@@ -282,15 +282,15 @@ OnlProdClient::getHisto(const string &hname)
 }
 
 void
-OnlProdClient::Print(const string &what)
+QADrawClient::Print(const string &what)
 {
   if (what == "ALL" || what == "DRAWER")
     {
       // loop over the map and print out the content (name and location in memory)
       cout << "--------------------------------------" << endl << endl;
-      cout << "List of Drawers in OnlProdClient:" << endl;
+      cout << "List of Drawers in QADrawClient:" << endl;
 
-      map<string, OnlProdDraw*>::const_iterator hiter;
+      map<string, QADraw*>::const_iterator hiter;
       for (hiter = DrawerList.begin(); hiter != DrawerList.end(); ++hiter)
         {
           cout << hiter->first << " is at " << hiter->second << endl;
@@ -301,7 +301,7 @@ OnlProdClient::Print(const string &what)
     {
       // loop over the map and print out the content (name and location in memory)
       cout << "--------------------------------------" << endl << endl;
-      cout << "List of Histograms in OnlProdClient:" << endl;
+      cout << "List of Histograms in QADrawClient:" << endl;
 
       map<string, ClientHistoList*>::const_iterator hiter;
       for (hiter = Histo.begin(); hiter != Histo.end(); ++hiter)
@@ -316,7 +316,7 @@ OnlProdClient::Print(const string &what)
 
 
 int
-OnlProdClient::ReadHistogramsFromFile(const string &filename)
+QADrawClient::ReadHistogramsFromFile(const string &filename)
 {
   TDirectory* save = gDirectory; // save current dir (which will be overwritten by the following fileopen)
   TFile *histofile = new TFile(filename.c_str(), "READ");
@@ -357,10 +357,10 @@ OnlProdClient::ReadHistogramsFromFile(const string &filename)
 }
 
 int
-OnlProdClient::GetHistoList(set<string> &histolist)
+QADrawClient::GetHistoList(set<string> &histolist)
 {
   map<string, ClientHistoList *>::const_iterator iter;
-  for (iter = Histo.begin(); iter != Histo.end(); iter++)
+  for (iter = Histo.begin(); iter != Histo.end(); ++iter)
     {
       histolist.insert(iter->first);
     }
@@ -369,7 +369,7 @@ OnlProdClient::GetHistoList(set<string> &histolist)
 
 //_____________________________________________________________________________
 void
-OnlProdClient::VerbosityAll(const int v)
+QADrawClient::VerbosityAll(const int v)
 {
   Verbosity(v);
   if ( fHtml )
@@ -380,7 +380,7 @@ OnlProdClient::VerbosityAll(const int v)
 
 //_____________________________________________________________________________
 void
-OnlProdClient::htmlAddMenu(const OnlProdDraw& drawer,
+QADrawClient::htmlAddMenu(const QADraw& drawer,
                          const string& path,
                          const string& relfilename)
 {
@@ -389,7 +389,7 @@ OnlProdClient::htmlAddMenu(const OnlProdDraw& drawer,
 
 //_____________________________________________________________________________
 void
-OnlProdClient::htmlNamer(const OnlProdDraw& drawer,
+QADrawClient::htmlNamer(const QADraw& drawer,
                        const string& basefilename,
                        const string& ext,
                        string& fullfilename,
@@ -400,7 +400,7 @@ OnlProdClient::htmlNamer(const OnlProdDraw& drawer,
 
 //_____________________________________________________________________________
 string
-OnlProdClient::htmlRegisterPage(const OnlProdDraw& drawer,
+QADrawClient::htmlRegisterPage(const QADraw& drawer,
                               const string& path,
                               const string& basefilename,
                               const string& ext)
@@ -409,7 +409,7 @@ OnlProdClient::htmlRegisterPage(const OnlProdDraw& drawer,
 }
 
 int
-OnlProdClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
+QADrawClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
 {
   // in order not to collide when running multiple html generators
   // create a unique filename (okay tempnam is not totally safe against
@@ -426,7 +426,7 @@ OnlProdClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
 }
 
 int
-OnlProdClient::HistoToPng(TH1 *histo, std::string const &pngfilename, const char *drawopt, const int statopt)
+QADrawClient::HistoToPng(TH1 *histo, std::string const &pngfilename, const char *drawopt, const int statopt)
 {
   TCanvas *cgiCanv = new TCanvas("cgiCanv", "cgiCanv", 200, 200, 650, 500);
   gStyle->SetOptStat(statopt);
@@ -453,7 +453,7 @@ OnlProdClient::HistoToPng(TH1 *histo, std::string const &pngfilename, const char
 }
 
 int
-OnlProdClient::SaveLogFile(const OnlProdDraw& drawer)
+QADrawClient::SaveLogFile(const QADraw& drawer)
 {
   // sendfile example shamelessly copied from
   // http://www.linuxgazette.com/issue91/tranter.html
@@ -483,14 +483,14 @@ OnlProdClient::SaveLogFile(const OnlProdDraw& drawer)
 }
 
 int
-OnlProdClient::ExtractRunNumber(const std::string &filename)
+QADrawClient::ExtractRunNumber(const std::string &filename)
 {
   int runno = 0;
   boost::char_separator<char> sep("_"); 
   boost::tokenizer<boost::char_separator<char> > tok(filename,sep);
   boost::tokenizer<boost::char_separator<char> >::iterator tokiter = tok.begin();
   
-  tokiter++;
+  ++tokiter;
   try
     {
       runno = boost::lexical_cast<int>(*tokiter);
@@ -510,7 +510,7 @@ OnlProdClient::ExtractRunNumber(const std::string &filename)
 }
 
 void
-OnlProdClient::RunNumber(const int runno)
+QADrawClient::RunNumber(const int runno)
 {
   if (runnumber != runno)
     {
@@ -520,48 +520,48 @@ OnlProdClient::RunNumber(const int runno)
         }
       else
         {
-          rdb = new OnlProdRunDBodbc(runno);
+          rdb = new QARunDBodbc(runno);
         }
       runnumber = runno;
     }
 }
 
 string
-OnlProdClient::RunType()
+QADrawClient::RunType()
 {
   if (!rdb)
     {
-      rdb = new OnlProdRunDBodbc();
+      rdb = new QARunDBodbc();
     }
   return rdb->RunType();
 }
 
 int
-OnlProdClient::EventsInRun()
+QADrawClient::EventsInRun()
 {
   if (!rdb)
     {
-      rdb = new OnlProdRunDBodbc();
+      rdb = new QARunDBodbc();
     }
   return rdb->EventsInRun();
 }
 
 time_t
-OnlProdClient::BeginRunUnixTime()
+QADrawClient::BeginRunUnixTime()
 {
   if (!rdb)
     {
-      rdb = new OnlProdRunDBodbc();
+      rdb = new QARunDBodbc();
     }
   return rdb->BeginRunUnixTime();
 }
 
 time_t
-OnlProdClient::EndRunUnixTime()
+QADrawClient::EndRunUnixTime()
 {
   if (!rdb)
     {
-      rdb = new OnlProdRunDBodbc();
+      rdb = new QARunDBodbc();
     }
   return rdb->EndRunUnixTime();
 }

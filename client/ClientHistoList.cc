@@ -6,17 +6,9 @@
 
 using namespace std;
 
-ClientHistoList::ClientHistoList()
-{
-  histo = NULL;
-  subsystem = "UNKNOWN";
-}
-
-ClientHistoList::ClientHistoList(const string &subsys)
-{
-  histo = NULL;
-  subsystem = subsys;
-}
+ClientHistoList::ClientHistoList(const string &subsys):
+  subsystem(subsys)
+{}
 
 TNamed *ClientHistoList::Histo() const
 {

@@ -1,4 +1,4 @@
-#include "OnlProdRunDBodbc.h"
+#include "QARunDBodbc.h"
 
 #include <odbc++/connection.h>
 #include <odbc++/errorhandler.h>
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-OnlProdRunDBodbc::OnlProdRunDBodbc():
+QARunDBodbc::QARunDBodbc():
   runnumber(0),
   verbosity(0),
   dbname("daq"),
@@ -27,7 +27,7 @@ OnlProdRunDBodbc::OnlProdRunDBodbc():
 {
 }
 
-OnlProdRunDBodbc::OnlProdRunDBodbc(const int runno):
+QARunDBodbc::QARunDBodbc(const int runno):
   runnumber(0),
   verbosity(0),
   dbname("daq"),
@@ -43,7 +43,7 @@ OnlProdRunDBodbc::OnlProdRunDBodbc(const int runno):
 
 
 void
-OnlProdRunDBodbc::identify() const
+QARunDBodbc::identify() const
 {
   cout << "DB Name: " << dbname << endl;
   cout << "DB Owner: " << dbowner << endl;
@@ -52,7 +52,7 @@ OnlProdRunDBodbc::identify() const
 }
 
 void
-OnlProdRunDBodbc::FillFromdaqDB(const int runno)
+QARunDBodbc::FillFromdaqDB(const int runno)
 {
   odbc::Connection *con = 0;
   odbc::Statement* query = 0;

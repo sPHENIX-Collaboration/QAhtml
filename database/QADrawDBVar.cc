@@ -1,4 +1,4 @@
-#include "OnlProdDBVar.h"
+#include "QADrawDBVar.h"
 #include <iostream>
 #include <cmath>
 
@@ -8,20 +8,14 @@ using namespace std;
 static const float NAN = sqrt( -1.);
 #endif
 
-OnlProdDBVar::OnlProdDBVar()
+QADrawDBVar::QADrawDBVar()
 {
-  runnumber = -1;
-  startvaltime = 0;
-  endvaltime = 0;
-  for (short i = 0; i < 2; i++)
-    {
-      m_val[i] = NAN;
-    }
+  m_val.fill(NAN);
   return ;
 }
 
 int
-OnlProdDBVar::SetVar(const float rval[2])
+QADrawDBVar::SetVar(const float rval[2])
 {
   for (short int i = 0; i < 2 ;i++)
     {
@@ -31,7 +25,7 @@ OnlProdDBVar::SetVar(const float rval[2])
 }
 
 void
-OnlProdDBVar::Print() const
+QADrawDBVar::Print() const
 {
   cout << "Value: " << m_val[0] << ", Error: " << m_val[1] << endl;
   return ;

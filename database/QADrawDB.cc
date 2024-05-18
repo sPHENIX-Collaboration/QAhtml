@@ -1,7 +1,7 @@
-#include "OnlProdDB.h"
-#include "OnlProdDBVar.h"
-#include "OnlProdDBodbc.h"
-#include <qahtml/OnlProdClient.h>
+#include "QADrawDB.h"
+#include "QADrawDBVar.h"
+#include "QADrawDBodbc.h"
+#include <qahtml/QADrawClient.h>
 
 #include <algorithm>
 #include <iostream>
@@ -9,14 +9,14 @@
 
 using namespace std;
 
-OnlProdDB::OnlProdDB(Fun4AllBase *caller): Fun4AllBase(caller->Name())
+QADrawDB::QADrawDB(Fun4AllBase *caller): Fun4AllBase(caller->Name())
 {
   
   db = 0;
   return ;
 }
 
-OnlProdDB::~OnlProdDB()
+QADrawDB::~QADrawDB()
 {
   delete db;
   while(varmap.begin() != varmap.end())
@@ -29,11 +29,11 @@ OnlProdDB::~OnlProdDB()
 
 
 void
-OnlProdDB::Print() const
+QADrawDB::Print() const
 {
-  cout << "OnlProdDB Name: " << Name() << endl;
-  map<const std::string, OnlProdDBVar *>::const_iterator iter;
-  for (iter = varmap.begin(); iter != varmap.end(); iter++)
+  cout << "QADrawDB Name: " << Name() << endl;
+  map<const std::string, QADrawDBVar *>::const_iterator iter;
+  for (iter = varmap.begin(); iter != varmap.end(); ++iter)
     {
       iter->second->Print();
     }
@@ -41,22 +41,22 @@ OnlProdDB::Print() const
 }
 
 int 
-OnlProdDB::registerVar(const string &varname)
+QADrawDB::registerVar(const string &varname)
 {
   string cpstring = varname;
   transform(cpstring.begin(), cpstring.end(), cpstring.begin(), (int(*)(int))tolower);
-  map<const string,OnlProdDBVar *>::const_iterator iter = varmap.find(cpstring);
+  map<const string,QADrawDBVar *>::const_iterator iter = varmap.find(cpstring);
   if (iter != varmap.end())
     {
       cout << "Variable " << varname << " allready registered in DB" << endl;
       return -1;
     }
-  varmap[cpstring] = new OnlProdDBVar();
+  varmap[cpstring] = new QADrawDBVar();
   return 0;
 }
 
 int 
-OnlProdDB::SetVar(const std::string &varname, const float var, const float varerr)
+QADrawDB::SetVar(const std::string &varname, const float var, const float varerr)
 {
   float vararray[2];
   vararray[0] = var;
@@ -65,11 +65,11 @@ OnlProdDB::SetVar(const std::string &varname, const float var, const float varer
 }
 
 int 
-OnlProdDB::SetVar(const string &varname, const float var[2])
+QADrawDB::SetVar(const string &varname, const float var[2])
 {
   string cpstring = varname;
   transform(cpstring.begin(), cpstring.end(), cpstring.begin(), (int(*)(int))tolower);
-  map<const string,OnlProdDBVar *>::iterator iter = varmap.find(cpstring);
+  map<const string,QADrawDBVar *>::iterator iter = varmap.find(cpstring);
   if (iter != varmap.end())
     {
       iter->second->SetVar(var);
@@ -80,20 +80,20 @@ OnlProdDB::SetVar(const string &varname, const float var[2])
 }
 
 int
-OnlProdDB::DBInit()
+QADrawDB::DBInit()
 {
   if (!db)
     {
-      db = new OnlProdDBodbc();
+      db = new QADrawDBodbc();
     }
   db->CheckAndCreateTable(Name(),varmap);
   return 0;
 }
 
 int 
-OnlProdDB::DBcommit()
+QADrawDB::DBcommit()
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   
   int iret = 0;
   if (!db)
@@ -114,11 +114,11 @@ OnlProdDB::DBcommit()
 }
 
 int
-OnlProdDB::GetVar(const time_t begin, const time_t end, const std::string &varname, std::vector<OnlProdDBVar> &DBVars)
+QADrawDB::GetVar(const time_t begin, const time_t end, const std::string &varname, std::vector<QADrawDBVar> &DBVars)
 {
   if (!db)
     {
-      db = new OnlProdDBodbc();
+      db = new QADrawDBodbc();
     }
   int iret = db->GetVar(Name(), begin, end, varname, DBVars);
   return iret;

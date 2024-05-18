@@ -1,14 +1,14 @@
-#ifndef ONLPRODDBVAR_H__
-#define ONLPRODDBVAR_H__
+#ifndef QA_DATABASE_QADRAWDBVAR_H
+#define QA_DATABASE_QADRAWDBVAR_H
 
 #include <array>
 #include <ctime>
 
-class OnlProdDBVar
+class QADrawDBVar
 {
  public:
-  OnlProdDBVar();
-  virtual ~OnlProdDBVar() {};
+  QADrawDBVar();
+  virtual ~QADrawDBVar() {};
 
   int SetVar(const float rval[2]);
   void Print() const;
@@ -25,9 +25,9 @@ class OnlProdDBVar
   int RunNumber() const {return runnumber;}
 
  protected:
-  int runnumber;
-  time_t startvaltime;
-  time_t endvaltime;
+  int runnumber {-1};
+  time_t startvaltime {0};
+  time_t endvaltime{0};
   std::array<float,2> m_val;
 
 };
