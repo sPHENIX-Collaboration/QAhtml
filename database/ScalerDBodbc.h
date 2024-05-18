@@ -9,7 +9,6 @@ class Scalers;
 
 class ScalerDBodbc
 {
-
  public:
   ScalerDBodbc(const int runnumber);
   virtual ~ScalerDBodbc();
@@ -18,15 +17,15 @@ class ScalerDBodbc
   unsigned long long ScalerLive(const std::string &triggername);
   unsigned long long ScalerScaled(const std::string &triggername);
   void identify();
-  void Verbosity(const int i) {verbosity = i;}
+  void Verbosity(const int i) { verbosity = i; }
   int GetRunInfo();
   void RunNumber(const int runnumber);
-  unsigned int BeginRunTime() const {return brunixtime;}
-  unsigned int EndRunTime() const {return erunixtime;}
+  unsigned int BeginRunTime() const { return brunixtime; }
+  unsigned int EndRunTime() const { return erunixtime; }
 
  private:
   int GetConnection();
-  Scalers * GetScalers(const std::string &triggername);
+  Scalers *GetScalers(const std::string &triggername);
   void FlushScalerMap();
   int verbosity;
   int runnumber;
@@ -38,7 +37,6 @@ class ScalerDBodbc
   std::string runstate;
   time_t brunixtime;
   time_t erunixtime;
-
 };
 
 #endif
