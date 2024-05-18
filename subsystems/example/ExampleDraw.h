@@ -11,26 +11,25 @@ class TCanvas;
 class TGraphErrors;
 class TPad;
 
-class ExampleDraw: public QADraw
+class ExampleDraw : public QADraw
 {
-
- public: 
+ public:
   ExampleDraw(const std::string &name = "EXAMPLE");
-  virtual ~ExampleDraw();
+  ~ExampleDraw() override;
 
-  int Draw(const std::string &what = "ALL");
-  int MakeHtml(const std::string &what = "ALL");
+  int Draw(const std::string &what = "ALL") override;
+  int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
 
  protected:
   int MakeCanvas(const std::string &name);
   int DrawFirst(const std::string &what = "ALL");
   int DrawGraph(TPad *pad, const std::vector<QADrawDBVar> &history, const time_t begin, const time_t end);
-  QADrawDB *db {nullptr};
-  TCanvas *TC[1];
-  TPad *transparent[1];
-  TPad *Pad[4];
-  TGraphErrors *gr[1];
+  QADrawDB *db{nullptr};
+  TCanvas *TC[1]{};
+  TPad *transparent[1]{};
+  TPad *Pad[4]{};
+  TGraphErrors *gr[1]{};
 };
 
 #endif

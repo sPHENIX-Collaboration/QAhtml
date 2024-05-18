@@ -16,47 +16,47 @@ class TH1;
 class TNamed;
 class TStyle;
 
-class QADrawClient: public Fun4AllBase
+class QADrawClient : public Fun4AllBase
 {
  public:
   static QADrawClient *instance();
-  virtual ~QADrawClient();
-  void Print(const std::string &what = "ALL");
+  ~QADrawClient() override;
+  void Print(const std::string &what = "ALL") const override;
   TNamed *getHisto(const std::string &hname);
   void registerHisto(const char *hname, const char *subsys);
 
   void registerDrawer(QADraw *Drawer);
   int ReadHistogramsFromFile(const std::string &filename);
   int GetHistoList(std::set<std::string> &histolist);
-  void updateHistoMap(const char *hname, TNamed *h1d);
-  int Draw(const char *who = "ALL", const char *what = "ALL");
-  int MakeHtml(const char *who = "ALL", const char *what = "ALL");
+  void updateHistoMap(const std::string &hname, TNamed *h1d);
+  int Draw(const std::string &who = "ALL", const std::string &what = "ALL");
+  int MakeHtml(const std::string &who = "ALL", const std::string &what = "ALL");
 
-  std::string htmlRegisterPage(const QADraw& drawer,
-			       const std::string& path,
-			       const std::string& basefilename,
-			       const std::string& ext);
-  
-  void htmlAddMenu(const QADraw& drawer, const std::string& path,
-		   const std::string& relfilename);
+  std::string htmlRegisterPage(const QADraw &drawer,
+                               const std::string &path,
+                               const std::string &basefilename,
+                               const std::string &ext);
 
-  void htmlNamer(const QADraw& drawer, const std::string& basefilename,
-		 const std::string& ext, std::string& fullfilename,
-		 std::string& filename);
+  void htmlAddMenu(const QADraw &drawer, const std::string &path,
+                   const std::string &relfilename);
+
+  void htmlNamer(const QADraw &drawer, const std::string &basefilename,
+                 const std::string &ext, std::string &fullfilename,
+                 std::string &filename);
 
   void VerbosityAll(const int v);
 
-  int RunNumber() const {return runnumber;}
+  int RunNumber() const { return runnumber; }
   void RunNumber(const int runno);
 
-  void SetDisplaySizeX(const int xsize) { display_sizex = xsize;}
-  void SetDisplaySizeY(const int ysize) { display_sizey = ysize;}
-  int GetDisplaySizeX() {return display_sizex;}
-  int GetDisplaySizeY() {return display_sizey;}
+  void SetDisplaySizeX(const int xsize) { display_sizex = xsize; }
+  void SetDisplaySizeY(const int ysize) { display_sizey = ysize; }
+  int GetDisplaySizeX() { return display_sizex; }
+  int GetDisplaySizeY() { return display_sizey; }
   int CanvasToPng(TCanvas *canvas, std::string const &filename);
-  int HistoToPng(TH1 *histo, std::string const &pngfilename, const char *drawopt = "", const int statopt = 11);
+  int HistoToPng(TH1 *histo, std::string const &pngfilename, const std::string &drawopt = "", const int statopt = 11);
 
-  int SaveLogFile(const QADraw& drawer);
+  int SaveLogFile(const QADraw &drawer);
   int ExtractRunNumber(const std::string &fname);
 
   std::string RunType();
@@ -66,18 +66,18 @@ class QADrawClient: public Fun4AllBase
 
  private:
   QADrawClient();
-  int DoSomething(const char *who, const char *what, const char *opt);
+  int DoSomething(const std::string &who, const std::string &what, const std::string &opt);
   void InitAll();
 
   static QADrawClient *__instance;
-  QAHtml* fHtml;
-  QARunDBodbc *rdb;
-  int runnumber;
-  int display_sizex;
-  int display_sizey;
-  TStyle *defaultStyle;
+  QAHtml *fHtml{nullptr};
+  QARunDBodbc *rdb{nullptr};
+  int runnumber{0};
+  int display_sizex{0};
+  int display_sizey{0};
+  TStyle *defaultStyle{nullptr};
   std::map<std::string, ClientHistoList *> Histo;
-  std::map<std::string, QADraw*> DrawerList;
+  std::map<std::string, QADraw *> DrawerList;
 };
 
 #endif /* QA_CLIENT_QADRAWCLIENT_H */

@@ -2,158 +2,155 @@
 
 #include "TSystem.h"
 
-#include <sstream>
-#include <iostream>
-#include <iomanip>
-#include <vector>
+#include <dirent.h>
 #include <algorithm>
 #include <fstream>
-#include <set>
+#include <iomanip>
+#include <iostream>
 #include <iterator>
-#include <dirent.h>
+#include <set>
+#include <sstream>
+#include <vector>
 
-using namespace std;
-
-namespace {
+namespace
+{
 
   //___________________________________________________________________________
-  vector<string> split(const char sep, const string& s)
-  {    
-    string str = s;
+  std::vector<std::string> split(const char sep, const std::string& s)
+  {
+    std::string str = s;
     std::vector<size_t> slashes_pos;
-    
-    if ( str[0] != sep ) 
-      { 
-	str.insert(str.begin(),sep);
-      }
-    
-    if ( str[str.size()-1] != sep ) 
+
+    if (str[0] != sep)
+    {
+      str.insert(str.begin(), sep);
+    }
+
+    if (str[str.size() - 1] != sep)
+    {
+      str.push_back(sep);
+    }
+
+    for (size_t i = 0; i < str.size(); i++)
+    {
+      if (str[i] == sep)
       {
-	str.push_back(sep);
+        slashes_pos.push_back(i);
       }
-    
-    for (size_t i = 0 ; i < str.size() ; i++) 
+    }
+
+    std::vector<std::string> parts;
+
+    if (slashes_pos.size() > 0)
+    {
+      for (size_t i = 0; i < slashes_pos.size() - 1; i++)
       {
-	if ( str[i] == sep ) 
-	  { 
-	    slashes_pos.push_back(i);
-	  }
+        parts.push_back(str.substr(slashes_pos[i] + 1,
+                                   slashes_pos[i + 1] - slashes_pos[i] - 1));
       }
-    
-    vector<string> parts;
-    
-    if ( slashes_pos.size() > 0 ) 
-      {
-	for (size_t i = 0 ; i < slashes_pos.size()-1 ; i++) 
-	  {
-	    parts.push_back(str.substr(slashes_pos[i]+1,
-				       slashes_pos[i+1]-slashes_pos[i]-1));
-	  }
-      }  
-    
+    }
+
     return parts;
   }
 
   //___________________________________________________________________________
-  string join(const char sep, const vector<string>& parts)
+  std::string join(const char sep, const std::vector<std::string>& parts)
   {
-    string rv;
-    for ( size_t i = 0; i < parts.size(); ++i ) 
+    std::string rv;
+    for (size_t i = 0; i < parts.size(); ++i)
+    {
+      rv += parts[i];
+      if (i + 1 < parts.size())
       {
-	rv += parts[i];
-	if ( i+1 < parts.size() )
-	  {
-	    rv += sep;
-	  }
+        rv += sep;
       }
+    }
     return rv;
   }
-}
+}  // namespace
 
 //_____________________________________________________________________________
 QAHtml::QAHtml(const char* topdir)
 {
-  if ( topdir ) 
-    {
-      fHtmlDir = topdir;
-    }
+  if (topdir)
+  {
+    fHtmlDir = topdir;
+  }
   else
-    {
-      fHtmlDir = "./";
-    }
+  {
+    fHtmlDir = "./";
+  }
 }
 
 //_____________________________________________________________________________
-void
-QAHtml::addMenu(const string& header, const string& path, 
-		    const string& relfilename)
+void QAHtml::addMenu(const std::string& header, const std::string& path,
+                     const std::string& relfilename)
 {
-  ostringstream menufile;
+  std::ostringstream menufile;
 
   menufile << fHtmlRunDir << "/menu";
 
-  ifstream in(menufile.str().c_str());
+  std::ifstream in(menufile.str().c_str());
 
   if (!in.good())
+  {
+    if (verbosity())
     {
-      if (verbosity())
-	{
-	  cout << "File " << menufile.str() << " does not exist."
-	       << "I'm creating it now" << endl;
-	}
-      ofstream out(menufile.str().c_str());
-      out.close();
+      std::cout << "File " << menufile.str() << " does not exist."
+                << "I'm creating it now" << std::endl;
     }
+    std::ofstream out(menufile.str().c_str());
+    out.close();
+  }
   else
+  {
+    if (verbosity())
     {
-      if (verbosity())
-	{
-	  cout << "Reading file " << menufile.str() << endl;
-	}
+      std::cout << "Reading file " << menufile.str() << std::endl;
     }
+  }
 
   // we read back the old menu file...
-  vector<string> lines;
+  std::vector<std::string> lines;
   char str[1024];
-  while (in.getline(str,1024,'\n'))
-    {
-      lines.push_back(str);
-    }
+  while (in.getline(str, 1024, '\n'))
+  {
+    lines.emplace_back(str);
+  }
   in.close();
 
   // ... we then append the requested new entry...
-  ostringstream sline;
+  std::ostringstream sline;
   sline << header << "/" << path << "/" << relfilename;
 
   lines.push_back(sline.str());
 
   // ... and we sort this out...
-  sort(lines.begin(),lines.end());
+  sort(lines.begin(), lines.end());
 
   // ... and we remove duplicates lines...
-  set<string> olines;
-  copy(lines.begin(),lines.end(),
-       insert_iterator<set<string> >(olines,olines.begin()));
+  std::set<std::string> olines;
+  copy(lines.begin(), lines.end(),
+       std::insert_iterator<std::set<std::string> >(olines, olines.begin()));
 
   // ... and finally we write the full new menu file out.
-  ofstream out(menufile.str().c_str());
-  copy(olines.begin(),olines.end(),ostream_iterator<string>(out,"\n"));
+  std::ofstream out(menufile.str().c_str());
+  copy(olines.begin(), olines.end(), std::ostream_iterator<std::string>(out, "\n"));
   out.close();
 
   // --end of normal menu generation--
 
   // -- For those who do not have javascript (and thus the menu file
-  // created by addMenu will be useless) or 
-  // in case cgi script(s) won't be allowed for some reason, 
+  // created by addMenu will be useless) or
+  // in case cgi script(s) won't be allowed for some reason,
   // make a plain html menu file too.
   plainHtmlMenu(olines);
 }
 
 //_____________________________________________________________________________
-void
-QAHtml::plainHtmlMenu(const set<string>& olines)
+void QAHtml::plainHtmlMenu(const std::set<std::string>& olines)
 {
-  ostringstream htmlmenufile;
+  std::ostringstream htmlmenufile;
 
   htmlmenufile << fHtmlRunDir << "/menu.html";
 
@@ -162,95 +159,94 @@ QAHtml::plainHtmlMenu(const set<string>& olines)
   // D1/D2/TITLE/link (where link is generally somefile.gif)
   // The dir in this case is D1/D2, which is why we look for 2 slashes
   // below (the one before TITLE and the one before link).
-  set<string> dirlist;
-  set<string>::const_iterator it;
-  for ( it = olines.begin(); it != olines.end(); ++it ) 
+  std::set<std::string> dirlist;
+  std::set<std::string>::const_iterator it;
+  for (it = olines.begin(); it != olines.end(); ++it)
+  {
+    const std::string& line = *it;
+    std::string::size_type pos = line.find_last_of('/');
+    pos = line.substr(0, pos).find_last_of('/');
+    std::string dir = line.substr(0, pos);
+    std::vector<std::string> parts = split('/', dir);
+    for (size_t i = 0; i <= parts.size(); ++i)
     {
-      const string& line = *it;
-      string::size_type pos = line.find_last_of('/');
-      pos = line.substr(0,pos).find_last_of('/');
-      string dir = line.substr(0,pos);
-      vector<string> parts = split('/',dir);
-      for ( size_t i = 0; i <= parts.size(); ++i ) 
-	{
-	  dir = join('/',parts);
-	  dirlist.insert(dir);
-	  parts.pop_back();
-	}
+      dir = join('/', parts);
+      dirlist.insert(dir);
+      parts.pop_back();
     }
+  }
 
   // We now generate the menu.html file.
-  ofstream out(htmlmenufile.str().c_str());
+  std::ofstream out(htmlmenufile.str().c_str());
   if (!out.good())
-    {
-      cerr << " cannot open output file "
-	   << htmlmenufile.str() << endl;
-      return;
-    }
+  {
+    std::cout << " cannot open output file "
+              << htmlmenufile.str() << std::endl;
+    return;
+  }
 
-  for ( it = dirlist.begin(); it != dirlist.end(); ++it ) 
+  for (it = dirlist.begin(); it != dirlist.end(); ++it)
+  {
+    // in the example above, dir is D1/D2
+    const std::string& dir = *it;
+    int nslashes = count(dir.begin(), dir.end(), '/') + 1;
+    std::string name = dir;
+    std::string::size_type pos = dir.find_last_of('/');
+    if (pos < dir.size())
     {
-      // in the example above, dir is D1/D2
-      const string& dir = *it;
-      int nslashes = count(dir.begin(),dir.end(),'/')+1;
-      string name = dir;
-      string::size_type pos = dir.find_last_of('/');
-      if ( pos < dir.size() )
-	{
-	  name = dir.substr(pos+1);
-	}
-      else
-	{
-	  out << "<HR><BR>\n";
-	}
-      out << "<H" << nslashes << ">" << name
-	  << "</H" << nslashes << "><BR>\n";
-
-      // We then loop on all the olines, and for those matching the
-      // dir pattern, we generate link <A HREF="link">TITLE</A>
-      set<string>::const_iterator it2;
-      for ( it2 = olines.begin(); it2 != olines.end(); ++it2 ) 
-	{
-	  const string& line = *it2; 
-	  pos = line.find_last_of('/');
-	  pos = line.substr(0,pos).find_last_of('/');
-	  string ldir = line.substr(0,pos);
-	  if ( ldir == dir ) // we get a matching line
-	    {
-	      string sline = line.substr(dir.size()+1);
-	      // in the example above, sline is TITLE/link...
-	      pos = sline.find('/');
-	      // ...which we split at the slash pos
-	      if ( pos < sline.size() )
-		{
-		  out << "<A HREF=\"" 
-		      << sline.substr(pos+1) << "\">"
-		      << sline.substr(0,pos) << "</A><BR>\n";
-		}
-	    }
-	}
+      name = dir.substr(pos + 1);
     }
+    else
+    {
+      out << "<HR><BR>\n";
+    }
+    out << "<H" << nslashes << ">" << name
+        << "</H" << nslashes << "><BR>\n";
+
+    // We then loop on all the olines, and for those matching the
+    // dir pattern, we generate link <A HREF="link">TITLE</A>
+    std::set<std::string>::const_iterator it2;
+    for (it2 = olines.begin(); it2 != olines.end(); ++it2)
+    {
+      const std::string& line = *it2;
+      pos = line.find_last_of('/');
+      pos = line.substr(0, pos).find_last_of('/');
+      std::string ldir = line.substr(0, pos);
+      if (ldir == dir)  // we get a matching line
+      {
+        std::string sline = line.substr(dir.size() + 1);
+        // in the example above, sline is TITLE/link...
+        pos = sline.find('/');
+        // ...which we split at the slash pos
+        if (pos < sline.size())
+        {
+          out << "<A HREF=\""
+              << sline.substr(pos + 1) << "\">"
+              << sline.substr(0, pos) << "</A><BR>\n";
+        }
+      }
+    }
+  }
   out.close();
 }
 
 //_____________________________________________________________________________
-void
-QAHtml::namer(const string& header, 
-		   const string& basefilename,
-		   const string& ext, 
-		   string& fullfilename,
-		   string& filename)
+void QAHtml::namer(const std::string& header,
+                   const std::string& basefilename,
+                   const std::string& ext,
+                   std::string& fullfilename,
+                   std::string& filename)
 {
-  ostringstream sfilename;
+  std::ostringstream sfilename;
 
   sfilename << header << "_";
   if (!basefilename.empty())
-    {
-      sfilename << basefilename << "_";
-    }
+  {
+    sfilename << basefilename << "_";
+  }
   sfilename << runNumber() << "." << ext;
 
-  ostringstream sfullfilename;
+  std::ostringstream sfullfilename;
 
   sfullfilename << fHtmlRunDir << "/" << sfilename.str();
 
@@ -258,115 +254,113 @@ QAHtml::namer(const string& header,
   filename = sfilename.str();
 
   if (verbosity())
-    {
-      cout << "namer: header=" << header
-	   << " basefilename=" << basefilename << " ext=" << ext
-	   << endl
-	   << "fullfilename=" << fullfilename
-	   << " filename=" << filename
-	   << endl;
-    }
+  {
+    std::cout << "namer: header=" << header
+              << " basefilename=" << basefilename << " ext=" << ext
+              << std::endl
+              << "fullfilename=" << fullfilename
+              << " filename=" << filename
+              << std::endl;
+  }
 }
 
 //_____________________________________________________________________________
-string
-QAHtml::registerPage(const string& header,
-			  const string& path,
-			  const string& basefilename,
-			  const string& ext)
+std::string
+QAHtml::registerPage(const std::string& header,
+                     const std::string& path,
+                     const std::string& basefilename,
+                     const std::string& ext)
 {
-  string fullfilename;
-  string filename;
-  static string saveheader = "";
+  std::string fullfilename;
+  std::string filename;
+  static std::string saveheader = "";
   if (saveheader != header)
-    {
-      runInit();
-      saveheader = header;
-    }
-  namer(header,basefilename,ext,fullfilename,filename);
-  addMenu(header,path,filename);
+  {
+    runInit();
+    saveheader = header;
+  }
+  namer(header, basefilename, ext, fullfilename, filename);
+  addMenu(header, path, filename);
   return fullfilename;
 }
 
 //_____________________________________________________________________________
-void
-QAHtml::runInit()
+void QAHtml::runInit()
 {
   // Check if html output directory for this run exist.
   // If not create it.
   // Then check (and create if necessary) the "menu" template file.
 
-  ostringstream fulldir;
+  std::ostringstream fulldir;
   fulldir << fHtmlDir << "/" << runtype << "/"
-	  << runRange() << "/" << runNumber();
+          << runRange() << "/" << runNumber();
 
   fHtmlRunDir = fulldir.str();
-  DIR *htdir = opendir(fulldir.str().c_str());
+  DIR* htdir = opendir(fulldir.str().c_str());
   if (!htdir)
+  {
+    std::vector<std::string> mkdirlist;
+    mkdirlist.push_back(fulldir.str());
+    std::string updir = fulldir.str();
+    std::string::size_type pos1;
+    while ((pos1 = updir.rfind('/')) != std::string::npos)
     {
-      vector<string> mkdirlist;
-      mkdirlist.push_back(fulldir.str());
-      string updir = fulldir.str();
-      string::size_type pos1;
-      while ((pos1 = updir.rfind("/") ) != string::npos)
-        {
-          updir.erase(pos1, updir.size());
-          htdir = opendir(updir.c_str());
-          if (!htdir)
-            {
-              mkdirlist.push_back(updir);
-            }
-          else
-            {
-              closedir(htdir);
-              break;
-            }
-        }
-      while (mkdirlist.rbegin() != mkdirlist.rend())
-        {
-          string md = *(mkdirlist.rbegin());
-          if (verbosity())
-            {
-              cout << "Trying to create dir " << md << endl;
-            }
-          if (gSystem->mkdir(md.c_str(), S_IRWXU | S_IRWXG | S_IRWXO))
-            {
-              cout << "Error creating directory " << md << endl;
-              fHtmlRunDir = fHtmlDir;
-              break;
-            }
-          mkdirlist.pop_back();
-        }
+      updir.erase(pos1, updir.size());
+      htdir = opendir(updir.c_str());
+      if (!htdir)
+      {
+        mkdirlist.push_back(updir);
+      }
+      else
+      {
+        closedir(htdir);
+        break;
+      }
     }
+    while (mkdirlist.rbegin() != mkdirlist.rend())
+    {
+      std::string md = *(mkdirlist.rbegin());
+      if (verbosity())
+      {
+        std::cout << "Trying to create dir " << md << std::endl;
+      }
+      if (gSystem->mkdir(md.c_str(), S_IRWXU | S_IRWXG | S_IRWXO))
+      {
+        std::cout << "Error creating directory " << md << std::endl;
+        fHtmlRunDir = fHtmlDir;
+        break;
+      }
+      mkdirlist.pop_back();
+    }
+  }
   else
-    {
-      closedir(htdir);
-    }
+  {
+    closedir(htdir);
+  }
   if (verbosity())
-    {
-      cout << "OK. fHtmlRunDir=" << fHtmlRunDir << endl;
-    }
+  {
+    std::cout << "OK. fHtmlRunDir=" << fHtmlRunDir << std::endl;
+  }
 }
 
 //_____________________________________________________________________________
-string
+std::string
 QAHtml::runRange()
 {
   const int range = 1000;
-  int start = runNumber()/range;
+  int start = runNumber() / range;
 
-  ostringstream s;
+  std::ostringstream s;
 
-  s << "run_" << setw(10) << setfill('0') << start*range
-    << "_" << setw(10) << setfill('0') << (start+1)*range;
+  s << "run_" << std::setw(10) << std::setfill('0') << start * range
+    << "_" << std::setw(10) << std::setfill('0') << (start + 1) * range;
 
   return s.str();
 }
 
-void
-QAHtml:: RunType(const std::string &rtyp)
+void QAHtml::RunType(const std::string& rtyp)
 {
   runtype = rtyp;
-  transform(runtype.begin(), runtype.end(), runtype.begin(), (int(*)(int))tolower);
+  transform(runtype.begin(), runtype.end(), runtype.begin(), (int (*)(int)) tolower);
   return;
 }

@@ -14,7 +14,7 @@ class QADraw;
 class QADrawDBVar;
 class QADrawDBodbc;
 
-class QADrawDB: public Fun4AllBase
+class QADrawDB : public Fun4AllBase
 {
  public:
   QADrawDB(Fun4AllBase *caller);
@@ -25,12 +25,12 @@ class QADrawDB: public Fun4AllBase
   int SetVar(const std::string &varname, const float var[2]);
   int DBcommit();
   int DBInit();
-  void Print() const;
+  void Print(const std::string &what = "ALL") const override;
   int GetVar(const time_t begin, const time_t end, const std::string &varname, std::vector<QADrawDBVar> &DBVars);
 
  protected:
   std::map<const std::string, QADrawDBVar *> varmap;
-  QADrawDBodbc *db {nullptr};
+  QADrawDBodbc *db{nullptr};
 };
 
-#endif //QA_DATABASE_QADrawDB_H
+#endif  // QA_DATABASE_QADrawDB_H
