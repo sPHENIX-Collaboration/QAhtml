@@ -4,11 +4,10 @@
 
 #include <string>
 
-using namespace std;
-
-ClientHistoList::ClientHistoList(const string &subsys):
-  subsystem(subsys)
-{}
+ClientHistoList::ClientHistoList(const std::string &subsys)
+  : subsystem(subsys)
+{
+}
 
 TNamed *ClientHistoList::Histo() const
 {
@@ -18,22 +17,22 @@ TNamed *ClientHistoList::Histo() const
 void ClientHistoList::Histo(TNamed *Histo)
 {
   histo = Histo;
-  return ;
+  return;
 }
 
-string ClientHistoList::SubSystem() const
+std::string ClientHistoList::SubSystem() const
 {
   return subsystem;
 }
 
-void ClientHistoList::SubSystem(const string &SubSystem)
+void ClientHistoList::SubSystem(const std::string &SubSystem)
 {
   subsystem = SubSystem;
-  return ;
+  return;
 }
 
-void ClientHistoList::identify(ostream& os) const
+void ClientHistoList::identify(std::ostream &os) const
 {
-  os << "id" << endl;
+  os << "id" << std::endl;
   return;
 }

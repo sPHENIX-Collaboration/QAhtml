@@ -6,13 +6,13 @@
 
 class Event;
 
-class QADraw: public Fun4AllBase
+class QADraw : public Fun4AllBase
 {
  public:
   QADraw(const std::string &name = "NONE");
   virtual ~QADraw() {}
 
-  virtual int Init() {return 0;}
+  virtual int Init() { return 0; }
   virtual int Draw(const std::string &what = "ALL");
   virtual int MakeHtml(const std::string &what = "ALL");
 
@@ -20,4 +20,3 @@ class QADraw: public Fun4AllBase
 };
 
 #endif /* QA_CLIENT_DRAW_H */
-
