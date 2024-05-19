@@ -329,6 +329,10 @@ void QAHtml::runInit()
       std::filesystem::perms permissions = std::filesystem::perms::owner_all | std::filesystem::perms::group_all | std::filesystem::perms::group_exec | std::filesystem::perms::others_read | std::filesystem::perms::others_exec;
       if (std::filesystem::create_directory(md))
       {
+	if (verbosity())
+	{
+	  std::cout << "created " << md << std::endl;
+	}
         char* onlprod_real_html = getenv("QA_REAL_HTML");
         if (!onlprod_real_html)
         {
@@ -379,14 +383,17 @@ void QAHtml::RunType(const std::string& rtyp)
 
 void QAHtml::set_group_sticky_bit(const std::filesystem::path& dir)
 {
-  struct stat st;
+  struct stat st
+  {
+  };
   if (stat(dir.c_str(), &st) != 0)
   {
-    std::cerr << "Failed to stat directory: " << std::strerror(errno) << std::endl;
+    std::cout << "Failed to stat directory: " << std::strerror(errno) << std::endl;
     return;
   }
 
   // Add the setgid bit to the existing permissions
+  // NOLINTNEXTLINE(hicpp-signed-bitwise)
   mode_t new_mode = st.st_mode | S_ISGID;
 
   if (chmod(dir.c_str(), new_mode) != 0)

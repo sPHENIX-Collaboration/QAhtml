@@ -469,26 +469,23 @@ int QADrawClient::SaveLogFile(const QADraw &drawer)
 int QADrawClient::ExtractRunNumber(const std::string &filename)
 {
   int runno = 0;
-  boost::char_separator<char> sep("_");
-  boost::tokenizer<boost::char_separator<char> > tok(filename, sep);
-  boost::tokenizer<boost::char_separator<char> >::iterator tokiter = tok.begin();
-
-  ++tokiter;
+  std::vector<std::string> tokens = tokenize(filename, '-');
+  auto iter = tokens.rbegin();
+  ++iter;
+  if (Verbosity() > 0)
+  {
+    std::cout << "run number string is " << *iter << std::endl;
+  }
   try
   {
-    runno = boost::lexical_cast<int>(*tokiter);
+    runno = std::stoi(*iter);
   }
-  catch (boost::bad_lexical_cast const &)
+  catch (const std::invalid_argument &e)
   {
-    std::cout << "Cannot extract run number from filename "
-              << filename << std::endl;
-    std::cout << "Segment string after parsing: input string "
-              << *tokiter
-              << " is not valid run number" << std::endl;
-    std::cout << "filename " << filename << " not standard Run_<runno>_XXX.ext"
-              << std::endl;
+    std::cout << "Problem extracting runnumber from filename "
+              << filename << ", tried std::stoi on "
+              << *iter << std::endl;
   }
-
   return runno;
 }
 
@@ -545,4 +542,21 @@ QADrawClient::EndRunUnixTime()
     rdb = new QARunDBodbc();
   }
   return rdb->EndRunUnixTime();
+}
+
+std::vector<std::string> QADrawClient::tokenize(const std::string &str, char delimiter)
+{
+  std::vector<std::string> tokens;
+  size_t start = 0;
+  size_t end = str.find(delimiter);
+
+  while (end != std::string::npos)
+  {
+    tokens.push_back(str.substr(start, end - start));
+    start = end + 1;
+    end = str.find(delimiter, start);
+  }
+  tokens.push_back(str.substr(start));
+
+  return tokens;
 }
