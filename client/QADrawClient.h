@@ -68,7 +68,7 @@ class QADrawClient : public Fun4AllBase
   QADrawClient();
   int DoSomething(const std::string &who, const std::string &what, const std::string &opt);
   void InitAll();
-
+  std::vector<std::string> tokenize(const std::string &str, char delimiter);
   static QADrawClient *__instance;
   QAHtml *fHtml{nullptr};
   QARunDBodbc *rdb{nullptr};
