@@ -56,14 +56,12 @@ class QAHtml
   std::string RunType() const { return runtype; }
 
   void verbosity(const int v) { fVerbosity = v; }
-  int verbosity() const { return fVerbosity; }
+  int Verbosity() const { return fVerbosity; }
 
  private:
   void plainHtmlMenu(const std::set<std::string>&);
   void runInit();
   std::string runRange();
-
- private:
   void set_group_sticky_bit(const std::filesystem::path& dir);
   int fVerbosity{0};
   int fRunNumber{0};

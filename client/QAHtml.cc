@@ -96,7 +96,7 @@ void QAHtml::addMenu(const std::string& header, const std::string& path,
 
   if (!in.good())
   {
-    if (verbosity())
+    if (Verbosity())
     {
       std::cout << "File " << menufile.str() << " does not exist."
                 << "I'm creating it now" << std::endl;
@@ -106,7 +106,7 @@ void QAHtml::addMenu(const std::string& header, const std::string& path,
   }
   else
   {
-    if (verbosity())
+    if (Verbosity())
     {
       std::cout << "Reading file " << menufile.str() << std::endl;
     }
@@ -255,7 +255,7 @@ void QAHtml::namer(const std::string& header,
   fullfilename = sfullfilename.str();
   filename = sfilename.str();
 
-  if (verbosity())
+  if (Verbosity())
   {
     std::cout << "namer: header=" << header
               << " basefilename=" << basefilename << " ext=" << ext
@@ -322,14 +322,14 @@ void QAHtml::runInit()
     while (mkdirlist.rbegin() != mkdirlist.rend())
     {
       std::string md = *(mkdirlist.rbegin());
-      if (verbosity())
+      if (Verbosity())
       {
         std::cout << "Trying to create dir " << md << std::endl;
       }
       std::filesystem::perms permissions = std::filesystem::perms::owner_all | std::filesystem::perms::group_all | std::filesystem::perms::group_exec | std::filesystem::perms::others_read | std::filesystem::perms::others_exec;
       if (std::filesystem::create_directory(md))
       {
-	if (verbosity())
+	if (Verbosity())
 	{
 	  std::cout << "created " << md << std::endl;
 	}
@@ -353,7 +353,7 @@ void QAHtml::runInit()
   {
     closedir(htdir);
   }
-  if (verbosity())
+  if (Verbosity())
   {
     std::cout << "OK. fHtmlRunDir=" << fHtmlRunDir << std::endl;
   }
@@ -402,6 +402,9 @@ void QAHtml::set_group_sticky_bit(const std::filesystem::path& dir)
   }
   else
   {
-    std::cout << "Group sticky bit set for directory: " << dir << std::endl;
+    if (Verbosity() > 0)
+    {
+      std::cout << "Group sticky bit set for directory: " << dir << std::endl;
+    }
   }
 }
