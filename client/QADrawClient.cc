@@ -158,11 +158,10 @@ int QADrawClient::MakeHtml(const std::string &who, const std::string &what)
 int QADrawClient::DoSomething(const std::string &who, const std::string &what, const std::string &opt)
 {
   int i = 0;
-
   std::map<std::string, QADraw *>::iterator iter;
-  if (who == "ALL")
+  if (who != "ALL")
   {
-    iter = DrawerList.find(who);
+    iter = DrawerList.find(what);
     if (iter != DrawerList.end())
     {
       if (opt == "DRAW")
