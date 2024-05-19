@@ -1,6 +1,7 @@
 #ifndef QA_CLIENT_QAHTML_H
 #define QA_CLIENT_QAHTML_H
 
+#include <filesystem>
 #include <set>
 #include <string>
 
@@ -63,6 +64,7 @@ class QAHtml
   std::string runRange();
 
  private:
+  void set_group_sticky_bit(const std::filesystem::path& dir);
   int fVerbosity{0};
   int fRunNumber{0};
   std::string fHtmlDir;
