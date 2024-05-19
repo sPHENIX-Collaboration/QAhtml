@@ -6,11 +6,11 @@ if(! $?QA_MAIN ) then
 endif
 
 if (! $?QA_HTMLDIR) then
-  setenv ONLPROD_HTMLDIR /common/s6/htmltest/OnlProd
+  setenv QA_HTMLDIR /sphenix/WWW/subsystem/QAHtmlTest
 endif
 
 if (-f ${OPT_SPHENIX}/bin/setup_local.csh ) then
-  source ${OPT_SPHENIX}/bin/setup_local.csh $ONLMON_MAIN
+  source ${OPT_SPHENIX}/bin/setup_local.csh $QA_MAIN
 else
   echo no ${OPT_SPHENIX}/bin/setup_local.sh
   exit -1

@@ -1,13 +1,13 @@
-#include <qahtml/OnlProdClient.h>
-#include <qahtml/CaloDraw.h>
+#include <qahtml/QADrawClient.h>
+#include <calo/CaloDraw.h>
 
-R__LOAD_LIBRARY(libonlprodcalo.so)
+R__LOAD_LIBRARY(libqadrawcalo.so)
 
-void draw_calo(const char *rootfile) {
+void draw_calo(const std::string &rootfile) {
 
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
-  OnlProdDraw *ex = new CaloDraw();
+  QADraw *ex = new CaloDraw();
   cl->registerDrawer(ex);
 
   cl->ReadHistogramsFromFile(rootfile);
