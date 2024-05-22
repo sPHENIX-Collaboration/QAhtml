@@ -2,22 +2,25 @@ AUTOMAKE_OPTIONS = foreign
 
 AM_CPPFLAGS = \
   -I$(includedir) \
-  -I$(OFFLINE_MAIN)/include \
+  -isystem$(OFFLINE_MAIN)/include \
+  -isystem$(OFFLINE_MAIN)/rootmacros \
   -isystem$(ROOTSYS)/include 
 
 lib_LTLIBRARIES = \
-  libonlprodcalo.la
+  libqadrawtpc.la
 
-libonlprodcalo_la_LIBADD = \
+libqadrawtpc_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
-  -lonlprodclient \
-  -lonlproddb
+  -lqadrawclient \
+  -lqadrawdb
 
-pkginclude_HEADERS = \
+tpcincludedir=$(pkgincludedir)/tpc
+
+tpcinclude_HEADERS = \
   TPCDraw.h
 
-libonlprodcalo_la_SOURCES = \
+libqadrawtpc_la_SOURCES = \
   TPCDraw.cc
 
 noinst_PROGRAMS = \
@@ -27,7 +30,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libonlprodcalo.la
+  libqadrawtpc.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@

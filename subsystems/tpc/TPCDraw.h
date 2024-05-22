@@ -1,19 +1,19 @@
-#ifndef TPCDRAW_H__
-#define TPCDRAW_H__
+#ifndef TPC_TPCDRAW_H__
+#define TPC_TPCDRAW_H__
 
-#include <qahtml/OnlProdDraw.h>
+#include <qahtml/QADraw.h>
 
 #include <vector>
 
-class OnlProdDB;
-class OnlProdDBVar;
+class QADB;
+class QADBVar;
 class TCanvas;
 class TGraphErrors;
 class TPad;
 class TH1F;
 class TH2F;
 
-class TPCDraw : public OnlProdDraw
+class TPCDraw : public QADraw
 {
  public: 
   TPCDraw(const std::string &name = "TPCQA");

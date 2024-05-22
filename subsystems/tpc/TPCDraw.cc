@@ -1,7 +1,9 @@
 #include "TPCDraw.h"
+
 #include <sPhenixStyle.C>
-#include <qahtml/OnlProdClient.h>
-#include <qahtml/OnlProdDB.h>
+
+#include <qahtml/QADrawClient.h>
+#include <qahtml/QADrawDB.h>
 
 #include <TCanvas.h>
 #include <TDatime.h>
@@ -18,13 +20,14 @@
 
 #include <boost/format.hpp>
 
+#include <cmath>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <ctime>
 
 TPCDraw::TPCDraw(const std::string &name)
-  : OnlProdDraw(name)
+  : QADraw(name)
 {
   memset(TC, 0, sizeof(TC));
   memset(transparent, 0, sizeof(transparent));
@@ -74,7 +77,7 @@ int TPCDraw::Draw(const std::string &what)
 
 int TPCDraw::MakeCanvas(const std::string &name, int num)
 {
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
   // xpos (-1) negative: do not draw menu bar
@@ -102,7 +105,7 @@ int TPCDraw::MakeCanvas(const std::string &name, int num)
 int TPCDraw::DrawChannelHits()
 {
   std::cout << "DrawChannelHits Beginning" << std::endl;
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   // Loop over all sectors, 4 at a time
   for (int quad = 0; quad < 6; quad ++)
@@ -143,7 +146,7 @@ int TPCDraw::DrawChannelHits()
 
     /*
     // retrieve variables from previous runs
-    vector<OnlProdDBVar> history;
+    vector<QADrawDBVar> history;
     time_t current = cl->BeginRunUnixTime();
     // go back 24 hours
     time_t back =   current - 24*3600;
@@ -171,7 +174,7 @@ int TPCDraw::DrawChannelHits()
 int TPCDraw::DrawChannelADCs()
 {
   std::cout << "DrawChannelADCs Beginning" << std::endl;
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   // Loop over all sectors, 4 at a time
   for (int quad = 0; quad < 6; quad ++)
@@ -230,7 +233,7 @@ int TPCDraw::DrawChannelADCs()
 int TPCDraw::DrawClusterInfo()
 {
   std::cout << "DrawClusterInfo Beginning" << std::endl;
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH2F *h_clusterssector = dynamic_cast <TH2F *> (cl->getHisto("h_TpcClusterQA_ncluspersector"));
   TH2F *h_totalclusters = dynamic_cast <TH2F *> (cl->getHisto("h_TpcClusterQA_stotal_clusters"));
@@ -345,7 +348,7 @@ int TPCDraw::DrawClusterInfo()
 int TPCDraw::DrawRegionInfo()
 {
   std::cout << "DrawRegionInfo Beginning" << std::endl;
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   std::vector<std::string> histNames;
   histNames.push_back("clusedge");
@@ -410,7 +413,7 @@ int TPCDraw::MakeHtml(const std::string &what)
     return iret;
   }
 
-  OnlProdClient *cl = OnlProdClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   std::string pngfile;
 
   // Register the 1st canvas png file to the menu and produces the png file.
@@ -460,7 +463,7 @@ int TPCDraw::MakeHtml(const std::string &what)
 
 int TPCDraw::DBVarInit()
 {
-  /* db = new OnlProdDB(this); */
+  /* db = new QADrawDB(this); */
   /* db->DBInit(); */
   return 0;
 }
