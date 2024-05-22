@@ -101,6 +101,7 @@ int TPCDraw::MakeCanvas(const std::string &name, int num)
 
 int TPCDraw::DrawChannelHits()
 {
+  std::cout << "DrawChannelHits Beginning" << std::endl;
   OnlProdClient *cl = OnlProdClient::instance();
 
   // Loop over all sectors, 4 at a time
@@ -163,11 +164,13 @@ int TPCDraw::DrawChannelHits()
 
     TC[quad]->Update();
   } 
+  std::cout << "DrawChannelHits Ending" << std::endl;
   return 0;
 }
 
 int TPCDraw::DrawChannelADCs()
 {
+  std::cout << "DrawChannelADCs Beginning" << std::endl;
   OnlProdClient *cl = OnlProdClient::instance();
 
   // Loop over all sectors, 4 at a time
@@ -220,11 +223,13 @@ int TPCDraw::DrawChannelADCs()
 
     TC[quad + 6]->Update();
   }
+  std::cout << "DrawChannelADCs Ending" << std::endl;
   return 0;
 }
 
 int TPCDraw::DrawClusterInfo()
 {
+  std::cout << "DrawClusterInfo Beginning" << std::endl;
   OnlProdClient *cl = OnlProdClient::instance();
 
   TH2F *h_clusterssector = dynamic_cast <TH2F *> (cl->getHisto("h_TpcClusterQA_ncluspersector"));
@@ -297,7 +302,7 @@ int TPCDraw::DrawClusterInfo()
     // make a canvas for the quad grouping
     if (! gROOT->FindObject((boost::format("sector_clusperrun_%i") % quad).str().c_str()))
     {
-      MakeCanvas((boost::format("sector_clusperrun_%i") % quad).str(), quad + 6);
+      MakeCanvas((boost::format("sector_clusperrun_%i") % quad).str(), quad + 13);
     }
     TC[quad + 13]->Clear("D");
     for (int i = 0; i < 4; i++)
@@ -333,11 +338,13 @@ int TPCDraw::DrawClusterInfo()
 
     TC[13 + quad]->Update();
   }
+  std::cout << "DrawClusterInfo Ending" << std::endl;
   return 0;
 }
 
 int TPCDraw::DrawRegionInfo()
 {
+  std::cout << "DrawRegionInfo Beginning" << std::endl;
   OnlProdClient *cl = OnlProdClient::instance();
 
   std::vector<std::string> histNames;
@@ -390,6 +397,7 @@ int TPCDraw::DrawRegionInfo()
 
     TC[19+k]->Update();
   } 
+  std::cout << "DrawRegionInfo Ending" << std::endl;
 
   return 0;
 }
@@ -406,36 +414,47 @@ int TPCDraw::MakeHtml(const std::string &what)
   std::string pngfile;
 
   // Register the 1st canvas png file to the menu and produces the png file.
-  for (int quad = 0; quad < 6; quad++)
+  if (what == "ALLTPC" || what == "HITS")
   {
-    pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_Hits_s%i-%i") % quad % (quad + 3)).str(), (boost::format("%i") % (quad + 1)).str(), "png");
-    cl->CanvasToPng(TC[quad], pngfile);
+    for (int quad = 0; quad < 6; quad++)
+    {
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_Hits_s%i-%i") % quad % (quad + 3)).str(), (boost::format("%i") % (quad + 1)).str(), "png");
+      cl->CanvasToPng(TC[quad], pngfile);
+    }
   }
-  for (int quad = 0; quad < 6; quad++)
+  if (what == "ALLTPC" || what == "ADCS")
   {
-    pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_ADCs_s%i-%i") % quad % (quad + 3)).str(), (boost::format("%i") % (quad + 7)).str(), "png");
-    cl->CanvasToPng(TC[quad + 6], pngfile);
+    for (int quad = 0; quad < 6; quad++)
+    {
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_ADCs_s%i-%i") % quad % (quad + 3)).str(), (boost::format("%i") % (quad + 7)).str(), "png");
+      cl->CanvasToPng(TC[quad + 6], pngfile);
+    }
   }
-  pngfile = cl->htmlRegisterPage(*this, "tpc_clus_info", "13", "png");
-  cl->CanvasToPng(TC[12], pngfile);
-  for (int quad = 0; quad < 6; quad++)
+  if (what == "ALL" || what == "CLUSTERS")
   {
-    pngfile = cl->htmlRegisterPage(*this, (boost::format("sector_clusperrun_%i-%i") % quad % (quad + 3)).str(), (boost::format("%i") % (quad + 13)).str(), "png");
-    cl->CanvasToPng(TC[quad + 13], pngfile);
+    pngfile = cl->htmlRegisterPage(*this, "tpc_clus_info", "13", "png");
+    cl->CanvasToPng(TC[12], pngfile);
+    for (int quad = 0; quad < 6; quad++)
+    {
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("sector_clusperrun_%i-%i") % quad % (quad + 3)).str(), (boost::format("%i") % (quad + 13)).str(), "png");
+      cl->CanvasToPng(TC[quad + 13], pngfile);
+    }
   }
-  std::vector<std::string> histNames;
-  histNames.push_back("clusedge");
-  histNames.push_back("clusoverlap");
-  histNames.push_back("phisize");
-  histNames.push_back("rphi_error");
-  histNames.push_back("z_error");
-  histNames.push_back("zsize");
-  for (int quad = 0; quad < 6; quad++)
+  if (what == "ALL" || what == "REGIONS")
   {
-    pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_Regions_%s") % histNames[quad]).str(), (boost::format("%i") % (quad + 19)).str(), "png");
-    cl->CanvasToPng(TC[quad + 19], pngfile);
+    std::vector<std::string> histNames;
+    histNames.push_back("clusedge");
+    histNames.push_back("clusoverlap");
+    histNames.push_back("phisize");
+    histNames.push_back("rphi_error");
+    histNames.push_back("z_error");
+    histNames.push_back("zsize");
+    for (int quad = 0; quad < 6; quad++)
+    {
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_Regions_%s") % histNames[quad]).str(), (boost::format("%i") % (quad + 19)).str(), "png");
+      cl->CanvasToPng(TC[quad + 19], pngfile);
+    }
   }
-
   return 0;
 }
 
