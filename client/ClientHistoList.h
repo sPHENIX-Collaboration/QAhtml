@@ -1,5 +1,5 @@
-#ifndef __CLIENTHISTOLIST_H__
-#define __CLIENTHISTOLIST_H__
+#ifndef QA_CLIENT_CLIENTHISTOLIST_H
+#define QA_CLIENT_CLIENTHISTOLIST_H
 
 #include <iostream>
 #include <string>
@@ -9,7 +9,7 @@ class TNamed;
 class ClientHistoList
 {
  public:
-  ClientHistoList();
+  ClientHistoList() = default;
   ClientHistoList(const std::string &subsys);
 
   virtual ~ClientHistoList() {}
@@ -18,13 +18,11 @@ class ClientHistoList
   void Histo(TNamed *Histo);
   std::string SubSystem() const;
   void SubSystem(const std::string &SubSystem);
-  void identify(std::ostream& os = std::cout) const;
+  void identify(std::ostream &os = std::cout) const;
 
  protected:
-  TNamed* histo;
-  std::string subsystem;
-
+  TNamed *histo{nullptr};
+  std::string subsystem{"UNKNOWN"};
 };
 
-#endif /* __CLIENTHISTOLIST_H__ */
-
+#endif /* QA_CLIENT_CLIENTHISTOLIST_H */

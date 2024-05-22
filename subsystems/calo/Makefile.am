@@ -2,22 +2,25 @@ AUTOMAKE_OPTIONS = foreign
 
 AM_CPPFLAGS = \
   -I$(includedir) \
-  -I$(OFFLINE_MAIN)/include \
+  -isystem$(OFFLINE_MAIN)/include \
+  -isystem$(OFFLINE_MAIN)/rootmacros \
   -isystem$(ROOTSYS)/include 
 
 lib_LTLIBRARIES = \
-  libonlprodcalo.la
+  libqadrawcalo.la
 
-libonlprodcalo_la_LIBADD = \
+libqadrawcalo_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
-  -lonlprodclient \
-  -lonlproddb
+  -lqadrawclient \
+  -lqadrawdb
 
-pkginclude_HEADERS = \
+caloincludedir=$(pkgincludedir)/calo
+
+caloinclude_HEADERS = \
   CaloDraw.h
 
-libonlprodcalo_la_SOURCES = \
+libqadrawcalo_la_SOURCES = \
   CaloDraw.cc
 
 noinst_PROGRAMS = \
@@ -27,7 +30,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libonlprodcalo.la
+  libqadrawcalo.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@

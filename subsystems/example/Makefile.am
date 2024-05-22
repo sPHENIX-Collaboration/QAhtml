@@ -2,22 +2,24 @@ AUTOMAKE_OPTIONS = foreign
 
 AM_CPPFLAGS = \
   -I$(includedir) \
-  -I$(OFFLINE_MAIN)/include \
+  -isystem$(OFFLINE_MAIN)/include \
   -isystem$(ROOTSYS)/include 
 
 lib_LTLIBRARIES = \
-  libonlprodexample.la
+  libqadrawexample.la
 
-libonlprodexample_la_LIBADD = \
+libqadrawexample_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
-  -lonlprodclient \
-  -lonlproddb
+  -lqadrawclient \
+  -lqadrawdb
 
-pkginclude_HEADERS = \
+exampleincludedir=$(pkgincludedir)/example
+
+exampleinclude_HEADERS = \
   ExampleDraw.h
 
-libonlprodexample_la_SOURCES = \
+libqadrawexample_la_SOURCES = \
   ExampleDraw.cc
 
 noinst_PROGRAMS = \
@@ -27,7 +29,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libonlprodexample.la
+  libqadrawexample.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@

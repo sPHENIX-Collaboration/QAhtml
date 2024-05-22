@@ -1,30 +1,30 @@
 AUTOMAKE_OPTIONS = foreign
 
-INCLUDES = \
+AM_CPPFLAGS = \
   -I$(includedir) \
-  -I$(OFFLINE_MAIN)/include \
-  -I$(ROOTSYS)/include \
-  -I$(OPT_SPHENIX)/include
+  -isystem$(OFFLINE_MAIN)/include \
+  -isystem$(ROOTSYS)/include \
+  -isystem$(OPT_SPHENIX)/include
 
-lib_LTLIBRARIES = libonlprodclient.la
+lib_LTLIBRARIES = libqadrawclient.la
 
 noinst_HEADERS = \
   ClientHistoList.h \
-  OnlProdHtml.h \
-  OnlProdRunDBodbc.h
+  QAHtml.h \
+  QARunDBodbc.h
 
 pkginclude_HEADERS = \
-  OnlProdClient.h \
-  OnlProdDraw.h
+  QADrawClient.h \
+  QADraw.h
 
-libonlprodclient_la_SOURCES = \
+libqadrawclient_la_SOURCES = \
   ClientHistoList.cc \
-  OnlProdClient.cc \
-  OnlProdDraw.cc \
-  OnlProdHtml.cc \
-  OnlProdRunDBodbc.cc
+  QADrawClient.cc \
+  QADraw.cc \
+  QAHtml.cc \
+  QARunDBodbc.cc
 
-libonlprodclient_la_LIBADD = \
+libqadrawclient_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -L$(OPT_SPHENIX)/lib \
@@ -34,6 +34,9 @@ libonlprodclient_la_LIBADD = \
   -lodbc++ \
   -lGui
 
+BUILT_SOURCES = \
+  testexternals.cc
+
 noinst_PROGRAMS = \
   testexternals
 
@@ -41,7 +44,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libonlprodclient.la
+  libqadrawclient.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@
@@ -51,4 +54,4 @@ testexternals.cc:
 	echo "}" >> $@
 
 clean-local:
-	rm -f *Dict.*
+	rm -f $(BUILT_SOURCES)
