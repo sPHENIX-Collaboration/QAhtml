@@ -6,4 +6,5 @@ include_HEADERS =
 
 SUBDIRS = \
   calo \
+  tpc \
   example
