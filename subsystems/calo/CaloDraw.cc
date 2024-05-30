@@ -17,6 +17,7 @@
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
+#include <TGaxis.h>
 
 #include <boost/format.hpp>
 
@@ -46,6 +47,19 @@ CaloDraw::~CaloDraw()
 int CaloDraw::Draw(const std::string &what)
 {
   /* SetsPhenixStyle(); */
+  gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
+  gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
+  gStyle->SetPadLeftMargin(0.15);
+  gStyle->SetPadBottomMargin(0.15);
+  gStyle->SetTitleOffset(0.85, "XY");
+  gStyle->SetLabelSize(gStyle->GetLabelSize("X")*1.5, "X");
+  gStyle->SetLabelSize(gStyle->GetLabelSize("Y")*1.5, "Y");
+  gStyle->SetLabelSize(gStyle->GetLabelSize("Z")*1.5, "Z");
+  TGaxis::SetMaxDigits(4);
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
+  gStyle->SetOptStat(10);
+  gROOT->ForceStyle();
   int iret = 0;
   int idraw = 0;
   if (what == "ALL" || what == "CEMC")
@@ -70,7 +84,7 @@ int CaloDraw::Draw(const std::string &what)
   }
   if (what == "ALL" || what == "ZDC")
   {
-    iret += DrawZdc();
+    iret += DrawZdcMbd();
     idraw++;
   }
   if (!idraw)
@@ -88,30 +102,45 @@ int CaloDraw::MakeCanvas(const std::string &name, int num)
   int ysize = cl->GetDisplaySizeY();
   // xpos (-1) negative: do not draw menu bar
   TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  TC[num]->UseCurrentStyle();
   gSystem->ProcessEvents();
 
-  if (num < 6)
+  if (num==1)
+  {
+    Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.25, 0.45, 0.75, 0);
+    Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
+
+    Pad[num][0]->Draw();
+    Pad[num][1]->Draw();
+  }
+  else if (num==5)
+  {
+    TC[num]->Divide(3, 2, 0.025, 0.025);
+    Pad[num][0] = (TPad*)TC[num]->GetPad(1);
+    Pad[num][1] = (TPad*)TC[num]->GetPad(2);
+    Pad[num][2] = (TPad*)TC[num]->GetPad(3);
+    Pad[num][3] = (TPad*)TC[num]->GetPad(4);
+    Pad[num][4] = (TPad*)TC[num]->GetPad(5);
+    Pad[num][5] = (TPad*)TC[num]->GetPad(6);
+
+    Pad[num][0]->Draw();
+    Pad[num][1]->Draw();
+    Pad[num][2]->Draw();
+    Pad[num][3]->Draw();
+    Pad[num][4]->Draw();
+    Pad[num][5]->Draw();
+  }
+  else
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.45, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.52, 0.95, 0.97, 0);
     Pad[num][2] = new TPad((boost::format("mypad%d2") % num).str().c_str(), "name", 0.05, 0.02, 0.45, 0.47, 0);
     Pad[num][3] = new TPad((boost::format("mypad%d3") % num).str().c_str(), "here", 0.5, 0.02, 0.95, 0.47, 0);
 
-    /* Pad[0]->SetLogy(); */
-    /* Pad[1]->SetLogz(); */
-
     Pad[num][0]->Draw();
     Pad[num][1]->Draw();
     Pad[num][2]->Draw();
     Pad[num][3]->Draw();
-  }
-  else if (num == 6)
-  {
-    Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "no", 0.05, 0.25, 0.45, 0.75);
-    Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "no", 0.5, 0.25, 0.95, 0.75);
-
-    Pad[num][0]->Draw();
-    Pad[num][1]->Draw();
   }
 
   // this one is used to plot the run number on the canvas
@@ -134,20 +163,21 @@ int CaloDraw::DrawCemc()
   TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
 
   // canvas 1
-  if (!gROOT->FindObject("cemc_1"))
+  if (!gROOT->FindObject("cemc1"))
   {
-    MakeCanvas("cemc_1", 0);
+    MakeCanvas("cemc1", 0);
   }
-  TC[0]->Clear("D");
+  /* TC[0]->Clear("D"); */
   Pad[0][0]->cd();
   if (cemc_e_chi2)
   {
     cemc_e_chi2->SetTitle("EMCal #chi^{2} vs Energy");
-    cemc_e_chi2->SetXTitle("Cluster E (GeV) EMCal");
-    cemc_e_chi2->SetYTitle("Cluster #chi^{2} EMCal");
+    cemc_e_chi2->SetXTitle("Tower E (GeV) EMCal");
+    cemc_e_chi2->SetYTitle("Tower #chi^{2} EMCal");
     cemc_e_chi2->GetXaxis()->SetNdivisions(505);
     cemc_e_chi2->GetXaxis()->SetRangeUser(-1, 15);
     cemc_e_chi2->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogy();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
@@ -160,20 +190,22 @@ int CaloDraw::DrawCemc()
   Pad[0][1]->cd();
   if (cemc_etaphi)
   {
-    cemc_etaphi->SetTitle("EMCal Hits");
+    cemc_etaphi->SetTitle("EMCal Occupancy");
     cemc_etaphi->SetXTitle("#it{#eta}_{i} EMCal");
     cemc_etaphi->SetYTitle("#it{#phi}_{i} EMCal");
     cemc_etaphi->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
   Pad[0][2]->cd();
   if (cemc_etaphi_time)
   {
-    cemc_etaphi_time->SetTitle("EMCal Mean Hit Peak Time");
+    cemc_etaphi_time->SetTitle("EMCal Mean Signal Peak Time");
     cemc_etaphi_time->SetXTitle("#it{#eta}_{i} EMCal");
     cemc_etaphi_time->SetYTitle("#it{#phi}_{i} EMCal");
     cemc_etaphi_time->GetXaxis()->SetNdivisions(505);
     cemc_etaphi_time->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
   Pad[0][3]->cd();
@@ -184,14 +216,15 @@ int CaloDraw::DrawCemc()
     /* emcal_proj->GetXaxis()->SetNdivisions(505); */
     emcal_proj->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
     emcal_proj->DrawCopy("HIST");
+    gPad->UseCurrentStyle();
   }
 
   // canvas 2
-  if (!gROOT->FindObject("cemc_2"))
+  if (!gROOT->FindObject("cemc2"))
   {
-    MakeCanvas("cemc_2", 1);
+    MakeCanvas("cemc2", 1);
   }
-  TC[1]->Clear("D");
+  /* TC[1]->Clear("D"); */
   Pad[1][0]->cd();
   if (invMass)
   {
@@ -199,6 +232,7 @@ int CaloDraw::DrawCemc()
     invMass->SetXTitle("M_{#gamma #gamma} (GeV)");
     invMass->SetYTitle("Counts");
     invMass->DrawCopy();
+    gPad->UseCurrentStyle();
   }
   Pad[1][1]->cd();
   if (etaphi_clus)
@@ -207,8 +241,11 @@ int CaloDraw::DrawCemc()
     etaphi_clus->SetXTitle("#it{#eta}_{i} EMCal Clusters");
     etaphi_clus->SetYTitle("#it{#phi}_{i} EMCal Clusters");
     etaphi_clus->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
+  // remove this plot 
+  /*
   TH2 *ohcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi")));
   TH1 *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
   TH2 *ihcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi")));
@@ -216,7 +253,7 @@ int CaloDraw::DrawCemc()
   TH1 *h_fb_ratio_emcal = FBratio(emcal_proj);
   TH1 *h_fb_ratio_ohcal = FBratio(ohcal_proj);
   TH1 *h_fb_ratio_ihcal = FBratio(ihcal_proj);
-  Pad[1][2]->cd();
+  Pad[0][6]->cd();
   h_fb_ratio_emcal->Draw("ex0");
   h_fb_ratio_emcal->SetTitle("Calo North-South Ratio");
   h_fb_ratio_emcal->SetYTitle("N^{twr}(#eta_{i})/N^{twr}(#eta_{N-i})");
@@ -230,10 +267,12 @@ int CaloDraw::DrawCemc()
   h_fb_ratio_ihcal->SetLineColor(kRed);
   h_fb_ratio_ihcal->SetMarkerColor(kRed);
   h_fb_ratio_ihcal->SetMarkerStyle(33);
+  gPad->UseCurrentStyle();
 
   myText(0.52, 0.20, 1, "EMCal");
   myText(0.67, 0.20, kBlue, "oHCal");
   myText(0.82, 0.20, kRed, "iHCal");
+  */
 
   /* db->DBcommit(); */
 
@@ -253,9 +292,9 @@ int CaloDraw::DrawCemc()
   PrintRun.SetTextAlign(23);  // center/top alignment
   std::ostringstream runnostream1, runnostream2;
   std::string runstring1, runstring2;
-  runnostream1 << Name() << "_cemc_1 Run " << cl->RunNumber();
+  runnostream1 << Name() << "_cemc_towers Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
-  runnostream2 << Name() << "_cemc_2 Run " << cl->RunNumber();
+  runnostream2 << Name() << "_cemc_clusters Run " << cl->RunNumber();
   runstring2 = runnostream2.str();
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -281,16 +320,17 @@ int CaloDraw::DrawIhcal()
   {
     MakeCanvas("ihcal", 2);
   }
-  TC[2]->Clear("D");
+  /* TC[2]->Clear("D"); */
   Pad[2][0]->cd();
   if (ihcal_e_chi2)
   {
     ihcal_e_chi2->SetTitle("iHCal #chi^{2} vs Energy");
-    ihcal_e_chi2->SetXTitle("Cluster E (GeV) iHCal");
-    ihcal_e_chi2->SetYTitle("Cluster #chi^{2} iHCal");
+    ihcal_e_chi2->SetXTitle("Tower E (GeV) iHCal");
+    ihcal_e_chi2->SetYTitle("Tower #chi^{2} iHCal");
     ihcal_e_chi2->GetXaxis()->SetNdivisions(505);
     ihcal_e_chi2->GetXaxis()->SetRangeUser(-1, 15);
     ihcal_e_chi2->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogy();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
@@ -303,20 +343,22 @@ int CaloDraw::DrawIhcal()
   Pad[2][1]->cd();
   if (ihcal_etaphi)
   {
-    ihcal_etaphi->SetTitle("iHCal Hits");
+    ihcal_etaphi->SetTitle("iHCal Occupancy");
     ihcal_etaphi->SetXTitle("#it{#eta}_{i} iHCal");
     ihcal_etaphi->SetYTitle("#it{#phi}_{i} iHCal");
     ihcal_etaphi->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
   Pad[2][2]->cd();
   if (ihcal_etaphi_time)
   {
-    ihcal_etaphi_time->SetTitle("iHCal Mean Hit Peak Time");
+    ihcal_etaphi_time->SetTitle("iHCal Mean Signal Peak Time");
     ihcal_etaphi_time->SetXTitle("#it{#eta}_{i} iHCal");
     ihcal_etaphi_time->SetYTitle("#it{#phi}_{i} iHCal");
     ihcal_etaphi_time->GetXaxis()->SetNdivisions(505);
     ihcal_etaphi_time->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
   Pad[2][3]->cd();
@@ -326,6 +368,7 @@ int CaloDraw::DrawIhcal()
     ihcal_proj->SetXTitle("#it{#eta}_{i} iHCal");
     ihcal_proj->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
     ihcal_proj->DrawCopy("HIST");
+    gPad->UseCurrentStyle();
   }
 
   /* db->DBcommit(); */
@@ -360,16 +403,17 @@ int CaloDraw::DrawOhcal()
   {
     MakeCanvas("ohcal", 3);
   }
-  TC[3]->Clear("D");
+  /* TC[3]->Clear("D"); */
   Pad[3][0]->cd();
   if (ohcal_e_chi2)
   {
     ohcal_e_chi2->SetTitle("oHCal #chi^{2} vs Energy");
-    ohcal_e_chi2->SetXTitle("Cluster E (GeV) oHCal");
-    ohcal_e_chi2->SetYTitle("Cluster #chi^{2} oHCal");
+    ohcal_e_chi2->SetXTitle("Tower E (GeV) oHCal");
+    ohcal_e_chi2->SetYTitle("Tower #chi^{2} oHCal");
     ohcal_e_chi2->GetXaxis()->SetNdivisions(505);
     ohcal_e_chi2->GetXaxis()->SetRangeUser(-1, 15);
     ohcal_e_chi2->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogy();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
@@ -382,20 +426,22 @@ int CaloDraw::DrawOhcal()
   Pad[3][1]->cd();
   if (ohcal_etaphi)
   {
-    ohcal_etaphi->SetTitle("oHCal Hits");
+    ohcal_etaphi->SetTitle("oHCal Occupancy");
     ohcal_etaphi->SetXTitle("#it{#eta}_{i} oHCal");
     ohcal_etaphi->SetYTitle("#it{#phi}_{i} oHCal");
     ohcal_etaphi->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
   Pad[3][2]->cd();
   if (ohcal_etaphi_time)
   {
-    ohcal_etaphi_time->SetTitle("oHCal Mean Hit Peak Time");
+    ohcal_etaphi_time->SetTitle("oHCal Mean Signal Peak Time");
     ohcal_etaphi_time->SetXTitle("#it{#eta}_{i} oHCal");
     ohcal_etaphi_time->SetYTitle("#it{#phi}_{i} oHCal");
     ohcal_etaphi_time->GetXaxis()->SetNdivisions(505);
     ohcal_etaphi_time->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
   Pad[3][3]->cd();
@@ -405,6 +451,7 @@ int CaloDraw::DrawOhcal()
     ohcal_proj->SetXTitle("#it{#eta}_{i} oHCal");
     ohcal_proj->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
     ohcal_proj->DrawCopy("HIST");
+    gPad->UseCurrentStyle();
   }
 
   /* db->DBcommit(); */
@@ -418,10 +465,100 @@ int CaloDraw::DrawOhcal()
   std::string runstring;
   runnostream << Name() << "_ohcal Run " << cl->RunNumber();
   runstring = runnostream.str();
-  transparent[2]->cd();
+  transparent[3]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
 
   TC[3]->Update();
+  return 0;
+}
+
+int CaloDraw::DrawZdcMbd()
+{
+  QADrawClient *cl = QADrawClient::instance();
+
+  TH1 *zdc_Northcalib = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("zdcNorthcalib")));
+  TH1 *zdc_Southcalib = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("zdcSouthcalib")));
+  TH1 *vtx_z = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("vtx_z_raw")));
+
+  // canvas 1
+  if (!gROOT->FindObject("zdc&mbd"))
+  {
+    MakeCanvas("zdc&mbd", 4);
+  }
+  /* TC[3]->Clear("D"); */
+  Pad[4][0]->cd();
+  if (zdc_Northcalib && zdc_Southcalib)
+  {
+    zdc_Northcalib->SetLineColor(kBlue);
+    zdc_Northcalib->GetXaxis()->SetRangeUser(0.0, 12000);
+    zdc_Northcalib->SetTitle("ZDC Total Energy");
+    zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
+    zdc_Northcalib->SetYTitle("Events");
+    zdc_Northcalib->GetXaxis()->SetNdivisions(505);
+    zdc_Northcalib->DrawCopy();
+    gPad->UseCurrentStyle();
+
+    zdc_Southcalib->SetLineColor(kRed);
+    zdc_Southcalib->DrawCopy("same");
+    gPad->SetLogy();
+
+    myText(0.75, 0.80, kBlue, "North");
+    myText(0.65, 0.80, kRed, "South");
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  Pad[4][1]->cd();
+  if (zdc_Northcalib && zdc_Southcalib)
+  {
+    zdc_Northcalib->Draw();
+    zdc_Northcalib->SetLineColor(kBlue);
+    zdc_Northcalib->GetXaxis()->SetRangeUser(10, 300);
+    zdc_Northcalib->SetTitle("ZDC Total Energy");
+    zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
+    zdc_Northcalib->SetYTitle("Events");
+    gPad->UseCurrentStyle();
+
+    TGraph *gr_1n = new TGraph();
+    gr_1n->SetPoint(0, 100, 0);
+    gr_1n->SetPoint(1, 100, 1e7);
+    gr_1n->SetLineStyle(7);
+    gr_1n->Draw("l");
+
+    zdc_Southcalib->Draw("same");
+    zdc_Southcalib->SetLineColor(kRed);
+    gPad->SetLogy();
+
+    myText(0.75, 0.80, kBlue, "North");
+    myText(0.65, 0.80, kRed, "South");
+  }
+  Pad[4][2]->cd();
+  if (vtx_z)
+  {
+    vtx_z->SetTitle("MBD Vertex z");
+    vtx_z->SetXTitle("MBD Vtx #it{z} (cm)");
+    vtx_z->SetYTitle("Counts");
+    vtx_z->DrawCopy("");
+    gPad->UseCurrentStyle();
+  }
+
+  /* db->DBcommit(); */
+
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << Name() << "_zdc&mbd Run " << cl->RunNumber();
+  runstring = runnostream.str();
+  transparent[4]->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+
+  TC[4]->Update();
   return 0;
 }
 
@@ -434,15 +571,14 @@ int CaloDraw::DrawCorr()
   TH2 *zdc_emcal = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("zdc_emcal_correlation")));
   TH2 *ihcal_mbd = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ihcal_mbd_correlation")));
   TH2 *ohcal_mbd = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_mbd_correlation")));
-  TH1 *vtx_z = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("vtx_z_raw")));
 
   // canvas 1
-  if (!gROOT->FindObject("corr_1"))
+  if (!gROOT->FindObject("corr"))
   {
-    MakeCanvas("corr_1", 4);
+    MakeCanvas("corr", 5);
   }
-  TC[4]->Clear("D");
-  Pad[4][0]->cd();
+  /* TC[4]->Clear("D"); */
+  Pad[5][0]->cd();
   if (emcal_mbd)
   {
     emcal_mbd->SetTitle("EMCal MBD Correlation");
@@ -450,6 +586,7 @@ int CaloDraw::DrawCorr()
     emcal_mbd->SetYTitle("#Sigma #it{E}^{MBD} [Arb]");
     emcal_mbd->GetXaxis()->SetNdivisions(505);
     emcal_mbd->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
   }
@@ -458,7 +595,7 @@ int CaloDraw::DrawCorr()
     // histogram is missing
     return -1;
   }
-  Pad[4][1]->cd();
+  Pad[5][1]->cd();
   if (emcal_hcal)
   {
     emcal_hcal->SetTitle("EMCal HCal Correlation");
@@ -466,10 +603,11 @@ int CaloDraw::DrawCorr()
     emcal_hcal->SetYTitle("#Sigma #it{E}^{HCal} [Arb]");
     emcal_hcal->GetXaxis()->SetNdivisions(505);
     emcal_hcal->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
   }
-  Pad[4][2]->cd();
+  Pad[5][2]->cd();
   if (zdc_emcal)
   {
     zdc_emcal->SetTitle("ZDC EMCal Correlation");
@@ -477,17 +615,11 @@ int CaloDraw::DrawCorr()
     zdc_emcal->SetYTitle("#Sigma #it{E}^{ZDC} [Arb]");
     zdc_emcal->GetXaxis()->SetNdivisions(505);
     zdc_emcal->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
   }
-
-  // canvas 2
-  if (!gROOT->FindObject("corr_2"))
-  {
-    MakeCanvas("corr_2", 5);
-  }
-  TC[5]->Clear("D");
-  Pad[5][0]->cd();
+  Pad[5][3]->cd();
   if (ihcal_mbd)
   {
     ihcal_mbd->SetTitle("iHCal MBD Correlation");
@@ -495,10 +627,11 @@ int CaloDraw::DrawCorr()
     ihcal_mbd->SetYTitle("#Sigma #it{E}^{MBD} [Arb]");
     ihcal_mbd->GetXaxis()->SetNdivisions(505);
     ihcal_mbd->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
   }
-  Pad[5][1]->cd();
+  Pad[5][4]->cd();
   if (ohcal_mbd)
   {
     ohcal_mbd->SetTitle("oHCal MBD Correlation");
@@ -506,16 +639,9 @@ int CaloDraw::DrawCorr()
     ohcal_mbd->SetYTitle("#Sigma #it{E}^{MBD} [Arb]");
     ohcal_mbd->GetXaxis()->SetNdivisions(505);
     ohcal_mbd->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
     gPad->SetLogz();
     gPad->SetRightMargin(0.15);
-  }
-  Pad[5][2]->cd();
-  if (vtx_z)
-  {
-    vtx_z->SetTitle("MBD Vertex z");
-    vtx_z->SetXTitle("MBD Vtx #it{z} (cm)");
-    vtx_z->SetYTitle("Counts");
-    vtx_z->DrawCopy("");
   }
 
   /* db->DBcommit(); */
@@ -534,97 +660,19 @@ int CaloDraw::DrawCorr()
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();          // set to normalized coordinates
   PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream1, runnostream2;
-  std::string runstring1, runstring2;
-  runnostream1 << Name() << "_corr_1 Run " << cl->RunNumber();
+  std::ostringstream runnostream1;//, runnostream2;
+  std::string runstring1;//, runstring2;
+  runnostream1 << Name() << "_correlation Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
-  runnostream2 << Name() << "_corr_2 Run " << cl->RunNumber();
-  runstring2 = runnostream2.str();
-  transparent[4]->cd();
-  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+  /* runnostream2 << Name() << "_corr_2 Run " << cl->RunNumber(); */
+  /* runstring2 = runnostream2.str(); */
   transparent[5]->cd();
-  PrintRun.DrawText(0.5, 1., runstring2.c_str());
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+  /* transparent[5]->cd(); */
+  /* PrintRun.DrawText(0.5, 1., runstring2.c_str()); */
 
-  TC[4]->Update();
   TC[5]->Update();
-  return 0;
-}
-
-int CaloDraw::DrawZdc()
-{
-  QADrawClient *cl = QADrawClient::instance();
-
-  TH1 *zdc_Northcalib = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("zdcNorthcalib")));
-  TH1 *zdc_Southcalib = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("zdcSouthcalib")));
-
-  // canvas 1
-  if (!gROOT->FindObject("zdc"))
-  {
-    MakeCanvas("zdc", 6);
-  }
-  TC[6]->Clear("D");
-  Pad[6][0]->cd();
-  if (zdc_Northcalib && zdc_Southcalib)
-  {
-    zdc_Northcalib->SetLineColor(kBlue);
-    zdc_Northcalib->GetXaxis()->SetRangeUser(0.0, 12000);
-    zdc_Northcalib->SetTitle("ZDC Total Energy");
-    zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
-    zdc_Northcalib->SetYTitle("Events");
-    zdc_Northcalib->GetXaxis()->SetNdivisions(505);
-    zdc_Northcalib->DrawCopy();
-
-    zdc_Southcalib->SetLineColor(kRed);
-    zdc_Southcalib->DrawCopy("same");
-    gPad->SetLogy();
-
-    myText(0.75, 0.80, kBlue, "North");
-    myText(0.65, 0.80, kRed, "South");
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-  Pad[6][1]->cd();
-  if (zdc_Northcalib && zdc_Southcalib)
-  {
-    zdc_Northcalib->Draw();
-    zdc_Northcalib->SetLineColor(kBlue);
-    zdc_Northcalib->GetXaxis()->SetRangeUser(10, 300);
-    zdc_Northcalib->SetTitle("ZDC Total Energy");
-    zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
-    zdc_Northcalib->SetYTitle("Events");
-
-    TGraph *gr_1n = new TGraph();
-    gr_1n->SetPoint(0, 100, 0);
-    gr_1n->SetPoint(1, 100, 1e7);
-    gr_1n->SetLineStyle(7);
-    gr_1n->Draw("l");
-
-    zdc_Southcalib->Draw("same");
-    zdc_Southcalib->SetLineColor(kRed);
-    gPad->SetLogy();
-
-    myText(0.75, 0.80, kBlue, "North");
-    myText(0.65, 0.80, kRed, "South");
-  }
-
-  /* db->DBcommit(); */
-
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream;
-  std::string runstring;
-  runnostream << Name() << "_zdc Run " << cl->RunNumber();
-  runstring = runnostream.str();
-  transparent[6]->cd();
-  PrintRun.DrawText(0.5, 1., runstring.c_str());
-
-  TC[6]->Update();
+  /* TC[6]->Update(); */
   return 0;
 }
 
@@ -639,20 +687,22 @@ int CaloDraw::MakeHtml(const std::string &what)
   QADrawClient *cl = QADrawClient::instance();
 
   // Register the 1st canvas png file to the menu and produces the png file.
-  std::string pngfile = cl->htmlRegisterPage(*this, "CEMC", "1", "png");
+  std::string pngfile = cl->htmlRegisterPage(*this, "EMCal/Towers", "cemc1", "png");
   cl->CanvasToPng(TC[0], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "CEMC", "2", "png");
+  pngfile = cl->htmlRegisterPage(*this, "EMCal/Clusters", "cemc2", "png");
   cl->CanvasToPng(TC[1], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "IHCAL", "3", "png");
+  pngfile = cl->htmlRegisterPage(*this, "iHCal", "ihcal", "png");
   cl->CanvasToPng(TC[2], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "OHCAL", "4", "png");
+  pngfile = cl->htmlRegisterPage(*this, "oHCal", "ohcal", "png");
   cl->CanvasToPng(TC[3], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "CORR", "5", "png");
+  pngfile = cl->htmlRegisterPage(*this, "ZDC&MBD", "zdc&mbd", "png");
   cl->CanvasToPng(TC[4], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "CORR", "6", "png");
+  pngfile = cl->htmlRegisterPage(*this, "Correlations", "correlations", "png");
   cl->CanvasToPng(TC[5], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "ZDC", "7", "png");
-  cl->CanvasToPng(TC[6], pngfile);
+  /* pngfile = cl->htmlRegisterPage(*this, "CORR", "6", "png"); */
+  /* cl->CanvasToPng(TC[5], pngfile); */
+  /* pngfile = cl->htmlRegisterPage(*this, "ZDC&MBD", "7", "png"); */
+  /* cl->CanvasToPng(TC[6], pngfile); */
 
   return 0;
 }

@@ -28,15 +28,15 @@ class CaloDraw : public QADraw
   int DrawCemc();
   int DrawIhcal();
   int DrawOhcal();
+  int DrawZdcMbd();
   int DrawCorr();
-  int DrawZdc();
   TH1 *proj(TH2 *h2);
   TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
   //  QADB *db {nullptr};
-  TCanvas *TC[7]{};
-  TPad *transparent[7]{};
-  TPad *Pad[7][4]{};
+  TCanvas *TC[6]{};
+  TPad *transparent[6]{};
+  TPad *Pad[6][6]{};
   const char *histprefix;
 };
 
