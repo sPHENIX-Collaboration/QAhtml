@@ -24,9 +24,11 @@ AC_CONFIG_FILES([
   client/Makefile
   database/Makefile
   subsystems/Makefile
-  subsystems/example/Makefile
   subsystems/calo/Makefile
+  subsystems/example/Makefile
+  subsystems/micromegas/Makefile
   subsystems/tpc/Makefile
+  subsystems/vertex/Makefile
 ])
 
 AC_OUTPUT
