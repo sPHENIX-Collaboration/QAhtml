@@ -26,7 +26,9 @@ AC_CONFIG_FILES([
   subsystems/Makefile
   subsystems/calo/Makefile
   subsystems/example/Makefile
+  subsystems/intt/Makefile
   subsystems/micromegas/Makefile
+  subsystems/mvtx/Makefile
   subsystems/tpc/Makefile
   subsystems/vertex/Makefile
 ])
