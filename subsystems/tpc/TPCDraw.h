@@ -29,9 +29,10 @@ class TPCDraw : public QADraw
   int DrawChannelADCs();
   int DrawClusterInfo();
   int DrawRegionInfo();
-  TCanvas *TC[19]{};
-  TPad *transparent[19]{};
-  TPad *Pad[19][4]{};
+  int DrawResidInfo();
+  TCanvas *TC[21]{};
+  TPad *transparent[21]{};
+  TPad *Pad[21][6]{};
 };
 
 #endif
