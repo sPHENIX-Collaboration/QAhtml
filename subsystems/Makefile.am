@@ -6,5 +6,9 @@ include_HEADERS =
 
 SUBDIRS = \
   calo \
+  example \
+  intt \
+  micromegas \
+  mvtx \
   tpc \
-  example
+  vertex 
