@@ -11,6 +11,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TLatex.h>
+#include <TString.h>
 #include <TPad.h>
 #include <TProfile.h>
 #include <TROOT.h>
@@ -161,6 +162,8 @@ int CaloDraw::DrawCemc()
   TH1F *emcal_proj = (TH1F *) proj(cemc_etaphi)->Clone("h_emcal_proj");
   TH1 *invMass = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("InvMass")));
   TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
+  TH2 *h_hot = dynamic_cast<TH2 *>(cl->getHisto(std::string("h_hot")));
+  TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA")));
 
   // canvas 1
   if (!gROOT->FindObject("cemc1"))
@@ -244,6 +247,78 @@ int CaloDraw::DrawCemc()
     gPad->UseCurrentStyle();
     gPad->SetRightMargin(0.15);
   }
+
+  // canvas 3
+  if (!gROOT->FindObject("cemc3"))
+  {
+    MakeCanvas("cemc3", 6);
+  }
+  /* TC[6]->Clear("D"); */
+  Pad[6][0]->cd();
+  if (h_hot)
+  {
+    h_hot->SetTitle("EMCal Hot Tower Mask");
+    h_hot->SetXTitle("#it{#eta}_{i}");
+    h_hot->SetYTitle("#it{#phi}_{i}");
+    // change to a discrete color palette
+    int palette[4] = {kWhite, kGray+2, kRed, kBlue};
+    h_hot->GetZaxis()->SetRangeUser(-0.5,3.5);
+    h_hot->DrawCopy("COLZ");
+    gStyle->SetPalette(4, palette);
+    gPad->UseCurrentStyle();
+    gPad->Update();
+    gPad->SetRightMargin(0.15);
+  }
+  Pad[6][1]->cd();
+  gStyle->SetPalette(kBird);
+  TH2 *h_hitmask = nullptr;
+  int nonzero_towers = 0;
+  int dead_towers = 0;
+  int hot_towers = 0;
+  int cold_towers = 0;
+  // Make masked tower histogram
+  if (cemc_etaphi_wQA && h_hot)
+  {
+    h_hitmask = (TH2*)cemc_etaphi_wQA->Clone("h_hitmask");
+    int nbins = h_hot->GetNcells();
+    for (int i=0; i<=nbins; i++)
+    {
+      if (h_hot->GetBinContent(i) != 0)
+      {
+	h_hitmask->SetBinContent(i, 0);
+	nonzero_towers++;
+      }
+      if (h_hot->GetBinContent(i) == 1) dead_towers++;
+      if (h_hot->GetBinContent(i) == 2) hot_towers++;
+      if (h_hot->GetBinContent(i) == 3) cold_towers++;
+    }
+    h_hitmask->SetTitle("EMCal Tower Hits w/ Masking");
+    h_hitmask->SetXTitle("#it{#eta}_{i}");
+    h_hitmask->SetYTitle("#it{#phi}_{i}");
+    h_hitmask->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
+  Pad[6][2]->cd();
+  myText(0.2, 0.80, kBlack, "Hot Tower Mask Legend:");
+  myText(0.2, 0.75, kBlack, "0/empty = good tower");
+  myText(0.2, 0.70, kGray+2, "1 = dead tower");
+  myText(0.2, 0.65, kRed, "2 = hot tower");
+  myText(0.2, 0.60, kBlue, "3 = cold tower");
+  myText(0.5, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
+  myText(0.5, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
+  Pad[6][3]->cd();
+  TH1F *emcal_proj_masked = nullptr;
+  if (h_hitmask) emcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_emcal_proj_masked");
+  if (emcal_proj_masked)
+  {
+    emcal_proj_masked->SetTitle("EMCal #eta Projection w/ Masking");
+    emcal_proj_masked->SetXTitle("#it{#eta}_{i} EMCal");
+    /* emcal_proj_masked->GetXaxis()->SetNdivisions(505); */
+    emcal_proj_masked->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
+    emcal_proj_masked->DrawCopy("HIST");
+    gPad->UseCurrentStyle();
+  }
   // remove this plot 
   /*
   TH2 *ohcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi")));
@@ -290,19 +365,24 @@ int CaloDraw::DrawCemc()
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();          // set to normalized coordinates
   PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream1, runnostream2;
-  std::string runstring1, runstring2;
+  std::ostringstream runnostream1, runnostream2, runnostream3;
+  std::string runstring1, runstring2, runstring3;
   runnostream1 << Name() << "_cemc_towers Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
   runnostream2 << Name() << "_cemc_clusters Run " << cl->RunNumber();
   runstring2 = runnostream2.str();
+  runnostream3 << Name() << "_cemc_tower_masking Run " << cl->RunNumber();
+  runstring3 = runnostream3.str();
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
   transparent[1]->cd();
   PrintRun.DrawText(0.5, 1., runstring2.c_str());
+  transparent[6]->cd();
+  PrintRun.DrawText(0.5, 1., runstring3.c_str());
 
   TC[0]->Update();
   TC[1]->Update();
+  TC[6]->Update();
   return 0;
 }
 
@@ -691,6 +771,8 @@ int CaloDraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(TC[0], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "EMCal/Clusters", "cemc2", "png");
   cl->CanvasToPng(TC[1], pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "EMCal/Masking", "cemc3", "png");
+  cl->CanvasToPng(TC[6], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "iHCal", "ihcal", "png");
   cl->CanvasToPng(TC[2], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "oHCal", "ohcal", "png");

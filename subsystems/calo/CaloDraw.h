@@ -34,9 +34,9 @@ class CaloDraw : public QADraw
   TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
   //  QADB *db {nullptr};
-  TCanvas *TC[6]{};
-  TPad *transparent[6]{};
-  TPad *Pad[6][6]{};
+  TCanvas *TC[7]{};
+  TPad *transparent[7]{};
+  TPad *Pad[7][6]{};
   const char *histprefix;
 };
 
