@@ -168,10 +168,10 @@ int BCODraw::DrawMVTX()
     TGraph *mvtxFelixFracGr[nmvtxfelix];
     for(int i=0; i<nmvtxfelix; i++)
     {
-      mvtxTagFelixx[i] = (dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCO_felix_%i") % i).str())))->GetEntries(); 
+      mvtxTagFelixx[i] = (dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCO_felix%i") % i).str())))->GetEntries(); 
       mvtxTagFelixxFrac[i] = mvtxTagFelixx[i] / nMvtxGL1BCOs;
 
-      mvtxTagAllFelixFrac[i] = ((dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCOAllFees_Felix_%i") % (i)).str())))->GetEntries()) / nMvtxGL1BCOs; 
+      mvtxTagAllFelixFrac[i] = ((dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCOAllFees_Felix%i") % (i)).str())))->GetEntries()) / nMvtxGL1BCOs; 
 
       for(int j=0; j<nmvtxfees; j++)
       {
@@ -233,10 +233,11 @@ int BCODraw::DrawMVTX()
     for(int i=0; i<nmvtxfelix; i++)
     {
       Pad[1][i]->cd();
+      mvtxFelixFracGr[i]->SetTitle((boost::format("Felix %i") % i).str().c_str());
       mvtxFelixFracGr[i]->GetYaxis()->SetRangeUser(0,1);
       mvtxFelixFracGr[i]->GetXaxis()->SetTitle("FEE");
       mvtxFelixFracGr[i]->GetYaxis()->SetTitle("Fraction Tagged GTM BCOs");
-      mvtxFelixFracGr[i]->Draw("ap");
+      mvtxFelixFracGr[i]->Draw("ap*");
       //myText(0.22,0.4,kBlack,(boost::format("Felix %i") % (i)).str().c_str());
     }
   }
@@ -377,10 +378,11 @@ int BCODraw::DrawINTT()
     for(int i=0; i<ninttebdcs; i++)
     {
       Pad[3][i]->cd();
+      inttebdcfeegr[i]->SetTitle((boost::format("Server %i") % i).str().c_str());
       inttebdcfeegr[i]->GetXaxis()->SetTitle("FEE ID");
       inttebdcfeegr[i]->GetYaxis()->SetTitle("Fraction Tagged GL1BCOs");
       inttebdcfeegr[i]->GetYaxis()->SetRangeUser(0,1);
-      inttebdcfeegr[i]->Draw("ap");
+      inttebdcfeegr[i]->Draw("ap*");
       //myText(0.2,0.25,kBlack,(boost::format("Server %i") % (i)).str().c_str(),0.07);
     }
   }
