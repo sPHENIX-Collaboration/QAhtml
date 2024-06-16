@@ -24,6 +24,7 @@ AC_CONFIG_FILES([
   client/Makefile
   database/Makefile
   subsystems/Makefile
+  subsystems/bco/Makefile
   subsystems/calo/Makefile
   subsystems/example/Makefile
   subsystems/intt/Makefile
