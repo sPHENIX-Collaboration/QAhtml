@@ -5,6 +5,7 @@ include_HEADERS =
 ###USE ALPHABETICAL ORDER FOR MAKEFILE LIST
 
 SUBDIRS = \
+  bco \
   calo \
   example \
   intt \
