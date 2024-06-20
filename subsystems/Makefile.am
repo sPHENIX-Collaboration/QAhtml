@@ -12,4 +12,5 @@ SUBDIRS = \
   micromegas \
   mvtx \
   tpc \
-  vertex 
+  vertex \
+  siliconseeds
