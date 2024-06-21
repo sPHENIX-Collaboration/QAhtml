@@ -1,4 +1,5 @@
 #include "CaloDraw.h"
+#include "CaloGoodRunChecker.h"
 
 #include <sPhenixStyle.C>
 
@@ -167,7 +168,8 @@ int CaloDraw::DrawCemc()
   TH1F *emcal_proj = (TH1F *) proj(cemc_etaphi)->Clone("h_emcal_proj");
   TH1 *invMass = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("InvMass")));
   TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
-  TH2 *cemc_hotmap = dynamic_cast<TH2 *>(cl->getHisto(std::string("cemc_hotmap")));
+  TH2 *cemc_hotmap = nullptr;
+  if (cemc_checker) cemc_hotmap = cemc_checker->cemc_hcdmap;
   TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA")));
 
   // canvas 1
@@ -255,26 +257,14 @@ int CaloDraw::DrawCemc()
 
   // do "summary" canvas before tower masking canvas, so CemcGoodRun gets called first
   // canvas 4
-  if (!gROOT->FindObject("cemc4"))
-  {
-    MakeCanvas("cemc4", 7);
-  }
-  /* TC[7]->Clear("D"); */
-  Pad[7][0]->cd();
-  bool isgoodrun = CemcGoodRun();
-  // n_events, hot/cold/dead_towers, cemc_time_* and vtxz_* are now filled
-  if (isgoodrun)
-  {
-    myText(0.5, 0.80, kGreen, "Overall status: Good Run", 0.08);
-  }
-  else
-  {
-    myText(0.5, 0.80, kRed, "Overall status: Bad Run", 0.08);
-  }
-  myText(0.5, 0.70, kBlack, Form("%d total events", n_events));
-  myText(0.5, 0.65, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers));
-  myText(0.5, 0.60, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
-  myText(0.5, 0.55, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+  /* if (!gROOT->FindObject("cemc4")) */
+  /* { */
+  /*   MakeCanvas("cemc4", 7); */
+  /* } */
+  /* /1* TC[7]->Clear("D"); *1/ */
+  /* Pad[7][0]->cd(); */
+  /* bool isgoodrun = CemcGoodRun(); */
+  /* // n_events, hot/cold/dead_towers, cemc_time_* and vtxz_* are now filled */
 
   // canvas 3
   if (!gROOT->FindObject("cemc3"))
@@ -327,6 +317,13 @@ int CaloDraw::DrawCemc()
   myText(0.25, 0.70, kGray+2, "1 = dead tower");
   myText(0.25, 0.65, kRed, "2 = hot tower");
   myText(0.25, 0.60, kBlue, "3 = cold tower");
+  int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
+  if (cemc_checker)
+  {
+    dead_towers = cemc_checker->cemc_dead_towers;
+    hot_towers = cemc_checker->cemc_hot_towers;
+    cold_towers = cemc_checker->cemc_cold_towers;
+  }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
   myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
   Pad[6][3]->cd();
@@ -396,21 +393,21 @@ int CaloDraw::DrawCemc()
   runstring2 = runnostream2.str();
   runnostream3 << Name() << "_cemc_tower_masking Run " << cl->RunNumber();
   runstring3 = runnostream3.str();
-  runnostream4 << Name() << "_cemc_summary Run " << cl->RunNumber();
-  runstring4 = runnostream4.str();
+  /* runnostream4 << Name() << "_cemc_summary Run " << cl->RunNumber(); */
+  /* runstring4 = runnostream4.str(); */
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
   transparent[1]->cd();
   PrintRun.DrawText(0.5, 1., runstring2.c_str());
   transparent[6]->cd();
   PrintRun.DrawText(0.5, 1., runstring3.c_str());
-  transparent[7]->cd();
-  PrintRun.DrawText(0.5, 1., runstring4.c_str());
+  /* transparent[7]->cd(); */
+  /* PrintRun.DrawText(0.5, 1., runstring4.c_str()); */
 
   TC[0]->Update();
   TC[1]->Update();
   TC[6]->Update();
-  TC[7]->Update();
+  /* TC[7]->Update(); */
   return 0;
 }
 
@@ -802,7 +799,8 @@ int CaloDraw::MakeHtml(const std::string &what)
   pngfile = cl->htmlRegisterPage(*this, "EMCal/Masking", "cemc3", "png");
   cl->CanvasToPng(TC[6], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "EMCal/Summary", "cemc4", "png");
-  cl->CanvasToPng(TC[7], pngfile);
+  cl->CanvasToPng(cemcSummary, pngfile);
+  /* cl->CanvasToPng(TC[7], pngfile); */
   pngfile = cl->htmlRegisterPage(*this, "iHCal", "ihcal", "png");
   cl->CanvasToPng(TC[2], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "oHCal", "ohcal", "png");
@@ -824,6 +822,29 @@ int CaloDraw::DBVarInit()
   /* db = new QADrawDB(this); */
   /* db->DBInit(); */
   return 0;
+}
+
+void CaloDraw::SetCemcSummary(TCanvas* c)
+{
+  cemcSummary = c;
+  cemcSummary->cd();
+  // add the run number title
+  QADrawClient *cl = QADrawClient::instance();
+  TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);
+  tr->SetFillStyle(4000);
+  tr->Draw();
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << Name() << "_cemc_summary Run " << cl->RunNumber();
+  runstring = runnostream.str();
+  tr->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+  cemcSummary->Update();
 }
 
 TH1 *CaloDraw::proj(TH2 *h2)
@@ -887,98 +908,3 @@ void CaloDraw::myText(double x, double y, int color, const char *text, double ts
   l.DrawLatex(x, y, text);
 }
 
-bool CaloDraw::CemcGoodRun()
-{
-  QADrawClient *cl = QADrawClient::instance();
-  TH1 *zdcNorthcalib = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("zdcNorthcalib")));
-  TH2 *cemc_hotmap = dynamic_cast<TH2 *>(cl->getHisto(std::string("cemc_hotmap")));
-  TH2 *cemc_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_time")));
-  TH1 *vtx_z = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("vtx_z_raw")));
-
-  // Number of events
-  if (zdcNorthcalib)
-  {
-    n_events = zdcNorthcalib->GetEntries();
-  }
-  int MINEVENTS = 100000;
-  if (n_events < MINEVENTS)
-  {
-    return false;
-  }
-
-  // Bad towers
-  if (cemc_hotmap)
-  {
-    dead_towers = 0;
-    hot_towers = 0;
-    cold_towers = 0;
-    int nbins = cemc_hotmap->GetNcells();
-    for (int i=0; i<=nbins; i++)
-    {
-      if (cemc_hotmap->GetBinContent(i) == 1) dead_towers++;
-      if (cemc_hotmap->GetBinContent(i) == 2) hot_towers++;
-      if (cemc_hotmap->GetBinContent(i) == 3) cold_towers++;
-    }
-  }
-  int MAXHOTTOWERS = 100;
-  if (hot_towers > MAXHOTTOWERS)
-  {
-    return false;
-  }
-  int MAXCOLDDEADTOWERS = 500;
-  if ((cold_towers + dead_towers) > MAXCOLDDEADTOWERS)
-  {
-    return false;
-  }
-
-  // Hit timing
-  if (cemc_etaphi_time)
-  {
-    int nx = cemc_etaphi_time->GetNbinsX();
-    int ny = cemc_etaphi_time->GetNbinsY();
-    float t_sum = 0;
-    float t2_sum = 0;
-    for (int ieta=0; ieta<nx; ieta++)
-    {
-      for (int iphi=0; iphi<ny; iphi++)
-      {
-	float t = cemc_etaphi_time->GetBinContent(ieta+1, iphi+1);
-	t_sum += t;
-	t2_sum += t*t;
-      }
-    }
-    cemc_time_mean = t_sum/(nx*ny);
-    cemc_time_sigma = sqrt((t2_sum/(nx*ny)) - (cemc_time_mean*cemc_time_mean));
-  }
-  float MINTIMEMEAN = -1.0;
-  float MAXTIMEMEAN = 1.0;
-  if ((cemc_time_mean < MINTIMEMEAN) || (cemc_time_mean > MAXTIMEMEAN))
-  {
-    return false;
-  }
-  float MAXTIMESIGMA = 2.0;
-  if (cemc_time_sigma > MAXTIMESIGMA)
-  {
-    return false;
-  }
-
-  // MBD vertex
-  if (vtx_z)
-  {
-    vtxz_mean = vtx_z->GetMean();
-    vtxz_sigma = vtx_z->GetStdDev();
-  }
-  float MAXABSVTXZ = 5.0;
-  if (abs(vtxz_mean) > MAXABSVTXZ)
-  {
-    return false;
-  }
-  float MAXVTXZSIGMA = 20.0;
-  if (vtxz_sigma > MAXVTXZSIGMA)
-  {
-    return false;
-  }
-
-  // Passed all requirements
-  return true;
-}
