@@ -32,6 +32,7 @@ AC_CONFIG_FILES([
   subsystems/mvtx/Makefile
   subsystems/tpc/Makefile
   subsystems/vertex/Makefile
+  subsystems/trackseeds/Makefile
 ])
 
 AC_OUTPUT
