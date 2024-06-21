@@ -13,4 +13,4 @@ SUBDIRS = \
   mvtx \
   tpc \
   vertex \
-  siliconseeds
+  trackseeds

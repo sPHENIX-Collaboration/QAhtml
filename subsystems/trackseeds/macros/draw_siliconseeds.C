@@ -1,5 +1,5 @@
 #include <qahtml/QADrawClient.h>
-#include "siliconseeds/SiliconSeedsDraw.h"
+#include <trackseeds/SiliconSeedsDraw.h>
 
 R__LOAD_LIBRARY(libqadrawsiliconseeds.so)
 

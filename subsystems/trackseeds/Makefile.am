@@ -15,7 +15,7 @@ libqadrawsiliconseeds_la_LIBADD = \
   -lqadrawclient \
   -lqadrawdb
 
-siliconseedsincludedir=$(pkgincludedir)/siliconseeds
+siliconseedsincludedir=$(pkgincludedir)/trackseeds
 
 siliconseedsinclude_HEADERS = \
   SiliconSeedsDraw.h
