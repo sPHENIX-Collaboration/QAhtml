@@ -70,11 +70,15 @@ int MVTXDraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("MVTX Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.25, 0.45, 0.75, 0);
-  Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
+  Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.45, 0.97, 0);
+  Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.52, 0.95, 0.97, 0);
+  Pad[num][2] = new TPad((boost::format("mypad%d2") % num).str().c_str(), "name", 0.05, 0.02, 0.45, 0.47, 0);
+  Pad[num][3] = new TPad((boost::format("mypad%d3") % num).str().c_str(), "here", 0.5, 0.02, 0.95, 0.47, 0);
 
   Pad[num][0]->Draw();
   Pad[num][1]->Draw();
+  Pad[num][2]->Draw();
+  Pad[num][3]->Draw();
 
   // this one is used to plot the run number on the canvas
   transparent[num] = new TPad((boost::format("transparent%d") % num).str().c_str(), "this does not show", 0, 0, 1, 1);
@@ -91,6 +95,7 @@ int MVTXDraw::DrawChipInfo()
 
   TH1F *h_occupancy = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("chipOccupancy")));
   TH1F *h_clusSize = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterSize")));
+  TH1I *h_strobe = dynamic_cast <TH1I *> (cl->getHisto(histprefix + std::string("strobeTiming")));
 
   if (! gROOT->FindObject("chip_info"))
   {
@@ -114,13 +119,24 @@ int MVTXDraw::DrawChipInfo()
     return -1;
   }
   Pad[0][1]->cd();
-  if (h_occupancy)
+  if (h_clusSize)
   {
     h_clusSize->SetTitle("MVTX Cluster Size");
     h_clusSize->SetXTitle("Cluster Size");
     h_clusSize->SetYTitle("Normalized Entries");
     h_clusSize->Scale(1./h_clusSize->Integral());
     h_clusSize->DrawCopy();
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  Pad[0][2]->cd();
+  if (h_strobe)
+  {
+    h_strobe->DrawCopy();
     gPad->SetRightMargin(0.15);
   }
   else
