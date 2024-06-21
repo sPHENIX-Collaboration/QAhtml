@@ -91,6 +91,7 @@ void QARunDBodbc::FillFromdaqDB(const int runno)
     brunixtime = brtimestamp.getTime();
     odbc::Timestamp ertimestamp = rs->getTimestamp("ertimestamp");
     erunixtime = ertimestamp.getTime();
+    brtimestr = brtimestamp.toString(); // timestamp is in 'America/New_York' time zone
   }
   delete rs;
   delete query;

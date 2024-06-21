@@ -10,6 +10,7 @@ void draw_calo(const std::string &rootfile) {
   /* cl->Verbosity(1); */
   CaloDraw *ex = new CaloDraw();
   cl->registerDrawer(ex);
+  cl->ReadHistogramsFromFile(rootfile);
 
   // Tower masking & good/bad run determination
   CaloGoodRunChecker* ch = new CaloGoodRunChecker();
@@ -20,7 +21,6 @@ void draw_calo(const std::string &rootfile) {
   TCanvas* cemc_summ = ch->CemcMakeSummary(cemc_isgood);
   ex->SetCemcSummary(cemc_summ);
 
-  cl->ReadHistogramsFromFile(rootfile);
   cl->ReadHistogramsFromFile(mapsfile.c_str());
   /* cl->Print("ALL"); */
   cl->MakeHtml();
