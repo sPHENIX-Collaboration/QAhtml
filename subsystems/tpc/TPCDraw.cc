@@ -89,7 +89,7 @@ int TPCDraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("TPC Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  if (num != 12 && num != 19 && num != 20)
+  if (num != 12 && num != 18 && num != 19 && num != 20)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.45, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.52, 0.95, 0.97, 0);
@@ -109,7 +109,7 @@ int TPCDraw::MakeCanvas(const std::string &name, int num)
     Pad[num][0]->Draw();
     Pad[num][1]->Draw();
   }
-  else if (num == 19)
+  else if (num ==18 || num == 19)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.32, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.37, 0.52, 0.64, 0.97, 0);
@@ -324,7 +324,6 @@ int TPCDraw::DrawRegionInfo()
   std::vector<std::string> histNames;
   histNames.push_back("clusedge");
   histNames.push_back("clusoverlap");
-  histNames.push_back("phisize");
   histNames.push_back("rphi_error");
   histNames.push_back("z_error");
   histNames.push_back("zsize");
@@ -370,7 +369,59 @@ int TPCDraw::DrawRegionInfo()
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
     TC[13+k]->Update();
-  } 
+  }
+  std::vector<TH1F*> h_regions;
+  for (int reg = 0; reg < 3; reg++)
+  {
+    TH1F *h_region_0 = dynamic_cast <TH1F *> (cl->getHisto((boost::format("h_TpcClusterQA_phisize_side0_%i") % reg).str()));
+    TH1F *h_region_1 = dynamic_cast <TH1F *> (cl->getHisto((boost::format("h_TpcClusterQA_phisize_side1_%i") % reg).str()));
+    h_regions.push_back(h_region_0);
+    h_regions.push_back(h_region_1);
+  }
+
+  if (! gROOT->FindObject("tpc_regions_phisize"))
+  {
+    MakeCanvas("tpc_regions_phisize", 18);
+  }
+  TC[18]->Clear("D");
+  for (int reg = 0; reg < 3; reg++)
+  {
+    Pad[18][2*reg]->cd();
+    if (h_regions[2*reg])
+    {
+      h_regions[2*reg]->DrawCopy();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      // histogram is missing
+      return -1; 
+    }
+    Pad[18][2*reg + 1]->cd();
+    if (h_regions[2*reg + 1])
+    {
+      h_regions[2*reg + 1]->DrawCopy();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      // histogram is missing
+      return -1; 
+    }
+  }
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();  // set to normalized coordinates
+  PrintRun.SetTextAlign(23); // center/top alignment
+  std::ostringstream runnostream1;
+  std::string runstring1;
+  runnostream1 << Name() << "_tpc_region_info Run " << cl->RunNumber();
+  runstring1 = runnostream1.str();
+  transparent[18]->cd();
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+  TC[18]->Update();
   std::cout << "DrawRegionInfo Ending" << std::endl;
 
   return 0;
@@ -524,10 +575,10 @@ int TPCDraw::MakeHtml(const std::string &what)
     std::vector<std::string> histNames;
     histNames.push_back("clusedge");
     histNames.push_back("clusoverlap");
-    histNames.push_back("phisize");
     histNames.push_back("rphi_error");
     histNames.push_back("z_error");
     histNames.push_back("zsize");
+    histNames.push_back("phisize");
     for (int quad = 0; quad < 6; quad++)
     {
       pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_Regions_%s") % histNames[quad]).str(), (boost::format("%i") % (quad + 14)).str(), "png");
