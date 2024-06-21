@@ -13,15 +13,18 @@ libqadrawcalo_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb
+  -lqadrawdb \
+  -lemcNoisyTowerFinder
 
 caloincludedir=$(pkgincludedir)/calo
 
 caloinclude_HEADERS = \
-  CaloDraw.h
+  CaloDraw.h \
+  CaloGoodRunChecker.h
 
 libqadrawcalo_la_SOURCES = \
-  CaloDraw.cc
+  CaloDraw.cc \
+  CaloGoodRunChecker.cc
 
 noinst_PROGRAMS = \
   testexternals

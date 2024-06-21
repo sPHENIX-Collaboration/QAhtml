@@ -12,6 +12,7 @@ class TGraphErrors;
 class TPad;
 class TH1;
 class TH2;
+class CaloGoodRunChecker;
 
 class CaloDraw : public QADraw
 {
@@ -22,6 +23,8 @@ class CaloDraw : public QADraw
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
+  void SetCemcSummary(TCanvas* c);
+  void SetCemcChecker(CaloGoodRunChecker* ch) {cemc_checker = ch;}
 
  private:
   int MakeCanvas(const std::string &name, int num);
@@ -34,10 +37,16 @@ class CaloDraw : public QADraw
   TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
   //  QADB *db {nullptr};
-  TCanvas *TC[7]{};
-  TPad *transparent[7]{};
-  TPad *Pad[7][6]{};
+  const static int ncanvases = 8;
+  const static int maxpads = 6;
+  TCanvas *TC[ncanvases]{};
+  TPad *transparent[ncanvases]{};
+  TPad *Pad[ncanvases][maxpads]{};
+  TCanvas* cemcSummary = nullptr;
+  // add summary canvases for hcal etc later
   const char *histprefix;
+  // for EMCal good run determination
+  CaloGoodRunChecker* cemc_checker = nullptr;
 };
 
 #endif
