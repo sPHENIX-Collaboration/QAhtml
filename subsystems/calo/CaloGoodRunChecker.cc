@@ -164,18 +164,25 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary(bool cemc_goodrun)
   // xpos (-1) negative: do not draw menu bar
   TCanvas* canvas = new TCanvas("cemcsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
   canvas->cd();
+
+  int runno = cl->RunNumber();
+  std::string runtime = cl->RunTime();
+  int n_events_db = cl->EventsInRun();
+  myText(0.5, 0.85, kBlack, Form("EMCal Summary - Run %d", runno), 0.08);
+  
   if (cemc_goodrun)
   {
-    myText(0.5, 0.80, kGreen, "Overall status: Good Run", 0.08);
+    myText(0.5, 0.70, kGreen, "Overall status: Good Run", 0.06);
   }
   else
   {
-    myText(0.5, 0.80, kRed, "Overall status: Bad Run", 0.08);
+    myText(0.5, 0.70, kRed, "Overall status: Bad Run", 0.06);
   }
-  myText(0.5, 0.70, kBlack, Form("%d total events", n_events));
-  myText(0.5, 0.65, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", cemc_dead_towers, cemc_hot_towers, cemc_cold_towers));
-  myText(0.5, 0.60, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
-  myText(0.5, 0.55, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+  myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
+  myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
+  myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", cemc_dead_towers, cemc_hot_towers, cemc_cold_towers));
+  myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
+  myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
 
   // add the run number title
   TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);

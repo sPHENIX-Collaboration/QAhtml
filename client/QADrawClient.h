@@ -48,6 +48,7 @@ class QADrawClient : public Fun4AllBase
 
   int RunNumber() const { return runnumber; }
   void RunNumber(const int runno);
+  std::string RunTime();
 
   void SetDisplaySizeX(const int xsize) { display_sizex = xsize; }
   void SetDisplaySizeY(const int ysize) { display_sizey = ysize; }

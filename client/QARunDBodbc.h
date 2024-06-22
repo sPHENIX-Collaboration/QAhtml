@@ -20,6 +20,7 @@ class QARunDBodbc
   int EventsInRun() { return eventsinrun; }
   time_t BeginRunUnixTime() { return brunixtime; }
   time_t EndRunUnixTime() { return erunixtime; }
+  std::string RunTime() { return brtimestr; }
 
  private:
   int runnumber;
@@ -31,6 +32,7 @@ class QARunDBodbc
   int eventsinrun;
   time_t brunixtime;
   time_t erunixtime;
+  std::string brtimestr;
 };
 
 #endif  // QA_CLIENT_QARUNDBODBC_H

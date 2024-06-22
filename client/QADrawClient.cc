@@ -505,6 +505,15 @@ void QADrawClient::RunNumber(const int runno)
   }
 }
 
+std::string QADrawClient::RunTime()
+{
+  if (!rdb)
+  {
+    rdb = new QARunDBodbc();
+  }
+  return rdb->RunTime();
+}
+
 std::string
 QADrawClient::RunType()
 {
