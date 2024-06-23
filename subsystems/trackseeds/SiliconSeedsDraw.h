@@ -30,7 +30,7 @@ class SiliconSeedsDraw : public QADraw
   int DrawVertexInfo();
   TCanvas *TC[2]{};
   TPad *transparent[2]{};
-  TPad *Pad[2][10]{};
+  TPad *Pad[2][12]{};
   const char *histprefix;
 };
 

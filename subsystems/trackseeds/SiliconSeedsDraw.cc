@@ -18,6 +18,8 @@
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
+#include <TColor.h>
+#include <TLegend.h>
 
 #include <boost/format.hpp>
 
@@ -73,21 +75,25 @@ int SiliconSeedsDraw::MakeCanvas(const std::string &name, int num)
     int xsize = cl->GetDisplaySizeX();
     int ysize = cl->GetDisplaySizeY();
     // xpos (-1) negative: do not draw menu bar
-    TC[num] = new TCanvas(name.c_str(), (boost::format("Silicon Seeds Plots %d") % num).str().c_str(), -1, 0, (int)(xsize), (int)(ysize * 2.2));
+    TC[num] = new TCanvas(name.c_str(), (boost::format("Silicon Seeds Plots %d") % num).str().c_str(), -1, 0, (int)(xsize), (int)(ysize * 2.5));
     TC[num]->SetCanvasSize(xsize, ysize * 2.2);
     gSystem->ProcessEvents();
 
-    Pad[num][9] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.5, 0.02, 0.95, 0.18, 0);
-    Pad[num][8] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.05, 0.02, 0.45, 0.18, 0);
-    Pad[num][7] = new TPad((boost::format("mypad%d2") % num).str().c_str(), "name", 0.5, 0.20, 0.95, 0.38, 0);
-    Pad[num][6] = new TPad((boost::format("mypad%d3") % num).str().c_str(), "here", 0.05, 0.20, 0.45, 0.38, 0);
-    Pad[num][5] = new TPad((boost::format("mypad%d4") % num).str().c_str(), "hi", 0.5, 0.40, 0.95, 0.58, 0);
-    Pad[num][4] = new TPad((boost::format("mypad%d5") % num).str().c_str(), "hello", 0.05, 0.40, 0.45, 0.58, 0);
-    Pad[num][3] = new TPad((boost::format("mypad%d6") % num).str().c_str(), "what", 0.5, 0.60, 0.95, 0.78, 0);
-    Pad[num][2] = new TPad((boost::format("mypad%d7") % num).str().c_str(), "is", 0.05, 0.60, 0.45, 0.78, 0);
-    Pad[num][1] = new TPad((boost::format("mypad%d8") % num).str().c_str(), "up", 0.5, 0.80, 0.95, 0.98, 0);
-    Pad[num][0] = new TPad((boost::format("mypad%d9") % num).str().c_str(), "now", 0.05, 0.80, 0.45, 0.98, 0);
+    Pad[num][11] = new TPad((boost::format("mypad%d10") % num).str().c_str(), "put", 0.5, 0.02, 0.95, 0.18, 0);
+    Pad[num][10] = new TPad((boost::format("mypad%d11") % num).str().c_str(), "a", 0.05, 0.02, 0.45, 0.18, 0);
+    Pad[num][9] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.5, 0.19, 0.95, 0.35, 0);
+    Pad[num][8] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.05, 0.19, 0.45, 0.35, 0);
+    Pad[num][7] = new TPad((boost::format("mypad%d2") % num).str().c_str(), "name", 0.5, 0.36, 0.95, 0.51, 0);
+    Pad[num][6] = new TPad((boost::format("mypad%d3") % num).str().c_str(), "here", 0.05, 0.36, 0.45, 0.51, 0);
+    Pad[num][5] = new TPad((boost::format("mypad%d4") % num).str().c_str(), "hi", 0.5, 0.52, 0.95, 0.67, 0);
+    Pad[num][4] = new TPad((boost::format("mypad%d5") % num).str().c_str(), "hello", 0.05, 0.52, 0.45, 0.67, 0);
+    Pad[num][3] = new TPad((boost::format("mypad%d6") % num).str().c_str(), "what", 0.5, 0.68, 0.95, 0.83, 0);
+    Pad[num][2] = new TPad((boost::format("mypad%d7") % num).str().c_str(), "is", 0.05, 0.68, 0.45, 0.83, 0);
+    Pad[num][1] = new TPad((boost::format("mypad%d8") % num).str().c_str(), "up", 0.5, 0.84, 0.95, 0.98, 0);
+    Pad[num][0] = new TPad((boost::format("mypad%d9") % num).str().c_str(), "now", 0.05, 0.84, 0.45, 0.98, 0);
 
+    Pad[num][11]->Draw();
+    Pad[num][10]->Draw();
     Pad[num][9]->Draw();
     Pad[num][8]->Draw();
     Pad[num][7]->Draw();
@@ -122,6 +128,10 @@ int SiliconSeedsDraw::DrawTrackletInfo()
     TH2F *h_dcazorigin_phi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazorigin_phi")));
     TH2F *h_dcazvtx_phi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi")));
     TH1F *h_ntrack_isfromvtx = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("ntrack_isfromvtx")));
+    TH1F *h_trackpt_inclusive = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("trackpt")));
+    TH1F *h_trackpt_pos = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("trackpt_pos")));
+    TH1F *h_trackpt_neg = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("trackpt_neg")));
+    TH1F *h_ntrack_IsPosCharge = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("ntrack_IsPosCharge")));
 
     if (!gROOT->FindObject("track_info"))
     {
@@ -269,10 +279,55 @@ int SiliconSeedsDraw::DrawTrackletInfo()
     {
         h_ntrack_isfromvtx->SetTitle("Is track from a vertex");
         h_ntrack_isfromvtx->SetXTitle("Is track associated to a vertex");
-        h_ntrack_isfromvtx->SetYTitle("Normalized Entries");
+        h_ntrack_isfromvtx->SetYTitle("Fraction");
         h_ntrack_isfromvtx->Scale(1. / h_ntrack_isfromvtx->Integral());
-        h_ntrack_isfromvtx->SetMarkerSize(1.5);
+        h_ntrack_isfromvtx->GetYaxis()->SetRangeUser(0, 1.0);
+        h_ntrack_isfromvtx->SetMarkerSize(2.5);
         h_ntrack_isfromvtx->DrawCopy("histtext0");
+        gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+        // histogram is missing
+        return -1;
+    }
+
+    Pad[0][10]->cd();
+    if (h_trackpt_inclusive && h_trackpt_pos && h_trackpt_neg)
+    {
+        gPad->SetLogy();
+        h_trackpt_inclusive->SetXTitle("Track p_{T} [GeV]");
+        h_trackpt_inclusive->SetYTitle("Entries");
+        h_trackpt_inclusive->SetLineColor(kBlack);
+        h_trackpt_inclusive->DrawCopy();
+        h_trackpt_pos->SetMarkerColor(kRed);
+        h_trackpt_pos->SetLineColor(kRed);
+        h_trackpt_pos->DrawCopy("same");
+        h_trackpt_neg->SetMarkerColor(kBlue);
+        h_trackpt_neg->SetLineColor(kBlue);
+        h_trackpt_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_trackpt_inclusive, "Inclusive", "pl");
+        legend->AddEntry(h_trackpt_pos, "Positive charged", "pl");
+        legend->AddEntry(h_trackpt_neg, "Negative charged", "pl");
+        legend->Draw();
+        gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+        // histogram is missing
+        return -1;
+    }
+
+    Pad[0][11]->cd();
+    if (h_ntrack_IsPosCharge)
+    {
+        h_ntrack_IsPosCharge->SetXTitle("Number of tracks with positive charge");
+        h_ntrack_IsPosCharge->SetYTitle("Fraction");
+        h_ntrack_IsPosCharge->Scale(1. / h_ntrack_IsPosCharge->Integral());
+        h_ntrack_IsPosCharge->GetYaxis()->SetRangeUser(0, 1.0);
+        h_ntrack_IsPosCharge->SetMarkerSize(2.5);
+        h_ntrack_IsPosCharge->DrawCopy("histtext0");
         gPad->SetRightMargin(0.15);
     }
     else
@@ -294,6 +349,8 @@ int SiliconSeedsDraw::DrawTrackletInfo()
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
     TC[0]->Update();
+    TC[0]->SaveAs("track_info.png");
+    TC[0]->SaveAs("track_info.pdf");
 
     std::cout << "DrawTrackletInfo Ending" << std::endl;
     return 0;
@@ -430,6 +487,8 @@ int SiliconSeedsDraw::DrawVertexInfo()
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
     TC[1]->Update();
+    TC[1]->SaveAs("vertex_info.png");
+    TC[1]->SaveAs("vertex_info.pdf");
 
     std::cout << "DrawVertexInfo Ending" << std::endl;
     return 0;
