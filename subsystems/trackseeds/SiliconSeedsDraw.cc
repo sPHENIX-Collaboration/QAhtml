@@ -349,8 +349,6 @@ int SiliconSeedsDraw::DrawTrackletInfo()
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
     TC[0]->Update();
-    TC[0]->SaveAs("track_info.png");
-    TC[0]->SaveAs("track_info.pdf");
 
     std::cout << "DrawTrackletInfo Ending" << std::endl;
     return 0;
@@ -487,8 +485,6 @@ int SiliconSeedsDraw::DrawVertexInfo()
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
     TC[1]->Update();
-    TC[1]->SaveAs("vertex_info.png");
-    TC[1]->SaveAs("vertex_info.pdf");
 
     std::cout << "DrawVertexInfo Ending" << std::endl;
     return 0;
