@@ -28,7 +28,7 @@ class INTTDraw : public QADraw
   int DrawChipInfo();
   TCanvas *TC[1]{};
   TPad *transparent[1]{};
-  TPad *Pad[1][2]{};
+  TPad *Pad[1][4]{};
   const char *histprefix;
 };
 

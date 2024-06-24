@@ -17,6 +17,8 @@
 #include <TSystem.h>
 #include <TText.h>
 #include <TLatex.h>
+#include <TColor.h>
+#include <TLegend.h>
 
 #include <boost/format.hpp>
 
@@ -96,6 +98,10 @@ int MVTXDraw::DrawChipInfo()
   TH1F *h_occupancy = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("chipOccupancy")));
   TH1F *h_clusSize = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterSize")));
   TH1I *h_strobe = dynamic_cast <TH1I *> (cl->getHisto(histprefix + std::string("strobeTiming")));
+  TH1F *h_clusPhi_incl = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_incl")));
+  TH1F *h_clusPhi_l0 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l0")));
+  TH1F *h_clusPhi_l1 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l1")));
+  TH1F *h_clusPhi_l2 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l2")));
 
   if (! gROOT->FindObject("chip_info"))
   {
@@ -137,6 +143,40 @@ int MVTXDraw::DrawChipInfo()
   if (h_strobe)
   {
     h_strobe->DrawCopy();
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  Pad[0][3]->cd();
+  if (h_clusPhi_incl && h_clusPhi_l0 && h_clusPhi_l1 && h_clusPhi_l2)
+  {
+    h_clusPhi_incl->SetTitle("MVTX Cluster #phi");
+    h_clusPhi_incl->SetXTitle("Cluster #phi wrt origin [rad]");
+    h_clusPhi_incl->SetYTitle("Entries");
+    h_clusPhi_incl->SetMarkerSize(0.5);
+    h_clusPhi_incl->DrawCopy();
+    h_clusPhi_l0->SetMarkerSize(0.5);
+    h_clusPhi_l0->SetMarkerColor(kRed);
+    h_clusPhi_l0->SetLineColor(kRed);
+    h_clusPhi_l0->DrawCopy("same");
+    h_clusPhi_l1->SetMarkerSize(0.5);
+    h_clusPhi_l1->SetMarkerColor(kBlue);
+    h_clusPhi_l1->SetLineColor(kBlue);
+    h_clusPhi_l1->DrawCopy("same");
+    h_clusPhi_l2->SetMarkerSize(0.5);
+    h_clusPhi_l2->SetMarkerColor(kGreen+2);
+    h_clusPhi_l2->SetLineColor(kGreen+2);
+    h_clusPhi_l2->DrawCopy("same");
+    auto legend = new TLegend(0.45, 0.7, 0.7, 0.9);
+    legend->AddEntry(h_clusPhi_incl, "Inclusive", "pl");
+    legend->AddEntry(h_clusPhi_l0, "Layer 0", "pl");
+    legend->AddEntry(h_clusPhi_l1, "Layer 1", "pl");
+    legend->AddEntry(h_clusPhi_l2, "Layer 2", "pl");
+    legend->SetFillStyle(0);
+    legend->Draw();
     gPad->SetRightMargin(0.15);
   }
   else

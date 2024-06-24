@@ -376,6 +376,7 @@ int SiliconSeedsDraw::DrawVertexInfo()
     Pad[1][0]->cd();
     if (h_nvertex)
     {
+        gPad->SetLogy();
         h_nvertex->SetXTitle("Number of vertices");
         h_nvertex->SetYTitle("Entries");
         h_nvertex->DrawCopy();
