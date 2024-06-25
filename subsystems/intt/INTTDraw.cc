@@ -55,6 +55,11 @@ int INTTDraw::Draw(const std::string &what)
     iret += DrawChipInfo();
     idraw++;
   }
+  if (what == "ALL" || what == "CLUSTER")
+  {
+    iret += DrawClusterInfo();
+    idraw++;
+  }
   if (!idraw)
   {
     std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -97,9 +102,6 @@ int INTTDraw::DrawChipInfo()
 
   TH1F *h_occupancy = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("sensorOccupancy")));
   TH1F *h_clusSize = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterSize")));
-  TH1F *h_clusPhi_incl = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_incl")));
-  TH1F *h_clusPhi_l34 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l34")));
-  TH1F *h_clusPhi_l56 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l56")));
 
   if (! gROOT->FindObject("chip_info"))
   {
@@ -137,7 +139,43 @@ int INTTDraw::DrawChipInfo()
     // histogram is missing
     return -1;
   }
-  Pad[0][2]->cd();
+
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();  // set to normalized coordinates
+  PrintRun.SetTextAlign(23); // center/top alignment
+  std::ostringstream runnostream1;
+  std::string runstring1;
+  runnostream1 << Name() << "_intt Info Run " << cl->RunNumber();
+  runstring1 = runnostream1.str();
+  transparent[0]->cd();
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+  TC[0]->Update();
+ 
+  std::cout << "DrawChipInfo Ending" << std::endl;
+  return 0;
+}
+
+int INTTDraw::DrawClusterInfo()
+{
+  std::cout << "INTT DrawClusterInfo() Beginning" << std::endl;
+  QADrawClient *cl = QADrawClient::instance();
+
+  TH1F *h_clusPhi_incl = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_incl")));
+  TH1F *h_clusPhi_l34 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l34")));
+  TH1F *h_clusPhi_l56 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l56")));
+  TH2F *h_clusZ_clusPhi_l34 = dynamic_cast <TH2F *> (cl->getHisto(histprefix + std::string("clusterZ_clusPhi_l34")));
+  TH2F *h_clusZ_clusPhi_l56 = dynamic_cast <TH2F *> (cl->getHisto(histprefix + std::string("clusterZ_clusPhi_l56")));
+
+  if (! gROOT->FindObject("cluster_info"))
+  {
+    MakeCanvas("cluster_info", 1);
+  }
+  TC[1]->Clear("D");
+  
+  Pad[1][0]->cd();
   if (h_clusPhi_incl && h_clusPhi_l34 && h_clusPhi_l56)
   {
     h_clusPhi_incl->SetTitle("INTT Cluster Phi");
@@ -167,6 +205,39 @@ int INTTDraw::DrawChipInfo()
     // histogram is missing
     return -1;
   }
+  Pad[1][1]->cd();
+  if (h_clusZ_clusPhi_l34)
+  {
+    h_clusZ_clusPhi_l34->SetTitle("INTT Cluster Z vs #phi Inner Layer");
+    h_clusZ_clusPhi_l34->SetXTitle("Inner cluster Z [cm]");
+    h_clusZ_clusPhi_l34->SetYTitle("Inner cluster #phi wrt origin [rad]");
+    h_clusZ_clusPhi_l34->SetMarkerSize(0.5);
+    h_clusZ_clusPhi_l34->DrawCopy("colz");
+    gPad->SetRightMargin(0.15);
+    gPad->SetLogz();
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  Pad[1][2]->cd();
+  if (h_clusZ_clusPhi_l56)
+  {
+    h_clusZ_clusPhi_l56->SetTitle("INTT Cluster Z vs #phi Outer Layer");
+    h_clusZ_clusPhi_l56->SetXTitle("Outer cluster Z [cm]");
+    h_clusZ_clusPhi_l56->SetYTitle("Outer cluster #phi wrt origin [rad]");
+    h_clusZ_clusPhi_l56->SetMarkerSize(0.5);
+    h_clusZ_clusPhi_l56->DrawCopy("colz");
+    gPad->SetRightMargin(0.15);
+    gPad->SetLogz();
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
 
   TText PrintRun;
   PrintRun.SetTextFont(62);
@@ -177,12 +248,12 @@ int INTTDraw::DrawChipInfo()
   std::string runstring1;
   runnostream1 << Name() << "_intt Info Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
-  transparent[0]->cd();
+  transparent[1]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-  TC[0]->Update();
+  TC[1]->Update();
  
-  std::cout << "DrawChipInfo Ending" << std::endl;
+  std::cout << "DrawClusterInfo Ending" << std::endl;
   return 0;
 }
  
@@ -202,6 +273,11 @@ int INTTDraw::MakeHtml(const std::string &what)
   {
     pngfile = cl->htmlRegisterPage(*this, "chip_info", "1", "png");
     cl->CanvasToPng(TC[0], pngfile);
+  }
+  if (what == "ALL" || what == "CLUSTER")
+  {
+    pngfile = cl->htmlRegisterPage(*this, "cluster_info", "2", "png");
+    cl->CanvasToPng(TC[1], pngfile);
   }
   return 0;
 }

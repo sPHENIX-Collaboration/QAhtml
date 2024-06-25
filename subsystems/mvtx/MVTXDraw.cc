@@ -55,6 +55,11 @@ int MVTXDraw::Draw(const std::string &what)
     iret += DrawChipInfo();
     idraw++;
   }
+  if (what == "ALL" || what == "CLUSTER")
+  {
+    iret += DrawClusterInfo();
+    idraw++;
+  }
   if (!idraw)
   {
     std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -98,10 +103,6 @@ int MVTXDraw::DrawChipInfo()
   TH1F *h_occupancy = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("chipOccupancy")));
   TH1F *h_clusSize = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterSize")));
   TH1I *h_strobe = dynamic_cast <TH1I *> (cl->getHisto(histprefix + std::string("strobeTiming")));
-  TH1F *h_clusPhi_incl = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_incl")));
-  TH1F *h_clusPhi_l0 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l0")));
-  TH1F *h_clusPhi_l1 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l1")));
-  TH1F *h_clusPhi_l2 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l2")));
 
   if (! gROOT->FindObject("chip_info"))
   {
@@ -150,7 +151,46 @@ int MVTXDraw::DrawChipInfo()
     // histogram is missing
     return -1;
   }
-  Pad[0][3]->cd();
+
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();  // set to normalized coordinates
+  PrintRun.SetTextAlign(23); // center/top alignment
+  std::ostringstream runnostream1;
+  std::string runstring1;
+  runnostream1 << Name() << "_mvtx Info Run " << cl->RunNumber();
+  runstring1 = runnostream1.str();
+  transparent[0]->cd();
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+  TC[0]->Update();
+ 
+  std::cout << "DrawChipInfo Ending" << std::endl;
+  return 0;
+}
+
+int MVTXDraw::DrawClusterInfo()
+{
+  std::cout << "MVTX DrawChipInfo() Beginning" << std::endl;
+  QADrawClient *cl = QADrawClient::instance();
+
+  TH1F *h_clusPhi_incl = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_incl")));
+  TH1F *h_clusPhi_l0 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l0")));
+  TH1F *h_clusPhi_l1 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l1")));
+  TH1F *h_clusPhi_l2 = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_l2")));
+  TH2F *h_clusZ_clusPhi_l0 = dynamic_cast <TH2F *> (cl->getHisto(histprefix + std::string("clusterZ_clusPhi_l0")));
+  TH2F *h_clusZ_clusPhi_l1 = dynamic_cast <TH2F *> (cl->getHisto(histprefix + std::string("clusterZ_clusPhi_l1")));
+  TH2F *h_clusZ_clusPhi_l2 = dynamic_cast <TH2F *> (cl->getHisto(histprefix + std::string("clusterZ_clusPhi_l2")));
+
+  if (! gROOT->FindObject("cluster_info"))
+  {
+    MakeCanvas("cluster_info", 1);
+  }
+
+  TC[1]->Clear("D");
+
+  Pad[1][0]->cd();
   if (h_clusPhi_incl && h_clusPhi_l0 && h_clusPhi_l1 && h_clusPhi_l2)
   {
     h_clusPhi_incl->SetTitle("MVTX Cluster #phi");
@@ -184,6 +224,54 @@ int MVTXDraw::DrawChipInfo()
     // histogram is missing
     return -1;
   }
+  Pad[1][1]->cd();
+  if (h_clusZ_clusPhi_l0)
+  {
+    h_clusZ_clusPhi_l0->SetTitle("MVTX Cluster Z vs phi Layer 0");
+    h_clusZ_clusPhi_l0->SetXTitle("Cluster (layer 0) Z [cm]");
+    h_clusZ_clusPhi_l0->SetYTitle("Cluster (layer 0) #phi wrt origin [rad]");
+    h_clusZ_clusPhi_l0->SetZTitle("Entries");
+    h_clusZ_clusPhi_l0->DrawCopy("colz");
+    gPad->SetRightMargin(0.17);
+    gPad->SetLogz();
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  Pad[1][2]->cd();
+  if (h_clusZ_clusPhi_l1)
+  {
+    h_clusZ_clusPhi_l1->SetTitle("MVTX Cluster Z vs phi Layer 1");
+    h_clusZ_clusPhi_l1->SetXTitle("Cluster (layer 1) Z [cm]");
+    h_clusZ_clusPhi_l1->SetYTitle("Cluster (layer 1) #phi wrt origin [rad]");
+    h_clusZ_clusPhi_l1->SetZTitle("Entries");
+    h_clusZ_clusPhi_l1->DrawCopy("colz");
+    gPad->SetRightMargin(0.17);
+    gPad->SetLogz();
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  Pad[1][3]->cd();
+  if (h_clusZ_clusPhi_l2)
+  {
+    h_clusZ_clusPhi_l2->SetTitle("MVTX Cluster Z vs phi Layer 2");
+    h_clusZ_clusPhi_l2->SetXTitle("Cluster (layer 2) Z [cm]");
+    h_clusZ_clusPhi_l2->SetYTitle("Cluster (layer 2) #phi wrt origin [rad]");
+    h_clusZ_clusPhi_l2->SetZTitle("Entries");
+    h_clusZ_clusPhi_l2->DrawCopy("colz");
+    gPad->SetRightMargin(0.17);
+    gPad->SetLogz();
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
 
   TText PrintRun;
   PrintRun.SetTextFont(62);
@@ -194,12 +282,12 @@ int MVTXDraw::DrawChipInfo()
   std::string runstring1;
   runnostream1 << Name() << "_mvtx Info Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
-  transparent[0]->cd();
+  transparent[1]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-  TC[0]->Update();
+  TC[1]->Update();
  
-  std::cout << "DrawChipInfo Ending" << std::endl;
+  std::cout << "DrawClusterInfo Ending" << std::endl;
   return 0;
 }
  
@@ -219,6 +307,11 @@ int MVTXDraw::MakeHtml(const std::string &what)
   {
     pngfile = cl->htmlRegisterPage(*this, "chip_info", "1", "png");
     cl->CanvasToPng(TC[0], pngfile);
+  }
+  if (what == "ALL" || what == "CLUSTER")
+  {
+    pngfile = cl->htmlRegisterPage(*this, "cluster_info", "2", "png");
+    cl->CanvasToPng(TC[1], pngfile);
   }
   return 0;
 }
