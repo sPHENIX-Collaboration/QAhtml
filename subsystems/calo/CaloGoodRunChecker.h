@@ -29,7 +29,7 @@ class CaloGoodRunChecker
   TH2* ihcal_hcdmap = nullptr;
   TH2* ohcal_hcdmap = nullptr;
 
-  int n_events = 0;
+  int n_events= 0;
   int cemc_hot_towers = 999999;
   int cemc_cold_towers = 999999;
   int cemc_dead_towers = 999999;

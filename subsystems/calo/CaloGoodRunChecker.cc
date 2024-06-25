@@ -21,9 +21,9 @@ std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
   std::string histfile_base = histfile.substr(histfile.find_last_of("/") + 1);
   mapsfile = mapsfile_prefix + histfile_base;
   // can only store one hot/cold/dead map per file --> need 3 files
-  std::string outfile_cemc = "deadHotTowersCemc.root";
-  std::string outfile_ihcal = "deadHotTowersIhcal.root";
-  std::string outfile_ohcal = "deadHotTowersOhcal.root";
+  std::string outfile_cemc = "deadHotTowersCemc" + histfile_base;
+  std::string outfile_ihcal = "deadHotTowersIhcal" + histfile_base;
+  std::string outfile_ohcal = "deadHotTowersOhcal" + histfile_base;
   calo->FindHot(histfile, outfile_cemc, "h_CaloValid_cemc_etaphi_wQA"); 
   calo->set_hcal();
   calo->FindHot(histfile, outfile_ihcal, "h_CaloValid_ihcal_etaphi_wQA"); 
@@ -60,6 +60,8 @@ void CaloGoodRunChecker::DeleteHotColdDeadMaps()
 
 bool CaloGoodRunChecker::CemcGoodRun()
 {
+  bool failed_check = false;
+
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
@@ -76,7 +78,8 @@ bool CaloGoodRunChecker::CemcGoodRun()
   int MINEVENTS = 100000;
   if (n_events < MINEVENTS)
   {
-    return false;
+    /* return false; */
+    failed_check = true;
   }
 
   // Bad towers
@@ -96,12 +99,14 @@ bool CaloGoodRunChecker::CemcGoodRun()
   int MAXHOTTOWERS = 100;
   if (cemc_hot_towers > MAXHOTTOWERS)
   {
-    return false;
+    /* return false; */
+    failed_check = true;
   }
   int MAXCOLDDEADTOWERS = 500;
   if ((cemc_cold_towers + cemc_dead_towers) > MAXCOLDDEADTOWERS)
   {
-    return false;
+    /* return false; */
+    failed_check = true;
   }
 
   // Hit timing
@@ -127,12 +132,14 @@ bool CaloGoodRunChecker::CemcGoodRun()
   float MAXTIMEMEAN = 1.0;
   if ((cemc_time_mean < MINTIMEMEAN) || (cemc_time_mean > MAXTIMEMEAN))
   {
-    return false;
+    /* return false; */
+    failed_check = true;
   }
   float MAXTIMESIGMA = 2.0;
   if (cemc_time_sigma > MAXTIMESIGMA)
   {
-    return false;
+    /* return false; */
+    failed_check = true;
   }
 
   // MBD vertex
@@ -144,16 +151,19 @@ bool CaloGoodRunChecker::CemcGoodRun()
   float MAXABSVTXZ = 5.0;
   if (abs(vtxz_mean) > MAXABSVTXZ)
   {
-    return false;
+    /* return false; */
+    failed_check = true;
   }
   float MAXVTXZSIGMA = 20.0;
   if (vtxz_sigma > MAXVTXZSIGMA)
   {
-    return false;
+    /* return false; */
+    failed_check = true;
   }
 
   // Passed all requirements
-  return true;
+  if (failed_check) return false;
+  else return true;
 }
 
 TCanvas* CaloGoodRunChecker::CemcMakeSummary(bool cemc_goodrun)
