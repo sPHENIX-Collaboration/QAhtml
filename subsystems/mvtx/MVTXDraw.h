@@ -15,21 +15,22 @@ class TH2F;
 
 class MVTXDraw : public QADraw
 {
- public: 
-  MVTXDraw(const std::string &name = "MVTXQA");
-  ~MVTXDraw() override;
+  public:
+    MVTXDraw(const std::string &name = "MVTXQA");
+    ~MVTXDraw() override;
 
-  int Draw(const std::string &what = "ALL") override;
-  int MakeHtml(const std::string &what = "ALL") override;
-  int DBVarInit();
+    int Draw(const std::string &what = "ALL") override;
+    int MakeHtml(const std::string &what = "ALL") override;
+    int DBVarInit();
 
- private:
-  int MakeCanvas(const std::string &name, int num);
-  int DrawChipInfo();
-  TCanvas *TC[1]{};
-  TPad *transparent[1]{};
-  TPad *Pad[1][4]{};
-  const char *histprefix;
+  private:
+    int MakeCanvas(const std::string &name, int num);
+    int DrawChipInfo();
+    int DrawClusterInfo();
+    TCanvas *TC[2]{};
+    TPad *transparent[2]{};
+    TPad *Pad[2][4]{};
+    const char *histprefix;
 };
 
 #endif
