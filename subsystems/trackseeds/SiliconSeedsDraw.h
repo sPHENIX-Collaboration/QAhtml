@@ -1,5 +1,5 @@
-#ifndef INTT_INTTDRAW_H__
-#define INTT_INTTDRAW_H__
+#ifndef SILICONSEEDSDRAW_H__
+#define SILICONSEEDSDRAW_H__
 
 #include <qahtml/QADraw.h>
 
@@ -12,12 +12,13 @@ class TGraphErrors;
 class TPad;
 class TH1F;
 class TH2F;
+class TProfile2D;
 
-class INTTDraw : public QADraw
+class SiliconSeedsDraw : public QADraw
 {
  public: 
-  INTTDraw(const std::string &name = "INTTQA");
-  ~INTTDraw() override;
+  SiliconSeedsDraw(const std::string &name = "SILICONSEEDSQA");
+  ~SiliconSeedsDraw() override;
 
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
@@ -25,11 +26,11 @@ class INTTDraw : public QADraw
 
  private:
   int MakeCanvas(const std::string &name, int num);
-  int DrawChipInfo();
-  int DrawClusterInfo();
+  int DrawTrackletInfo();
+  int DrawVertexInfo();
   TCanvas *TC[2]{};
   TPad *transparent[2]{};
-  TPad *Pad[2][4]{};
+  TPad *Pad[2][12]{};
   const char *histprefix;
 };
 
