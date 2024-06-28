@@ -18,6 +18,7 @@
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
+#include <TLegend.h>
 
 #include <boost/format.hpp>
 
@@ -26,6 +27,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 TpcSeedsDraw::TpcSeedsDraw(const std::string &name)
     : QADraw(name)
@@ -89,10 +91,11 @@ int TpcSeedsDraw::MakeCanvas(const std::string &name, int num)
     TC[num]->SetCanvasSize(xsize, ysize * 2.2);
     gSystem->ProcessEvents();
 
+    int nrow = 4;
     double yoffset = 0.02;
-    double ywidth=(1.-yoffset-yoffset)/5.;
+    double ywidth=(1.-yoffset-yoffset)/(double)nrow;
     double x1=0, y1=0, x2=0, y2=0;
-    for (int i=0; i<10; i++)
+    for (int i=0; i<2*nrow; i++)
     {
         if (i%2==0)
         {
@@ -107,14 +110,14 @@ int TpcSeedsDraw::MakeCanvas(const std::string &name, int num)
         y1=0.02+(i/2)*ywidth;
         y2=0.02+(i/2+1)*ywidth;
 
-        Pad[num][10-1-i] = new TPad(
+        Pad[num][2*nrow-1-i] = new TPad(
                                 (boost::format("mypad_%1%_%2%") % num % i).str().c_str(),
                                 "pad",
                                 x1, y1, x2, y2
                                 );
     }
 
-    for (int i=0; i<10; i++) Pad[num][10-1-i]->Draw();
+    for (int i=0; i<2*nrow; i++) Pad[num][2*nrow-1-i]->Draw();
 
     // this one is used to plot the run number on the canvas
     transparent[num] = new TPad((boost::format("transparent%d") % num).str().c_str(), "this does not show", 0, 0, 1, 1);
@@ -132,10 +135,16 @@ int TpcSeedsDraw::DrawTrackletInfo()
     TH1F *h_ntrack1d = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("nrecotracks1d")));
     TH1F *h_ntrack1d_pos = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("nrecotracks1d_pos")));
     TH1F *h_ntrack1d_neg = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("nrecotracks1d_neg")));
+    TH1F *h_ntrack1d_ptg1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("nrecotracks1d_ptg1")));
+    TH1F *h_ntrack1d_ptg1_pos = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("nrecotracks1d_ptg1_pos")));
+    TH1F *h_ntrack1d_ptg1_neg = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("nrecotracks1d_ptg1_neg")));
+    TH1F *h_pt = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("pt")));
+    TH1F *h_pt_pos = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("pt_pos")));
+    TH1F *h_pt_neg = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("pt_neg")));
     TH2F *h_ntrack_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("nrecotracks_pos")));
     TH2F *h_ntrack_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("nrecotracks_neg")));
-    TH1F *h_trackcrossing_pos = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("trackcrossing_pos")));
-    TH1F *h_trackcrossing_neg = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("trackcrossing_neg")));
+    //TH1F *h_trackcrossing_pos = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("trackcrossing_pos")));
+    //TH1F *h_trackcrossing_neg = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("trackcrossing_neg")));
     TH1F *h_ntrack_isfromvtx_pos = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("ntrack_isfromvtx_pos")));
     TH1F *h_ntrack_isfromvtx_neg = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("ntrack_isfromvtx_neg")));
 
@@ -146,12 +155,62 @@ int TpcSeedsDraw::DrawTrackletInfo()
     TC[0]->Clear("D");
 
     Pad[0][0]->cd();
-    if (h_ntrack1d)
+    if (h_ntrack1d && h_ntrack1d_pos && h_ntrack1d_neg)
     {
         h_ntrack1d->SetTitle("Number of tpc tracks");
         h_ntrack1d->SetXTitle("Number of tpc tracks");
         h_ntrack1d->SetYTitle("Entries");
-        h_ntrack1d->DrawCopy();
+        h_ntrack1d->SetMarkerColor(kBlack);
+        h_ntrack1d->SetLineColor(kBlack);
+        auto ymax = h_ntrack1d->GetMaximum();
+        auto ymax_pos = h_ntrack1d_pos->GetMaximum();
+        auto ymax_neg = h_ntrack1d_neg->GetMaximum();
+        h_ntrack1d->SetMaximum(1.2*std::max({ymax, ymax_pos, ymax_neg}));
+        h_ntrack1d->DrawCopy("");
+        h_ntrack1d_pos->SetMarkerColor(kRed);
+        h_ntrack1d_pos->SetLineColor(kRed);
+        h_ntrack1d_pos->DrawCopy("same");
+        h_ntrack1d_neg->SetMarkerColor(kBlue);
+        h_ntrack1d_neg->SetLineColor(kBlue);
+        h_ntrack1d_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_ntrack1d, "Positive + Negative", "pl");
+        legend->AddEntry(h_ntrack1d_pos, "Positive charged", "pl");
+        legend->AddEntry(h_ntrack1d_neg, "Negative charged", "pl");
+        legend->Draw();
+        gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+        // histogram is missing
+        return -1;
+    }
+
+    Pad[0][1]->cd();
+    Pad[0][1]->SetLogy(1);
+    if (h_ntrack1d_ptg1 && h_ntrack1d_ptg1_pos && h_ntrack1d_ptg1_neg)
+    {
+        h_ntrack1d_ptg1->SetTitle("Number of tpc tracks with p_{T}>1GeV");
+        h_ntrack1d_ptg1->SetXTitle("Number of tpc tracks");
+        h_ntrack1d_ptg1->SetYTitle("Entries");
+        h_ntrack1d_ptg1->SetMarkerColor(kBlack);
+        h_ntrack1d_ptg1->SetLineColor(kBlack);
+        auto ymax = h_ntrack1d_ptg1->GetMaximum();
+        auto ymax_pos = h_ntrack1d_ptg1_pos->GetMaximum();
+        auto ymax_neg = h_ntrack1d_ptg1_neg->GetMaximum();
+        h_ntrack1d_ptg1->SetMaximum(1.2*std::max({ymax, ymax_pos, ymax_neg}));
+        h_ntrack1d_ptg1->DrawCopy("");
+        h_ntrack1d_ptg1_pos->SetMarkerColor(kRed);
+        h_ntrack1d_ptg1_pos->SetLineColor(kRed);
+        h_ntrack1d_ptg1_pos->DrawCopy("same");
+        h_ntrack1d_ptg1_neg->SetMarkerColor(kBlue);
+        h_ntrack1d_ptg1_neg->SetLineColor(kBlue);
+        h_ntrack1d_ptg1_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_ntrack1d_ptg1, "Positive + Negative", "pl");
+        legend->AddEntry(h_ntrack1d_ptg1_pos, "Positive charged", "pl");
+        legend->AddEntry(h_ntrack1d_ptg1_neg, "Negative charged", "pl");
+        legend->Draw();
         gPad->SetRightMargin(0.15);
     }
     else
@@ -161,12 +220,30 @@ int TpcSeedsDraw::DrawTrackletInfo()
     }
 
     Pad[0][2]->cd();
-    if (h_ntrack1d_pos)
+    Pad[0][2]->SetLogy(1);
+    if (h_pt && h_pt_pos && h_pt_neg)
     {
-        h_ntrack1d_pos->SetTitle("Number of positive tpc tracks");
-        h_ntrack1d_pos->SetXTitle("Number of positive tpc tracks");
-        h_ntrack1d_pos->SetYTitle("Entries");
-        h_ntrack1d_pos->DrawCopy();
+        h_pt->SetTitle("p_{T} distribution for p_{T}>1GeV tracks");
+        h_pt->SetXTitle("p_{T} (GeV)");
+        h_pt->SetYTitle("Entries");
+        h_pt->SetMarkerColor(kBlack);
+        h_pt->SetLineColor(kBlack);
+        auto ymax = h_pt->GetMaximum();
+        auto ymax_pos = h_pt_pos->GetMaximum();
+        auto ymax_neg = h_pt_neg->GetMaximum();
+        h_pt->SetMaximum(1.2*std::max({ymax, ymax_pos, ymax_neg}));
+        h_pt->DrawCopy("");
+        h_pt_pos->SetMarkerColor(kRed);
+        h_pt_pos->SetLineColor(kRed);
+        h_pt_pos->DrawCopy("same");
+        h_pt_neg->SetMarkerColor(kBlue);
+        h_pt_neg->SetLineColor(kBlue);
+        h_pt_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_pt, "Positive + Negative", "pl");
+        legend->AddEntry(h_pt_pos, "Positive charged", "pl");
+        legend->AddEntry(h_pt_neg, "Negative charged", "pl");
+        legend->Draw();
         gPad->SetRightMargin(0.15);
     }
     else
@@ -175,27 +252,40 @@ int TpcSeedsDraw::DrawTrackletInfo()
         return -1;
     }
 
+/*
     Pad[0][3]->cd();
-    if (h_ntrack1d_neg)
+    if (h_trackcrossing_pos && h_trackcrossing_neg)
     {
-        h_ntrack1d_neg->SetTitle("Number of negative tpc tracks");
-        h_ntrack1d_neg->SetXTitle("Number of negative tpc tracks");
-        h_ntrack1d_neg->SetYTitle("Entries");
-        h_ntrack1d_neg->DrawCopy();
-        gPad->SetRightMargin(0.15);
+        h_trackcrossing_pos->SetXTitle("Track crossing");
+        h_trackcrossing_pos->SetYTitle("Entries");
+        h_trackcrossing_pos->SetMarkerColor(kRed);
+        h_trackcrossing_pos->SetLineColor(kRed);
+        auto ymax_pos = h_trackcrossing_pos->GetMaximum();
+        auto ymax_neg = h_trackcrossing_neg->GetMaximum();
+        h_trackcrossing_pos->SetMaximum(1.2*std::max({ymax_pos, ymax_neg}));
+        h_trackcrossing_pos->DrawCopy();
+        h_trackcrossing_neg->SetMarkerColor(kBlue);
+        h_trackcrossing_neg->SetLineColor(kBlue);
+        h_trackcrossing_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_trackcrossing_pos, "Positive charged", "pl");
+        legend->AddEntry(h_trackcrossing_neg, "Negative charged", "pl");
+        legend->Draw();
+        gPad->SetRightMargin(0.17);
     }
     else
     {
         // histogram is missing
         return -1;
     }
+*/
 
     Pad[0][4]->cd();
     if (h_ntrack_pos)
     {
         h_ntrack_pos->SetXTitle("#eta");
         h_ntrack_pos->SetYTitle("#phi [rad]");
-        h_ntrack_pos->SetZTitle("Number of positive tracks");
+        h_ntrack_pos->SetZTitle("Number of positive tracks with p_{T}>1GeV");
         h_ntrack_pos->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
@@ -210,7 +300,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
     {
         h_ntrack_neg->SetXTitle("#eta");
         h_ntrack_neg->SetYTitle("#phi [rad]");
-        h_ntrack_neg->SetZTitle("Number of negative tracks");
+        h_ntrack_neg->SetZTitle("Number of negative tracks with p_{T}>1GeV");
         h_ntrack_neg->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
@@ -221,34 +311,6 @@ int TpcSeedsDraw::DrawTrackletInfo()
     }
 
     Pad[0][6]->cd();
-    if (h_trackcrossing_pos)
-    {
-        h_trackcrossing_pos->SetXTitle("Positive track crossing");
-        h_trackcrossing_pos->SetYTitle("Entries");
-        h_trackcrossing_pos->DrawCopy();
-        gPad->SetRightMargin(0.17);
-    }
-    else
-    {
-        // histogram is missing
-        return -1;
-    }
-
-    Pad[0][7]->cd();
-    if (h_trackcrossing_neg)
-    {
-        h_trackcrossing_neg->SetXTitle("Negative track crossing");
-        h_trackcrossing_neg->SetYTitle("Entries");
-        h_trackcrossing_neg->DrawCopy();
-        gPad->SetRightMargin(0.17);
-    }
-    else
-    {
-        // histogram is missing
-        return -1;
-    }
-
-    Pad[0][8]->cd();
     if (h_ntrack_isfromvtx_pos)
     {
         h_ntrack_isfromvtx_pos->SetTitle("Is positive track from a vertex");
@@ -265,7 +327,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
         return -1;
     }
 
-    Pad[0][9]->cd();
+    Pad[0][7]->cd();
     if (h_ntrack_isfromvtx_neg)
     {
         h_ntrack_isfromvtx_neg->SetTitle("Is negative track from a vertex");
@@ -321,12 +383,24 @@ int TpcSeedsDraw::DrawClusterInfo()
     TC[1]->Clear("D");
 
     Pad[1][0]->cd();
-    if (h_ntpc_pos)
+    if (h_ntpc_pos && h_ntpc_neg)
     {
-        h_ntpc_pos->SetTitle("Number of TPC clusters per positive track");
-        h_ntpc_pos->SetXTitle("Number of TPC clusters per positive track");
+        h_ntpc_pos->SetTitle("Number of TPC clusters for track with p_{T}>1GeV");
+        h_ntpc_pos->SetXTitle("Number of TPC clusters");
         h_ntpc_pos->SetYTitle("Entries");
-        h_ntpc_pos->DrawCopy("colz");
+        h_ntpc_pos->SetMarkerColor(kRed);
+        h_ntpc_pos->SetLineColor(kRed);
+        auto ymax_pos = h_ntpc_pos->GetMaximum();
+        auto ymax_neg = h_ntpc_neg->GetMaximum();
+        h_ntpc_pos->SetMaximum(1.2*std::max({ymax_pos, ymax_neg}));
+        h_ntpc_pos->DrawCopy("");
+        h_ntpc_neg->SetMarkerColor(kBlue);
+        h_ntpc_neg->SetLineColor(kBlue);
+        h_ntpc_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_ntpc_pos, "Positive charged", "pl");
+        legend->AddEntry(h_ntpc_neg, "Negative charged", "pl");
+        legend->Draw();
         gPad->SetRightMargin(0.15);
     }
     else
@@ -336,12 +410,24 @@ int TpcSeedsDraw::DrawClusterInfo()
     }
 
     Pad[1][1]->cd();
-    if (h_ntpc_neg)
+    if (h_ntpot_pos && h_ntpot_neg)
     {
-        h_ntpc_neg->SetTitle("Number of TPC clusters per negative track");
-        h_ntpc_neg->SetXTitle("Number of TPC clusters per negative track");
-        h_ntpc_neg->SetYTitle("Entries");
-        h_ntpc_neg->DrawCopy("colz");
+        h_ntpot_pos->SetTitle("Number of TPOT clusters for track with p_{T}>1GeV");
+        h_ntpot_pos->SetXTitle("Number of TPOT clusters");
+        h_ntpot_pos->SetYTitle("Entries");
+        h_ntpot_pos->SetMarkerColor(kRed);
+        h_ntpot_pos->SetLineColor(kRed);
+        auto ymax_pos = h_ntpot_pos->GetMaximum();
+        auto ymax_neg = h_ntpot_neg->GetMaximum();
+        h_ntpot_pos->SetMaximum(1.2*std::max({ymax_pos, ymax_neg}));
+        h_ntpot_pos->DrawCopy("");
+        h_ntpot_neg->SetMarkerColor(kBlue);
+        h_ntpot_neg->SetLineColor(kBlue);
+        h_ntpot_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_ntpc_pos, "Positive charged", "pl");
+        legend->AddEntry(h_ntpc_neg, "Negative charged", "pl");
+        legend->Draw();
         gPad->SetRightMargin(0.15);
     }
     else
@@ -351,41 +437,11 @@ int TpcSeedsDraw::DrawClusterInfo()
     }
 
     Pad[1][2]->cd();
-    if (h_ntpot_pos)
-    {
-        h_ntpot_pos->SetTitle("Number of TPOT clusters per positive track");
-        h_ntpot_pos->SetXTitle("Number of TPOT clusters per positive track");
-        h_ntpot_pos->SetYTitle("Entries");
-        h_ntpot_pos->DrawCopy("colz");
-        gPad->SetRightMargin(0.15);
-    }
-    else
-    {
-        // histogram is missing
-        return -1;
-    }
-
-    Pad[1][3]->cd();
-    if (h_ntpot_neg)
-    {
-        h_ntpot_neg->SetTitle("Number of TPOT clusters per negative track");
-        h_ntpot_neg->SetXTitle("Number of TPOT clusters per negative track");
-        h_ntpot_neg->SetYTitle("Entries");
-        h_ntpot_neg->DrawCopy("colz");
-        gPad->SetRightMargin(0.15);
-    }
-    else
-    {
-        // histogram is missing
-        return -1;
-    }
-
-    Pad[1][4]->cd();
     if (h_avgnclus_eta_phi_pos)
     {
         h_avgnclus_eta_phi_pos->SetXTitle("#eta");
         h_avgnclus_eta_phi_pos->SetYTitle("#phi [rad]");
-        h_avgnclus_eta_phi_pos->SetZTitle("Average number of clusters per positive track");
+        h_avgnclus_eta_phi_pos->SetZTitle("Average number of clusters per positive track with p_{T}>1GeV");
         h_avgnclus_eta_phi_pos->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
@@ -395,12 +451,12 @@ int TpcSeedsDraw::DrawClusterInfo()
         return -1;
     }
 
-    Pad[1][5]->cd();
+    Pad[1][3]->cd();
     if (h_avgnclus_eta_phi_neg)
     {
         h_avgnclus_eta_phi_neg->SetXTitle("#eta");
         h_avgnclus_eta_phi_neg->SetYTitle("#phi [rad]");
-        h_avgnclus_eta_phi_neg->SetZTitle("Average number of clusters per negative track");
+        h_avgnclus_eta_phi_neg->SetZTitle("Average number of clusters per negative track with p_{T}>1GeV");
         h_avgnclus_eta_phi_neg->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
@@ -410,28 +466,25 @@ int TpcSeedsDraw::DrawClusterInfo()
         return -1;
     }
 
-    Pad[1][6]->cd();
-    if (h_cluster_phisize1_fraction_pos)
+    Pad[1][4]->cd();
+    if (h_cluster_phisize1_fraction_pos && h_cluster_phisize1_fraction_neg)
     {
-        h_cluster_phisize1_fraction_pos->SetTitle("Fraction of TPC clusters per positive track with phi size of 1");
-        h_cluster_phisize1_fraction_pos->SetXTitle("Fraction of TPC clusters per positive track with phi size of 1");
+        h_cluster_phisize1_fraction_pos->SetTitle("Fraction of TPC clusters per p_{T}>1GeV track with phi size of 1");
+        h_cluster_phisize1_fraction_pos->SetXTitle("Fraction of TPC clusters per p_{T}>1GeV track with phi size of 1");
         h_cluster_phisize1_fraction_pos->SetYTitle("Entries");
+        h_cluster_phisize1_fraction_pos->SetMarkerColor(kRed);
+        h_cluster_phisize1_fraction_pos->SetLineColor(kRed);
+        auto ymax_pos = h_cluster_phisize1_fraction_pos->GetMaximum();
+        auto ymax_neg = h_cluster_phisize1_fraction_neg->GetMaximum();
+        h_cluster_phisize1_fraction_pos->SetMaximum(1.2*std::max({ymax_pos, ymax_neg}));
         h_cluster_phisize1_fraction_pos->DrawCopy();
-        gPad->SetRightMargin(0.15);
-    }
-    else
-    {
-        // histogram is missing
-        return -1;
-    }
-
-    Pad[1][7]->cd();
-    if (h_cluster_phisize1_fraction_neg)
-    {
-        h_cluster_phisize1_fraction_neg->SetTitle("Fraction of TPC clusters per negative track with phi size of 1");
-        h_cluster_phisize1_fraction_neg->SetXTitle("Fraction of TPC clusters per negative track with phi size of 1");
-        h_cluster_phisize1_fraction_neg->SetYTitle("Entries");
-        h_cluster_phisize1_fraction_neg->DrawCopy();
+        h_cluster_phisize1_fraction_neg->SetMarkerColor(kBlue);
+        h_cluster_phisize1_fraction_neg->SetLineColor(kBlue);
+        h_cluster_phisize1_fraction_neg->DrawCopy("same");
+        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        legend->AddEntry(h_ntpc_pos, "Positive charged", "pl");
+        legend->AddEntry(h_ntpc_neg, "Negative charged", "pl");
+        legend->Draw();
         gPad->SetRightMargin(0.15);
     }
     else
@@ -625,7 +678,7 @@ int TpcSeedsDraw::DrawVertexInfo()
     TH2F *h_vx_vy = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("vx_vy")));
     TH1F *h_vz = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("vz")));
     TH1F *h_vt = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("vt")));
-    TH1F *h_vcrossing = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("vertexcrossing")));
+    //TH1F *h_vcrossing = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("vertexcrossing")));
     TH1F *h_vchi2dof = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("vertexchi2dof")));
     TH1F *h_ntrackpervertex = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("ntrackspervertex")));
 
@@ -692,6 +745,7 @@ int TpcSeedsDraw::DrawVertexInfo()
         return -1;
     }
 
+/*
     Pad[3][4]->cd();
     if (h_vcrossing)
     {
@@ -705,8 +759,9 @@ int TpcSeedsDraw::DrawVertexInfo()
         // histogram is missing
         return -1;
     }
+*/
 
-    Pad[3][5]->cd();
+    Pad[3][4]->cd();
     if (h_vchi2dof)
     {
         h_vchi2dof->SetXTitle("Vertex #chi2/ndof");
@@ -720,7 +775,7 @@ int TpcSeedsDraw::DrawVertexInfo()
         return -1;
     }
 
-    Pad[3][6]->cd();
+    Pad[3][5]->cd();
     if (h_ntrackpervertex)
     {
         h_ntrackpervertex->SetXTitle("Number of tracks per vertex");
