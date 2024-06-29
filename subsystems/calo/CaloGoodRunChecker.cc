@@ -154,12 +154,15 @@ bool CaloGoodRunChecker::CemcGoodRun()
     /* return false; */
     failed_check = true;
   }
+  // remove vertex width cut -- not actually useful
+  /*
   float MAXVTXZSIGMA = 20.0;
   if (vtxz_sigma > MAXVTXZSIGMA)
   {
-    /* return false; */
+    // return false;
     failed_check = true;
   }
+  */
 
   // Passed all requirements
   if (failed_check) return false;
