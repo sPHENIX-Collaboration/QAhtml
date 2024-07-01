@@ -2,6 +2,13 @@
 #include <emcnoisytowerfinder/emcNoisyTowerFinder.h>
 #include <qahtml/QADrawClient.h>
 
+#include <odbc++/connection.h>
+#include <odbc++/drivermanager.h>
+#include <odbc++/errorhandler.h>
+#include <odbc++/preparedstatement.h>
+#include <odbc++/resultset.h>
+#include <odbc++/types.h>
+
 #include <TCanvas.h>
 #include <TPad.h>
 #include <TH1.h>
@@ -238,6 +245,59 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary(bool cemc_goodrun)
 
   canvas->Update();
   return canvas;
+}
+
+void CaloGoodRunChecker::CemcWriteDB(bool isGood)
+{
+  // if the run is bad, don't do anything. just keep the default DB --> "bad"
+  if (!isGood)
+  {
+    return;
+  }
+
+  QADrawClient *cl = QADrawClient::instance();
+  int runno = cl->RunNumber();
+  delete cl;
+
+  std::string server = "sphnxproddbmaster";
+  std::string database = "Production";
+  std::string username = "phnxro";
+  std::string password = "";
+  
+  odbc::Connection* con = nullptr;
+  odbc::Statement* query = nullptr;
+  odbc::ResultSet* rs = nullptr;
+  std::ostringstream cmd;
+
+  try
+  {
+    con = odbc::DriverManager::getConnection(database.c_str(), username.c_str(), password.c_str());
+  }
+  catch (odbc::SQLException& e)
+  {
+    std::cout << "Exception caught during DriverManager::getConnection" << std::endl;
+    std::cout << "Message: " << e.getMessage() << std::endl;
+    delete con;
+    return;
+  }
+
+  query = con->createStatement();
+  cmd << Form(" UPDATE goodruns SET emcal = (%s, %s) WHERE runnumber = %d ", "GOLDEN", "Greg's write test worked!", runno);
+  try
+  {
+    rs = query->executeQuery(cmd.str());
+  }
+  catch (odbc::SQLException& e)
+  {
+    std::cout << "Exception caught" << std::endl;
+    std::cout << "Message: " << e.getMessage() << std::endl;
+  }
+
+  con->commit();
+  delete rs;
+  delete query;
+  delete con;
+  return;
 }
 
 void CaloGoodRunChecker::myText(double x, double y, int color, const char *text, double tsize)

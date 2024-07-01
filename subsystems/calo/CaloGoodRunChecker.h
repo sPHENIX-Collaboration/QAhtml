@@ -19,6 +19,7 @@ class CaloGoodRunChecker
   void DeleteHotColdDeadMaps();
   bool CemcGoodRun();
   TCanvas* CemcMakeSummary(bool cemc_goodrun=false);
+  void CemcWriteDB(bool isGood=false);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
 
   std::string histfile = "";
