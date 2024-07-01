@@ -60,8 +60,6 @@ void CaloGoodRunChecker::DeleteHotColdDeadMaps()
 
 bool CaloGoodRunChecker::CemcGoodRun()
 {
-  bool failed_check = false;
-
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
@@ -78,8 +76,7 @@ bool CaloGoodRunChecker::CemcGoodRun()
   int MINEVENTS = 100000;
   if (n_events < MINEVENTS)
   {
-    /* return false; */
-    failed_check = true;
+    cemc_fails_events = true;
   }
 
   // Bad towers
@@ -99,14 +96,12 @@ bool CaloGoodRunChecker::CemcGoodRun()
   int MAXHOTTOWERS = 100;
   if (cemc_hot_towers > MAXHOTTOWERS)
   {
-    /* return false; */
-    failed_check = true;
+    cemc_fails_badtowers = true;
   }
   int MAXCOLDDEADTOWERS = 500;
   if ((cemc_cold_towers + cemc_dead_towers) > MAXCOLDDEADTOWERS)
   {
-    /* return false; */
-    failed_check = true;
+    cemc_fails_badtowers = true;
   }
 
   // Hit timing
@@ -132,14 +127,12 @@ bool CaloGoodRunChecker::CemcGoodRun()
   float MAXTIMEMEAN = 1.0;
   if ((cemc_time_mean < MINTIMEMEAN) || (cemc_time_mean > MAXTIMEMEAN))
   {
-    /* return false; */
-    failed_check = true;
+    cemc_fails_timing = true;
   }
   float MAXTIMESIGMA = 2.0;
   if (cemc_time_sigma > MAXTIMESIGMA)
   {
-    /* return false; */
-    failed_check = true;
+    cemc_fails_timing = true;
   }
 
   // MBD vertex
@@ -151,20 +144,18 @@ bool CaloGoodRunChecker::CemcGoodRun()
   float MAXABSVTXZ = 5.0;
   if (abs(vtxz_mean) > MAXABSVTXZ)
   {
-    /* return false; */
-    failed_check = true;
+    cemc_fails_vertex = true;
   }
   // remove vertex width cut -- not actually useful
   /*
   float MAXVTXZSIGMA = 20.0;
   if (vtxz_sigma > MAXVTXZSIGMA)
   {
-    // return false;
-    failed_check = true;
+    cemc_fails_vertex = true;
   }
   */
 
-  // Passed all requirements
+  bool failed_check = (cemc_fails_events || cemc_fails_badtowers || cemc_fails_timing || cemc_fails_vertex);
   if (failed_check) return false;
   else return true;
 }
@@ -193,9 +184,41 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary(bool cemc_goodrun)
   }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
+  if (cemc_fails_events)
+  {
+    myText(0.8, 0.55, kRed, "(bad)");
+  }
+  else
+  {
+    myText(0.8, 0.55, kGreen, "(good)");
+  }
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", cemc_dead_towers, cemc_hot_towers, cemc_cold_towers));
+  if (cemc_fails_badtowers)
+  {
+    myText(0.8, 0.50, kRed, "(bad)");
+  }
+  else
+  {
+    myText(0.8, 0.50, kGreen, "(good)");
+  }
   myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
+  if (cemc_fails_timing)
+  {
+    myText(0.8, 0.45, kRed, "(bad)");
+  }
+  else
+  {
+    myText(0.8, 0.45, kGreen, "(good)");
+  }
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+  if (cemc_fails_vertex)
+  {
+    myText(0.8, 0.40, kRed, "(bad)");
+  }
+  else
+  {
+    myText(0.8, 0.40, kGreen, "(good)");
+  }
 
   // add the run number title
   TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);

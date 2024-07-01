@@ -30,6 +30,10 @@ class CaloGoodRunChecker
   TH2* ohcal_hcdmap = nullptr;
 
   int n_events= 0;
+  bool cemc_fails_events = false;
+  bool cemc_fails_badtowers = false;
+  bool cemc_fails_timing = false;
+  bool cemc_fails_vertex = false;
   int cemc_hot_towers = 999999;
   int cemc_cold_towers = 999999;
   int cemc_dead_towers = 999999;
