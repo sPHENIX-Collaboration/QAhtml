@@ -27,6 +27,10 @@ void draw_calo(const std::string &rootfile) {
   delete cl;
   ch->DeleteHotColdDeadMaps();
 
+  // Write good/bad run status to triage database
+  // (don't actually do this yet -- 7/1/24)
+  // ch->CemcWriteDB(cemc_isgood);
+
   gSystem->Exit(0);
   return ;
 }

@@ -4,7 +4,8 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -isystem$(OFFLINE_MAIN)/include \
   -isystem$(OFFLINE_MAIN)/rootmacros \
-  -isystem$(ROOTSYS)/include 
+  -isystem$(ROOTSYS)/include \
+  -isystem$(OPT_SPHENIX)/include
 
 lib_LTLIBRARIES = \
   libqadrawcalo.la
@@ -14,7 +15,8 @@ libqadrawcalo_la_LIBADD = \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
   -lqadrawdb \
-  -lemcNoisyTowerFinder
+  -lemcNoisyTowerFinder \
+  -lodbc++
 
 caloincludedir=$(pkgincludedir)/calo
 
