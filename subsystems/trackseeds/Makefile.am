@@ -4,7 +4,8 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -isystem$(OFFLINE_MAIN)/include \
   -isystem$(OFFLINE_MAIN)/rootmacros \
-  -isystem$(ROOTSYS)/include 
+  -isystem$(ROOTSYS)/include \
+  -isystem$(OPT_SPHENIX)/include
 
 lib_LTLIBRARIES = \
   libqadrawsiliconseeds.la \
@@ -14,7 +15,8 @@ libqadrawsiliconseeds_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb
+  -lqadrawdb \
+  -lodbc++
 
 libqadrawtpcseeds_la_LIBADD = \
   -L$(libdir) \
@@ -26,13 +28,15 @@ siliconseedsincludedir=$(pkgincludedir)/trackseeds
 tpcseedsincludedir=$(pkgincludedir)/trackseeds
 
 siliconseedsinclude_HEADERS = \
-  SiliconSeedsDraw.h
+  SiliconSeedsDraw.h \
+  SiSeedsGoodRunChecker.h
 
 tpcseedsinclude_HEADERS = \
   TpcSeedsDraw.h
 
 libqadrawsiliconseeds_la_SOURCES = \
-  SiliconSeedsDraw.cc
+  SiliconSeedsDraw.cc \
+  SiSeedsGoodRunChecker.cc
 
 libqadrawtpcseeds_la_SOURCES = \
   TpcSeedsDraw.cc
