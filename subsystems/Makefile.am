@@ -11,6 +11,6 @@ SUBDIRS = \
   intt \
   micromegas \
   mvtx \
-  tpc \
-  vertex \
-  trackseeds
+  siliconseeds \
+  tpcseeds \
+  vertex

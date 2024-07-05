@@ -7,8 +7,7 @@ AM_CPPFLAGS = \
   -isystem$(ROOTSYS)/include 
 
 lib_LTLIBRARIES = \
-  libqadrawsiliconseeds.la \
-  libqadrawtpcseeds.la
+  libqadrawsiliconseeds.la
 
 libqadrawsiliconseeds_la_LIBADD = \
   -L$(libdir) \
@@ -16,26 +15,13 @@ libqadrawsiliconseeds_la_LIBADD = \
   -lqadrawclient \
   -lqadrawdb
 
-libqadrawtpcseeds_la_LIBADD = \
-  -L$(libdir) \
-  -L$(OFFLINE_MAIN)/lib \
-  -lqadrawclient \
-  -lqadrawdb
-
-siliconseedsincludedir=$(pkgincludedir)/trackseeds
-tpcseedsincludedir=$(pkgincludedir)/trackseeds
+siliconseedsincludedir=$(pkgincludedir)/siliconseeds
 
 siliconseedsinclude_HEADERS = \
   SiliconSeedsDraw.h
 
-tpcseedsinclude_HEADERS = \
-  TpcSeedsDraw.h
-
 libqadrawsiliconseeds_la_SOURCES = \
   SiliconSeedsDraw.cc
-
-libqadrawtpcseeds_la_SOURCES = \
-  TpcSeedsDraw.cc
 
 noinst_PROGRAMS = \
   testexternals
@@ -44,8 +30,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libqadrawsiliconseeds.la \
-  libqadrawtpcseeds.la
+  libqadrawsiliconseeds.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@
