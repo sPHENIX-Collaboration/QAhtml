@@ -30,9 +30,10 @@ AC_CONFIG_FILES([
   subsystems/intt/Makefile
   subsystems/micromegas/Makefile
   subsystems/mvtx/Makefile
+  subsystems/siliconseeds/Makefile
   subsystems/tpc/Makefile
+  subsystems/tpcseeds/Makefile
   subsystems/vertex/Makefile
-  subsystems/trackseeds/Makefile
 ])
 
 AC_OUTPUT
