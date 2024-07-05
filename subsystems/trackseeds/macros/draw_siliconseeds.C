@@ -12,7 +12,9 @@ void draw_siliconseeds(const std::string &rootfile) {
   cl->registerDrawer(ex);
 
   SiSeedsGoodRunChecker* ch = new SiSeedsGoodRunChecker();
-  TCanvas* siseeds_summ = ch->SiSeedsMakeSummary(true); // TESTING
+  ch->SetHistfile(rootfile);
+  bool siseeds_isgood = ch->SiSeedsGoodRun();
+  TCanvas* siseeds_summ = ch->SiSeedsMakeSummary(siseeds_isgood); // TESTING
   ex->SetSiSeedsSummary(siseeds_summ);
 
   cl->ReadHistogramsFromFile(rootfile);
