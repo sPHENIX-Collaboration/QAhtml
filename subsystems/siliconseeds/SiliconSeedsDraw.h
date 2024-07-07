@@ -13,6 +13,7 @@ class TPad;
 class TH1F;
 class TH2F;
 class TProfile2D;
+class TStyle;
 
 class SiliconSeedsDraw : public QADraw
 {
@@ -23,15 +24,22 @@ class SiliconSeedsDraw : public QADraw
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
+  void SetSiSeedsSummary(int run, TCanvas* c);
 
  private:
   int MakeCanvas(const std::string &name, int num);
-  int DrawTrackletInfo();
+  int DrawTrackBasicInfo();
+  int DrawTrackDCAInfo();
+  int DrawTrackQualityInfo();
+  int DrawTrackChargeInfo();
   int DrawVertexInfo();
-  TCanvas *TC[2]{};
-  TPad *transparent[2]{};
-  TPad *Pad[2][12]{};
+  int DrawVertexQualityInfo();
+  TCanvas *TC[6]{};
+  TPad *transparent[6]{};
+  TPad *Pad[6][6]{};
   const char *histprefix;
+  // Summary
+  TCanvas* siseedsSummary = nullptr;
 };
 
 #endif

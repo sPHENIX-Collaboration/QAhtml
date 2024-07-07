@@ -4,7 +4,8 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -isystem$(OFFLINE_MAIN)/include \
   -isystem$(OFFLINE_MAIN)/rootmacros \
-  -isystem$(ROOTSYS)/include 
+  -isystem$(ROOTSYS)/include \
+  -isystem$(OPT_SPHENIX)/include
 
 lib_LTLIBRARIES = \
   libqadrawsiliconseeds.la
@@ -13,15 +14,20 @@ libqadrawsiliconseeds_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb
+  -lqadrawdb \
+  -lodbc++
 
 siliconseedsincludedir=$(pkgincludedir)/siliconseeds
 
 siliconseedsinclude_HEADERS = \
-  SiliconSeedsDraw.h
+  SiliconSeedsDraw.h \
+  SiSeedsGoodRunChecker.h \ 
+  OfflineQAKSTest.h
 
 libqadrawsiliconseeds_la_SOURCES = \
-  SiliconSeedsDraw.cc
+  SiliconSeedsDraw.cc \
+  SiSeedsGoodRunChecker.cc \
+  OfflineQAKSTest.cc
 
 noinst_PROGRAMS = \
   testexternals
