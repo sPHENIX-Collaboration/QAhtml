@@ -1,3 +1,4 @@
+// Author: Tanner Mengel
 #include "OfflineQAKSTest.h"
 
 #include <TFile.h>

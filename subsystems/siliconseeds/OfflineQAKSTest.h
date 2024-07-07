@@ -1,3 +1,4 @@
+// Author: Tanner Mengel
 #ifndef OFFLINEQAKSTEST_H
 #define OFFLINEQAKSTEST_H
 
