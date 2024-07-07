@@ -13,6 +13,7 @@ class TPad;
 class TH1F;
 class TH2F;
 class TProfile2D;
+class TStyle;
 
 class SiliconSeedsDraw : public QADraw
 {
@@ -23,7 +24,7 @@ class SiliconSeedsDraw : public QADraw
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
-  void SetSiSeedsSummary(TCanvas* c);
+  void SetSiSeedsSummary(int run, TCanvas* c);
 
  private:
   int MakeCanvas(const std::string &name, int num);

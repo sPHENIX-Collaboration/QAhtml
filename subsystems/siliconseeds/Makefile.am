@@ -4,7 +4,7 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -isystem$(OFFLINE_MAIN)/include \
   -isystem$(OFFLINE_MAIN)/rootmacros \
-  -isystem$(ROOTSYS)/include 
+  -isystem$(ROOTSYS)/include \
   -isystem$(OPT_SPHENIX)/include
 
 lib_LTLIBRARIES = \
@@ -21,11 +21,13 @@ siliconseedsincludedir=$(pkgincludedir)/siliconseeds
 
 siliconseedsinclude_HEADERS = \
   SiliconSeedsDraw.h \
-  SiSeedsGoodRunChecker.h
+  SiSeedsGoodRunChecker.h \ 
+  OfflineQAKSTest.h
 
 libqadrawsiliconseeds_la_SOURCES = \
   SiliconSeedsDraw.cc \
-  SiSeedsGoodRunChecker.cc
+  SiSeedsGoodRunChecker.cc \
+  OfflineQAKSTest.cc
 
 noinst_PROGRAMS = \
   testexternals

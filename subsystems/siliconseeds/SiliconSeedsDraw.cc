@@ -48,6 +48,7 @@ SiliconSeedsDraw::~SiliconSeedsDraw()
 
 int SiliconSeedsDraw::Draw(const std::string &what)
 {
+    gStyle->SetPaintTextFormat(".3g");
     int iret = 0;
     int idraw = 0;
     if (what == "ALL" || what == "TRACKLET")
@@ -166,8 +167,9 @@ int SiliconSeedsDraw::DrawTrackBasicInfo()
         h_nmaps_nintt->SetXTitle("Number of MVTX clusters");
         h_nmaps_nintt->SetYTitle("Number of INTT clusters");
         h_nmaps_nintt->SetZTitle("Fraction");
+        h_nmaps_nintt->SetMarkerSize(2.0);
         h_nmaps_nintt->Scale(1. / h_nmaps_nintt->Integral());
-        h_nmaps_nintt->DrawCopy("colztext");
+        h_nmaps_nintt->DrawCopy("colztext45");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -681,16 +683,12 @@ int SiliconSeedsDraw::DBVarInit()
     return 0;
 }
 
-void SiliconSeedsDraw::SetSiSeedsSummary(TCanvas *c)
+void SiliconSeedsDraw::SetSiSeedsSummary(int runnumber, TCanvas *c)
 {
-    if (!c)
-    {
-        return;
-    }
     siseedsSummary = c;
     siseedsSummary->cd();
     // add the run number title
-    QADrawClient *cl = QADrawClient::instance();
+    // QADrawClient *cl = QADrawClient::instance();
     TPad *tr = new TPad("transparent_siseeds", "", 0, 0, 1, 1);
     tr->SetFillStyle(4000);
     tr->Draw();
@@ -701,7 +699,7 @@ void SiliconSeedsDraw::SetSiSeedsSummary(TCanvas *c)
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream;
     std::string runstring;
-    runnostream << Name() << "_SiliconSeeds_summary Run " << cl->RunNumber();
+    runnostream << Name() << "_SiliconSeeds_summary Run " << runnumber;
     runstring = runnostream.str();
     tr->cd();
     PrintRun.DrawText(0.5, 1., runstring.c_str());
