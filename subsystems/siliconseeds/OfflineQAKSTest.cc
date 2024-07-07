@@ -86,7 +86,7 @@ void OfflineQAKSTest::AddHistogramNames(const std::set<std::string> &names)
     return;
 }
 
-TH1D *OfflineQAKSTest::GenKSTestSummary()
+TH1D *OfflineQAKSTest::GenKSTestSummary(const char * option)
 {
     if (m_histogram_names.empty())
     {
@@ -133,7 +133,7 @@ TH1D *OfflineQAKSTest::GenKSTestSummary()
                 return nullptr;
             }
 
-            KS_result = OfflineQAKSTest::KSTest(h1, h2, "D");
+            KS_result = OfflineQAKSTest::KSTest(h1, h2, option);
         }
         else if (cl->InheritsFrom("TH2"))
         {
@@ -145,7 +145,7 @@ TH1D *OfflineQAKSTest::GenKSTestSummary()
                 return nullptr;
             }
 
-            KS_result = OfflineQAKSTest::KSTest(h1, h2, "D");
+            KS_result = OfflineQAKSTest::KSTest(h1, h2, option);
         }
         else if (cl->InheritsFrom("TProfile2D"))
         {
@@ -158,26 +158,105 @@ TH1D *OfflineQAKSTest::GenKSTestSummary()
             }
 
             // convert to TH2
-            TH2D *h1 = p1->ProjectionXY();
-            TH2D *h2 = p2->ProjectionXY();
+            // TH2D * h1 = p1->ProjectionXY();
+            // TH2D * h2 = p2->ProjectionXY();
 
-            KS_result = OfflineQAKSTest::KSTest(h1, h2, "D");
+            // KS_result = OfflineQAKSTest::KSTest(h1, h2, option);
+            KS_result = OfflineQAKSTest::KSTest(p1, p2, option);
         }
         else
         {
             std::cerr << "OfflineQAKSTest: unsupported histogram type for " << name << std::endl;
             return nullptr;
         }
-        std::cout << "KS result for " << name << ": " << KS_result << std::endl;
+
+        if(Verbosity() > 0)
+        {
+            std::cout << "OfflineQAKSTest: KS result for " << name << ": " << KS_result << std::endl;
+        }
+
+        if(KS_result < 0)
+        {
+            std::cerr << "OfflineQAKSTest: KS test failed for " << name << std::endl;
+            return nullptr;
+        }
+
         h->SetBinContent(i, KS_result);
         h->GetXaxis()->SetBinLabel(i, name.c_str());
         i++;
     }
 
+
     h->GetXaxis()->SetLabelSize(0.03);
     h->LabelsOption("v");
 
     return h;
+}
+
+double OfflineQAKSTest::GetHistoScore(const std::string &name, const char * option)
+{
+    double KS_result = 0;
+    // figure out the type of histogram
+    TKey * key = m_inputfileptr->FindKey(name.c_str());
+    if (!key)
+    {
+        std::cerr << "OfflineQAKSTest: could not find histogram " << name << std::endl;
+        return -1;
+    }
+
+    TClass * cl = gROOT->GetClass(key->GetClassName());
+    if (!cl)
+    {
+        std::cerr << "OfflineQAKSTest: could not get class for histogram " << name << std::endl;
+        return -1;
+    }
+
+    // get the histogram
+    if (cl->InheritsFrom("TH1"))
+    {
+        TH1 * h1 = dynamic_cast<TH1 *>(m_inputfileptr->Get(name.c_str()));
+        TH1 * h2 = dynamic_cast<TH1 *>(m_goodrunfileptr->Get(name.c_str()));
+        if (!h1 || !h2)
+        {
+            std::cerr << "OfflineQAKSTest: could not get histograms for " << name << std::endl;
+            return -1;
+        }
+
+        KS_result = OfflineQAKSTest::KSTest(h1, h2, option);
+    }
+    else if (cl->InheritsFrom("TH2"))
+    {
+        TH2 * h1 = dynamic_cast<TH2 *>(m_inputfileptr->Get(name.c_str()));
+        TH2 * h2 = dynamic_cast<TH2 *>(m_goodrunfileptr->Get(name.c_str()));
+        if (!h1 || !h2)
+        {
+            std::cerr << "OfflineQAKSTest: could not get histograms for " << name << std::endl;
+            return -1;
+        }
+
+        KS_result = OfflineQAKSTest::KSTest(h1, h2, option);
+    }
+    else if (cl->InheritsFrom("TProfile2D"))
+    {
+        TProfile2D * p1 = dynamic_cast<TProfile2D *>(m_inputfileptr->Get(name.c_str()));
+        TProfile2D * p2 = dynamic_cast<TProfile2D *>(m_goodrunfileptr->Get(name.c_str()));
+        if (!p1 || !p2)
+        {
+            std::cerr << "OfflineQAKSTest: could not get histograms for " << name << std::endl;
+            return -1;
+        }
+
+        KS_result = OfflineQAKSTest::KSTest(p1, p2, option);
+
+    }
+    else
+    {
+        std::cerr << "OfflineQAKSTest: unsupported histogram type for " << name << std::endl;
+        return -1;
+    }
+
+    return KS_result;
+
 }
 
 template <typename T> double OfflineQAKSTest::KSTest(T *h1, T *h2, const char *options)

@@ -45,7 +45,7 @@ void draw_siliconseeds(const std::string &rootfile) {
   TH1D *hm_kssumary = qakstest->GenKSTestSummary();
 
   SiSeedsGoodRunChecker* ch = new SiSeedsGoodRunChecker();
-  ch->SetKSTestSummary(hm_kssumary);
+  ch->SetKSTestSummary(hm_kssumary, "");
   bool siseeds_isgood = ch->SiSeedsGoodRun();
   TCanvas* siseeds_summ = ch->SiSeedsMakeSummary(cl->ExtractRunNumber(rootfile), siseeds_isgood); 
   ex->SetSiSeedsSummary(cl->ExtractRunNumber(rootfile), siseeds_summ);
