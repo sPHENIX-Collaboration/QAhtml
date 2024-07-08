@@ -27,9 +27,9 @@ if __name__ == "__main__":
                 # print(f'Found production tag 2024p00{tag} in {basename}')
             if not runnum in runinfo:
                 runinfo[runnum] = [runnum, tag, line]
-            else:
+            else: # if runnum already exists, check the tag
                 oldtag = runinfo[runnum][1]
-                if tag > oldtag:
+                if tag > oldtag: # use only the most recent tag
                     runinfo[runnum][1] = tag
                     runinfo[runnum][2] = line
 
