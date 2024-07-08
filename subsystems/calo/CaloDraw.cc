@@ -205,6 +205,7 @@ int CaloDraw::DrawCemc()
     cemc_etaphi->SetYTitle("#it{#phi}_{i} EMCal");
     cemc_etaphi->DrawCopy("COLZ");
     gPad->UseCurrentStyle();
+    gPad->SetLogz();
     gPad->SetRightMargin(0.15);
   }
   Pad[0][2]->cd();

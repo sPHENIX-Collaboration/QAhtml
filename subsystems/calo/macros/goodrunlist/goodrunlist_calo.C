@@ -25,11 +25,13 @@ void goodrunlist_calo(const std::string &rootfile, const std::string goodrunfile
   std::string outstr = "";  // run#, isGood, #events(DB), #events(CaloValid), #dead, #cold, #hot, meantime, sigmatime, meanvtx, sigmavtx
   outstr += (std::to_string(runnum) + ",");
   outstr += (std::to_string(cemc_isgood) + ",");
-  std::string failurepoint = "GoodRun";
-  if (ch->cemc_fails_vertex) failurepoint = "BadVertex";
-  if (ch->cemc_fails_timing) failurepoint = "BadTiming";
-  if (ch->cemc_fails_badtowers) failurepoint = "BadTowers";
-  if (ch->cemc_fails_events) failurepoint = "NotEnoughEvents";
+  std::string failurepoint;
+  if (cemc_isgood) failurepoint = "GoodRun";
+  else failurepoint = "";
+  if (ch->cemc_fails_vertex) failurepoint += "BadVertex";
+  if (ch->cemc_fails_timing) failurepoint += "BadTiming";
+  if (ch->cemc_fails_badtowers) failurepoint += "BadTowers";
+  if (ch->cemc_fails_events) failurepoint += "NotEnoughEvents";
   outstr += failurepoint;
   /* outstr += (std::to_string(n_events_db) + ","); */
   /* outstr += (std::to_string(ch->n_events) + ","); */
