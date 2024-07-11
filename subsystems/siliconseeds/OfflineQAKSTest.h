@@ -16,7 +16,7 @@ class OfflineQAKSTest
    OfflineQAKSTest(const std::string & inputfile, const std::string & goodrunfile = "");
    ~OfflineQAKSTest();
 
-   TH1D * GenKSTestSummary(const char * option = "");
+   TH1D *GenKSTestSummary(const char * option = "");
    void AddHistogramNames(const std::set<std::string> & names);
    double GetHistoScore(const std::string &name, const char * option = "");
 
