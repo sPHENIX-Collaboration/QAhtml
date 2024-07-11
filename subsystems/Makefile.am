@@ -11,6 +11,7 @@ SUBDIRS = \
   intt \
   micromegas \
   mvtx \
+  mvtxrawhit \
   siliconseeds \
   tpcseeds \
   tpc \

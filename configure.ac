@@ -30,6 +30,7 @@ AC_CONFIG_FILES([
   subsystems/intt/Makefile
   subsystems/micromegas/Makefile
   subsystems/mvtx/Makefile
+  subsystems/mvtxrawhit/Makefile
   subsystems/siliconseeds/Makefile
   subsystems/tpc/Makefile
   subsystems/tpcseeds/Makefile
