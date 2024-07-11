@@ -1,5 +1,5 @@
 #include <qahtml/QADrawClient.h>
-#include <qahtml/trackseeds/TpcSeedsDraw.h>
+#include <qahtml/tpcseeds/TpcSeedsDraw.h>
 
 R__LOAD_LIBRARY(libqadrawtpcseeds.so)
 
