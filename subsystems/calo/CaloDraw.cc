@@ -605,7 +605,7 @@ int CaloDraw::DrawZdcMbd()
 
     zdc_Southcalib->SetLineColor(kRed);
     zdc_Southcalib->DrawCopy("same");
-    gPad->SetLogy();
+    // gPad->SetLogy();
 
     myText(0.75, 0.80, kBlue, "North");
     myText(0.65, 0.80, kRed, "South");
@@ -627,14 +627,14 @@ int CaloDraw::DrawZdcMbd()
     gPad->UseCurrentStyle();
 
     TGraph *gr_1n = new TGraph();
-    gr_1n->SetPoint(0, 100, 0);
-    gr_1n->SetPoint(1, 100, 1e7);
+    gr_1n->SetPoint(0, 70, 0);
+    gr_1n->SetPoint(1, 70, 1e7);
     gr_1n->SetLineStyle(7);
     gr_1n->Draw("l");
 
     zdc_Southcalib->Draw("same");
     zdc_Southcalib->SetLineColor(kRed);
-    gPad->SetLogy();
+    // gPad->SetLogy();
 
     myText(0.75, 0.80, kBlue, "North");
     myText(0.65, 0.80, kRed, "South");
