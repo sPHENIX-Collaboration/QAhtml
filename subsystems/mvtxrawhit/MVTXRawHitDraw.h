@@ -26,9 +26,10 @@ class MVTXRawHitDraw : public QADraw
  private:
   int MakeCanvas(const std::string &name, int num);
   int DrawChipInfo();
-  TCanvas *TC[1]{};
-  TPad *transparent[1]{};
-  TPad *Pad[1][6]{};
+  int DrawHitMapInfo();
+  TCanvas *TC[2]{};
+  TPad *transparent[2]{};
+  TPad *Pad[2][6]{};
   const char *histprefix;
 };
 

@@ -55,6 +55,11 @@ int MVTXRawHitDraw::Draw(const std::string &what)
     iret += DrawChipInfo();
     idraw++;
   }
+  if (what == "ALL" || what == "HITMAP")
+  {
+    iret += DrawHitMapInfo();
+    idraw++;
+  }
   if (!idraw)
   {
     std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -73,7 +78,6 @@ int MVTXRawHitDraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("MVTX Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 2.2) , (int) (ysize / 2.2));
   TC[num]->SetCanvasSize(xsize, ysize * 2.2);
   gSystem->ProcessEvents();
-
 
   int nrow = 3;
   double yoffset = 0.02;
@@ -116,80 +120,42 @@ int MVTXRawHitDraw::DrawChipInfo()
   std::cout << "MVTX DrawChipInfo() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
 
-  TH1 *h_nhits_per_chip_layper0 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("nhits_per_chip_layper0")));
-  TH1 *h_nhits_per_chip_layper1 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("nhits_per_chip_layper1")));
-  TH1 *h_nhits_per_chip_layper2 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("nhits_per_chip_layper2")));
-
-  TH1 *h_chipocc_layper0 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("chipocc_layper0")));
-  TH1 *h_chipocc_layper1 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("chipocc_layper1")));
-  TH1 *h_chipocc_layper2 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("chipocc_layper2")));
-
-  TH1 *h_bco = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("bco")));
-  TH1 *h_strobe_bc = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("strobe_bc")));
-  TH1 *h_chip_bc = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("chip_bc")));
+  TH1* h_nhits_layer0 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("nhits_layer0")));
+  TH1* h_nhits_layer1 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("nhits_layer1")));
+  TH1* h_nhits_layer2 = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("nhits_layer2")));
+       
+  TH1* h_bco = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("bco")));
+  TH1* h_strobe_bc = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("strobe_bc")));
+  TH1* h_chip_bc = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("chip_bc")));
 
   if (! gROOT->FindObject("chip_info"))
   {
     MakeCanvas("chip_info", 0);
   }
-  TC[0]->Clear("D");
   Pad[0][0]->cd();
-  if (h_chipocc_layper0 && h_chipocc_layper1 && h_chipocc_layper2)
+  if (h_nhits_layer0 && h_nhits_layer1 && h_nhits_layer2)
   {
-    h_chipocc_layper0->SetTitle("MVTX Chip Occupancy");
-    h_chipocc_layper0->SetXTitle("Chip Occupancy [%]");
-    h_chipocc_layper0->SetYTitle("Entries");
-    h_chipocc_layper0->SetMarkerColor(kRed);
-    h_chipocc_layper0->SetLineColor(kRed);
-    h_chipocc_layper0->GetXaxis()->SetNdivisions(5, kTRUE);
-    auto ymax_l0 = h_chipocc_layper0->GetMaximum();
-    auto ymax_l1 = h_chipocc_layper1->GetMaximum();
-    auto ymax_l2 = h_chipocc_layper2->GetMaximum();
-    h_chipocc_layper0->SetMaximum(1.2*std::max({ymax_l0, ymax_l1, ymax_l2}));
-    h_chipocc_layper0->DrawCopy();
-    h_chipocc_layper1->SetMarkerColor(kBlue);
-    h_chipocc_layper1->SetLineColor(kBlue);
-    h_chipocc_layper1->DrawCopy("same");
-    h_chipocc_layper2->SetMarkerColor(kBlack);
-    h_chipocc_layper2->SetLineColor(kBlack);
-    h_chipocc_layper2->DrawCopy("same");
+    h_nhits_layer0->SetTitle("MVTX Raw Hit Number");
+    h_nhits_layer0->SetXTitle("Hit number");
+    h_nhits_layer0->SetYTitle("Entries");
+    h_nhits_layer0->SetMarkerColor(kRed);
+    h_nhits_layer0->SetLineColor(kRed);
+    auto ymax_l0 = h_nhits_layer0->GetMaximum();
+    auto ymax_l1 = h_nhits_layer1->GetMaximum();
+    auto ymax_l2 = h_nhits_layer2->GetMaximum();
+    h_nhits_layer0->SetMaximum(1.2*std::max({ymax_l0, ymax_l1, ymax_l2}));
+    h_nhits_layer0->DrawCopy();
+    h_nhits_layer1->SetMarkerColor(kBlue);
+    h_nhits_layer1->SetLineColor(kBlue);
+    h_nhits_layer1->DrawCopy("same");
+    h_nhits_layer2->SetMarkerColor(kBlack);
+    h_nhits_layer2->SetLineColor(kBlack);
+    h_nhits_layer2->DrawCopy("same");
     auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
-    legend->AddEntry(h_chipocc_layper0, "Layer0", "pl");
-    legend->AddEntry(h_chipocc_layper1, "Layer1", "pl");
-    legend->AddEntry(h_chipocc_layper2, "Layer2", "pl");
-    legend->Draw();
-    gPad->SetLogy();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-  Pad[0][1]->cd();
-  if (h_nhits_per_chip_layper0 && h_nhits_per_chip_layper1 && h_nhits_per_chip_layper2)
-  {
-    h_nhits_per_chip_layper0->SetTitle("MVTX Raw Hit Number");
-    h_nhits_per_chip_layper0->SetXTitle("Hit number");
-    h_nhits_per_chip_layper0->SetYTitle("Entries");
-    h_nhits_per_chip_layper0->SetMarkerColor(kRed);
-    h_nhits_per_chip_layper0->SetLineColor(kRed);
-    auto ymax_l0 = h_nhits_per_chip_layper0->GetMaximum();
-    auto ymax_l1 = h_nhits_per_chip_layper1->GetMaximum();
-    auto ymax_l2 = h_nhits_per_chip_layper2->GetMaximum();
-    h_nhits_per_chip_layper0->SetMaximum(1.2*std::max({ymax_l0, ymax_l1, ymax_l2}));
-    h_nhits_per_chip_layper0->DrawCopy();
-    h_nhits_per_chip_layper1->SetMarkerColor(kBlue);
-    h_nhits_per_chip_layper1->SetLineColor(kBlue);
-    h_nhits_per_chip_layper1->DrawCopy("same");
-    h_nhits_per_chip_layper2->SetMarkerColor(kBlack);
-    h_nhits_per_chip_layper2->SetLineColor(kBlack);
-    h_nhits_per_chip_layper2->DrawCopy("same");
-    auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
-    legend->AddEntry(h_nhits_per_chip_layper0, "Layer0", "pl");
-    legend->AddEntry(h_nhits_per_chip_layper1, "Layer1", "pl");
-    legend->AddEntry(h_nhits_per_chip_layper2, "Layer2", "pl");
-    legend->Draw();
+    legend->AddEntry(h_nhits_layer0, "Layer0", "pl");
+    legend->AddEntry(h_nhits_layer1, "Layer1", "pl");
+    legend->AddEntry(h_nhits_layer2, "Layer2", "pl");
+    legend->Draw("same");
     gPad->SetLogy();
     gPad->SetRightMargin(0.15);
   }
@@ -199,7 +165,7 @@ int MVTXRawHitDraw::DrawChipInfo()
     return -1;
   }
 
-  Pad[0][2]->cd();
+  Pad[0][1]->cd();
   if (h_bco)
   {
     h_bco->SetTitle("MVTX BCO");
@@ -213,7 +179,7 @@ int MVTXRawHitDraw::DrawChipInfo()
     // histogram is missing
     return -1;
   }
-  Pad[0][3]->cd();
+  Pad[0][2]->cd();
   if (h_strobe_bc)
   {
     h_strobe_bc->SetTitle("MVTX Strobe BC");
@@ -227,7 +193,7 @@ int MVTXRawHitDraw::DrawChipInfo()
     // histogram is missing
     return -1;
   }
-  Pad[0][4]->cd();
+  Pad[0][3]->cd();
   if (h_chip_bc)
   {
     h_chip_bc->SetTitle("MVTX Chip BC");
@@ -249,7 +215,7 @@ int MVTXRawHitDraw::DrawChipInfo()
   PrintRun.SetTextAlign(23); // center/top alignment
   std::ostringstream runnostream1;
   std::string runstring1;
-  runnostream1 << Name() << "_mvtx Info Run " << cl->RunNumber();
+  runnostream1 << Name() << "_mvtx Chip Info Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -259,6 +225,155 @@ int MVTXRawHitDraw::DrawChipInfo()
   std::cout << "DrawChipInfo Ending" << std::endl;
   return 0;
 }
+
+int MVTXRawHitDraw::DrawHitMapInfo()
+{
+  std::cout << "MVTX DrawHitMapInfo() Beginning" << std::endl;
+  QADrawClient *cl = QADrawClient::instance();
+
+  TH2* h_nhits_stave_chip_layer0 = dynamic_cast <TH2 *> (cl->getHisto(histprefix + std::string("nhits_stave_chip_layer0")));
+  TH2* h_nhits_stave_chip_layer1 = dynamic_cast <TH2 *> (cl->getHisto(histprefix + std::string("nhits_stave_chip_layer1")));
+  TH2* h_nhits_stave_chip_layer2 = dynamic_cast <TH2 *> (cl->getHisto(histprefix + std::string("nhits_stave_chip_layer2")));
+
+  if (! gROOT->FindObject("hitmap_info"))
+  {
+    MakeCanvas("hitmap_info", 1);
+  }
+  Pad[1][0]->cd();
+  if (h_nhits_stave_chip_layer0 && h_nhits_stave_chip_layer1 && h_nhits_stave_chip_layer2)
+  {
+    TH1* h_nhits_chip_layer0 = h_nhits_stave_chip_layer0->ProjectionX();
+    TH1* h_nhits_chip_layer1 = h_nhits_stave_chip_layer1->ProjectionX();
+    TH1* h_nhits_chip_layer2 = h_nhits_stave_chip_layer2->ProjectionX();
+    h_nhits_chip_layer0->SetTitle("MVTX Raw Hit Number vs. ChipID");
+    h_nhits_chip_layer0->SetXTitle("ChipID");
+    h_nhits_chip_layer0->SetYTitle("Entries");
+    h_nhits_chip_layer0->SetMarkerColor(kRed);
+    h_nhits_chip_layer0->SetLineColor(kRed);
+    auto ymax_l0 = h_nhits_chip_layer0->GetMaximum();
+    auto ymax_l1 = h_nhits_chip_layer1->GetMaximum();
+    auto ymax_l2 = h_nhits_chip_layer2->GetMaximum();
+    h_nhits_chip_layer0->SetMaximum(1.2*std::max({ymax_l0, ymax_l1, ymax_l2}));
+    h_nhits_chip_layer0->SetMinimum(0);
+    h_nhits_chip_layer0->DrawCopy();
+    h_nhits_chip_layer1->SetMarkerColor(kBlue);
+    h_nhits_chip_layer1->SetLineColor(kBlue);
+    h_nhits_chip_layer1->DrawCopy("same");
+    h_nhits_chip_layer2->SetMarkerColor(kBlack);
+    h_nhits_chip_layer2->SetLineColor(kBlack);
+    h_nhits_chip_layer2->DrawCopy("same");
+    auto legend = new TLegend(0.55, 0.2, 0.83, 0.4);
+    legend->AddEntry(h_nhits_chip_layer0, "Layer0", "pl");
+    legend->AddEntry(h_nhits_chip_layer1, "Layer1", "pl");
+    legend->AddEntry(h_nhits_chip_layer2, "Layer2", "pl");
+    legend->Draw("same");
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  Pad[1][1]->cd();
+  if (h_nhits_stave_chip_layer0 && h_nhits_stave_chip_layer1 && h_nhits_stave_chip_layer2)
+  {
+    TH1* h_nhits_stave_layer0 = h_nhits_stave_chip_layer0->ProjectionY();
+    TH1* h_nhits_stave_layer1 = h_nhits_stave_chip_layer1->ProjectionY();
+    TH1* h_nhits_stave_layer2 = h_nhits_stave_chip_layer2->ProjectionY();
+    h_nhits_stave_layer2->SetTitle("MVTX Raw Hit Number vs. StaveID");
+    h_nhits_stave_layer2->SetXTitle("StaveID");
+    h_nhits_stave_layer2->SetYTitle("Entries");
+    h_nhits_stave_layer2->SetMarkerColor(kBlack);
+    h_nhits_stave_layer2->SetLineColor(kBlack);
+    auto ymax_l0 = h_nhits_stave_layer0->GetMaximum();
+    auto ymax_l1 = h_nhits_stave_layer1->GetMaximum();
+    auto ymax_l2 = h_nhits_stave_layer2->GetMaximum();
+    h_nhits_stave_layer2->SetMaximum(1.2*std::max({ymax_l0, ymax_l1, ymax_l2}));
+    h_nhits_stave_layer2->SetMinimum(0);
+    h_nhits_stave_layer2->DrawCopy("HIST");
+    h_nhits_stave_layer1->SetMarkerColor(kBlue);
+    h_nhits_stave_layer1->SetLineColor(kBlue);
+    h_nhits_stave_layer1->DrawCopy("HIST,same");
+    h_nhits_stave_layer0->SetMarkerColor(kRed);
+    h_nhits_stave_layer0->SetLineColor(kRed);
+    h_nhits_stave_layer0->DrawCopy("HIST,same");
+    auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+    legend->AddEntry(h_nhits_stave_layer0, "Layer0", "pl");
+    legend->AddEntry(h_nhits_stave_layer1, "Layer1", "pl");
+    legend->AddEntry(h_nhits_stave_layer2, "Layer2", "pl");
+    legend->Draw("same");
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  Pad[1][2]->cd();
+  if (h_nhits_stave_chip_layer0)
+  {
+    h_nhits_stave_chip_layer0->SetTitle("MVTX Raw Hit Map Layer 0");
+    h_nhits_stave_chip_layer0->SetXTitle("Chip ID");
+    h_nhits_stave_chip_layer0->SetYTitle("Stave ID");
+    h_nhits_stave_chip_layer0->DrawCopy("colz");
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  Pad[1][3]->cd();
+  if (h_nhits_stave_chip_layer1)
+  {
+    h_nhits_stave_chip_layer1->SetTitle("MVTX Raw Hit Map Layer 1");
+    h_nhits_stave_chip_layer1->SetXTitle("Chip ID");
+    h_nhits_stave_chip_layer1->SetYTitle("Stave ID");
+    h_nhits_stave_chip_layer1->DrawCopy("colz");
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  Pad[1][4]->cd();
+  if (h_nhits_stave_chip_layer2)
+  {
+    h_nhits_stave_chip_layer2->SetTitle("MVTX Raw Hit Map Layer 2");
+    h_nhits_stave_chip_layer2->SetXTitle("Chip ID");
+    h_nhits_stave_chip_layer2->SetYTitle("Stave ID");
+    h_nhits_stave_chip_layer2->DrawCopy("colz");
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();  // set to normalized coordinates
+  PrintRun.SetTextAlign(23); // center/top alignment
+  std::ostringstream runnostream1;
+  std::string runstring1;
+  runnostream1 << Name() << "_mvtx HitMap Info Run " << cl->RunNumber();
+  runstring1 = runnostream1.str();
+  transparent[1]->cd();
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+  TC[1]->Update();
+ 
+  std::cout << "DrawHitMapInfo Ending" << std::endl;
+  return 0;
+}
+
  
 int MVTXRawHitDraw::MakeHtml(const std::string &what)
 {
@@ -272,10 +387,15 @@ int MVTXRawHitDraw::MakeHtml(const std::string &what)
   std::string pngfile;
 
   // Register the 1st canvas png file to the menu and produces the png file.
-  if (what == "ALL" || what == "HITS")
+  if (what == "ALL" || what == "CHIP")
   {
     pngfile = cl->htmlRegisterPage(*this, "chip_info", "1", "png");
     cl->CanvasToPng(TC[0], pngfile);
+  }
+  if (what == "ALL" || what == "HITMAP")
+  {
+    pngfile = cl->htmlRegisterPage(*this, "hitmap_info", "2", "png");
+    cl->CanvasToPng(TC[1], pngfile);
   }
   return 0;
 }
