@@ -127,6 +127,7 @@ TH1D *OfflineQAKSTest::GenKSTestSummary(const char * option)
         {
             TH1 *h1 = dynamic_cast<TH1 *>(m_inputfileptr->Get(name.c_str()));
             TH1 *h2 = dynamic_cast<TH1 *>(m_goodrunfileptr->Get(name.c_str()));
+            h1->Scale(h2->Integral(-1,-1)/h1->Integral(-1,-1));
             if (!h1 || !h2)
             {
                 std::cerr << "OfflineQAKSTest: could not get histograms for " << name << std::endl;
@@ -139,6 +140,7 @@ TH1D *OfflineQAKSTest::GenKSTestSummary(const char * option)
         {
             TH2 *h1 = dynamic_cast<TH2 *>(m_inputfileptr->Get(name.c_str()));
             TH2 *h2 = dynamic_cast<TH2 *>(m_goodrunfileptr->Get(name.c_str()));
+            h1->Scale(h2->Integral(-1,-1,-1,-1)/h1->Integral(-1,-1,-1,-1));
             if (!h1 || !h2)
             {
                 std::cerr << "OfflineQAKSTest: could not get histograms for " << name << std::endl;
@@ -151,6 +153,7 @@ TH1D *OfflineQAKSTest::GenKSTestSummary(const char * option)
         {
             TProfile2D *p1 = dynamic_cast<TProfile2D *>(m_inputfileptr->Get(name.c_str()));
             TProfile2D *p2 = dynamic_cast<TProfile2D *>(m_goodrunfileptr->Get(name.c_str()));
+            p1->Scale(p2->Integral(-1,-1,-1,-1)/p1->Integral(-1,-1,-1,-1));
             if (!p1 || !p2)
             {
                 std::cerr << "OfflineQAKSTest: could not get histograms for " << name << std::endl;
