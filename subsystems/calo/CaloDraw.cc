@@ -596,7 +596,7 @@ int CaloDraw::DrawZdcMbd()
   {
     zdc_Northcalib->SetLineColor(kBlue);
     zdc_Northcalib->GetXaxis()->SetRangeUser(10, 300);
-    zdc_Northcalib->SetTitle("ZDC Total Energy");
+    zdc_Northcalib->SetTitle("ZDC Total Energy (GeV)");
     zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
     zdc_Northcalib->SetYTitle("Events");
 //    zdc_Northcalib->GetXaxis()->SetNdivisions(505);
