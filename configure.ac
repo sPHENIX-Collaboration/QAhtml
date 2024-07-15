@@ -28,6 +28,7 @@ AC_CONFIG_FILES([
   subsystems/calo/Makefile
   subsystems/example/Makefile
   subsystems/intt/Makefile
+  subsystems/inttrawhit/Makefile
   subsystems/micromegas/Makefile
   subsystems/mvtx/Makefile
   subsystems/mvtxrawhit/Makefile
