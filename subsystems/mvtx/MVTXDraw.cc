@@ -324,6 +324,8 @@ int MVTXDraw::DrawSummaryInfo()
   h_clusPhi_incl->Fit("f1", "R P M N 0 Q");
   float chi2ndf = f1->GetChisquare() / f1->GetNDF();
   float scaledchi2ndf = chi2ndf / f1->GetParameter(0);
+  float BoverA = f1->GetParameter(1) / f1->GetParameter(0);
+  float avgclus = f1->GetParameter(0);
 
   h_occupancy->Scale(1. / h_occupancy->Integral(-1, -1));
   h_occupancy->GetXaxis()->SetRange(1, h_occupancy->GetNbinsX() + 1);
@@ -336,62 +338,122 @@ int MVTXDraw::DrawSummaryInfo()
   sep->SetLineColor(kBlack);
   sep->SetLineWidth(2);
   sep->SetLineStyle(2);
-  sep->DrawLine(gPad->GetUxmin(), 0.8, gPad->GetUxmax(), 0.8);
-  sep->DrawLine(gPad->GetUxmin(), 0.62, gPad->GetUxmax(), 0.62);
-  sep->DrawLine(gPad->GetUxmin(), 0.45, gPad->GetUxmax(), 0.45);
+  sep->DrawLine(gPad->GetUxmin(), 0.85, gPad->GetUxmax(), 0.85);
+  sep->DrawLine(gPad->GetUxmin(), 0.58, gPad->GetUxmax(), 0.58);
+  sep->DrawLine(gPad->GetUxmin(), 0.41, gPad->GetUxmax(), 0.41);
 
   l->SetNDC();
   l->SetTextAlign(textalign);
   l->SetTextSize(titletextsize);
   l->SetTextColor(kBlack);
-  l->DrawLatex(textposx, 0.85, (boost::format("MVTX Cluster QA Summary - Run %d") % cl->RunNumber()).str().c_str());
+  l->DrawLatex(textposx, 0.9, (boost::format("MVTX Cluster QA Summary - Run %d") % cl->RunNumber()).str().c_str());
   
   if (scaledchi2ndf < scaledchi2ndf_good)
   {
     l->SetTextColor(kBlack);
     l->SetTextSize(stattextsize);
-    l->DrawLatex(textposx, 0.74, (boost::format("Cluster #phi fit #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g") % chi2ndf % scaledchi2ndf).str().c_str());
+    l->DrawLatex(textposx, 0.80, (boost::format("Cluster #phi fit A+B#timescos(#phi+C): #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g, B/A = %.5g") % chi2ndf % scaledchi2ndf % BoverA).str().c_str());
     l->SetTextColor(c_good);
-    l->DrawLatex(textposx, 0.67, Form("Status: GOOD (scaled #chi^{2}/ndf < %g)", scaledchi2ndf_good));
+    l->DrawLatex(textposx, 0.74, Form("#chi^{2}/ndf GOOD (scaled #chi^{2}/ndf < %.5g); ", scaledchi2ndf_good));
+    if (BoverA > bovera_high || BoverA < bovera_low)
+    {
+      l->SetTextColor(c_bad);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+    }
+    else
+    {
+      l->SetTextColor(c_good);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g WITHIN RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+    }
+    if (avgclus < avgnclus_theshold)
+    {
+      l->SetTextColor(c_ok);
+      l->DrawLatex(textposx, 0.62, Form("Run length: Short (Average number of clusters per bin %.5g < %.5g)", avgclus, avgnclus_theshold));
+    }
+    else
+    {
+      l->SetTextColor(c_good);
+      l->DrawLatex(textposx, 0.62, Form("Run length: Normal (Average number of clusters per bin %.5g #geq %.5g)", avgclus, avgnclus_theshold));
+    }
   }
   else if (scaledchi2ndf >= scaledchi2ndf_good && scaledchi2ndf < scaledchi2ndf_bad)
   {
     l->SetTextColor(kBlack);
     l->SetTextSize(stattextsize);
-    l->DrawLatex(textposx, 0.74, (boost::format("Cluster #phi fit #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g") % chi2ndf % scaledchi2ndf).str().c_str());
+    l->DrawLatex(textposx, 0.80, (boost::format("Cluster #phi fit A+B#timescos(#phi+C): #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g, B/A = %.5g") % chi2ndf % scaledchi2ndf % BoverA).str().c_str());
     l->SetTextColor(c_ok);
-    l->DrawLatex(textposx, 0.67, Form("Status: OK (%g #leq scaled #chi^{2}/ndf < %g)", scaledchi2ndf_good, scaledchi2ndf_bad));
+    l->DrawLatex(textposx, 0.74, Form("#chi^{2}/ndf OK (%g #leq scaled #chi^{2}/ndf < %g)", scaledchi2ndf_good, scaledchi2ndf_bad));
+    if (BoverA > bovera_high || BoverA < bovera_low)
+    {
+      l->SetTextColor(c_bad);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+    }
+    else
+    {
+      l->SetTextColor(c_good);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g WITHIN RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+    }
+    if (avgclus < avgnclus_theshold)
+    {
+      l->SetTextColor(c_ok);
+      l->DrawLatex(textposx, 0.62, Form("Run length: Short (Average number of clusters per bin %.5g < %.5g)", avgclus, avgnclus_theshold));
+    }
+    else
+    {
+      l->SetTextColor(c_good);
+      l->DrawLatex(textposx, 0.62, Form("Run length: Normal (Average number of clusters per bin %.5g #geq %.5g)", avgclus, avgnclus_theshold));
+    }
   }
   else if (scaledchi2ndf >= scaledchi2ndf_bad)
   {
     l->SetTextColor(kBlack);
     l->SetTextSize(stattextsize);
-    l->DrawLatex(textposx, 0.74, (boost::format("Cluster #phi fit #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g") % chi2ndf % scaledchi2ndf).str().c_str());
+    l->DrawLatex(textposx, 0.80, (boost::format("Cluster #phi fit A+B#timescos(#phi+C): #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g, B/A = %.5g") % chi2ndf % scaledchi2ndf % BoverA).str().c_str());
     l->SetTextColor(c_bad);
-    l->DrawLatex(textposx, 0.67, Form("Status: BAD (scaled #chi^{2}/ndf #geq %g)", scaledchi2ndf_bad));
+    l->DrawLatex(textposx, 0.74, Form("#chi^{2}/ndf BAD (scaled #chi^{2}/ndf #geq %g)", scaledchi2ndf_bad));
+    if (BoverA > bovera_high || BoverA < bovera_low)
+    {
+      l->SetTextColor(c_bad);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+    }
+    else
+    {
+      l->SetTextColor(c_good);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g WITHIN RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+    }
+    if (avgclus < avgnclus_theshold)
+    {
+      l->SetTextColor(c_ok);
+      l->DrawLatex(textposx, 0.62, Form("Run length: Short (Average number of clusters per bin %.5g < %.5g)", avgclus, avgnclus_theshold));
+    }
+    else
+    {
+      l->SetTextColor(c_good);
+      l->DrawLatex(textposx, 0.62, Form("Run length: Normal (Average number of clusters per bin %.5g #geq %.5g)", avgclus, avgnclus_theshold));
+    }
   }
   else
   {
     l->SetTextColor(c_bad);
     l->SetTextSize(stattextsize);
-    l->DrawLatex(textposx, 0.74, "Cluster #phi fit N/A");
+    l->DrawLatex(textposx, 0.80, "Cluster #phi fit N/A (Check if cluster QA histograms exist)");
   }
 
   if (probOccupancygt0p003 < probOccupancygt0p003_95percentile)
   {
     l->SetTextColor(kBlack);
     l->SetTextSize(stattextsize);
-    l->DrawLatex(textposx, 0.56, Form("Prob. of chip occupancy #geq 0.3%%: %.4e", probOccupancygt0p003));
+    l->DrawLatex(textposx, 0.52, Form("Prob. of chip occupancy #geq 0.3%%: %.4e", probOccupancygt0p003));
     l->SetTextColor(c_good);
-    l->DrawLatex(textposx, 0.50, Form("GOOD: Lower than 95%% of analyzed runs (%.4e)", probOccupancygt0p003_95percentile));
+    l->DrawLatex(textposx, 0.46, Form("GOOD: Lower than 95%% of analyzed runs (%.4e)", probOccupancygt0p003_95percentile));
   }
   else
   {
     l->SetTextColor(kBlack);
     l->SetTextSize(stattextsize);
-    l->DrawLatex(textposx, 0.56, Form("Prob. of chip occupancy #geq 0.3%%: %.4e", probOccupancygt0p003));
+    l->DrawLatex(textposx, 0.52, Form("Prob. of chip occupancy #geq 0.3%%: %.4e", probOccupancygt0p003));
     l->SetTextColor(c_bad);
-    l->DrawLatex(textposx, 0.50, Form("BAD: Higher than 95%% of analyzed runs (%.4e)", probOccupancygt0p003_95percentile));
+    l->DrawLatex(textposx, 0.46, Form("BAD: Higher than 95%% of analyzed runs (%.4e)", probOccupancygt0p003_95percentile));
   }
 
   // Draw the cluster phi and the fit
@@ -403,6 +465,21 @@ int MVTXDraw::DrawSummaryInfo()
   h_clusPhi_incl->DrawCopy();
   f1->SetLineColor(kRed);
   f1->Draw("same");
+  TLegend *leg = new TLegend(0.2, 0.15, 0.8, 0.35);
+  leg->SetTextSize(0.03);
+  leg->SetBorderSize(0);
+  leg->SetFillStyle(0);
+  leg->SetHeader("Fit function: A+B#timescos(#phi+C)");
+  leg->SetNColumns(2);
+  leg->AddEntry((TObject *)0, Form("#chi^{2}/ndf=%g", chi2ndf), "");
+  leg->AddEntry((TObject *)0, Form("A=%g", f1->GetParameter(0)), "");
+  leg->AddEntry((TObject *)0, Form("Scaled #chi^{2}/ndf=%g", scaledchi2ndf), "");
+  leg->AddEntry((TObject *)0, Form("B=%g", f1->GetParameter(1)), "");
+  leg->AddEntry((TObject *)0, Form("log_{10}(scaled #chi^{2}/ndf)=%g", log10(scaledchi2ndf)), "");
+  leg->AddEntry((TObject *)0, Form("B/A=%g", BoverA), "");
+  leg->AddEntry((TObject *)0, "", "");
+  leg->AddEntry((TObject *)0, Form("C=%g", f1->GetParameter(2)), "");
+  leg->Draw();
 
   // Draw the chip occupancy
   Pad[2][2]->cd();
