@@ -9,6 +9,7 @@ SUBDIRS = \
   calo \
   example \
   intt \
+  inttrawhit \
   micromegas \
   mvtx \
   mvtxrawhit \
