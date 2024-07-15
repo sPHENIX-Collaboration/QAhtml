@@ -300,8 +300,8 @@ int CaloDraw::DrawCemc()
     {
       if (cemc_hotmap->GetBinContent(i) != 0)
       {
-	h_hitmask->SetBinContent(i, 0);
-	nonzero_towers++;
+    h_hitmask->SetBinContent(i, 0);
+    nonzero_towers++;
       }
     }
     h_hitmask->SetTitle("EMCal Tower Hits w/ Masking");
@@ -339,7 +339,7 @@ int CaloDraw::DrawCemc()
     gPad->UseCurrentStyle();
   }
 
-  // remove this plot 
+  // remove this plot
   /*
   TH2 *ohcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi")));
   TH1 *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
@@ -595,13 +595,19 @@ int CaloDraw::DrawZdcMbd()
   if (zdc_Northcalib && zdc_Southcalib)
   {
     zdc_Northcalib->SetLineColor(kBlue);
-    zdc_Northcalib->GetXaxis()->SetRangeUser(0.0, 12000);
-    zdc_Northcalib->SetTitle("ZDC Total Energy");
+    zdc_Northcalib->GetXaxis()->SetRangeUser(10, 300);
+    zdc_Northcalib->SetTitle("ZDC Total Energy (GeV)");
     zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
     zdc_Northcalib->SetYTitle("Events");
-    zdc_Northcalib->GetXaxis()->SetNdivisions(505);
+//    zdc_Northcalib->GetXaxis()->SetNdivisions(505);
     zdc_Northcalib->DrawCopy();
     gPad->UseCurrentStyle();
+      
+    TGraph *gr_1n = new TGraph();
+    gr_1n->SetPoint(0, 70, 0);
+    gr_1n->SetPoint(1, 70, 1e7);
+    gr_1n->SetLineStyle(7);
+    gr_1n->Draw("l");
 
     zdc_Southcalib->SetLineColor(kRed);
     zdc_Southcalib->DrawCopy("same");
@@ -616,38 +622,23 @@ int CaloDraw::DrawZdcMbd()
     return -1;
   }
   Pad[4][1]->cd();
-  if (zdc_Northcalib && zdc_Southcalib)
-  {
-    zdc_Northcalib->Draw();
-    zdc_Northcalib->SetLineColor(kBlue);
-    zdc_Northcalib->GetXaxis()->SetRangeUser(10, 300);
-    zdc_Northcalib->SetTitle("ZDC Total Energy");
-    zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
-    zdc_Northcalib->SetYTitle("Events");
-    gPad->UseCurrentStyle();
-
-    TGraph *gr_1n = new TGraph();
-    gr_1n->SetPoint(0, 70, 0);
-    gr_1n->SetPoint(1, 70, 1e7);
-    gr_1n->SetLineStyle(7);
-    gr_1n->Draw("l");
-
-    zdc_Southcalib->Draw("same");
-    zdc_Southcalib->SetLineColor(kRed);
-    // gPad->SetLogy();
-
-    myText(0.75, 0.80, kBlue, "North");
-    myText(0.65, 0.80, kRed, "South");
-  }
-  Pad[4][2]->cd();
   if (vtx_z)
   {
-    vtx_z->SetTitle("MBD Vertex z");
-    vtx_z->SetXTitle("MBD Vtx #it{z} (cm)");
-    vtx_z->SetYTitle("Counts");
-    vtx_z->DrawCopy("");
-    gPad->UseCurrentStyle();
+     vtx_z->SetTitle("MBD Vertex z");
+     vtx_z->SetXTitle("MBD Vtx #it{z} (cm)");
+     vtx_z->SetYTitle("Counts");
+     vtx_z->DrawCopy("");
+     gPad->UseCurrentStyle();
   }
+//  Pad[4][2]->cd();
+//  if (vtx_z)
+//  {
+//    vtx_z->SetTitle("MBD Vertex z");
+//    vtx_z->SetXTitle("MBD Vtx #it{z} (cm)");
+//    vtx_z->SetYTitle("Counts");
+//    vtx_z->DrawCopy("");
+//    gPad->UseCurrentStyle();
+//  }
 
   /* db->DBcommit(); */
 
@@ -907,4 +898,5 @@ void CaloDraw::myText(double x, double y, int color, const char *text, double ts
   l.SetTextColor(color);
   l.DrawLatex(x, y, text);
 }
+
 
