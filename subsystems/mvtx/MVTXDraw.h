@@ -54,16 +54,20 @@ class MVTXDraw : public QADraw
     TPad *Pad[3][4]{};
     const char *histprefix;
 
-    // good/ok/bad run threshold
+    // thresholds - run quality checks
     float scaledchi2ndf_good = 0.0015;
-    float scaledchi2ndf_bad = 0.0025;
-    float probOccupancygt0p003_95percentile = 2.58523e-05; // 95% of the runs have probability of chips with occupancy > 0.003 less than this value
+    float scaledchi2ndf_bad = 0.01;
+    float probOccupancygt0p003_95percentile = 8.17523e-05; // 95% of the runs have probability of chips with occupancy > 0.003 less than this value
+    float bovera_high = 0.28;
+    float bovera_low = 0.24;
+    float avgnclus_theshold = 38041.6;
+
     // Run summary text position
     TLatex *l;
     int textalign = 22;
     float textposx = 0.5;
     float titletextsize = 0.08;
-    float stattextsize = 0.055;
+    float stattextsize = 0.05;
 
     Color_t c_good;
     Color_t c_ok;
