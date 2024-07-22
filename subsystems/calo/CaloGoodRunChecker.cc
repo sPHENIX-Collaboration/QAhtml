@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstdio>
 
 std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
 {
@@ -39,6 +40,11 @@ std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
   TFile* fcemc = new TFile(outfile_cemc.c_str(), "READ");
   TFile* fihcal = new TFile(outfile_ihcal.c_str(), "READ");
   TFile* fohcal = new TFile(outfile_ohcal.c_str(), "READ");
+  if (!fcemc->IsOpen())
+  {
+    std::cout << "Failed to create hot/cold/dead tower maps!" << std::endl;
+    return "";
+  }
   cemc_hcdmap = (TH2*)fcemc->Get("h_hot");
   ihcal_hcdmap = (TH2*)fihcal->Get("h_hot");
   ohcal_hcdmap = (TH2*)fohcal->Get("h_hot");
@@ -52,16 +58,23 @@ std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
   fmaps->Close(); fcemc->Close(); fihcal->Close(); fohcal->Close();
   delete fmaps; delete fcemc; delete fihcal; delete fohcal;
   // remove the extra files now that we're done
-  gSystem->Exec(Form("rm %s", outfile_cemc.c_str()));
-  gSystem->Exec(Form("rm %s", outfile_ihcal.c_str()));
-  gSystem->Exec(Form("rm %s", outfile_ohcal.c_str()));
+  std::string outfiles[3] = {outfile_cemc, outfile_ihcal, outfile_ohcal};
+  for (int i=0; i<3; i++)
+  {
+    std::string str = outfiles[i];
+    std::string cdbstr = str;
+    size_t pos = cdbstr.find_last_of('.');
+    cdbstr.insert(pos, "cdb");
+    std::remove(str.c_str());
+    std::remove(cdbstr.c_str());
+  }
 
   return mapsfile;
 }
 
 void CaloGoodRunChecker::DeleteHotColdDeadMaps()
 {
-  gSystem->Exec(Form("rm %s", mapsfile.c_str()));
+  std::remove(mapsfile.c_str());
 }
 
 
@@ -282,7 +295,7 @@ void CaloGoodRunChecker::CemcWriteDB(bool isGood)
   }
 
   query = con->createStatement();
-  cmd << Form(" UPDATE goodruns SET emcal = (%s, %s) WHERE runnumber = %d ", "GOLDEN", "Greg's write test worked!", runno);
+  cmd << Form(" UPDATE goodruns SET emcal_auto = (%s, %s) WHERE runnumber = %d ", "GOLDEN", "Greg's write test worked!", runno);
   try
   {
     rs = query->executeQuery(cmd.str());

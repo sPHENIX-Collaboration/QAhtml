@@ -2,8 +2,8 @@ import re
 import os.path
 
 if __name__ == "__main__":
-    infile = 'aggruns_all_07052024.txt'
-    outfile = 'aggruns_good_07052024.txt'
+    infile = 'aggruns_all_07222024.txt'
+    outfile = 'aggruns_good_07222024.txt'
     runinfo = {} # runnum: [runnum, tag, aggfile (absolute path)] # see next comment
     joblistdir = 'condor/joblists/'
 

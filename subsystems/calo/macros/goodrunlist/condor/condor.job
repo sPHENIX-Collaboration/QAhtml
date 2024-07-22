@@ -64,7 +64,8 @@ concurrency_limits = CONCURRENCY_LIMIT_DEFAULT:2300
 # then the job will be submitted N times.  Use the $(Process)
 # macro to make your input/output and log files unique.
 
-# 165 jobs for aggruns_good_07052024.txt
+# 176 jobs for aggruns_good_07052024.txt
+# 217 jobs for aggruns_good_07222024.txt
 
-Queue 165
+Queue 217
 
