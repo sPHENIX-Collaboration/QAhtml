@@ -4,30 +4,30 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -isystem$(OFFLINE_MAIN)/include \
   -isystem$(OFFLINE_MAIN)/rootmacros \
-  -isystem$(ROOTSYS)/include 
+  -isystem$(ROOTSYS)/include \
+  -isystem$(OPT_SPHENIX)/include
 
 lib_LTLIBRARIES = \
-  libqadrawmvtx.la
+  libqadrawsiliconseeds.la
 
-libqadrawmvtx_la_LIBADD = \
+libqadrawsiliconseeds_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb
+  -lqadrawdb \
+  -lodbc++
 
-libqadrawmvtxrawhit_la_LIBADD = \
-  -L$(libdir) \
-  -L$(OFFLINE_MAIN)/lib \
-  -lqadrawclient \
-  -lqadrawdb
+siliconseedsincludedir=$(pkgincludedir)/siliconseeds
 
-mvtxincludedir=$(pkgincludedir)/mvtx
+siliconseedsinclude_HEADERS = \
+  SiliconSeedsDraw.h \
+  SiSeedsGoodRunChecker.h \ 
+  OfflineQAKSTest.h
 
-mvtxinclude_HEADERS = \
-  MVTXDraw.h
-
-libqadrawmvtx_la_SOURCES = \
-  MVTXDraw.cc
+libqadrawsiliconseeds_la_SOURCES = \
+  SiliconSeedsDraw.cc \
+  SiSeedsGoodRunChecker.cc \
+  OfflineQAKSTest.cc
 
 noinst_PROGRAMS = \
   testexternals
@@ -36,7 +36,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libqadrawmvtx.la
+  libqadrawsiliconseeds.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@

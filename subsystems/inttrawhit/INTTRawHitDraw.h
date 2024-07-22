@@ -1,5 +1,5 @@
-#ifndef MVTX_MVTXDRAW_H__
-#define MVTX_MVTXDRAW_H__
+#ifndef INTT_INTTDRAW_H__
+#define INTT_INTTDRAW_H__
 
 #include <qahtml/QADraw.h>
 
@@ -13,11 +13,11 @@ class TPad;
 class TH1F;
 class TH2F;
 
-class MVTXRawHitDraw : public QADraw
+class INTTRawHitDraw : public QADraw
 {
- public: 
-  MVTXRawHitDraw(const std::string &name = "MVTXRAWHITQA");
-  ~MVTXRawHitDraw() override;
+ public:
+  INTTRawHitDraw(const std::string &name = "INTTRAWHITQA");
+  ~INTTRawHitDraw() override;
 
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
@@ -25,10 +25,13 @@ class MVTXRawHitDraw : public QADraw
 
  private:
   int MakeCanvas(const std::string &name, int num);
+  int MakeChipCanvas(const std::string &name, int num);
   int DrawChipInfo();
-  TCanvas *TC[1]{};
-  TPad *transparent[1]{};
-  TPad *Pad[1][6]{};
+  int DrawSummary();
+  TCanvas *TC[2]{};
+  TCanvas *chipCanvas[8]{};
+  TPad *transparent[2]{};
+  TPad *Pad[2][8]{};
   const char *histprefix;
 };
 

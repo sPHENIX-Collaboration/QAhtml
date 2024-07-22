@@ -67,11 +67,13 @@ int TPCDraw::Draw(const std::string &what)
     iret += DrawRegionInfo();
     idraw++;
   }
+  /*
   if (what == "ALL" || what == "RESID")
   {
     iret += DrawResidInfo();
     idraw++;
   }
+  */
   if (!idraw)
   {
     std::cout << " Unimplemented Drawing option: " << what << std::endl;

@@ -1,13 +1,13 @@
 #include <qahtml/QADrawClient.h>
-#include <trackseeds/SiliconSeedsDraw.h>
+#include <bco/BCODraw.h>
 
-R__LOAD_LIBRARY(libqadrawsiliconseeds.so)
+R__LOAD_LIBRARY(libqadrawbco.so)
 
-void draw_siliconseeds(const std::string &rootfile) {
+void draw_packets(const std::string &rootfile) {
 
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
-  QADraw *ex = new SiliconSeedsDraw();
+  QADraw *ex = new BCODraw();
   cl->registerDrawer(ex);
 
   cl->ReadHistogramsFromFile(rootfile);

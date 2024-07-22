@@ -9,8 +9,11 @@ SUBDIRS = \
   calo \
   example \
   intt \
+  inttrawhit \
   micromegas \
   mvtx \
+  mvtxrawhit \
+  siliconseeds \
+  tpcseeds \
   tpc \
-  vertex \
-  trackseeds
+  vertex

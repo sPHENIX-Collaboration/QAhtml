@@ -27,12 +27,13 @@ class TpcSeedsDraw : public QADraw
  private:
   int MakeCanvas(const std::string &name, int num);
   int DrawTrackletInfo();
-  int DrawClusterInfo();
+  int DrawClusterInfo1();
+  int DrawClusterInfo2();
   int DrawDCAInfo();
   int DrawVertexInfo();
-  TCanvas *TC[4]{};
-  TPad *transparent[4]{};
-  TPad *Pad[4][26]{};
+  TCanvas *TC[5]{};
+  TPad *transparent[5]{};
+  TPad *Pad[5][26]{};
   const char *histprefix;
 };
 

@@ -28,11 +28,14 @@ AC_CONFIG_FILES([
   subsystems/calo/Makefile
   subsystems/example/Makefile
   subsystems/intt/Makefile
+  subsystems/inttrawhit/Makefile
   subsystems/micromegas/Makefile
   subsystems/mvtx/Makefile
+  subsystems/mvtxrawhit/Makefile
+  subsystems/siliconseeds/Makefile
   subsystems/tpc/Makefile
+  subsystems/tpcseeds/Makefile
   subsystems/vertex/Makefile
-  subsystems/trackseeds/Makefile
 ])
 
 AC_OUTPUT
