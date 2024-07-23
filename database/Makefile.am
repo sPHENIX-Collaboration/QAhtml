@@ -7,7 +7,9 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -isystem$(OFFLINE_MAIN)/include \
   -isystem$(OPT_SPHENIX)/include \
-  -isystem$(ROOTSYS)/include
+  -isystem$(ROOTSYS)/include \
+	-I$(top_srcdir)/client  #added this line
+
 
 pkginclude_HEADERS = \
   QADrawDB.h \
