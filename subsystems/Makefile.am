@@ -8,10 +8,11 @@ SUBDIRS = \
   bco \
   calo \
   example \
+	globalQA \
   intt \
   micromegas \
   mvtx \
   siliconseeds \
   tpcseeds \
   tpc \
-  vertex
+  vertex 
