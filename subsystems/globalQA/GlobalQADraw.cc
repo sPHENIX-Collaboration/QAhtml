@@ -2,6 +2,7 @@
 
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
+#include <boost/format.hpp>
 
 #include <TCanvas.h>
 #include <TDatime.h>
@@ -31,22 +32,13 @@ void get_scaledowns(int runnumber, int scaledowns[])
 
   TSQLServer *db = TSQLServer::Connect("pgsql://sphnxdaqdbreplica:5432/daq","phnxro","");
 
-  if (db)
-  {
-    printf("Server info: %s\n", db->ServerInfo());
-  }
-  else
-  {
-    printf("bad\n");
-  }
-
   TSQLRow *row;
   TSQLResult *res;
-  char sql[1000];
+  const char * sql = "";
 
   for (int is = 0; is < 64; is++)
   {
-    sprintf(sql, "select scaledown%02d from gl1_scaledown where runnumber = %d;", is, runnumber);
+    sql = boost::str(boost::format("select scaledown%02d from gl1_scaledown where runnumber = %d;") % is % runnumber).c_str();
 
     res = db->Query(sql);
 
@@ -264,8 +256,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     printrms.SetNDC();
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
-    printmean.DrawText(0.2,0.7,Form("Mean: %.2f",mean));
-    printrms.DrawText(0.2,0.5,Form("RMS: %.2f",rms));
+    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
+    printrms.DrawText(0.2,0.5,boost::str(boost::format("RMS: %.2f") % rms).c_str());
   
     
     leg02->Draw();
@@ -325,8 +317,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     float meann = h_GlobalQA_mbd_nhit_n->GetMean();
     
     h_GlobalQA_mbd_nhit_n->DrawCopy("hist same");
-    printnhits.DrawText(0.5,0.6,Form("South mean: %.2f",means));
-    printnhitn.DrawText(0.5,0.4,Form("North mean: %.2f",meann));
+    printnhits.DrawText(0.5,0.6,boost::str(boost::format("South mean: %.2f") % means).c_str());
+    printnhitn.DrawText(0.5,0.4,boost::str(boost::format("North mean: %.2f") % meann).c_str());
 
     leg03->Draw();
   }
@@ -351,8 +343,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     float no = h_GlobalQA_mbd_zvtxq->GetBinContent(1) * 100;
     
     h_GlobalQA_mbd_zvtxq->DrawCopy("hist");
-    printyes.DrawText(0.6,0.7,Form("zvtx provided:\n %.2f%s",yes,"%"));
-    printno.DrawText(0.2,0.7,Form("No zvtx:\n %.2f%s",no,"%"));
+    printyes.DrawText(0.6,0.7,boost::str(boost::format("zvtx provided:\n %.2f%s") % yes % "%").c_str());
+    printno.DrawText(0.2,0.7, boost::str(boost::format("No zvtx:\n %.2f%s") % no % "%").c_str());
     
     gPad->UseCurrentStyle();
   }
@@ -448,8 +440,8 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
     printrms.SetNDC();
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
-    printmean.DrawText(0.2,0.7,Form("Mean: %.2f",mean));
-    printrms.DrawText(0.2,0.5,Form("RMS: %.2f",rms));
+    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
+    printrms.DrawText(0.2,0.5, boost::str(boost::format("RMS: %.2f") % rms).c_str());
   }
   else 
   {
