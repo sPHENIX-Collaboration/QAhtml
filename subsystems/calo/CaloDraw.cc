@@ -821,6 +821,7 @@ void CaloDraw::SetCemcSummary(TCanvas* c)
   cemcSummary = c;
   cemcSummary->cd();
   // add the run number title
+  /*
   QADrawClient *cl = QADrawClient::instance();
   TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);
   tr->SetFillStyle(4000);
@@ -837,6 +838,7 @@ void CaloDraw::SetCemcSummary(TCanvas* c)
   tr->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
   cemcSummary->Update();
+  */
 }
 
 TH1 *CaloDraw::proj(TH2 *h2)

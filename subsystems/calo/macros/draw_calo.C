@@ -17,8 +17,8 @@ void draw_calo(const std::string &rootfile) {
   ex->SetCemcChecker(ch);
   ch->SetHistfile(rootfile);
   std::string mapsfile = ch->MakeHotColdDeadMaps();
-  bool cemc_isgood = ch->CemcGoodRun();
-  TCanvas* cemc_summ = ch->CemcMakeSummary(cemc_isgood);
+  ch->CemcCheckGoodRun();
+  TCanvas* cemc_summ = ch->CemcMakeSummary();
   ex->SetCemcSummary(cemc_summ);
 
   cl->ReadHistogramsFromFile(mapsfile.c_str());
@@ -29,7 +29,9 @@ void draw_calo(const std::string &rootfile) {
 
   // Write good/bad run status to triage database
   // (don't actually do this yet -- 7/1/24)
-  // ch->CemcWriteDB(cemc_isgood);
+  std::cout << "Writing to DB... ";
+  ch->CemcWriteDB();
+  std::cout << "Done!" << std::endl;
 
   gSystem->Exit(0);
   return ;

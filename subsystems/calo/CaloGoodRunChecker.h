@@ -17,9 +17,10 @@ class CaloGoodRunChecker
   void SetHistfile(std::string hfile) {histfile = hfile;}
   std::string MakeHotColdDeadMaps();
   void DeleteHotColdDeadMaps();
-  bool CemcGoodRun();
-  TCanvas* CemcMakeSummary(bool cemc_goodrun=false);
-  void CemcWriteDB(bool isGood=false);
+  void CemcCheckGoodRun();
+  std::string CemcGetComments();
+  TCanvas* CemcMakeSummary();
+  void CemcWriteDB();
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
 
   std::string histfile = "";
@@ -31,6 +32,7 @@ class CaloGoodRunChecker
   TH2* ohcal_hcdmap = nullptr;
 
   int n_events= 0;
+  bool cemc_isgood = false;
   bool cemc_fails_events = false;
   bool cemc_fails_badtowers = false;
   bool cemc_fails_timing = false;
