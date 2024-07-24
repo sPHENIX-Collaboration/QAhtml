@@ -2,13 +2,14 @@
 #define CALO_CALOGOODRUNCHECKER_H
 
 #include <string>
+#include <TLatex.h>
 
 class TCanvas;
 class TPad;
 class TH1;
 class TH2;
-
 class CaloGoodRunChecker
+
 {
  public:
   CaloGoodRunChecker() {}
@@ -19,8 +20,22 @@ class CaloGoodRunChecker
   void DeleteHotColdDeadMaps();
   bool CemcGoodRun();
   TCanvas* CemcMakeSummary(bool cemc_goodrun=false);
-  void CemcWriteDB(bool isGood=false);
-  void myText(double x, double y, int color, const char *text, double tsize = 0.04);
+  // void myText(double x, double y, int color, const char *text, double tsize = 0.04);
+  bool ihcalGoodRun();
+  TCanvas* ihcalMakeSummary(bool ihcal_goodrun=false);
+  //void myText(double x, double y, int color, const char *text, double tsize = 0.04);
+  bool ohcalGoodRun();
+  TCanvas* ohcalMakeSummary(bool ohcal_goodrun=false);
+  //void myText(double x, double y, int color, const char *text, double tsize = 0.04);
+
+  inline void myText(double x, double y, int color, const char *text, double tsize = 0.04)
+  {
+    TLatex latex;
+    latex.SetTextSize(tsize);
+    latex.SetNDC();
+    latex.SetTextColor(color);
+    latex.DrawLatex(x, y, text);
+  }
 
   std::string histfile = "";
   std::string histprefix = "h_CaloValid_";
@@ -40,11 +55,19 @@ class CaloGoodRunChecker
   int cemc_dead_towers = 999999;
   float cemc_time_mean = 999.9;
   float cemc_time_sigma = 999.9;
+  bool ihcal_fails_events = false;
+  bool ihcal_fails_badtowers = false;
+  bool ihcal_fails_timing = false;
+  bool ihcal_fails_vertex = false;
   int ihcal_hot_towers = 999999;
   int ihcal_cold_towers = 999999;
   int ihcal_dead_towers = 999999;
   float ihcal_time_mean = 999.9;
   float ihcal_time_sigma = 999.9;
+  bool ohcal_fails_events = false;
+  bool ohcal_fails_badtowers = false;
+  bool ohcal_fails_timing = false;
+  bool ohcal_fails_vertex = false;
   int ohcal_hot_towers = 999999;
   int ohcal_cold_towers = 999999;
   int ohcal_dead_towers = 999999;
