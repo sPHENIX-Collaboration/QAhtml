@@ -26,6 +26,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 void get_scaledowns(int runnumber, int scaledowns[])
 {
@@ -34,13 +35,13 @@ void get_scaledowns(int runnumber, int scaledowns[])
 
   TSQLRow *row;
   TSQLResult *res;
-  const char * sql = "";
+  std::string sql = "";
 
   for (int is = 0; is < 64; is++)
   {
     sql = boost::str(boost::format("select scaledown%02d from gl1_scaledown where runnumber = %d;") % is % runnumber).c_str();
-
-    res = db->Query(sql);
+    const char * csql = sql.c_str();
+    res = db->Query(csql);
 
     int nrows = res->GetRowCount();
 
@@ -130,18 +131,16 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
     TC[num]->UseCurrentStyle();
     gSystem->ProcessEvents();
 
-    //Pad[num][0] = new TPad("mypad00", "mbd_zvtx", 0.05, 0.69, 0.45, 0.97, 0);
-    Pad[num][1] = new TPad("mypad01", "mbd_zvtx_wide", 0.5, 0.69, 0.95, 0.97, 0);
-    Pad[num][2] = new TPad("mypad02", "mbd_charge", 0.05, 0.32, 0.45, 0.97, 0);
-    Pad[num][3] = new TPad("mypad03", "mbd_nhit", 0.5, 0.32, 0.95, 0.64, 0);
-    Pad[num][4] = new TPad("mypad04", "mbd_zvtxq", 0.05, 0.02, 0.45, 0.28, 0);
+    Pad[num][0] = new TPad("mypad00", "mbd_zvtx_wide", 0.05, 0.32, 0.45, 0.97, 0);
+    Pad[num][1] = new TPad("mypad01", "mbd_charge", 0.5, 0.52, 0.95, 0.97, 0);
+    Pad[num][2] = new TPad("mypad02", "mbd_nhit", 0.5, 0.02, 0.95, 0.47, 0);
+    Pad[num][3] = new TPad("mypad03", "mbd_zvtxq", 0.05, 0.02, 0.45, 0.28, 0);
 
 
-    //Pad[num][0]->Draw();
+    Pad[num][0]->Draw();
     Pad[num][1]->Draw();
     Pad[num][2]->Draw();
     Pad[num][3]->Draw();
-    Pad[num][4]->Draw();
   }
   
   if (num == 1)
@@ -161,13 +160,30 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
 
   if (num == 2)
   {
-    TC[num] = new TCanvas(name.c_str(),"Trigger Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+    TC[num] = new TCanvas(name.c_str(),"Photon Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
     TC[num]->UseCurrentStyle();
     gSystem->ProcessEvents();
 
     Pad[num][0] = new TPad("mypad20", "trigger_eff", 0.05, 0.52, 0.45, 0.97, 0);
-    Pad[num][1] = new TPad("mypad21", "trigger_persistency", 0.5, 0.52, 0.95, 0.97, 0);
-    Pad[num][2] = new TPad("mypad22", "triggers", 0.05, 0.02, 0.45, 0.47, 0);
+    Pad[num][1] = new TPad("mypad21", "trigger_2d_photon", 0.5, 0.52, 0.95, 0.97, 0);
+    Pad[num][2] = new TPad("mypad22", "trigger_2d_mbd", 0.5, 0.02, 0.95, 0.47, 0);
+    Pad[num][3] = new TPad("mypad23", "triggers", 0.05, 0.02, 0.45, 0.47, 0);
+
+    Pad[num][0]->Draw();
+    Pad[num][1]->Draw();
+    Pad[num][2]->Draw();
+    Pad[num][3]->Draw();
+  }
+
+  if (num == 3)
+  {
+    TC[num] = new TCanvas(name.c_str(),"Average Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+    TC[num]->UseCurrentStyle();
+    gSystem->ProcessEvents();
+
+    Pad[num][0] = new TPad("mypad30", "trigger_leading", 0.05, 0.67, 0.95, 0.97, 0);
+    Pad[num][1] = new TPad("mypad31", "trigger_rejection", 0.05, 0.34, 0.95, 0.64, 0);
+    Pad[num][2] = new TPad("mypad32", "trigger_livetime", 0.05, 0.01, 0.95, 0.31, 0);
 
     Pad[num][0]->Draw();
     Pad[num][1]->Draw();
@@ -201,32 +217,10 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     MakeCanvas("Global1",0);
   }
   TC[0]->Clear("D");
-  // Plot the z-vertices zoomed
-  /*Pad[0][0]->cd();
-  TLegend * leg00 = new TLegend(.6,.7,.9,.9);
-  if (h_GlobalQA_mbd_zvtx && h_GlobalQA_calc_zvtx)
-  {
-    
-    h_GlobalQA_mbd_zvtx->SetLineColor(kBlue);
-    h_GlobalQA_mbd_zvtx->DrawCopy("hist");
-    gPad->UseCurrentStyle();
-    
-    h_GlobalQA_calc_zvtx->SetLineColor(kRed);
-    h_GlobalQA_calc_zvtx->DrawCopy("hist same");
-    
-    leg00->AddEntry(h_GlobalQA_mbd_zvtx,"Provided z-vertex");
-    leg00->AddEntry(h_GlobalQA_calc_zvtx,"Calculated z-vertex"); 
-    leg00->Draw();
-    
-  }
-  else 
-  {
-    return -1;
-  }
-*/
+  
   // Plot the z-vertices wide
-  TLegend * leg02 = new TLegend(0.6, 0.7, 0.9, 0.9);
-  Pad[0][2]->cd();
+  TLegend * leg00 = new TLegend(0.6, 0.7, 0.9, 0.9);
+  Pad[0][0]->cd();
   if (h_GlobalQA_mbd_zvtx_wide && h_GlobalQA_calc_zvtx_wide)
   {
     TF1 * f = new TF1("f", "gaus", -100,100);
@@ -234,7 +228,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     h_GlobalQA_mbd_zvtx_wide->Fit("f");
     
     h_GlobalQA_mbd_zvtx_wide->SetLineColor(kBlue);
-    leg02->AddEntry(h_GlobalQA_mbd_zvtx_wide,"Provided z-vertex");
+    leg00->AddEntry(h_GlobalQA_mbd_zvtx_wide,"Provided z-vertex");
     h_GlobalQA_mbd_zvtx_wide->DrawCopy("hist");
      
     gPad->UseCurrentStyle();
@@ -243,7 +237,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     f->DrawCopy("same");
     
     h_GlobalQA_calc_zvtx_wide->SetLineColor(kRed);
-    leg02->AddEntry(h_GlobalQA_calc_zvtx_wide,"Calculated z-vertex");
+    leg00->AddEntry(h_GlobalQA_calc_zvtx_wide,"Calculated z-vertex");
     h_GlobalQA_calc_zvtx_wide->DrawCopy("hist same");
     
     TText printmean;
@@ -260,7 +254,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     printrms.DrawText(0.2,0.5,boost::str(boost::format("RMS: %.2f") % rms).c_str());
   
     
-    leg02->Draw();
+    leg00->Draw();
   }
   else
   {
@@ -291,19 +285,19 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   }
 
   // Plot the hit distribution
-  TLegend * leg03 = new TLegend(0.7, 0.7, 0.9, 0.9);
-  Pad[0][3]->cd();
+  TLegend * leg02 = new TLegend(0.7, 0.7, 0.9, 0.9);
+  Pad[0][2]->cd();
   if (h_GlobalQA_mbd_nhit_s && h_GlobalQA_mbd_nhit_n)
   {
     h_GlobalQA_mbd_nhit_s->SetLineColor(kBlue);
-    leg03->AddEntry(h_GlobalQA_mbd_nhit_s,"South");
+    leg02->AddEntry(h_GlobalQA_mbd_nhit_s,"South");
     h_GlobalQA_mbd_nhit_s->DrawCopy("hist");
   
     gPad->UseCurrentStyle();
     gPad->SetLogy();
 
     h_GlobalQA_mbd_nhit_n->SetLineColor(kRed);
-    leg03->AddEntry(h_GlobalQA_mbd_nhit_n,"North");
+    leg02->AddEntry(h_GlobalQA_mbd_nhit_n,"North");
     
     TText printnhits;
     TText printnhitn;
@@ -320,11 +314,11 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     printnhits.DrawText(0.5,0.6,boost::str(boost::format("South mean: %.2f") % means).c_str());
     printnhitn.DrawText(0.5,0.4,boost::str(boost::format("North mean: %.2f") % meann).c_str());
 
-    leg03->Draw();
+    leg02->Draw();
   }
 
   // Plot the number of mbd plots available
-  Pad[0][4]->cd();
+  Pad[0][3]->cd();
   gPad->UseCurrentStyle();
   if (h_GlobalQA_mbd_zvtxq)
   {
@@ -474,13 +468,9 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   TH1 *h_GlobalQA_ldClus_trig25 = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_ldClus_trig25"));
   TH1 *h_GlobalQA_ldClus_trig26 = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_ldClus_trig26"));
   TH1 *h_GlobalQA_ldClus_trig27 = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_ldClus_trig27"));
-
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig10 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig10"));
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig25 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig25"));
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig26 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig26"));
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig27 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig27"));
-
   TH1 *h_GlobalQA_triggerVec = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_triggerVec"));
+  TH2 *h_GlobalQA_edist_trig10 = dynamic_cast<TH2 *>(cl->getHisto("h_GlobalQA_edist_trig10"));
+  TH2 *h_GlobalQA_edist_trig26 = dynamic_cast<TH2 *>(cl->getHisto("h_GlobalQA_edist_trig26"));
 
   if (!gROOT->FindObject("Global3"))
   {
@@ -524,16 +514,87 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   {
     return -1;
   }
+  Pad[2][1]->cd();
+  if (h_GlobalQA_edist_trig10)
+  {
+    gPad->UseCurrentStyle();
+    h_GlobalQA_edist_trig10->SetXTitle("Trigger 10 max cluster\t ieta");
+    h_GlobalQA_edist_trig10->SetYTitle("iphi");
+    h_GlobalQA_edist_trig10->DrawCopy("colz");
+  }
+  else
+  {
+    return -1;
+  }
+  Pad[2][2]->cd();
+  if (h_GlobalQA_edist_trig26)
+  {
+    gPad->UseCurrentStyle();
+    h_GlobalQA_edist_trig26->SetXTitle("Trigger 26 max cluster\t ieta");
+    h_GlobalQA_edist_trig26->SetYTitle("iphi");
+    h_GlobalQA_edist_trig26->DrawCopy("colz");
+  }
+  else
+  {
+    return -1;
+  }
+
+
+  // Plot the triggervector
+  Pad[2][3]->cd();
+  if (h_GlobalQA_triggerVec)
+  {
+    h_GlobalQA_triggerVec->SetXTitle("Trigger index");
+    h_GlobalQA_triggerVec->SetYTitle("Counts");
+    gPad->UseCurrentStyle();
+    h_GlobalQA_triggerVec->DrawCopy("hist");
+  }
+  else
+  {
+    return 1;
+  }
+  
+  //db->DBcommit();
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << Name() << "_Trigger Run " << cl->RunNumber();
+  runstring = runnostream.str();
+  transparent[2]->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+  TC[2]->Update();
+
+
+  TH1 *pr_GlobalQA_evtNum_ldClus_trig10 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig10"));
+  TH1 *pr_GlobalQA_evtNum_ldClus_trig25 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig25"));
+  TH1 *pr_GlobalQA_evtNum_ldClus_trig26 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig26"));
+  TH1 *pr_GlobalQA_evtNum_ldClus_trig27 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig27"));
+  TH1 *pr_GlobalQA_rejection_trig25 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_rejection_trig25"));
+  TH1 *pr_GlobalQA_rejection_trig26 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_rejection_trig26"));
+  TH1 *pr_GlobalQA_rejection_trig27 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_rejection_trig27"));
+  TH1 *pr_GlobalQA_livetime_trig10 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_livetime_trig10"));
+  TH1 *pr_GlobalQA_livetime_trig26 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_livetime_trig26"));
+  TH1 *pr_GlobalQA_livetime_trig27 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_livetime_trig27"));
+
+  // Second page
+  if (!gROOT->FindObject("Global4"))
+  {
+    MakeCanvas("Global4",3);
+  }
   
   // Plot the trigger persistency
-  TLegend * leg21 = new TLegend(0.5, 0.7, 0.9 ,0.9);
-  Pad[2][1]->cd();
+  TLegend * leg30 = new TLegend(0.7, 0.8, 0.9 ,1.0);
+  Pad[3][0]->cd();
   if (pr_GlobalQA_evtNum_ldClus_trig10 && pr_GlobalQA_evtNum_ldClus_trig25 && pr_GlobalQA_evtNum_ldClus_trig26 && pr_GlobalQA_evtNum_ldClus_trig27)
   {
+    gPad->UseCurrentStyle();
     pr_GlobalQA_evtNum_ldClus_trig27->SetXTitle("Events binned by one thousand");
     pr_GlobalQA_evtNum_ldClus_trig27->SetYTitle("Average leading cluster E [GeV]");
 
-    gPad->UseCurrentStyle();
 
     pr_GlobalQA_evtNum_ldClus_trig10->SetLineColor(kBlack);
     pr_GlobalQA_evtNum_ldClus_trig25->SetLineColor(kRed);
@@ -558,10 +619,10 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
     pr_GlobalQA_evtNum_ldClus_trig26->GetXaxis()->SetRangeUser(0,last);
     pr_GlobalQA_evtNum_ldClus_trig27->GetXaxis()->SetRangeUser(0,last);
 
-    leg21->AddEntry(pr_GlobalQA_evtNum_ldClus_trig10, "10. MBD N+S >= 1");
-    leg21->AddEntry(pr_GlobalQA_evtNum_ldClus_trig25, "25. MBD N+S >= 1 && Photon 3 GeV");
-    leg21->AddEntry(pr_GlobalQA_evtNum_ldClus_trig26, "26. MBD N+S >= 1 && Photon 4 GeV");
-    leg21->AddEntry(pr_GlobalQA_evtNum_ldClus_trig27, "27. MBD N+S >= 1 && Photon 5 GeV");
+    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig10, "10. MBD N+S >= 1");
+    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig25, "25. MBD N+S >= 1 && Photon 3 GeV");
+    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig26, "26. MBD N+S >= 1 && Photon 4 GeV");
+    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig27, "27. MBD N+S >= 1 && Photon 5 GeV");
    
     pr_GlobalQA_evtNum_ldClus_trig27->SetMinimum(0);
     pr_GlobalQA_evtNum_ldClus_trig27->SetMinimum(8);
@@ -570,40 +631,112 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
     pr_GlobalQA_evtNum_ldClus_trig25->DrawCopy("hist same");
     pr_GlobalQA_evtNum_ldClus_trig10->DrawCopy("hist same");
 
-    leg21->Draw();
+    leg30->Draw();
   }
   else
   {
     return 1;
   }
 
-  // Plot the triggervector
-  Pad[2][2]->cd();
-  if (h_GlobalQA_triggerVec)
+  // Plot the trigger rejections
+  TLegend * leg31 = new TLegend(0.5, 0.7, 0.9 ,0.9);
+  Pad[3][1]->cd();
+  if (pr_GlobalQA_rejection_trig25 && pr_GlobalQA_rejection_trig26 && pr_GlobalQA_rejection_trig27)
   {
-    h_GlobalQA_triggerVec->SetXTitle("Trigger index");
-    h_GlobalQA_triggerVec->SetYTitle("Counts");
     gPad->UseCurrentStyle();
-    h_GlobalQA_triggerVec->DrawCopy("hist");
+    pr_GlobalQA_rejection_trig27->SetXTitle("Events binned by one thousand");
+    pr_GlobalQA_rejection_trig27->SetYTitle("Average rejection factor");
+
+
+    pr_GlobalQA_rejection_trig25->SetLineColor(kRed);
+    pr_GlobalQA_rejection_trig26->SetLineColor(kGreen);
+    pr_GlobalQA_rejection_trig27->SetLineColor(kBlue);
+    
+    int last = 0;
+    for (int i = 1; i < pr_GlobalQA_rejection_trig25->GetNbinsX(); i++)
+    {
+      if (pr_GlobalQA_rejection_trig25->GetBinContent(i) != 0)
+      {
+        last = i;
+      }
+      else 
+      {
+        break;
+      }
+    }
+
+    pr_GlobalQA_rejection_trig25->GetXaxis()->SetRangeUser(0,last);
+    pr_GlobalQA_rejection_trig26->GetXaxis()->SetRangeUser(0,last);
+    pr_GlobalQA_rejection_trig27->GetXaxis()->SetRangeUser(0,last);
+
+    leg31->AddEntry(pr_GlobalQA_rejection_trig25, "25. MBD N+S >= 1 && Photon 3 GeV");
+    leg31->AddEntry(pr_GlobalQA_rejection_trig26, "26. MBD N+S >= 1 && Photon 4 GeV");
+    leg31->AddEntry(pr_GlobalQA_rejection_trig27, "27. MBD N+S >= 1 && Photon 5 GeV");
+   
+    pr_GlobalQA_rejection_trig27->SetMinimum(0);
+    pr_GlobalQA_rejection_trig27->DrawCopy("hist");
+    pr_GlobalQA_rejection_trig26->DrawCopy("hist same");
+    pr_GlobalQA_rejection_trig25->DrawCopy("hist same");
+
+    //leg31->Draw();
   }
   else
   {
     return 1;
   }
 
+  // Plot the trigger livetimes
+  TLegend * leg32 = new TLegend(0.5, 0.7, 0.9 ,0.9);
+  Pad[3][2]->cd();
+  if (pr_GlobalQA_livetime_trig10 && pr_GlobalQA_livetime_trig26 && pr_GlobalQA_livetime_trig27)
+  {
+    gPad->UseCurrentStyle();
+    pr_GlobalQA_livetime_trig27->SetXTitle("Events binned by one thousand");
+    pr_GlobalQA_livetime_trig27->SetYTitle("Average livetime factor");
+
+
+    pr_GlobalQA_livetime_trig10->SetLineColor(kRed);
+    pr_GlobalQA_livetime_trig26->SetLineColor(kGreen);
+    pr_GlobalQA_livetime_trig27->SetLineColor(kBlue);
+    
+    int last = 0;
+    for (int i = 1; i < pr_GlobalQA_livetime_trig10->GetNbinsX(); i++)
+    {
+      if (pr_GlobalQA_livetime_trig10->GetBinContent(i) != 0)
+      {
+        last = i;
+      }
+      else 
+      {
+        break;
+      }
+    }
+
+    pr_GlobalQA_livetime_trig10->GetXaxis()->SetRangeUser(0,last);
+    pr_GlobalQA_livetime_trig26->GetXaxis()->SetRangeUser(0,last);
+    pr_GlobalQA_livetime_trig27->GetXaxis()->SetRangeUser(0,last);
+
+    leg32->AddEntry(pr_GlobalQA_livetime_trig10, "25. MBD N+S >= 1 && Photon 3 GeV");
+    leg32->AddEntry(pr_GlobalQA_livetime_trig26, "26. MBD N+S >= 1 && Photon 4 GeV");
+    leg32->AddEntry(pr_GlobalQA_livetime_trig27, "27. MBD N+S >= 1 && Photon 5 GeV");
+   
+    pr_GlobalQA_livetime_trig27->SetMinimum(0);
+    pr_GlobalQA_livetime_trig27->DrawCopy("hist");
+    pr_GlobalQA_livetime_trig26->DrawCopy("hist same");
+    pr_GlobalQA_livetime_trig10->DrawCopy("hist same");
+
+    //leg32->Draw();
+  }
+  else
+  {
+    return 1;
+  }
+  
+  
   //db->DBcommit();
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream;
-  std::string runstring;
-  runnostream << Name() << "_Trigger Run " << cl->RunNumber();
-  runstring = runnostream.str();
-  transparent[2]->cd();
+  transparent[3]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
-  TC[2]->Update();
+  TC[3]->Update();
   return 0;
 }
 
@@ -622,8 +755,10 @@ int GlobalQADraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(TC[0], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "ZDC", "global2", "png");
   cl->CanvasToPng(TC[1], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "Trigger", "global3", "png");
+  pngfile = cl->htmlRegisterPage(*this, "Trigger/photon", "global3", "png");
   cl->CanvasToPng(TC[2], pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "Trigger/persistency", "global4", "png");
+  cl->CanvasToPng(TC[3], pngfile);
 
   return 0;
 }
