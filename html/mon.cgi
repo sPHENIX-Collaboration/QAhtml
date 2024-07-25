@@ -400,7 +400,7 @@ sub print_start_1 {
   print "<html>\n";
   print "<head>\n";
   print "<link rel=\"stylesheet\" href=\"$css\" type=\"text/css\">\n";
-  print "<title>PHENIX Online Production HTML Output for Run $run</title>\n";
+  print "<title>PHENIX Offline Production HTML Output for Run $run</title>\n";
 
   print_copyright();
 
@@ -581,7 +581,7 @@ sub show_contacts {
   print html_doctype("Transitional");
   print "<html>\n<head>\n";
   print "<link rel=\"stylesheet\" href=\"mon.css\" type=\"text/css\">\n";
-  print "<title>The humans behind the PHENIX Online Production</title>\n";
+  print "<title>The humans behind the PHENIX Offline Production</title>\n";
   print "</head>\n<body class=\"contacts\">\n";
 
   print "<P>The humans behind the sPHENIX QA...<BR><HR>";
