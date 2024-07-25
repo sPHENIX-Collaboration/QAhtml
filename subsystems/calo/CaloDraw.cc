@@ -554,7 +554,7 @@ int CaloDraw::DrawIhcal()
       cold_towers = calo_checker->ihcal_cold_towers;
     }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
-  myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
+  myText(0.75, 0.62, kBlack, "Expected: 0 dead, 0 hot, 0 cold", 0.06);
   Pad[8][3]->cd();
   TH1F *ihcal_proj_masked = nullptr;
   if (h_hitmask) ihcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_ihcal_proj_masked");
@@ -734,7 +734,7 @@ int CaloDraw::DrawOhcal()
       cold_towers = calo_checker->ohcal_cold_towers;
     }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
-  myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
+  myText(0.75, 0.62, kBlack, "Expected: 0 dead, 0 hot, 0 cold", 0.06);
   Pad[10][3]->cd();
   TH1F *ohcal_proj_masked = nullptr;
   if (h_hitmask) ohcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_ohcal_proj_masked");
