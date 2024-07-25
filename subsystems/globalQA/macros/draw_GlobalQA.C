@@ -1,0 +1,18 @@
+#include <qahtml/QADrawClient.h>
+#include <globalqa/GlobalQADraw.h>
+
+R__LOAD_LIBRARY(libqadrawglobalqa.so)
+
+void draw_GlobalQA(const char *rootfile) {
+
+  QADrawClient *cl = QADrawClient::instance();
+  GlobalQADraw *ex = new GlobalQADraw();
+  cl->registerDrawer(ex);
+
+  cl->ReadHistogramsFromFile(rootfile);
+  cl->Verbosity(1);
+  cl->MakeHtml();
+  delete cl;
+  gSystem->Exit(0);
+  return ;
+}

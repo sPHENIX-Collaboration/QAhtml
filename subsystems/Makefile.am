@@ -8,6 +8,7 @@ SUBDIRS = \
   bco \
   calo \
   example \
+	globalQA \
   intt \
   inttrawhit \
   micromegas \
@@ -16,4 +17,4 @@ SUBDIRS = \
   siliconseeds \
   tpcseeds \
   tpc \
-  vertex
+  vertex 

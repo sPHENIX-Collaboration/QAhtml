@@ -24,7 +24,9 @@ class CaloDraw : public QADraw
   int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
   void SetCemcSummary(TCanvas* c);
-  void SetCemcChecker(CaloGoodRunChecker* ch) {cemc_checker = ch;}
+  void SetihcalSummary(TCanvas* c);  // Declaration for ihcal summary setter
+  void SetohcalSummary(TCanvas* c);  // Declaration for ohcal summary setter
+  void SetCaloChecker(CaloGoodRunChecker* ch) {calo_checker = ch;}
 
  private:
   int MakeCanvas(const std::string &name, int num);
@@ -37,16 +39,19 @@ class CaloDraw : public QADraw
   TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
   //  QADB *db {nullptr};
-  const static int ncanvases = 8;
+  const static int ncanvases = 11;
   const static int maxpads = 6;
   TCanvas *TC[ncanvases]{};
   TPad *transparent[ncanvases]{};
   TPad *Pad[ncanvases][maxpads]{};
   TCanvas* cemcSummary = nullptr;
+  TCanvas* ihcalSummary = nullptr;
+  TCanvas* ohcalSummary = nullptr;
+
   // add summary canvases for hcal etc later
   const char *histprefix;
-  // for EMCal good run determination
-  CaloGoodRunChecker* cemc_checker = nullptr;
+  // for EMCal good run determination and hcal
+  CaloGoodRunChecker* calo_checker = nullptr;
 };
 
 #endif
