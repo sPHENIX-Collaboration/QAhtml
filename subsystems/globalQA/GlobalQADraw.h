@@ -26,9 +26,9 @@ class GlobalQADraw : public QADraw
   int DrawZDC(const std::string &what = "ALL");
   int DrawTrigger(const std::string &what = "ALL");
   QADrawDB *db{nullptr};
-  TCanvas *TC[3]{};
-  TPad *transparent[3]{};
-  TPad *Pad[3][5]{};
+  TCanvas *TC[4]{};
+  TPad *transparent[4]{};
+  TPad *Pad[4][5]{};
 };
 
 #endif
