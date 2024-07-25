@@ -547,7 +547,7 @@ sub select_run {
   print html_doctype("Transitional");
   print "<html>\n<head>\n";
   print "<link rel=\"stylesheet\" href=\"mon.css\" type=\"text/css\">\n";
-  print "<title>PHENIX OnlMon HTML Output : Run Selection</title>\n";
+  print "<title>PHENIX OffMon HTML Output : Run Selection</title>\n";
   print "</head>\n<body class=\"runselect\">\n";
 
   print "<P>Please click on a run range below to expand it (by default the latest runs are expanded), and then click on a run number to browse it.\n";
