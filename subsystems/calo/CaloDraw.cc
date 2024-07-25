@@ -169,7 +169,7 @@ int CaloDraw::DrawCemc()
   TH1 *invMass = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("InvMass")));
   TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
   TH2 *cemc_hotmap = nullptr;
-  if (cemc_checker) cemc_hotmap = cemc_checker->cemc_hcdmap;
+  if (calo_checker) cemc_hotmap = calo_checker->cemc_hcdmap;
   TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA")));
 
   // canvas 1
@@ -205,6 +205,7 @@ int CaloDraw::DrawCemc()
     cemc_etaphi->SetYTitle("#it{#phi}_{i} EMCal");
     cemc_etaphi->DrawCopy("COLZ");
     gPad->UseCurrentStyle();
+    gPad->SetLogz();
     gPad->SetRightMargin(0.15);
   }
   Pad[0][2]->cd();
@@ -318,11 +319,11 @@ int CaloDraw::DrawCemc()
   myText(0.25, 0.65, kRed, "2 = hot tower");
   myText(0.25, 0.60, kBlue, "3 = cold tower");
   int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
-  if (cemc_checker)
+  if (calo_checker)
   {
-    dead_towers = cemc_checker->cemc_dead_towers;
-    hot_towers = cemc_checker->cemc_hot_towers;
-    cold_towers = cemc_checker->cemc_cold_towers;
+    dead_towers = calo_checker->cemc_dead_towers;
+    hot_towers = calo_checker->cemc_hot_towers;
+    cold_towers = calo_checker->cemc_cold_towers;
   }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
   myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
@@ -420,7 +421,7 @@ int CaloDraw::DrawIhcal()
   TH2 *ihcal_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_time")));
   TH1F *ihcal_proj = (TH1F *) proj(ihcal_etaphi)->Clone("h_ihcal_proj");
   TH2 *ihcal_hotmap = nullptr;
-  if (ihcal_checker) ihcal_hotmap = ihcal_checker->ihcal_hcdmap;
+  if (calo_checker) ihcal_hotmap = calo_checker->ihcal_hcdmap;
   TH1 *ihcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_wQA")));
 
 
@@ -546,14 +547,14 @@ int CaloDraw::DrawIhcal()
   myText(0.25, 0.65, kRed, "2 = hot tower");
   myText(0.25, 0.60, kBlue, "3 = cold tower");
   int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
-  if (ihcal_checker)
+  if (calo_checker)
     {
-      dead_towers = ihcal_checker->ihcal_dead_towers;
-      hot_towers = ihcal_checker->ihcal_hot_towers;
-      cold_towers = ihcal_checker->ihcal_cold_towers;
+      dead_towers = calo_checker->ihcal_dead_towers;
+      hot_towers = calo_checker->ihcal_hot_towers;
+      cold_towers = calo_checker->ihcal_cold_towers;
     }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
-  myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
+  myText(0.75, 0.62, kBlack, "Expected: 0 dead, 0 hot, 0 cold", 0.06);
   Pad[8][3]->cd();
   TH1F *ihcal_proj_masked = nullptr;
   if (h_hitmask) ihcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_ihcal_proj_masked");
@@ -602,7 +603,7 @@ int CaloDraw::DrawOhcal()
   TH2 *ohcal_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_time")));
   TH1F *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
   TH2 *ohcal_hotmap = nullptr;
-  if (ohcal_checker) ohcal_hotmap = ohcal_checker->ohcal_hcdmap;
+  if (calo_checker) ohcal_hotmap = calo_checker->ohcal_hcdmap;
   TH1 *ohcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_wQA")));
 
   // canvas 1
@@ -726,14 +727,14 @@ int CaloDraw::DrawOhcal()
   myText(0.25, 0.65, kRed, "2 = hot tower");
   myText(0.25, 0.60, kBlue, "3 = cold tower");
   int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
-  if (ohcal_checker)
+  if (calo_checker)
     {
-      dead_towers = ohcal_checker->ohcal_dead_towers;
-      hot_towers = ohcal_checker->ohcal_hot_towers;
-      cold_towers = ohcal_checker->ohcal_cold_towers;
+      dead_towers = calo_checker->ohcal_dead_towers;
+      hot_towers = calo_checker->ohcal_hot_towers;
+      cold_towers = calo_checker->ohcal_cold_towers;
     }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
-  myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
+  myText(0.75, 0.62, kBlack, "Expected: 0 dead, 0 hot, 0 cold", 0.06);
   Pad[10][3]->cd();
   TH1F *ohcal_proj_masked = nullptr;
   if (h_hitmask) ohcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_ohcal_proj_masked");
@@ -1036,6 +1037,7 @@ int CaloDraw::DBVarInit()
 void CaloDraw::SetCemcSummary(TCanvas* c)
 {
   cemcSummary = c;
+  /*
   cemcSummary->cd();
   // add the run number title
   QADrawClient *cl = QADrawClient::instance();
@@ -1054,11 +1056,13 @@ void CaloDraw::SetCemcSummary(TCanvas* c)
   tr->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
   cemcSummary->Update();
+  */
 }
 
 void CaloDraw::SetihcalSummary(TCanvas* c)
 {
   ihcalSummary = c;
+  /*
   ihcalSummary->cd();
   
   // Add the run number title
@@ -1078,11 +1082,13 @@ void CaloDraw::SetihcalSummary(TCanvas* c)
   tr->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
   ihcalSummary->Update();
+  */
 }
 
 void CaloDraw::SetohcalSummary(TCanvas* c)
 {
   ohcalSummary = c;
+  /*
   ohcalSummary->cd();
   
   // Add the run number title
@@ -1102,6 +1108,7 @@ void CaloDraw::SetohcalSummary(TCanvas* c)
   tr->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
   ohcalSummary->Update();
+  */
 }
 
 TH1 *CaloDraw::proj(TH2 *h2)

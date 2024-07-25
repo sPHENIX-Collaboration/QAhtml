@@ -26,9 +26,7 @@ class CaloDraw : public QADraw
   void SetCemcSummary(TCanvas* c);
   void SetihcalSummary(TCanvas* c);  // Declaration for ihcal summary setter
   void SetohcalSummary(TCanvas* c);  // Declaration for ohcal summary setter
-  void SetCemcChecker(CaloGoodRunChecker* ch) {cemc_checker = ch;}
-  void SetihcalChecker(CaloGoodRunChecker* ch) {ihcal_checker = ch;}
-  void SetohcalChecker(CaloGoodRunChecker* ch) {ohcal_checker = ch;}
+  void SetCaloChecker(CaloGoodRunChecker* ch) {calo_checker = ch;}
 
  private:
   int MakeCanvas(const std::string &name, int num);
@@ -53,9 +51,7 @@ class CaloDraw : public QADraw
   // add summary canvases for hcal etc later
   const char *histprefix;
   // for EMCal good run determination and hcal
-  CaloGoodRunChecker* cemc_checker = nullptr;
-  CaloGoodRunChecker* ihcal_checker = nullptr;
-  CaloGoodRunChecker* ohcal_checker = nullptr;
+  CaloGoodRunChecker* calo_checker = nullptr;
 };
 
 #endif
