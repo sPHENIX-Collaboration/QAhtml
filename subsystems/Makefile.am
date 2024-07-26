@@ -8,6 +8,7 @@ SUBDIRS = \
   bco \
   calo \
   example \
+	globalQA \
   intt \
   inttrawhit \
   micromegas \

@@ -20,6 +20,10 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstdio>
+#include <chrono>
+#include <ctime>
+
 
 std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
 {
@@ -39,6 +43,11 @@ std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
   TFile* fcemc = new TFile(outfile_cemc.c_str(), "READ");
   TFile* fihcal = new TFile(outfile_ihcal.c_str(), "READ");
   TFile* fohcal = new TFile(outfile_ohcal.c_str(), "READ");
+  if (!fcemc->IsOpen())
+  {
+    std::cout << "Failed to create hot/cold/dead tower maps!" << std::endl;
+    return "";
+  }
   cemc_hcdmap = (TH2*)fcemc->Get("h_hot");
   ihcal_hcdmap = (TH2*)fihcal->Get("h_hot");
   ohcal_hcdmap = (TH2*)fohcal->Get("h_hot");
@@ -51,34 +60,41 @@ std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
   // clean up
   fmaps->Close(); fcemc->Close(); fihcal->Close(); fohcal->Close();
   delete fmaps; delete fcemc; delete fihcal; delete fohcal;
-  // remove the extra files now that we're done
-  gSystem->Exec(Form("rm %s", outfile_cemc.c_str()));
-  gSystem->Exec(Form("rm %s", outfile_ihcal.c_str()));
-  gSystem->Exec(Form("rm %s", outfile_ohcal.c_str()));
+  // remove the extra files from emcNoisyTowerFinder now that we're done
+  std::string outfiles[3] = {outfile_cemc, outfile_ihcal, outfile_ohcal};
+  for (int i=0; i<3; i++)
+  {
+    std::string str = outfiles[i];
+    std::string cdbstr = str;
+    size_t pos = cdbstr.find_last_of('.');
+    cdbstr.insert(pos, "cdb");
+    std::remove(str.c_str());
+    std::remove(cdbstr.c_str());
+  }
 
   return mapsfile;
 }
 
 void CaloGoodRunChecker::DeleteHotColdDeadMaps()
 {
-  gSystem->Exec(Form("rm %s", mapsfile.c_str()));
+  std::remove(mapsfile.c_str());
 }
 
 
-bool CaloGoodRunChecker::CemcGoodRun()
+void CaloGoodRunChecker::CemcCheckGoodRun()
 {
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
-  TH1 *zdcNorthcalib = dynamic_cast<TH1 *>(hfile->Get(Form("%szdcNorthcalib", histprefix.c_str())));
+  TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str())));
   TH2 *cemc_etaphi_time = dynamic_cast<TH2 *>(hfile->Get(Form("%scemc_etaphi_time", histprefix.c_str())));
   TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str())));
   cemc_hcdmap = dynamic_cast<TH2 *>(mapfile->Get("cemc_hotmap"));
 
   // Number of events
-  if (zdcNorthcalib)
+  if (emcal_hcal_correlation)
   {
-    n_events = zdcNorthcalib->GetEntries();
+    n_events = emcal_hcal_correlation->GetEntries();
   }
   int MINEVENTS = 100000;
   if (n_events < MINEVENTS)
@@ -153,25 +169,39 @@ bool CaloGoodRunChecker::CemcGoodRun()
   {
     cemc_fails_vertex = true;
   }
-  // remove vertex width cut -- not actually useful
-  /*
   float MAXVTXZSIGMA = 20.0;
   if (vtxz_sigma > MAXVTXZSIGMA)
   {
     cemc_fails_vertex = true;
   }
-  */
 
   bool failed_check = (cemc_fails_events || cemc_fails_badtowers || cemc_fails_timing || cemc_fails_vertex);
-  if (failed_check) return false;
-  else return true;
+  if (failed_check) return;
+  else
+  {
+    cemc_isgood = true;
+    return;
+  }
 }
 
-TCanvas* CaloGoodRunChecker::CemcMakeSummary(bool cemc_goodrun)
+std::string CaloGoodRunChecker::CemcGetComments()
+{
+  std::string comments;
+  if (cemc_isgood) comments = "GoodRun";
+  else comments = "";
+  if (cemc_fails_events) comments += "NotEnoughEvents";
+  if (cemc_fails_badtowers) comments += "BadTowers";
+  if (cemc_fails_timing) comments += "BadTiming";
+  if (cemc_fails_vertex) comments += "BadVertex";
+  return comments;
+}
+
+TCanvas* CaloGoodRunChecker::CemcMakeSummary()
 {
   QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
+  /* std::cout << "Canvas xsize = " << xsize << ", ysize = " << ysize << std::endl; */
   // xpos (-1) negative: do not draw menu bar
   TCanvas* canvas = new TCanvas("cemcsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
   canvas->cd();
@@ -180,52 +210,35 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary(bool cemc_goodrun)
   std::string runtime = cl->RunTime();
   int n_events_db = cl->EventsInRun();
   myText(0.5, 0.85, kBlack, Form("EMCal Summary - Run %d", runno), 0.08);
+  time_t endruntime = cl->EndRunUnixTime();
+  time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  time_t timediff_seconds = now - endruntime;
+  float timediff_hours = timediff_seconds / 3600.0;
+  // allow up to 36 hours for CaloValid to finish processing all segments
+  time_t maxtimediff = 36;
   
-  if (cemc_goodrun)
+  if (cemc_isgood)
   {
-    myText(0.5, 0.70, kGreen, "Overall status: Good Run", 0.06);
+    myText(0.5, 0.75, kGreen, "Overall status: Good Run", 0.06);
   }
   else
   {
-    myText(0.5, 0.70, kRed, "Overall status: Bad Run", 0.06);
+    if (timediff_hours > maxtimediff)
+    {
+      myText(0.5, 0.75, kRed, "Overall status: Bad Run", 0.06);
+      myText(0.5, 0.68, kRed, Form("(HTML generated %.0f hours after run end)", timediff_hours));
+    }
+    else
+    {
+      myText(0.5, 0.75, kOrange-3, "Overall status: Check again later", 0.06);
+      myText(0.5, 0.68, kOrange-3, Form("(HTML generated %.0f hours after run end)", timediff_hours));
+    }
   }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
-  if (cemc_fails_events)
-  {
-    myText(0.8, 0.55, kRed, "(bad)");
-  }
-  else
-  {
-    myText(0.8, 0.55, kGreen, "(good)");
-  }
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", cemc_dead_towers, cemc_hot_towers, cemc_cold_towers));
-  if (cemc_fails_badtowers)
-  {
-    myText(0.8, 0.50, kRed, "(bad)");
-  }
-  else
-  {
-    myText(0.8, 0.50, kGreen, "(good)");
-  }
   myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
-  if (cemc_fails_timing)
-  {
-    myText(0.8, 0.45, kRed, "(bad)");
-  }
-  else
-  {
-    myText(0.8, 0.45, kGreen, "(good)");
-  }
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
-  if (cemc_fails_vertex)
-  {
-    myText(0.8, 0.40, kRed, "(bad)");
-  }
-  else
-  {
-    myText(0.8, 0.40, kGreen, "(good)");
-  }
 
   // add the run number title
   TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);
@@ -247,23 +260,24 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary(bool cemc_goodrun)
   return canvas;
 }
 
-void CaloGoodRunChecker::CemcWriteDB(bool isGood)
+void CaloGoodRunChecker::CemcWriteDB()
 {
-  // if the run is bad, don't do anything. just keep the default DB --> "bad"
-  if (!isGood)
+  // if the run is bad, we still want to update the comments field
+  /*
+  if (!cemc_isgood)
   {
     return;
   }
-
+  */
   QADrawClient *cl = QADrawClient::instance();
   int runno = cl->RunNumber();
-  delete cl;
+  /* delete cl; // for some reason deleting the client here causes a return... not sure why */
 
   std::string server = "sphnxproddbmaster";
-  std::string database = "Production";
-  std::string username = "phnxro";
+  std::string database = "Production_write";
+  std::string username = "";
   std::string password = "";
-  
+
   odbc::Connection* con = nullptr;
   odbc::Statement* query = nullptr;
   odbc::ResultSet* rs = nullptr;
@@ -282,14 +296,19 @@ void CaloGoodRunChecker::CemcWriteDB(bool isGood)
   }
 
   query = con->createStatement();
-  cmd << Form(" UPDATE goodruns SET emcal = (%s, %s) WHERE runnumber = %d ", "GOLDEN", "Greg's write test worked!", runno);
+  std::string goodbad;
+  if (cemc_isgood) goodbad = "GOLDEN";
+  else goodbad = "BAD";
+  std::string comments = CemcGetComments();
+  cmd << Form("UPDATE goodruns SET emcal_auto = ('%s', '%s') WHERE runnumber = %d ", goodbad.c_str(), comments.c_str(), runno);
+  /* std::cout << "Executing query. Query = " << cmd.str() << std::endl; */
   try
   {
     rs = query->executeQuery(cmd.str());
   }
   catch (odbc::SQLException& e)
   {
-    std::cout << "Exception caught" << std::endl;
+    std::cout << "Exception caught during Statement::executeQuery" << std::endl;
     std::cout << "Message: " << e.getMessage() << std::endl;
   }
 
@@ -297,7 +316,313 @@ void CaloGoodRunChecker::CemcWriteDB(bool isGood)
   delete rs;
   delete query;
   delete con;
+  delete cl;
   return;
+}
+
+void CaloGoodRunChecker::ihcalCheckGoodRun()
+{
+  TFile* hfile = new TFile(histfile.c_str(), "READ");
+  TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
+
+  TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str())));
+  TH2 *ihcal_etaphi_time = dynamic_cast<TH2 *>(hfile->Get(Form("%sihcal_etaphi_time", histprefix.c_str())));
+  TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str())));
+  ihcal_hcdmap = dynamic_cast<TH2 *>(mapfile->Get("ihcal_hotmap"));
+
+  // Number of events
+  if (emcal_hcal_correlation)
+  {
+    n_events = emcal_hcal_correlation->GetEntries();
+  }
+  int MINEVENTS = 100000;
+  if (n_events < MINEVENTS)
+    {
+      ihcal_fails_events = true;
+    }
+
+  // Bad towers
+  if (ihcal_hcdmap)
+    {
+      ihcal_dead_towers = 0;
+      ihcal_hot_towers = 0;
+      ihcal_cold_towers = 0;
+      int nbins = ihcal_hcdmap->GetNcells();
+      for (int i=0; i<=nbins; i++)
+	{
+	  if (ihcal_hcdmap->GetBinContent(i) == 1) ihcal_dead_towers++;
+	  if (ihcal_hcdmap->GetBinContent(i) == 2) ihcal_hot_towers++;
+	  if (ihcal_hcdmap->GetBinContent(i) == 3) ihcal_cold_towers++;
+	}
+    }
+  int MAXHOTTOWERS = 6; //6
+  if (ihcal_hot_towers > MAXHOTTOWERS)
+    {
+      ihcal_fails_badtowers = true;
+    }
+  int MAXCOLDDEADTOWERS = 31; //31
+  if ((ihcal_cold_towers + ihcal_dead_towers) > MAXCOLDDEADTOWERS)
+    {
+      ihcal_fails_badtowers = true;
+    }
+
+  // Hit timing
+  if (ihcal_etaphi_time)
+    {
+      int nx = ihcal_etaphi_time->GetNbinsX();
+      int ny = ihcal_etaphi_time->GetNbinsY();
+      float t_sum = 0;
+      float t2_sum = 0;
+      for (int ieta=0; ieta<nx; ieta++)
+	{
+	  for (int iphi=0; iphi<ny; iphi++)
+	    {
+	      float t = ihcal_etaphi_time->GetBinContent(ieta+1, iphi+1);
+	      t_sum += t;
+	      t2_sum += t*t;
+	    }
+	}
+      ihcal_time_mean = t_sum/(nx*ny);
+      ihcal_time_sigma = sqrt((t2_sum/(nx*ny)) - (ihcal_time_mean*ihcal_time_mean));
+    }
+  float MINTIMEMEAN = -1.0;
+  float MAXTIMEMEAN = 1.0;
+  if ((ihcal_time_mean < MINTIMEMEAN) || (ihcal_time_mean > MAXTIMEMEAN))
+    {
+      ihcal_fails_timing = true;
+    }
+  float MAXTIMESIGMA = 2.0;
+  if (ihcal_time_sigma > MAXTIMESIGMA)
+    {
+      ihcal_fails_timing = true;
+    }
+
+  // MBD vertex
+  if (vtx_z)
+    {
+      vtxz_mean = vtx_z->GetMean();
+      vtxz_sigma = vtx_z->GetStdDev();
+    }
+  float MAXABSVTXZ = 5.0;
+  if (abs(vtxz_mean) > MAXABSVTXZ)
+    {
+     ihcal_fails_vertex = true;
+    }
+  // remove vertex width cut -- not actually useful
+  /*
+  float MAXVTXZSIGMA = 20.0;
+  if (vtxz_sigma > MAXVTXZSIGMA)
+  {
+    ihcal_fails_vertex = true;
+  }
+  */
+  
+  bool failed_check = (ihcal_fails_events || ihcal_fails_badtowers || ihcal_fails_timing || ihcal_fails_vertex);
+  if (failed_check) return;
+  else
+  {
+    ihcal_isgood = true;
+    return;
+  }
+}
+
+TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
+{
+  QADrawClient *cl = QADrawClient::instance();
+  int xsize = cl->GetDisplaySizeX();
+  int ysize = cl->GetDisplaySizeY();
+  // xpos (-1) negative: do not draw menu bar
+  TCanvas* canvas = new TCanvas("ihcalsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  canvas->cd();
+
+  int runno = cl->RunNumber();
+  std::string runtime = cl->RunTime();
+  int n_events_db = cl->EventsInRun();
+  myText(0.5, 0.85, kBlack, Form("IHCal Summary - Run %d", runno), 0.08);
+  
+  if (ihcal_isgood)
+    {
+      myText(0.5, 0.70, kGreen, "Overall status: Good Run", 0.06);
+    }
+  else
+    {
+      myText(0.5, 0.70, kRed, "Overall status: Bad Run", 0.06);
+    }
+  myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
+  myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
+ 
+  myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", ihcal_dead_towers, ihcal_hot_towers, ihcal_cold_towers));
+  
+  myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", ihcal_time_mean, ihcal_time_sigma));
+  
+  myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+ 
+  // add the run number title
+  TPad* tr = new TPad("transparent_ihcal", "", 0, 0, 1, 1);
+  tr->SetFillStyle(4000);
+  tr->Draw();
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << "CaloQA_ihcal_summary Run " << cl->RunNumber();
+  runstring = runnostream.str();
+  tr->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+
+  canvas->Update();
+  return canvas;
+}
+
+void CaloGoodRunChecker::ohcalCheckGoodRun()
+{
+  TFile* hfile = new TFile(histfile.c_str(), "READ");
+  TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
+
+  TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str())));
+  TH2 *ohcal_etaphi_time = dynamic_cast<TH2 *>(hfile->Get(Form("%sohcal_etaphi_time", histprefix.c_str())));
+  TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str())));
+  ohcal_hcdmap = dynamic_cast<TH2 *>(mapfile->Get("ohcal_hotmap"));
+
+  // Number of events                                                                                                                                                                                      
+  if (emcal_hcal_correlation)
+  {
+    n_events = emcal_hcal_correlation->GetEntries();
+  }
+  int MINEVENTS = 100000;
+  if (n_events < MINEVENTS)
+    {
+      ohcal_fails_events = true;
+    }
+
+  // Bad towers                                                                                                                                                                                            
+  if (ohcal_hcdmap)
+    {
+      ohcal_dead_towers = 0;
+      ohcal_hot_towers = 0;
+      ohcal_cold_towers = 0;
+      int nbins = ohcal_hcdmap->GetNcells();
+      for (int i=0; i<=nbins; i++)
+        {
+          if (ohcal_hcdmap->GetBinContent(i) == 1) ohcal_dead_towers++;
+          if (ohcal_hcdmap->GetBinContent(i) == 2) ohcal_hot_towers++;
+          if (ohcal_hcdmap->GetBinContent(i) == 3) ohcal_cold_towers++;
+        }
+    }
+  int MAXHOTTOWERS = 6;
+  if (ohcal_hot_towers > MAXHOTTOWERS)
+    {
+      ohcal_fails_badtowers = true;
+    }
+  int MAXCOLDDEADTOWERS = 31;
+  if ((ohcal_cold_towers + ohcal_dead_towers) > MAXCOLDDEADTOWERS)
+    {
+      ohcal_fails_badtowers = true;
+    }
+
+  // Hit timing                                                                                                                                                                                            
+  if (ohcal_etaphi_time)
+    {
+      int nx = ohcal_etaphi_time->GetNbinsX();
+      int ny = ohcal_etaphi_time->GetNbinsY();
+      float t_sum = 0;
+      float t2_sum = 0;
+      for (int ieta=0; ieta<nx; ieta++)
+        {
+          for (int iphi=0; iphi<ny; iphi++)
+            {
+              float t = ohcal_etaphi_time->GetBinContent(ieta+1, iphi+1);
+              t_sum += t;
+              t2_sum += t*t;
+            }
+        }
+      ohcal_time_mean = t_sum/(nx*ny);
+      ohcal_time_sigma = sqrt((t2_sum/(nx*ny)) - (ohcal_time_mean*ohcal_time_mean));
+    }
+  float MINTIMEMEAN = -1.0;
+  float MAXTIMEMEAN = 1.0;
+  if ((ohcal_time_mean < MINTIMEMEAN) || (ohcal_time_mean > MAXTIMEMEAN))
+    {
+      ohcal_fails_timing = true;
+    }
+  float MAXTIMESIGMA = 2.0;
+  if (ohcal_time_sigma > MAXTIMESIGMA)
+    {
+      ohcal_fails_timing = true;
+    }
+
+  // MBD vertex                                                                                                                                                                                            
+  if (vtx_z)
+    {
+      vtxz_mean = vtx_z->GetMean();
+      vtxz_sigma = vtx_z->GetStdDev();
+    }
+  float MAXABSVTXZ = 5.0;
+  if (abs(vtxz_mean) > MAXABSVTXZ)
+    {
+      ohcal_fails_vertex = true;
+    }
+
+  bool failed_check = (ohcal_fails_events || ohcal_fails_badtowers || ohcal_fails_timing || ohcal_fails_vertex);
+  if (failed_check) return;
+  else
+  {
+    ohcal_isgood = true;
+    return;
+  }
+}
+
+TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
+{
+  QADrawClient *cl = QADrawClient::instance();
+  int xsize = cl->GetDisplaySizeX();
+  int ysize = cl->GetDisplaySizeY();
+  // xpos (-1) negative: do not draw menu bar
+  TCanvas* canvas = new TCanvas("ohcalsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  canvas->cd();
+
+  int runno = cl->RunNumber();
+  std::string runtime = cl->RunTime();
+  int n_events_db = cl->EventsInRun();
+  myText(0.5, 0.85, kBlack, Form("OHCal Summary - Run %d", runno), 0.08);
+  
+  if (ohcal_isgood)
+    {
+      myText(0.5, 0.70, kGreen, "Overall status: Good Run", 0.06);
+    }
+  else
+    {
+      myText(0.5, 0.70, kRed, "Overall status: Bad Run", 0.06);
+    }
+  myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
+  myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
+  myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", ohcal_dead_towers, ohcal_hot_towers, ohcal_cold_towers));
+  
+  myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", ohcal_time_mean, ohcal_time_sigma));
+  
+  myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+
+  // add the run number title
+  TPad* tr = new TPad("transparent_ohcal", "", 0, 0, 1, 1);
+  tr->SetFillStyle(4000);
+  tr->Draw();
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << "CaloQA_ohcal_summary Run " << cl->RunNumber();
+  runstring = runnostream.str();
+  tr->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+
+  canvas->Update();
+  return canvas;
 }
 
 void CaloGoodRunChecker::myText(double x, double y, int color, const char *text, double tsize)
@@ -309,4 +634,3 @@ void CaloGoodRunChecker::myText(double x, double y, int color, const char *text,
   l.SetTextColor(color);
   l.DrawLatex(x, y, text);
 }
-
