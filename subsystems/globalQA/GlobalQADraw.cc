@@ -219,24 +219,26 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   TC[0]->Clear("D");
   
   // Plot the z-vertices wide
-  TLegend * leg00 = new TLegend(0.6, 0.7, 0.9, 0.9);
+  TLegend * leg00 = new TLegend(0.58, 0.7, 0.84, 0.89);
+  leg00->SetTextSize(0.035);
+  leg00->SetBorderSize(0);
   Pad[0][0]->cd();
   if (h_GlobalQA_mbd_zvtx_wide && h_GlobalQA_calc_zvtx_wide)
   {
     TF1 * f = new TF1("f", "gaus", -100,100);
     f->SetParameters(h_GlobalQA_mbd_zvtx_wide->GetMaximum(), h_GlobalQA_mbd_zvtx_wide->GetMean(), h_GlobalQA_mbd_zvtx_wide->GetRMS() );
     h_GlobalQA_mbd_zvtx_wide->Fit("f");
-    
-    h_GlobalQA_mbd_zvtx_wide->SetLineColor(kBlue);
     leg00->AddEntry(h_GlobalQA_mbd_zvtx_wide,"Provided z-vertex");
-    h_GlobalQA_mbd_zvtx_wide->DrawCopy("hist");
      
     gPad->UseCurrentStyle();
-    
+
+    h_GlobalQA_mbd_zvtx_wide->SetLineColor(kRed+4);
+    h_GlobalQA_mbd_zvtx_wide->DrawCopy("hist");
+
     f->SetLineColor(kBlack);
     f->DrawCopy("same");
-    
-    h_GlobalQA_calc_zvtx_wide->SetLineColor(kRed);
+       
+    h_GlobalQA_calc_zvtx_wide->SetLineColor(kMagenta+1);
     leg00->AddEntry(h_GlobalQA_calc_zvtx_wide,"Calculated z-vertex");
     h_GlobalQA_calc_zvtx_wide->DrawCopy("hist same");
     
@@ -251,7 +253,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
     printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
-    printrms.DrawText(0.2,0.5,boost::str(boost::format("RMS: %.2f") % rms).c_str());
+    printrms.DrawText(0.2,0.55,boost::str(boost::format("RMS: %.2f") % rms).c_str());
   
     
     leg00->Draw();
@@ -266,14 +268,15 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   Pad[0][1]->cd();
   if (h_GlobalQA_mbd_charge_s && h_GlobalQA_mbd_charge_n)
   {
-    h_GlobalQA_mbd_charge_s->SetLineColor(kBlue);
-    leg01->AddEntry(h_GlobalQA_mbd_charge_s,"South");
-    h_GlobalQA_mbd_charge_s->DrawCopy("hist");
-    
+   
     gPad->UseCurrentStyle();
     gPad->SetLogy();
+
+     h_GlobalQA_mbd_charge_s->SetLineColor(kRed);
+    leg01->AddEntry(h_GlobalQA_mbd_charge_s,"South");
+    h_GlobalQA_mbd_charge_s->DrawCopy("hist");
       
-    h_GlobalQA_mbd_charge_n->SetLineColor(kRed);
+    h_GlobalQA_mbd_charge_n->SetLineColor(kBlue);
     leg01->AddEntry(h_GlobalQA_mbd_charge_n,"North");
     h_GlobalQA_mbd_charge_n->DrawCopy("hist same");
   
@@ -289,14 +292,15 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   Pad[0][2]->cd();
   if (h_GlobalQA_mbd_nhit_s && h_GlobalQA_mbd_nhit_n)
   {
-    h_GlobalQA_mbd_nhit_s->SetLineColor(kBlue);
-    leg02->AddEntry(h_GlobalQA_mbd_nhit_s,"South");
-    h_GlobalQA_mbd_nhit_s->DrawCopy("hist");
   
     gPad->UseCurrentStyle();
     gPad->SetLogy();
 
-    h_GlobalQA_mbd_nhit_n->SetLineColor(kRed);
+    h_GlobalQA_mbd_nhit_s->SetLineColor(kRed);
+    leg02->AddEntry(h_GlobalQA_mbd_nhit_s,"South");
+    h_GlobalQA_mbd_nhit_s->DrawCopy("hist");
+
+    h_GlobalQA_mbd_nhit_n->SetLineColor(kBlue);
     leg02->AddEntry(h_GlobalQA_mbd_nhit_n,"North");
     
     TText printnhits;
@@ -312,7 +316,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     
     h_GlobalQA_mbd_nhit_n->DrawCopy("hist same");
     printnhits.DrawText(0.5,0.6,boost::str(boost::format("South mean: %.2f") % means).c_str());
-    printnhitn.DrawText(0.5,0.4,boost::str(boost::format("North mean: %.2f") % meann).c_str());
+    printnhitn.DrawText(0.5,0.45,boost::str(boost::format("North mean: %.2f") % meann).c_str());
 
     leg02->Draw();
   }
@@ -381,15 +385,26 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
   Pad[1][0]->cd();
   if (h_GlobalQA_zdc_energy_s && h_GlobalQA_zdc_energy_n)
   {
-    h_GlobalQA_zdc_energy_s->SetLineColor(kBlue);
-    leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South");
-    h_GlobalQA_zdc_energy_s->DrawCopy("hist");
-    
+    h_GlobalQA_zdc_energy_s->Scale(1/h_GlobalQA_zdc_energy_s->Integral());
+    h_GlobalQA_zdc_energy_n->Scale(1/h_GlobalQA_zdc_energy_n->Integral()); 
+
     gPad->UseCurrentStyle();
 
-    h_GlobalQA_zdc_energy_n->SetLineColor(kRed);
+    h_GlobalQA_zdc_energy_s->SetLineColor(kRed);
+    leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South");
+    h_GlobalQA_zdc_energy_s->DrawCopy();
+
+    TGraph *gr_1n = new TGraph();
+    gr_1n->SetPoint(0, 70, 0);
+    gr_1n->SetPoint(1, 70, 1e7);
+    gr_1n->SetLineColor(kBlack);
+    gr_1n->SetLineWidth(2);
+    gr_1n->SetLineStyle(9);
+    gr_1n->Draw("l");
+  
+    h_GlobalQA_zdc_energy_n->SetLineColor(kBlue);
     leg10->AddEntry(h_GlobalQA_zdc_energy_n,"North");
-    h_GlobalQA_zdc_energy_n->DrawCopy("hist same");
+    h_GlobalQA_zdc_energy_n->DrawCopy("same");
     
     leg10->Draw();
   }
@@ -435,7 +450,7 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
     printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
-    printrms.DrawText(0.2,0.5, boost::str(boost::format("RMS: %.2f") % rms).c_str());
+    printrms.DrawText(0.2,0.55, boost::str(boost::format("RMS: %.2f") % rms).c_str());
   }
   else 
   {
