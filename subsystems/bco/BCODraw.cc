@@ -149,23 +149,24 @@ int BCODraw::DrawMVTX()
   std::cout << "BCO DrawMVTX() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
 
-  const int nmvtxfelix = 6;
-  const int nmvtxfees = 12;
+  const int nmvtxfelix = 12;
+  //const int nmvtxfees = 12;
 
   auto h_mvtxrefgl1 = dynamic_cast <TH1 *> (cl->getHisto("h_MvtxPoolQA_RefGL1BCO"));
   auto h_mvtxallpackets = dynamic_cast <TH1 *> (cl->getHisto("h_MvtxPoolQA_TagBCOAllFelixs"));
+  auto h_mvtxallpacketsallfees = dynamic_cast <TH1 *> (cl->getHisto("h_MvtxPoolQA_TagBCOAllFelixsAllFees"));
     
-  if (h_mvtxrefgl1 && h_mvtxallpackets)
+  if (h_mvtxrefgl1 && h_mvtxallpackets && h_mvtxallpacketsallfees)
   {
     const int nMvtxGL1BCOs = h_mvtxrefgl1->GetEntries();
-    TH1* mvtxTagFelix[nmvtxfelix][nmvtxfees];
-    int nMvtxTagFelix[nmvtxfelix][nmvtxfees];
-    float mvtxTagFelixFrac[nmvtxfelix][nmvtxfees];
+    //TH1* mvtxTagFelix[nmvtxfelix][nmvtxfees];
+    //int nMvtxTagFelix[nmvtxfelix][nmvtxfees];
+    //float mvtxTagFelixFrac[nmvtxfelix][nmvtxfees];
     float mvtxTagFelixx[nmvtxfelix];
     float mvtxTagFelixxFrac[nmvtxfelix];
     float mvtxTagAllFelixFrac[nmvtxfelix];
-    float mvtxFelixPacket[nmvtxfees];
-    TGraph *mvtxFelixFracGr[nmvtxfelix];
+    //float mvtxFelixPacket[nmvtxfees];
+    //TGraph *mvtxFelixFracGr[nmvtxfelix];
     for(int i=0; i<nmvtxfelix; i++)
     {
       mvtxTagFelixx[i] = (dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCO_felix%i") % i).str())))->GetEntries(); 
@@ -173,28 +174,29 @@ int BCODraw::DrawMVTX()
 
       mvtxTagAllFelixFrac[i] = ((dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCOAllFees_Felix%i") % (i)).str())))->GetEntries()) / nMvtxGL1BCOs; 
 
-      for(int j=0; j<nmvtxfees; j++)
-      {
-        mvtxTagFelix[i][j] = (dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCO_felix%i_fee%i") % i % j).str()))); 
-        nMvtxTagFelix[i][j] = mvtxTagFelix[i][j]->GetEntries();
-
-        mvtxTagFelixFrac[i][j] = (float)nMvtxTagFelix[i][j] / nMvtxGL1BCOs;
-        mvtxFelixPacket[j] = j;
-      }
-      mvtxFelixFracGr[i] = new TGraph(nmvtxfees, mvtxFelixPacket, mvtxTagFelixFrac[i]);
+      // for(int j=0; j<nmvtxfees; j++)
+      // {
+      //   mvtxTagFelix[i][j] = (dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_MvtxPoolQA_TagBCO_felix%i_fee%i") % i % j).str()))); 
+      //   nMvtxTagFelix[i][j] = mvtxTagFelix[i][j]->GetEntries();
+      //
+      //   mvtxTagFelixFrac[i][j] = (float)nMvtxTagFelix[i][j] / nMvtxGL1BCOs;
+      //   mvtxFelixPacket[j] = j;
+      // }
+      // mvtxFelixFracGr[i] = new TGraph(nmvtxfees, mvtxFelixPacket, mvtxTagFelixFrac[i]);
     }     
-    TH1F* mvtxsummaryhisto = new TH1F("mvtxsummaryhisto",";Felix;Fraction Tagged GL1 BCOs",7,0,7);
+    TH1F* mvtxsummaryhisto = new TH1F("mvtxsummaryhisto",";Felix.Endpoint;Fraction Tagged GL1 BCOs",13,0,13);
     for(int i=0; i<nmvtxfelix; i++)
     {
       mvtxsummaryhisto->SetBinContent(i+1, mvtxTagFelixxFrac[i]);
     }
-    mvtxsummaryhisto->SetBinContent(7, h_mvtxallpackets->GetEntries() / nMvtxGL1BCOs);
+    mvtxsummaryhisto->SetBinContent(13, h_mvtxallpackets->GetEntries() / nMvtxGL1BCOs);
 
-    TH1F* mvtxAllFelixSummary = new TH1F("mvtxfelixsummaryhisto",";Felix; Fraction All FEEs Tagged GL1 BCOs",7,0,7);
+    TH1F* mvtxAllFelixSummary = new TH1F("mvtxfelixsummaryhisto",";Felix.Endpoint; Fraction All FEEs Tagged GL1 BCOs",13,0,13);
     for(int i=0; i<nmvtxfelix; i++)
     {
       mvtxAllFelixSummary->SetBinContent(i+1, mvtxTagAllFelixFrac[i]);
     }
+    mvtxAllFelixSummary->SetBinContent(13, h_mvtxallpacketsallfees->GetEntries() / nMvtxGL1BCOs);
 
     if (! gROOT->FindObject("mvtx_evt_building_1"))
     {
@@ -203,28 +205,42 @@ int BCODraw::DrawMVTX()
     TC[0]->Clear("D");
     Pad[0][0]->cd();
     gStyle->SetOptStat(0);
-    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(1,"0");
-    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(2,"1");
-    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(3,"2");
-    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(4,"3");
-    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(5,"4");
-    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(6,"5");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(1,"0.0");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(2,"0.1");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(3,"1.0");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(4,"1.1");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(5,"2.0");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(6,"2.1");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(7,"3.0");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(8,"3.1");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(9,"4.0");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(10,"4.1");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(11,"5.0");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(12,"5.1");
+    mvtxAllFelixSummary->GetXaxis()->SetBinLabel(13,"All");
     mvtxAllFelixSummary->DrawCopy("hist");
     gPad->SetRightMargin(0.15);
 
     Pad[0][1]->cd();
     gStyle->SetOptStat(0);
     mvtxsummaryhisto->GetYaxis()->SetRangeUser(0,1);
-    mvtxsummaryhisto->GetXaxis()->SetBinLabel(1,"0");
-    mvtxsummaryhisto->GetXaxis()->SetBinLabel(2,"1");
-    mvtxsummaryhisto->GetXaxis()->SetBinLabel(3,"2");
-    mvtxsummaryhisto->GetXaxis()->SetBinLabel(4,"3");
-    mvtxsummaryhisto->GetXaxis()->SetBinLabel(5,"4");
-    mvtxsummaryhisto->GetXaxis()->SetBinLabel(6,"5");
-    mvtxsummaryhisto->GetXaxis()->SetBinLabel(7,"All");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(1,"0.0");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(2,"0.1");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(3,"1.0");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(4,"1.1");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(5,"2.0");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(6,"2.1");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(7,"3.0");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(8,"3.1");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(9,"4.0");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(10,"4.1");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(11,"5.0");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(12,"5.1");
+    mvtxsummaryhisto->GetXaxis()->SetBinLabel(13,"All");
     mvtxsummaryhisto->DrawCopy("hist");
     gPad->SetRightMargin(0.15);
     
+    /*
     if (! gROOT->FindObject("mvtx_evt_building_2"))
     {
       MakeCanvas("mvtx_evt_building_2", 1);
@@ -240,6 +256,7 @@ int BCODraw::DrawMVTX()
       mvtxFelixFracGr[i]->Draw("ap*");
       //myText(0.22,0.4,kBlack,(boost::format("Felix %i") % (i)).str().c_str());
     }
+    */
   }
   else
   {
@@ -258,11 +275,11 @@ int BCODraw::DrawMVTX()
   runstring1 = runnostream1.str();
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
-  transparent[1]->cd();
-  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+  //transparent[1]->cd();
+  //PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
   TC[0]->Update();
-  TC[1]->Update();
+  //TC[1]->Update();
    
   std::cout << "DrawMVTX Ending" << std::endl;
   return 0;
@@ -382,7 +399,7 @@ int BCODraw::DrawINTT()
       inttebdcfeegr[i]->GetXaxis()->SetTitle("FEE ID");
       inttebdcfeegr[i]->GetYaxis()->SetTitle("Fraction Tagged GL1BCOs");
       inttebdcfeegr[i]->GetYaxis()->SetRangeUser(0,1);
-      inttebdcfeegr[i]->Draw("ap*");
+      inttebdcfeegr[i]->Draw("ap");
       //myText(0.2,0.25,kBlack,(boost::format("Server %i") % (i)).str().c_str(),0.07);
     }
   }
