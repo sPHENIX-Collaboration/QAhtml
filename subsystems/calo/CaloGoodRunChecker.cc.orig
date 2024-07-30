@@ -2,13 +2,6 @@
 #include <emcnoisytowerfinder/emcNoisyTowerFinder.h>
 #include <qahtml/QADrawClient.h>
 
-#include <odbc++/connection.h>
-#include <odbc++/drivermanager.h>
-#include <odbc++/errorhandler.h>
-#include <odbc++/preparedstatement.h>
-#include <odbc++/resultset.h>
-#include <odbc++/types.h>
-
 #include <TCanvas.h>
 #include <TPad.h>
 #include <TH1.h>
@@ -60,7 +53,7 @@ std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
   // clean up
   fmaps->Close(); fcemc->Close(); fihcal->Close(); fohcal->Close();
   delete fmaps; delete fcemc; delete fihcal; delete fohcal;
-  // remove the extra files from emcNoisyTowerFinder now that we're done
+  // remove the extra files now that we're done
   std::string outfiles[3] = {outfile_cemc, outfile_ihcal, outfile_ohcal};
   for (int i=0; i<3; i++)
   {
@@ -83,6 +76,8 @@ void CaloGoodRunChecker::DeleteHotColdDeadMaps()
 
 void CaloGoodRunChecker::CemcCheckGoodRun()
 {
+  bool failed_check = false;
+
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
@@ -99,7 +94,8 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
   int MINEVENTS = 100000;
   if (n_events < MINEVENTS)
   {
-    cemc_fails_events = true;
+    /* return false; */
+    failed_check = true;
   }
 
   // Bad towers
@@ -119,12 +115,14 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
   int MAXHOTTOWERS = 100;
   if (cemc_hot_towers > MAXHOTTOWERS)
   {
-    cemc_fails_badtowers = true;
+    /* return false; */
+    failed_check = true;
   }
   int MAXCOLDDEADTOWERS = 500;
   if ((cemc_cold_towers + cemc_dead_towers) > MAXCOLDDEADTOWERS)
   {
-    cemc_fails_badtowers = true;
+    /* return false; */
+    failed_check = true;
   }
 
   // Hit timing
@@ -150,12 +148,14 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
   float MAXTIMEMEAN = 1.0;
   if ((cemc_time_mean < MINTIMEMEAN) || (cemc_time_mean > MAXTIMEMEAN))
   {
-    cemc_fails_timing = true;
+    /* return false; */
+    failed_check = true;
   }
   float MAXTIMESIGMA = 2.0;
   if (cemc_time_sigma > MAXTIMESIGMA)
   {
-    cemc_fails_timing = true;
+    /* return false; */
+    failed_check = true;
   }
 
   // MBD vertex
@@ -167,15 +167,17 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
   float MAXABSVTXZ = 5.0;
   if (abs(vtxz_mean) > MAXABSVTXZ)
   {
-    cemc_fails_vertex = true;
+    /* return false; */
+    failed_check = true;
   }
-  // remove vertex width cut -- not actually helpful
   float MAXVTXZSIGMA = 20.0;
   if (vtxz_sigma > MAXVTXZSIGMA)
   {
-    /* cemc_fails_vertex = true; */
+    /* return false; */
+    failed_check = true;
   }
 
+<<<<<<< HEAD
   bool failed_check = (cemc_fails_events || cemc_fails_badtowers || cemc_fails_timing || cemc_fails_vertex);
   if (failed_check) return;
   else
@@ -195,6 +197,11 @@ std::string CaloGoodRunChecker::CemcGetComments()
   if (cemc_fails_timing) comments += "BadTiming";
   if (cemc_fails_vertex) comments += "BadVertex";
   return comments;
+=======
+  // Passed all requirements
+  if (failed_check) return false;
+  else return true;
+>>>>>>> 3bf886500874ff66f037b9b164dbc810d90453d4
 }
 
 TCanvas* CaloGoodRunChecker::CemcMakeSummary()
@@ -202,7 +209,7 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary()
   QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
-  /* std::cout << "Canvas xsize = " << xsize << ", ysize = " << ysize << std::endl; */
+  std::cout << "Canvas xsize = " << xsize << ", ysize = " << ysize << std::endl;
   // xpos (-1) negative: do not draw menu bar
   TCanvas* canvas = new TCanvas("cemcsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
   canvas->cd();
@@ -237,20 +244,9 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary()
   }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
-  if (cemc_fails_events) myText(0.9, 0.55, kRed, "(X)");
-  else myText(0.9, 0.55, kGreen, "(O)");
-
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", cemc_dead_towers, cemc_hot_towers, cemc_cold_towers));
-  if (cemc_fails_badtowers) myText(0.9, 0.50, kRed, "(X)");
-  else myText(0.9, 0.50, kGreen, "(O)");
-
   myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
-  if (cemc_fails_timing) myText(0.9, 0.45, kRed, "(X)");
-  else myText(0.9, 0.45, kGreen, "(O)");
-
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
-  if (cemc_fails_vertex) myText(0.9, 0.40, kRed, "(X)");
-  else myText(0.9, 0.40, kGreen, "(O)");
 
   // add the run number title
   TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);
@@ -272,21 +268,29 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary()
   return canvas;
 }
 
-void CaloGoodRunChecker::ihcalCheckGoodRun()
+<<<<<<< HEAD
+void CaloGoodRunChecker::CemcWriteDB()
+{
+  // if the run is bad, we still want to update the comments field
+  /*
+  if (!cemc_isgood)
+=======
+
+bool CaloGoodRunChecker::ihcalGoodRun()
 {
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
-  TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str())));
+  TH1 *zdcNorthcalib = dynamic_cast<TH1 *>(hfile->Get(Form("%szdcNorthcalib", histprefix.c_str())));
   TH2 *ihcal_etaphi_time = dynamic_cast<TH2 *>(hfile->Get(Form("%sihcal_etaphi_time", histprefix.c_str())));
   TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str())));
   ihcal_hcdmap = dynamic_cast<TH2 *>(mapfile->Get("ihcal_hotmap"));
 
   // Number of events
-  if (emcal_hcal_correlation)
-  {
-    n_events = emcal_hcal_correlation->GetEntries();
-  }
+  if (zdcNorthcalib)
+    {
+      n_events = zdcNorthcalib->GetEntries();
+    }
   int MINEVENTS = 100000;
   if (n_events < MINEVENTS)
     {
@@ -364,33 +368,30 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
   /*
   float MAXVTXZSIGMA = 20.0;
   if (vtxz_sigma > MAXVTXZSIGMA)
+>>>>>>> 3bf886500874ff66f037b9b164dbc810d90453d4
   {
-    ihcal_fails_vertex = true;
+    cemc_fails_vertex = true;
   }
   */
+<<<<<<< HEAD
   
+  QADrawClient *cl = QADrawClient::instance();
+  int runno = cl->RunNumber();
+  /* delete cl; // for some reason deleting the client here causes a return... not sure why */
+
+  std::string server = "sphnxproddbmaster";
+  std::string database = "Production_write";
+  std::string username = "";
+  std::string password = "";
+=======
+
   bool failed_check = (ihcal_fails_events || ihcal_fails_badtowers || ihcal_fails_timing || ihcal_fails_vertex);
-  if (failed_check) return;
-  else
-  {
-    ihcal_isgood = true;
-    return;
-  }
+  if (failed_check) return false;
+  else return true;
 }
 
-std::string CaloGoodRunChecker::IhcalGetComments()
-{
-  std::string comments;
-  if (ihcal_isgood) comments = "GoodRun";
-  else comments = "";
-  if (ihcal_fails_events) comments += "NotEnoughEvents";
-  if (ihcal_fails_badtowers) comments += "BadTowers";
-  if (ihcal_fails_timing) comments += "BadTiming";
-  if (ihcal_fails_vertex) comments += "BadVertex";
-  return comments;
-}
 
-TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
+TCanvas* CaloGoodRunChecker::ihcalMakeSummary(bool ihcal_goodrun)
 {
   QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
@@ -403,8 +404,9 @@ TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
   std::string runtime = cl->RunTime();
   int n_events_db = cl->EventsInRun();
   myText(0.5, 0.85, kBlack, Form("IHCal Summary - Run %d", runno), 0.08);
+>>>>>>> 3bf886500874ff66f037b9b164dbc810d90453d4
   
-  if (ihcal_isgood)
+  if (ihcal_goodrun)
     {
       myText(0.5, 0.70, kGreen, "Overall status: Good Run", 0.06);
     }
@@ -441,21 +443,47 @@ TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
   return canvas;
 }
 
-void CaloGoodRunChecker::ohcalCheckGoodRun()
+<<<<<<< HEAD
+  query = con->createStatement();
+  std::string goodbad;
+  if (cemc_isgood) goodbad = "GOLDEN";
+  else goodbad = "BAD";
+  std::string comments = CemcGetComments();
+  cmd << Form("UPDATE goodruns SET emcal_auto = ('%s', '%s') WHERE runnumber = %d ", goodbad.c_str(), comments.c_str(), runno);
+  /* std::cout << "Executing query. Query = " << cmd.str() << std::endl; */
+  try
+  {
+    rs = query->executeQuery(cmd.str());
+  }
+  catch (odbc::SQLException& e)
+  {
+    std::cout << "Exception caught during Statement::executeQuery" << std::endl;
+    std::cout << "Message: " << e.getMessage() << std::endl;
+  }
+
+  con->commit();
+  delete rs;
+  delete query;
+  delete con;
+  delete cl;
+  return;
+=======
+
+bool CaloGoodRunChecker::ohcalGoodRun()
 {
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
-  TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str())));
+  TH1 *zdcNorthcalib = dynamic_cast<TH1 *>(hfile->Get(Form("%szdcNorthcalib", histprefix.c_str())));
   TH2 *ohcal_etaphi_time = dynamic_cast<TH2 *>(hfile->Get(Form("%sohcal_etaphi_time", histprefix.c_str())));
   TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str())));
   ohcal_hcdmap = dynamic_cast<TH2 *>(mapfile->Get("ohcal_hotmap"));
 
   // Number of events                                                                                                                                                                                      
-  if (emcal_hcal_correlation)
-  {
-    n_events = emcal_hcal_correlation->GetEntries();
-  }
+  if (zdcNorthcalib)
+    {
+      n_events = zdcNorthcalib->GetEntries();
+    }
   int MINEVENTS = 100000;
   if (n_events < MINEVENTS)
     {
@@ -531,27 +559,12 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
     }
 
   bool failed_check = (ohcal_fails_events || ohcal_fails_badtowers || ohcal_fails_timing || ohcal_fails_vertex);
-  if (failed_check) return;
-  else
-  {
-    ohcal_isgood = true;
-    return;
-  }
+  if (failed_check) return false;
+  else return true;
+>>>>>>> 3bf886500874ff66f037b9b164dbc810d90453d4
 }
 
-std::string CaloGoodRunChecker::OhcalGetComments()
-{
-  std::string comments;
-  if (ohcal_isgood) comments = "GoodRun";
-  else comments = "";
-  if (ohcal_fails_events) comments += "NotEnoughEvents";
-  if (ohcal_fails_badtowers) comments += "BadTowers";
-  if (ohcal_fails_timing) comments += "BadTiming";
-  if (ohcal_fails_vertex) comments += "BadVertex";
-  return comments;
-}
-
-TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
+TCanvas* CaloGoodRunChecker::ohcalMakeSummary(bool ohcal_goodrun)
 {
   QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
@@ -565,7 +578,7 @@ TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
   int n_events_db = cl->EventsInRun();
   myText(0.5, 0.85, kBlack, Form("OHCal Summary - Run %d", runno), 0.08);
   
-  if (ohcal_isgood)
+  if (ohcal_goodrun)
     {
       myText(0.5, 0.70, kGreen, "Overall status: Good Run", 0.06);
     }
@@ -601,98 +614,14 @@ TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
   return canvas;
 }
 
-void CaloGoodRunChecker::CaloWriteDB(std::string subsystem)
-{
-  bool isGood = false;
-  std::string column = "";
-  std::string comments = "";
-  if (subsystem == "emcal")
-  {
-    isGood = cemc_isgood;
-    column = "emcal_auto";
-    comments = CemcGetComments();
-  }
-  else if (subsystem == "ihcal")
-  {
-    isGood = ihcal_isgood;
-    column = "ihcal_auto";
-    comments = IhcalGetComments();
-  }
-  else if (subsystem == "ohcal")
-  {
-    isGood = ohcal_isgood;
-    column = "ohcal_auto";
-    comments = OhcalGetComments();
-  }
-  else 
-  {
-    std::cout << "In CaloWriteDB: invalid subsystem " << subsystem << std::endl;
-    return;
-  }
 
-  // if the run is bad, we still want to update the comments field
-  /*
-  if (!cemc_isgood)
-  {
-    return;
-  }
-  */
-  QADrawClient *cl = QADrawClient::instance();
-  int runno = cl->RunNumber();
-  /* delete cl; // for some reason deleting the client here causes a return... not sure why */
+// void CaloGoodRunChecker::myText(double x, double y, int color, const char *text, double tsize)
+//{
+//TLatex l;
+//l.SetTextAlign(22);
+//l.SetTextSize(tsize);
+//l.SetNDC();
+//l.SetTextColor(color);
+//l.DrawLatex(x, y, text);
+//} 
 
-  std::string server = "sphnxproddbmaster";
-  std::string database = "Production_write";
-  std::string username = "";
-  std::string password = "";
-
-  odbc::Connection* con = nullptr;
-  odbc::Statement* query = nullptr;
-  odbc::ResultSet* rs = nullptr;
-  std::ostringstream cmd;
-
-  try
-  {
-    con = odbc::DriverManager::getConnection(database.c_str(), username.c_str(), password.c_str());
-  }
-  catch (odbc::SQLException& e)
-  {
-    std::cout << "Exception caught during DriverManager::getConnection" << std::endl;
-    std::cout << "Message: " << e.getMessage() << std::endl;
-    delete con;
-    return;
-  }
-
-  query = con->createStatement();
-  std::string goodbad;
-  if (isGood) goodbad = "GOLDEN";
-  else goodbad = "BAD";
-  cmd << Form("UPDATE goodruns SET %s = ('%s', '%s') WHERE runnumber = %d ", column.c_str(), goodbad.c_str(), comments.c_str(), runno);
-  /* std::cout << "Executing query. Query = " << cmd.str() << std::endl; */
-  try
-  {
-    rs = query->executeQuery(cmd.str());
-  }
-  catch (odbc::SQLException& e)
-  {
-    std::cout << "Exception caught during Statement::executeQuery" << std::endl;
-    std::cout << "Message: " << e.getMessage() << std::endl;
-  }
-
-  con->commit();
-  delete rs;
-  delete query;
-  delete con;
-  delete cl;
-  return;
-}
-
-void CaloGoodRunChecker::myText(double x, double y, int color, const char *text, double tsize)
-{
-  TLatex l;
-  l.SetTextAlign(22);
-  l.SetTextSize(tsize);
-  l.SetNDC();
-  l.SetTextColor(color);
-  l.DrawLatex(x, y, text);
-}
