@@ -169,10 +169,11 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
   {
     cemc_fails_vertex = true;
   }
+  // remove vertex width cut -- not actually helpful
   float MAXVTXZSIGMA = 20.0;
   if (vtxz_sigma > MAXVTXZSIGMA)
   {
-    cemc_fails_vertex = true;
+    /* cemc_fails_vertex = true; */
   }
 
   bool failed_check = (cemc_fails_events || cemc_fails_badtowers || cemc_fails_timing || cemc_fails_vertex);
@@ -236,9 +237,20 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary()
   }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
+  if (cemc_fails_events) myText(0.9, 0.55, kRed, "(X)");
+  else myText(0.9, 0.55, kGreen, "(O)");
+
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", cemc_dead_towers, cemc_hot_towers, cemc_cold_towers));
+  if (cemc_fails_badtowers) myText(0.9, 0.50, kRed, "(X)");
+  else myText(0.9, 0.50, kGreen, "(O)");
+
   myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
+  if (cemc_fails_timing) myText(0.9, 0.45, kRed, "(X)");
+  else myText(0.9, 0.45, kGreen, "(O)");
+
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+  if (cemc_fails_vertex) myText(0.9, 0.40, kRed, "(X)");
+  else myText(0.9, 0.40, kGreen, "(O)");
 
   // add the run number title
   TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);
