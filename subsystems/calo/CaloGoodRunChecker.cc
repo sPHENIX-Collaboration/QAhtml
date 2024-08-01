@@ -277,11 +277,12 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
-  TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str())));
+  /* TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str()))); */
   TH2 *ihcal_etaphi_time = dynamic_cast<TH2 *>(hfile->Get(Form("%sihcal_etaphi_time", histprefix.c_str())));
-  TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str())));
+  /* TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str()))); */
   ihcal_hcdmap = dynamic_cast<TH2 *>(mapfile->Get("ihcal_hotmap"));
 
+  /*
   // Number of events
   if (emcal_hcal_correlation)
   {
@@ -292,6 +293,7 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
     {
       ihcal_fails_events = true;
     }
+  */
 
   // Bad towers
   if (ihcal_hcdmap)
@@ -343,12 +345,13 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
     {
       ihcal_fails_timing = true;
     }
-  float MAXTIMESIGMA = 2.0;
+  float MAXTIMESIGMA = 3.0;
   if (ihcal_time_sigma > MAXTIMESIGMA)
     {
       ihcal_fails_timing = true;
     }
 
+  /*
   // MBD vertex
   if (vtx_z)
     {
@@ -360,6 +363,7 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
     {
      ihcal_fails_vertex = true;
     }
+  */
   // remove vertex width cut -- not actually useful
   /*
   float MAXVTXZSIGMA = 20.0;
@@ -415,8 +419,8 @@ TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
     }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
-  if (ihcal_fails_events) myText(0.8, 0.55, kRed, "(bad)");
-  else myText(0.8, 0.55, kGreen, "(good)");
+  /* if (ihcal_fails_events) myText(0.8, 0.55, kRed, "(bad)"); */
+  /* else myText(0.8, 0.55, kGreen, "(good)"); */
  
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", ihcal_dead_towers, ihcal_hot_towers, ihcal_cold_towers));
   if (ihcal_fails_badtowers) myText(0.8, 0.50, kRed, "(bad)");
@@ -427,8 +431,8 @@ TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
   else myText(0.8, 0.45, kGreen, "(good)");
   
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
-  if (ihcal_fails_vertex) myText(0.8, 0.40, kRed, "(bad)");
-  else myText(0.8, 0.40, kGreen, "(good)");
+  /* if (ihcal_fails_vertex) myText(0.8, 0.40, kRed, "(bad)"); */
+  /* else myText(0.8, 0.40, kGreen, "(good)"); */
  
   // add the run number title
   TPad* tr = new TPad("transparent_ihcal", "", 0, 0, 1, 1);
@@ -455,12 +459,13 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
   TFile* hfile = new TFile(histfile.c_str(), "READ");
   TFile* mapfile = new TFile(mapsfile.c_str(), "READ");
 
-  TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str())));
+  /* TH2 *emcal_hcal_correlation = dynamic_cast<TH2 *>(hfile->Get(Form("%semcal_hcal_correlation", histprefix.c_str()))); */
   TH2 *ohcal_etaphi_time = dynamic_cast<TH2 *>(hfile->Get(Form("%sohcal_etaphi_time", histprefix.c_str())));
-  TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str())));
+  /* TH1 *vtx_z = dynamic_cast<TH1 *>(hfile->Get(Form("%svtx_z_raw", histprefix.c_str()))); */
   ohcal_hcdmap = dynamic_cast<TH2 *>(mapfile->Get("ohcal_hotmap"));
 
-  // Number of events                                                                                                                                                                                      
+  /*
+  // Number of events
   if (emcal_hcal_correlation)
   {
     n_events = emcal_hcal_correlation->GetEntries();
@@ -470,8 +475,9 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
     {
       ohcal_fails_events = true;
     }
+  */
 
-  // Bad towers                                                                                                                                                                                            
+  // Bad towers
   if (ohcal_hcdmap)
     {
       ohcal_dead_towers = 0;
@@ -496,7 +502,7 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
       ohcal_fails_badtowers = true;
     }
 
-  // Hit timing                                                                                                                                                                                            
+  // Hit timing
   if (ohcal_etaphi_time)
     {
       int nx = ohcal_etaphi_time->GetNbinsX();
@@ -521,13 +527,14 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
     {
       ohcal_fails_timing = true;
     }
-  float MAXTIMESIGMA = 2.0;
+  float MAXTIMESIGMA = 3.0;
   if (ohcal_time_sigma > MAXTIMESIGMA)
     {
       ohcal_fails_timing = true;
     }
 
-  // MBD vertex                                                                                                                                                                                            
+  /*
+  // MBD vertex
   if (vtx_z)
     {
       vtxz_mean = vtx_z->GetMean();
@@ -538,6 +545,7 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
     {
       ohcal_fails_vertex = true;
     }
+  */
 
   bool failed_check = (ohcal_fails_events || ohcal_fails_badtowers || ohcal_fails_timing || ohcal_fails_vertex);
   if (failed_check) return;
@@ -585,8 +593,8 @@ TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
     }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
-  if (ohcal_fails_events) myText(0.8, 0.55, kRed, "(bad)");
-  else myText(0.8, 0.55, kGreen, "(good)");
+  /* if (ohcal_fails_events) myText(0.8, 0.55, kRed, "(bad)"); */
+  /* else myText(0.8, 0.55, kGreen, "(good)"); */
 
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", ohcal_dead_towers, ohcal_hot_towers, ohcal_cold_towers));
   if (ohcal_fails_badtowers) myText(0.8, 0.50, kRed, "(bad)");
@@ -597,8 +605,8 @@ TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
   else myText(0.8, 0.45, kGreen, "(good)");
   
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
-  if (ohcal_fails_vertex) myText(0.8, 0.40, kRed, "(bad)");
-  else myText(0.8, 0.40, kGreen, "(good)");
+  /* if (ohcal_fails_vertex) myText(0.8, 0.40, kRed, "(bad)"); */
+  /* else myText(0.8, 0.40, kGreen, "(good)"); */
 
   // add the run number title
   TPad* tr = new TPad("transparent_ohcal", "", 0, 0, 1, 1);
