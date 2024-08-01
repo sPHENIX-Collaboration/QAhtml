@@ -38,6 +38,9 @@ class CaloGoodRunChecker
   TH2* ihcal_hcdmap = nullptr;
   TH2* ohcal_hcdmap = nullptr;
 
+  int canvas_xsize = 1600;
+  int canvas_ysize = 800;
+
   int n_events= 0;
   bool cemc_isgood = false;
   bool cemc_fails_events = false;

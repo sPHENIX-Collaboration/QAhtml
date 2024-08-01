@@ -164,7 +164,7 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
     vtxz_mean = vtx_z->GetMean();
     vtxz_sigma = vtx_z->GetStdDev();
   }
-  float MAXABSVTXZ = 5.0;
+  float MAXABSVTXZ = 30.0;
   if (abs(vtxz_mean) > MAXABSVTXZ)
   {
     cemc_fails_vertex = true;
@@ -200,11 +200,11 @@ std::string CaloGoodRunChecker::CemcGetComments()
 TCanvas* CaloGoodRunChecker::CemcMakeSummary()
 {
   QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
-  /* std::cout << "Canvas xsize = " << xsize << ", ysize = " << ysize << std::endl; */
+  /* int xsize = cl->GetDisplaySizeX(); */
+  /* int ysize = cl->GetDisplaySizeY(); */
+  /* TCanvas* canvas = new TCanvas("cemcsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)); */
   // xpos (-1) negative: do not draw menu bar
-  TCanvas* canvas = new TCanvas("cemcsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  TCanvas* canvas = new TCanvas("cemcsummary", "", -1, 0, canvas_xsize, canvas_ysize);
   canvas->cd();
 
   int runno = cl->RunNumber();
@@ -237,20 +237,20 @@ TCanvas* CaloGoodRunChecker::CemcMakeSummary()
   }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
-  if (cemc_fails_events) myText(0.9, 0.55, kRed, "(X)");
-  else myText(0.9, 0.55, kGreen, "(O)");
+  if (cemc_fails_events) myText(0.8, 0.55, kRed, "(bad)");
+  else myText(0.8, 0.55, kGreen, "(good)");
 
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", cemc_dead_towers, cemc_hot_towers, cemc_cold_towers));
-  if (cemc_fails_badtowers) myText(0.9, 0.50, kRed, "(X)");
-  else myText(0.9, 0.50, kGreen, "(O)");
+  if (cemc_fails_badtowers) myText(0.8, 0.50, kRed, "(bad)");
+  else myText(0.8, 0.50, kGreen, "(good)");
 
   myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", cemc_time_mean, cemc_time_sigma));
-  if (cemc_fails_timing) myText(0.9, 0.45, kRed, "(X)");
-  else myText(0.9, 0.45, kGreen, "(O)");
+  if (cemc_fails_timing) myText(0.8, 0.45, kRed, "(bad)");
+  else myText(0.8, 0.45, kGreen, "(good)");
 
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
-  if (cemc_fails_vertex) myText(0.9, 0.40, kRed, "(X)");
-  else myText(0.9, 0.40, kGreen, "(O)");
+  if (cemc_fails_vertex) myText(0.8, 0.40, kRed, "(bad)");
+  else myText(0.8, 0.40, kGreen, "(good)");
 
   // add the run number title
   TPad* tr = new TPad("transparent_cemc", "", 0, 0, 1, 1);
@@ -355,7 +355,7 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
       vtxz_mean = vtx_z->GetMean();
       vtxz_sigma = vtx_z->GetStdDev();
     }
-  float MAXABSVTXZ = 5.0;
+  float MAXABSVTXZ = 30.0;
   if (abs(vtxz_mean) > MAXABSVTXZ)
     {
      ihcal_fails_vertex = true;
@@ -393,10 +393,11 @@ std::string CaloGoodRunChecker::IhcalGetComments()
 TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
 {
   QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
+  /* int xsize = cl->GetDisplaySizeX(); */
+  /* int ysize = cl->GetDisplaySizeY(); */
+  /* TCanvas* canvas = new TCanvas("ihcalsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)); */
   // xpos (-1) negative: do not draw menu bar
-  TCanvas* canvas = new TCanvas("ihcalsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  TCanvas* canvas = new TCanvas("ihcalsummary", "", -1, 0, canvas_xsize, canvas_ysize);
   canvas->cd();
 
   int runno = cl->RunNumber();
@@ -414,12 +415,20 @@ TCanvas* CaloGoodRunChecker::ihcalMakeSummary()
     }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
+  if (ihcal_fails_events) myText(0.8, 0.55, kRed, "(bad)");
+  else myText(0.8, 0.55, kGreen, "(good)");
  
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", ihcal_dead_towers, ihcal_hot_towers, ihcal_cold_towers));
+  if (ihcal_fails_badtowers) myText(0.8, 0.50, kRed, "(bad)");
+  else myText(0.8, 0.50, kGreen, "(good)");
   
   myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", ihcal_time_mean, ihcal_time_sigma));
+  if (ihcal_fails_timing) myText(0.8, 0.45, kRed, "(bad)");
+  else myText(0.8, 0.45, kGreen, "(good)");
   
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+  if (ihcal_fails_vertex) myText(0.8, 0.40, kRed, "(bad)");
+  else myText(0.8, 0.40, kGreen, "(good)");
  
   // add the run number title
   TPad* tr = new TPad("transparent_ihcal", "", 0, 0, 1, 1);
@@ -524,7 +533,7 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
       vtxz_mean = vtx_z->GetMean();
       vtxz_sigma = vtx_z->GetStdDev();
     }
-  float MAXABSVTXZ = 5.0;
+  float MAXABSVTXZ = 30.0;
   if (abs(vtxz_mean) > MAXABSVTXZ)
     {
       ohcal_fails_vertex = true;
@@ -554,10 +563,11 @@ std::string CaloGoodRunChecker::OhcalGetComments()
 TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
 {
   QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
+  /* int xsize = cl->GetDisplaySizeX(); */
+  /* int ysize = cl->GetDisplaySizeY(); */
+  /* TCanvas* canvas = new TCanvas("ohcalsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)); */
   // xpos (-1) negative: do not draw menu bar
-  TCanvas* canvas = new TCanvas("ohcalsummary", "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  TCanvas* canvas = new TCanvas("ohcalsummary", "", -1, 0, canvas_xsize, canvas_ysize);
   canvas->cd();
 
   int runno = cl->RunNumber();
@@ -575,11 +585,20 @@ TCanvas* CaloGoodRunChecker::ohcalMakeSummary()
     }
   myText(0.5, 0.60, kBlack, Form("Start time: %s", runtime.c_str()));
   myText(0.5, 0.55, kBlack, Form("Total events: %d CaloValid / %d from DB", n_events, n_events_db));
+  if (ohcal_fails_events) myText(0.8, 0.55, kRed, "(bad)");
+  else myText(0.8, 0.55, kGreen, "(good)");
+
   myText(0.5, 0.50, kBlack, Form("Bad towers: %d dead, %d hot, %d cold", ohcal_dead_towers, ohcal_hot_towers, ohcal_cold_towers));
+  if (ohcal_fails_badtowers) myText(0.8, 0.50, kRed, "(bad)");
+  else myText(0.8, 0.50, kGreen, "(good)");
   
   myText(0.5, 0.45, kBlack, Form("Hit timing: mean = %.3f, sigma = %.3f", ohcal_time_mean, ohcal_time_sigma));
+  if (ohcal_fails_timing) myText(0.8, 0.45, kRed, "(bad)");
+  else myText(0.8, 0.45, kGreen, "(good)");
   
   myText(0.5, 0.40, kBlack, Form("MBD vertex: mean = %.3f, sigma = %.3f", vtxz_mean, vtxz_sigma));
+  if (ohcal_fails_vertex) myText(0.8, 0.40, kRed, "(bad)");
+  else myText(0.8, 0.40, kGreen, "(good)");
 
   // add the run number title
   TPad* tr = new TPad("transparent_ohcal", "", 0, 0, 1, 1);
@@ -683,7 +702,8 @@ void CaloGoodRunChecker::CaloWriteDB(std::string subsystem)
   delete rs;
   delete query;
   delete con;
-  delete cl;
+  // deleting the client before the *last* time we're done using it seems to cause problems
+  /* delete cl; */
   return;
 }
 

@@ -99,11 +99,12 @@ int CaloDraw::Draw(const std::string &what)
 
 int CaloDraw::MakeCanvas(const std::string &name, int num)
 {
-  QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
+  /* QADrawClient *cl = QADrawClient::instance(); */
+  /* int xsize = cl->GetDisplaySizeX(); */
+  /* int ysize = cl->GetDisplaySizeY(); */
+  /* TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)); */
   // xpos (-1) negative: do not draw menu bar
-  TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, canvas_xsize, canvas_ysize);
   TC[num]->UseCurrentStyle();
   gSystem->ProcessEvents();
 
