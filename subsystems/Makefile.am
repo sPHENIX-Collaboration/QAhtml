@@ -10,9 +10,13 @@ SUBDIRS = \
   example \
 	globalQA \
   intt \
+  inttrawhit \
   micromegas \
   mvtx \
+  mvtxrawhit \
   siliconseeds \
-  tpcseeds \
   tpc \
-  vertex 
+  tpcrawhit \
+  tpcseeds \
+  tpcsil \
+  vertex

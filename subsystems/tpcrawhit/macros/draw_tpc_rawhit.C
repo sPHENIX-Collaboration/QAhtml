@@ -1,13 +1,13 @@
 #include <qahtml/QADrawClient.h>
-#include <qahtml/tpcseeds/TpcSeedsDraw.h>
+#include <tpc/TPCRawHitDraw.h>
 
-R__LOAD_LIBRARY(libqadrawtpcseeds.so)
+R__LOAD_LIBRARY(libqadrawtpcrawhit.so)
 
-void draw_tpcseeds(const std::string &rootfile) {
+void draw_tpc_rawhit(const std::string &rootfile) {
 
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
-  QADraw *ex = new TpcSeedsDraw();
+  QADraw *ex = new TPCRawHitDraw();
   cl->registerDrawer(ex);
 
   cl->ReadHistogramsFromFile(rootfile);

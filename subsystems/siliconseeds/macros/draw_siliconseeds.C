@@ -42,10 +42,10 @@ void draw_siliconseeds(const std::string &rootfile) {
                                "h_SiliconSeedsQA_vx_vy",
                                "h_SiliconSeedsQA_vy",
                                "h_SiliconSeedsQA_vz"});
-  TH1D *hm_kssumary = qakstest->GenKSTestSummary();
+  TH1D *hm_kssumary = qakstest->GenKSTestSummary("D"); // D for debug mode; print out more info
 
   SiSeedsGoodRunChecker* ch = new SiSeedsGoodRunChecker();
-  ch->SetKSTestSummary(hm_kssumary, "");
+  ch->SetKSTestSummary(hm_kssumary);
   bool siseeds_isgood = ch->SiSeedsGoodRun();
   TCanvas* siseeds_summ = ch->SiSeedsMakeSummary(cl->ExtractRunNumber(rootfile), siseeds_isgood); 
   ex->SetSiSeedsSummary(cl->ExtractRunNumber(rootfile), siseeds_summ);

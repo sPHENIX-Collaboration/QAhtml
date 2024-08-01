@@ -169,7 +169,7 @@ int CaloDraw::DrawCemc()
   TH1 *invMass = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("InvMass")));
   TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
   TH2 *cemc_hotmap = nullptr;
-  if (cemc_checker) cemc_hotmap = cemc_checker->cemc_hcdmap;
+  if (calo_checker) cemc_hotmap = calo_checker->cemc_hcdmap;
   TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA")));
 
   // canvas 1
@@ -205,6 +205,7 @@ int CaloDraw::DrawCemc()
     cemc_etaphi->SetYTitle("#it{#phi}_{i} EMCal");
     cemc_etaphi->DrawCopy("COLZ");
     gPad->UseCurrentStyle();
+    gPad->SetLogz();
     gPad->SetRightMargin(0.15);
   }
   Pad[0][2]->cd();
@@ -318,11 +319,11 @@ int CaloDraw::DrawCemc()
   myText(0.25, 0.65, kRed, "2 = hot tower");
   myText(0.25, 0.60, kBlue, "3 = cold tower");
   int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
-  if (cemc_checker)
+  if (calo_checker)
   {
-    dead_towers = cemc_checker->cemc_dead_towers;
-    hot_towers = cemc_checker->cemc_hot_towers;
-    cold_towers = cemc_checker->cemc_cold_towers;
+    dead_towers = calo_checker->cemc_dead_towers;
+    hot_towers = calo_checker->cemc_hot_towers;
+    cold_towers = calo_checker->cemc_cold_towers;
   }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
   myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
@@ -419,11 +420,16 @@ int CaloDraw::DrawIhcal()
   TH2F *ihcal_etaphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("ihcal_etaphi")));
   TH2 *ihcal_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_time")));
   TH1F *ihcal_proj = (TH1F *) proj(ihcal_etaphi)->Clone("h_ihcal_proj");
+  TH2 *ihcal_hotmap = nullptr;
+  if (calo_checker) ihcal_hotmap = calo_checker->ihcal_hcdmap;
+  TH1 *ihcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_wQA")));
+
 
   // canvas 1
-  if (!gROOT->FindObject("ihcal"))
+
+  if (!gROOT->FindObject("ihcal1"))
   {
-    MakeCanvas("ihcal", 2);
+    MakeCanvas("ihcal1", 2);
   }
   /* TC[2]->Clear("D"); */
   Pad[2][0]->cd();
@@ -476,23 +482,117 @@ int CaloDraw::DrawIhcal()
     gPad->UseCurrentStyle();
   }
 
+  // Canvas 2
+  // do "summary" canvas before tower masking canvas, so ihcalGoodRun gets called first
+  //  if (!gROOT->FindObject("ihcal3")) 
+  //{ 
+  //MakeCanvas("ihcal3", 7); 
+  //} 
+  /* /1* TC[7]->Clear("D"); *1/ */
+  //Pad[7][0]->cd(); 
+  //bool isgoodrun = ihcalGoodRun(); 
+  //n_events, hot/cold/dead_towers, ihcal_time_* and vtxz_* are now filled 
   /* db->DBcommit(); */
+
+  // Canvas 3
+
+  if (!gROOT->FindObject("ihcal2"))
+    {
+      MakeCanvas("ihcal2", 8);
+    }
+  /* TC[8]->Clear("D"); */
+  Pad[8][0]->cd();
+  if (ihcal_hotmap)
+    {
+      ihcal_hotmap->SetTitle("IHcal Hot Tower Mask");
+      ihcal_hotmap->SetXTitle("#it{#eta}_{i}");
+      ihcal_hotmap->SetYTitle("#it{#phi}_{i}");
+      // change to a discrete color palette
+      int palette[4] = {kWhite, kGray+2, kRed, kBlue};
+      ihcal_hotmap->GetZaxis()->SetRangeUser(-0.5,3.5);
+      ihcal_hotmap->DrawCopy("COLZ");
+      gStyle->SetPalette(4, palette);
+      gPad->UseCurrentStyle();
+      gPad->Update();
+      gPad->SetRightMargin(0.15);
+    }
+  Pad[8][1]->cd();
+  gStyle->SetPalette(kBird);
+  TH2 *h_hitmask = nullptr;
+  int nonzero_towers = 0;
+  // Make masked tower histogram
+  if (ihcal_etaphi_wQA && ihcal_hotmap)
+    {
+      h_hitmask = (TH2*)ihcal_etaphi_wQA->Clone("h_hitmask");
+      int nbins = ihcal_hotmap->GetNcells();
+      for (int i=0; i<=nbins; i++)
+	{
+	  if (ihcal_hotmap->GetBinContent(i) != 0)
+	    {
+	      h_hitmask->SetBinContent(i, 0);
+	      nonzero_towers++;
+	    }
+	}
+      h_hitmask->SetTitle("IHcal Tower Hits w/ Masking");
+      h_hitmask->SetXTitle("#it{#eta}_{i}");
+      h_hitmask->SetYTitle("#it{#phi}_{i}");
+      h_hitmask->DrawCopy("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
+  Pad[8][2]->cd();
+  myText(0.25, 0.80, kBlack, "Hot Tower Mask Legend:");
+  myText(0.25, 0.75, kBlack, "0/empty = good tower");
+  myText(0.25, 0.70, kGray+2, "1 = dead tower");
+  myText(0.25, 0.65, kRed, "2 = hot tower");
+  myText(0.25, 0.60, kBlue, "3 = cold tower");
+  int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
+  if (calo_checker)
+    {
+      dead_towers = calo_checker->ihcal_dead_towers;
+      hot_towers = calo_checker->ihcal_hot_towers;
+      cold_towers = calo_checker->ihcal_cold_towers;
+    }
+  myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
+  myText(0.75, 0.62, kBlack, "Expected: 0 dead, 0 hot, 0 cold", 0.06);
+  Pad[8][3]->cd();
+  TH1F *ihcal_proj_masked = nullptr;
+  if (h_hitmask) ihcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_ihcal_proj_masked");
+  if (ihcal_proj_masked)
+    {
+      ihcal_proj_masked->SetTitle("IHCal #eta Projection w/ Masking");
+      ihcal_proj_masked->SetXTitle("#it{#eta}_{i} EMCal");
+      ihcal_proj_masked->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
+      ihcal_proj_masked->DrawCopy("HIST");
+      gPad->UseCurrentStyle();
+    }
 
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();          // set to normalized coordinates
   PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream;
-  std::string runstring;
-  runnostream << Name() << "_ihcal Run " << cl->RunNumber();
-  runstring = runnostream.str();
+  std::ostringstream runnostream1,runnostream2, runnostream3;
+  std::string runstring1, runstring2, runstring3;
+  runnostream1 << Name() << "_ihcal Run " << cl->RunNumber();
+  runstring1 = runnostream1.str();
+  runnostream2 << Name() << "_ihcal_tower_masking Run " << cl->RunNumber();
+  runstring2 = runnostream2.str();
+  // runnostream3 << Name() << "_ihcal_summary Run " << cl->RunNumber(); 
+  //runstring3 = runnostream3.str(); 
   transparent[2]->cd();
-  PrintRun.DrawText(0.5, 1., runstring.c_str());
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+  //transparent[7]->cd();
+  //PrintRun.DrawText(0.5, 1., runstring3.c_str());
+  transparent[8]->cd();
+  PrintRun.DrawText(0.5, 1., runstring2.c_str());
 
   TC[2]->Update();
+  //TC[7]->Update();
+  TC[8]->Update();
   return 0;
 }
+
 
 int CaloDraw::DrawOhcal()
 {
@@ -502,6 +602,9 @@ int CaloDraw::DrawOhcal()
   TH2F *ohcal_etaphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("ohcal_etaphi")));
   TH2 *ohcal_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_time")));
   TH1F *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
+  TH2 *ohcal_hotmap = nullptr;
+  if (calo_checker) ohcal_hotmap = calo_checker->ohcal_hcdmap;
+  TH1 *ohcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_wQA")));
 
   // canvas 1
   if (!gROOT->FindObject("ohcal"))
@@ -558,22 +661,116 @@ int CaloDraw::DrawOhcal()
     ohcal_proj->DrawCopy("HIST");
     gPad->UseCurrentStyle();
   }
-
   /* db->DBcommit(); */
+
+  // Canvas 2                                                                                                                                                                                             
+  // do "summary" canvas before tower masking canvas, so ohcalGoodRun gets called first                                                                                                                   
+  //if (!gROOT->FindObject("ohcal3"))
+  //{
+  //  MakeCanvas("ohcal3", 9);
+  //}
+  /* /1* TC[9]->Clear("D"); *1/ */
+  //Pad[9][0]->cd();
+  //bool isgoodrun = ohcalGoodRun();
+  //n_events, hot/cold/dead_towers, ohcal_time_* and vtxz_* are now filled
+    /* db->DBcommit(); */
+
+    // Canvas 3                                                                                                                                                                                           
+    if (!gROOT->FindObject("ohcal2"))
+      {
+	MakeCanvas("ohcal2", 10);
+      }
+  /* TC[10]->Clear("D"); */
+  Pad[10][0]->cd();
+  if (ohcal_hotmap)
+    {
+      ohcal_hotmap->SetTitle("OHcal Hot Tower Mask");
+      ohcal_hotmap->SetXTitle("#it{#eta}_{i}");
+      ohcal_hotmap->SetYTitle("#it{#phi}_{i}");
+      // change to a discrete color palette                                                                                                                                                                
+      int palette[4] = {kWhite, kGray+2, kRed, kBlue};
+      ohcal_hotmap->GetZaxis()->SetRangeUser(-0.5,3.5);
+      ohcal_hotmap->DrawCopy("COLZ");
+      gStyle->SetPalette(4, palette);
+      gPad->UseCurrentStyle();
+      gPad->Update();
+      gPad->SetRightMargin(0.15);
+    }
+  Pad[10][1]->cd();
+  gStyle->SetPalette(kBird);
+  TH2 *h_hitmask = nullptr;
+  int nonzero_towers = 0;
+  // Make masked tower histogram                                                                                                                                                                           
+  if (ohcal_etaphi_wQA && ohcal_hotmap)
+    {
+      h_hitmask = (TH2*)ohcal_etaphi_wQA->Clone("h_hitmask");
+      int nbins = ohcal_hotmap->GetNcells();
+      for (int i=0; i<=nbins; i++)
+        {
+          if (ohcal_hotmap->GetBinContent(i) != 0)
+            {
+              h_hitmask->SetBinContent(i, 0);
+              nonzero_towers++;
+            }
+        }
+      h_hitmask->SetTitle("OHcal Tower Hits w/ Masking");
+      h_hitmask->SetXTitle("#it{#eta}_{i}");
+      h_hitmask->SetYTitle("#it{#phi}_{i}");
+      h_hitmask->DrawCopy("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
+  Pad[10][2]->cd();
+  myText(0.25, 0.80, kBlack, "Hot Tower Mask Legend:");
+  myText(0.25, 0.75, kBlack, "0/empty = good tower");
+  myText(0.25, 0.70, kGray+2, "1 = dead tower");
+  myText(0.25, 0.65, kRed, "2 = hot tower");
+  myText(0.25, 0.60, kBlue, "3 = cold tower");
+  int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
+  if (calo_checker)
+    {
+      dead_towers = calo_checker->ohcal_dead_towers;
+      hot_towers = calo_checker->ohcal_hot_towers;
+      cold_towers = calo_checker->ohcal_cold_towers;
+    }
+  myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
+  myText(0.75, 0.62, kBlack, "Expected: 0 dead, 0 hot, 0 cold", 0.06);
+  Pad[10][3]->cd();
+  TH1F *ohcal_proj_masked = nullptr;
+  if (h_hitmask) ohcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_ohcal_proj_masked");
+  if (ohcal_proj_masked)
+    {
+      ohcal_proj_masked->SetTitle("OHCal #eta Projection w/ Masking");
+      ohcal_proj_masked->SetXTitle("#it{#eta}_{i} EMCal");
+      ohcal_proj_masked->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
+      ohcal_proj_masked->DrawCopy("HIST");
+      gPad->UseCurrentStyle();
+    }
+
 
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();          // set to normalized coordinates
   PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream;
-  std::string runstring;
-  runnostream << Name() << "_ohcal Run " << cl->RunNumber();
-  runstring = runnostream.str();
+  std::ostringstream runnostream1,runnostream2, runnostream3;;
+  std::string runstring1, runstring2, runstring3;
+  runnostream1 << Name() << "_ohcal Run " << cl->RunNumber();
+  runstring1 = runnostream1.str();
+  runnostream2 << Name() << "_ohcal_tower_masking Run " << cl->RunNumber();
+  runstring2 = runnostream2.str();
+  //runnostream3 << Name() << "_ohcal_summary Run " << cl->RunNumber();
+  //runstring3 = runnostream3.str();
   transparent[3]->cd();
-  PrintRun.DrawText(0.5, 1., runstring.c_str());
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+  //transparent[9]->cd();
+  //PrintRun.DrawText(0.5, 1., runstring3.c_str());
+  transparent[10]->cd();
+  PrintRun.DrawText(0.5, 1., runstring2.c_str());
 
   TC[3]->Update();
+  //TC[9]->Update();
+  TC[10]->Update();
   return 0;
 }
 
@@ -595,6 +792,9 @@ int CaloDraw::DrawZdcMbd()
   if (zdc_Northcalib && zdc_Southcalib)
   {
     zdc_Northcalib->SetLineColor(kBlue);
+      
+
+
     zdc_Northcalib->GetXaxis()->SetRangeUser(0.0, 12000);
     zdc_Northcalib->SetTitle("ZDC Total Energy");
     zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
@@ -801,10 +1001,20 @@ int CaloDraw::MakeHtml(const std::string &what)
   pngfile = cl->htmlRegisterPage(*this, "EMCal/Summary", "cemc4", "png");
   cl->CanvasToPng(cemcSummary, pngfile);
   /* cl->CanvasToPng(TC[7], pngfile); */
-  pngfile = cl->htmlRegisterPage(*this, "iHCal", "ihcal", "png");
+  pngfile = cl->htmlRegisterPage(*this, "iHCal/Run", "ihcal1", "png");
   cl->CanvasToPng(TC[2], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "oHCal", "ohcal", "png");
+  pngfile = cl->htmlRegisterPage(*this, "iHCal/Masking", "ihcal2", "png");
+  cl->CanvasToPng(TC[8], pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "iHCal/Summary", "ihcal3", "png");
+  cl->CanvasToPng(ihcalSummary, pngfile);
+ /* cl->CanvasToPng(TC[7], pngfile); */
+  pngfile = cl->htmlRegisterPage(*this, "oHCal/Run", "ohcal", "png");
   cl->CanvasToPng(TC[3], pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "oHCal/Masking", "ohcal2", "png");
+  cl->CanvasToPng(TC[10], pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "oHCal/Summary", "ohcal3", "png");
+  cl->CanvasToPng(ohcalSummary, pngfile);
+ /* cl->CanvasToPng(TC[9], pngfile); */
   pngfile = cl->htmlRegisterPage(*this, "ZDC&MBD", "zdc&mbd", "png");
   cl->CanvasToPng(TC[4], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "Correlations", "correlations", "png");
@@ -827,6 +1037,7 @@ int CaloDraw::DBVarInit()
 void CaloDraw::SetCemcSummary(TCanvas* c)
 {
   cemcSummary = c;
+  /*
   cemcSummary->cd();
   // add the run number title
   QADrawClient *cl = QADrawClient::instance();
@@ -845,6 +1056,59 @@ void CaloDraw::SetCemcSummary(TCanvas* c)
   tr->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
   cemcSummary->Update();
+  */
+}
+
+void CaloDraw::SetihcalSummary(TCanvas* c)
+{
+  ihcalSummary = c;
+  /*
+  ihcalSummary->cd();
+  
+  // Add the run number title
+  QADrawClient *cl = QADrawClient::instance();
+  TPad* tr = new TPad("transparent_ihcal", "", 0, 0, 1, 1);
+  tr->SetFillStyle(4000);
+  tr->Draw();  
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << Name()<< "_ihcal_summary Run " << cl->RunNumber();
+  runstring = runnostream.str();
+  tr->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+  ihcalSummary->Update();
+  */
+}
+
+void CaloDraw::SetohcalSummary(TCanvas* c)
+{
+  ohcalSummary = c;
+  /*
+  ohcalSummary->cd();
+  
+  // Add the run number title
+  QADrawClient *cl = QADrawClient::instance();
+  TPad* tr = new TPad("transparent_ohcal", "", 0, 0, 1, 1);
+  tr->SetFillStyle(4000);
+  tr->Draw();  
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << Name() << "_ohcal_summary Run " << cl->RunNumber();
+  runstring = runnostream.str();
+  tr->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+  ohcalSummary->Update();
+  */
 }
 
 TH1 *CaloDraw::proj(TH2 *h2)

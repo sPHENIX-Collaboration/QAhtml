@@ -14,22 +14,57 @@ void draw_calo(const std::string &rootfile) {
 
   // Tower masking & good/bad run determination
   CaloGoodRunChecker* ch = new CaloGoodRunChecker();
-  ex->SetCemcChecker(ch);
+  ex->SetCaloChecker(ch);
   ch->SetHistfile(rootfile);
   std::string mapsfile = ch->MakeHotColdDeadMaps();
-  bool cemc_isgood = ch->CemcGoodRun();
-  TCanvas* cemc_summ = ch->CemcMakeSummary(cemc_isgood);
+
+  // EMCal
+  ch->CemcCheckGoodRun();
+  TCanvas* cemc_summ = ch->CemcMakeSummary();
   ex->SetCemcSummary(cemc_summ);
+
+  // iHCal
+  ch->ihcalCheckGoodRun();
+  TCanvas* ihcal_summ = ch->ihcalMakeSummary();
+  ex->SetihcalSummary(ihcal_summ);
+
+  // oHCal
+  ch->ohcalCheckGoodRun();
+  TCanvas* ohcal_summ = ch->ohcalMakeSummary();
+  ex->SetohcalSummary(ohcal_summ);
+
+  // Debug output before reading histograms
+  // std::cout << "Reading histograms from maps files..." << std::endl;
 
   cl->ReadHistogramsFromFile(mapsfile.c_str());
   /* cl->Print("ALL"); */
+
+  // Debug output before making HTML
+  // std::cout << "Making HTML and saving PNG files..." << std::endl;
+
   cl->MakeHtml();
-  delete cl;
+
+  // Debug output after making HTML
+  // std::cout << "HTML and PNG files should be saved now." << std::endl;
+
+  // Debug output before deleting maps
+  // std::cout << "Deleting hot/cold/dead maps..." << std::endl;
+
   ch->DeleteHotColdDeadMaps();
 
+  // Debug output after deleting maps
+  // std::cout << "Hot/cold/dead maps deleted." << std::endl;
+
   // Write good/bad run status to triage database
-  // (don't actually do this yet -- 7/1/24)
-  // ch->CemcWriteDB(cemc_isgood);
+  std::cout << "Writing emcal_auto to run triage DB... ";
+  ch->CaloWriteDB("emcal");
+  std::cout << "Done!" << std::endl;
+  /*
+  ch->CaloWriteDB("ihcal");
+  ch->CaloWriteDB("ohcal");
+  */
+
+  delete cl;
 
   gSystem->Exit(0);
   return ;

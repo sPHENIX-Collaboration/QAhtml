@@ -7,27 +7,27 @@ AM_CPPFLAGS = \
   -isystem$(ROOTSYS)/include 
 
 lib_LTLIBRARIES = \
-  libqadrawmvtx.la
+  libqadrawinttrawhit.la
 
-libqadrawmvtx_la_LIBADD = \
+libqadrawintt_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
   -lqadrawdb
 
-libqadrawmvtxrawhit_la_LIBADD = \
+libqadrawinttrawhit_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
   -lqadrawdb
 
-mvtxincludedir=$(pkgincludedir)/mvtx
+inttrawhitincludedir=$(pkgincludedir)/intt
 
-mvtxinclude_HEADERS = \
-  MVTXDraw.h
+inttrawhitinclude_HEADERS = \
+  INTTRawHitDraw.h
 
-libqadrawmvtx_la_SOURCES = \
-  MVTXDraw.cc
+libqadrawinttrawhit_la_SOURCES = \
+  INTTRawHitDraw.cc
 
 noinst_PROGRAMS = \
   testexternals
@@ -36,7 +36,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libqadrawmvtx.la
+  libqadrawinttrawhit.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@

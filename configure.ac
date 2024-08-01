@@ -29,11 +29,15 @@ AC_CONFIG_FILES([
   subsystems/example/Makefile
   subsystems/globalQA/Makefile
   subsystems/intt/Makefile
+  subsystems/inttrawhit/Makefile
   subsystems/micromegas/Makefile
   subsystems/mvtx/Makefile
+  subsystems/mvtxrawhit/Makefile
   subsystems/siliconseeds/Makefile
   subsystems/tpc/Makefile
+  subsystems/tpcrawhit/Makefile
   subsystems/tpcseeds/Makefile
+  subsystems/tpcsil/Makefile
   subsystems/vertex/Makefile
 ])
 
