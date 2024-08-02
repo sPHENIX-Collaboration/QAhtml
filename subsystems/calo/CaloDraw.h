@@ -48,9 +48,11 @@ class CaloDraw : public QADraw
   TCanvas* ihcalSummary = nullptr;
   TCanvas* ohcalSummary = nullptr;
 
-  // add summary canvases for hcal etc later
+  int canvas_xsize = 1600;
+  int canvas_ysize = 800;
+
   const char *histprefix;
-  // for EMCal good run determination and hcal
+  // for good run determination
   CaloGoodRunChecker* calo_checker = nullptr;
 };
 

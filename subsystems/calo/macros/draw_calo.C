@@ -58,11 +58,13 @@ void draw_calo(const std::string &rootfile) {
   // Write good/bad run status to triage database
   std::cout << "Writing emcal_auto to run triage DB... ";
   ch->CaloWriteDB("emcal");
-  std::cout << "Done!" << std::endl;
-  /*
+  std::cout << "Done!!" << std::endl;
+  std::cout << "Writing ihcal_auto to run triage DB... ";
   ch->CaloWriteDB("ihcal");
+  std::cout << "Done!" << std::endl;
+  std::cout << "Writing ohcal_auto to run triage DB... ";
   ch->CaloWriteDB("ohcal");
-  */
+  std::cout << "Done!" << std::endl;
 
   delete cl;
 
