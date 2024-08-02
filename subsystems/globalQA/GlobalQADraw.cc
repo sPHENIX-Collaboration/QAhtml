@@ -131,10 +131,10 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
     TC[num]->UseCurrentStyle();
     gSystem->ProcessEvents();
 
-    Pad[num][0] = new TPad("mypad00", "mbd_zvtx_wide", 0.05, 0.32, 0.45, 0.97, 0);
+    Pad[num][0] = new TPad("mypad00", "mbd_zvtx_wide", 0.05, 0.52, 0.50, 0.97, 0);
     Pad[num][1] = new TPad("mypad01", "mbd_charge", 0.5, 0.52, 0.95, 0.97, 0);
     Pad[num][2] = new TPad("mypad02", "mbd_nhit", 0.5, 0.02, 0.95, 0.47, 0);
-    Pad[num][3] = new TPad("mypad03", "mbd_zvtxq", 0.05, 0.02, 0.45, 0.28, 0);
+    Pad[num][3] = new TPad("mypad03", "mbd_zvtxq", 0.05, 0.02, 0.50, 0.47, 0);
 
 
     Pad[num][0]->Draw();
@@ -149,7 +149,7 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
     TC[num]->UseCurrentStyle();
     gSystem->ProcessEvents();
 
-    Pad[num][0] = new TPad("mypad10", "zdc_energy", 0.05, 0.52, 0.45, 0.97, 0);
+    Pad[num][0] = new TPad("mypad10", "zdc_energy", 0.05, 0.52, 0.50, 0.97, 0);
     Pad[num][1] = new TPad("mypad11", "zdc_zvtx", 0.5, 0.52, 0.95, 0.97, 0);
     Pad[num][2] = new TPad("mypad12", "zdc_zvtx_wide", 0.5, 0.02, 0.95, 0.47, 0);
 
@@ -219,8 +219,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   TC[0]->Clear("D");
   
   // Plot the z-vertices wide
-  TLegend * leg00 = new TLegend(0.58, 0.7, 0.84, 0.89);
-  leg00->SetTextSize(0.035);
+  TLegend * leg00 = new TLegend(0.3, 0.7, 0.9, 0.9);
   leg00->SetBorderSize(0);
   Pad[0][0]->cd();
   if (h_GlobalQA_mbd_zvtx_wide && h_GlobalQA_calc_zvtx_wide)
@@ -228,34 +227,26 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     TF1 * f = new TF1("f", "gaus", -100,100);
     f->SetParameters(h_GlobalQA_mbd_zvtx_wide->GetMaximum(), h_GlobalQA_mbd_zvtx_wide->GetMean(), h_GlobalQA_mbd_zvtx_wide->GetRMS() );
     h_GlobalQA_mbd_zvtx_wide->Fit("f");
+    h_GlobalQA_mbd_zvtx_wide->SetMaximum(h_GlobalQA_mbd_zvtx_wide->GetMaximum() * 1.5);
+    h_GlobalQA_mbd_zvtx_wide->SetLineColor(kRed+4);
     leg00->AddEntry(h_GlobalQA_mbd_zvtx_wide,"Provided z-vertex");
      
     gPad->UseCurrentStyle();
-
+    
     h_GlobalQA_mbd_zvtx_wide->SetLineColor(kRed+4);
-    h_GlobalQA_mbd_zvtx_wide->DrawCopy("hist");
 
     f->SetLineColor(kBlack);
-    f->DrawCopy("same");
-       
-    h_GlobalQA_calc_zvtx_wide->SetLineColor(kMagenta+1);
-    leg00->AddEntry(h_GlobalQA_calc_zvtx_wide,"Calculated z-vertex");
-    h_GlobalQA_calc_zvtx_wide->DrawCopy("hist same");
+    f->DrawCopy("hist");
     
-    TText printmean;
-    TText printrms;
-    printmean.SetTextFont(62);
-    printrms.SetTextFont(62);
-    printmean.SetTextSize(0.06);
-    printrms.SetTextSize(0.06);
-    printmean.SetNDC();
-    printrms.SetNDC();
+    //h_GlobalQA_calc_zvtx_wide->SetLineColor(kRed);
+    //leg00->AddEntry(h_GlobalQA_calc_zvtx_wide,"Calculated z-vertex");
+    //h_GlobalQA_calc_zvtx_wide->DrawCopy("hist same");
+    
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
-    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
-    printrms.DrawText(0.2,0.55,boost::str(boost::format("RMS: %.2f") % rms).c_str());
+    leg00->AddEntry((TObject*)0, boost::str(boost::format("Mean: %.1f") % mean).c_str(), "");
+    leg00->AddEntry((TObject*)0, boost::str(boost::format("RMS: %.1f") % rms).c_str(), "");
   
-    
     leg00->Draw();
   }
   else
@@ -264,7 +255,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   }
 
   // Plot the charge distribution 
-  TLegend * leg01 = new TLegend(0.7, 0.7, 0.9, 0.9);
+  TLegend * leg01 = new TLegend(0.6, 0.6, 0.9, 0.9);
   Pad[0][1]->cd();
   if (h_GlobalQA_mbd_charge_s && h_GlobalQA_mbd_charge_n)
   {
@@ -279,6 +270,11 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     h_GlobalQA_mbd_charge_n->SetLineColor(kBlue);
     leg01->AddEntry(h_GlobalQA_mbd_charge_n,"North");
     h_GlobalQA_mbd_charge_n->DrawCopy("hist same");
+    
+    float means = h_GlobalQA_mbd_charge_s->GetMean();
+    float meann = h_GlobalQA_mbd_charge_n->GetMean();
+    leg01->AddEntry((TObject*)0, boost::str(boost::format("South mean: %.1f") % means).c_str(), ""); 
+    leg01->AddEntry((TObject*)0, boost::str(boost::format("North mean: %.1f") % meann).c_str(), ""); 
   
     leg01->Draw();
   }
@@ -288,7 +284,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   }
 
   // Plot the hit distribution
-  TLegend * leg02 = new TLegend(0.7, 0.7, 0.9, 0.9);
+  TLegend * leg02 = new TLegend(0.6, 0.6, 0.9, 0.9);
   Pad[0][2]->cd();
   if (h_GlobalQA_mbd_nhit_s && h_GlobalQA_mbd_nhit_n)
   {
@@ -303,20 +299,12 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     h_GlobalQA_mbd_nhit_n->SetLineColor(kBlue);
     leg02->AddEntry(h_GlobalQA_mbd_nhit_n,"North");
     
-    TText printnhits;
-    TText printnhitn;
-    printnhits.SetTextFont(62);
-    printnhitn.SetTextFont(62);
-    printnhits.SetTextSize(0.06);
-    printnhitn.SetTextSize(0.06);
-    printnhits.SetNDC();
-    printnhitn.SetNDC();
     float means = h_GlobalQA_mbd_nhit_s->GetMean();
     float meann = h_GlobalQA_mbd_nhit_n->GetMean();
-    
+    leg02->AddEntry((TObject*)0, boost::str(boost::format("South mean: %.1f") % means).c_str(), ""); 
+    leg02->AddEntry((TObject*)0, boost::str(boost::format("North mean: %.1f") % meann).c_str(), ""); 
+
     h_GlobalQA_mbd_nhit_n->DrawCopy("hist same");
-    printnhits.DrawText(0.5,0.6,boost::str(boost::format("South mean: %.2f") % means).c_str());
-    printnhitn.DrawText(0.5,0.45,boost::str(boost::format("North mean: %.2f") % meann).c_str());
 
     leg02->Draw();
   }
@@ -341,8 +329,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     float no = h_GlobalQA_mbd_zvtxq->GetBinContent(1) * 100;
     
     h_GlobalQA_mbd_zvtxq->DrawCopy("hist");
-    printyes.DrawText(0.6,0.7,boost::str(boost::format("zvtx provided:\n %.2f%s") % yes % "%").c_str());
-    printno.DrawText(0.2,0.7, boost::str(boost::format("No zvtx:\n %.2f%s") % no % "%").c_str());
+    printyes.DrawText(0.55,0.7,boost::str(boost::format("zvtx provided:\n %.1f%s") % yes % "%").c_str());
+    printno.DrawText(0.2,0.7, boost::str(boost::format("No zvtx:\n %.1f%s") % no % "%").c_str());
     
     gPad->UseCurrentStyle();
   }
@@ -386,25 +374,47 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
   if (h_GlobalQA_zdc_energy_s && h_GlobalQA_zdc_energy_n)
   {
     h_GlobalQA_zdc_energy_s->Scale(1/h_GlobalQA_zdc_energy_s->Integral());
-    h_GlobalQA_zdc_energy_n->Scale(1/h_GlobalQA_zdc_energy_n->Integral()); 
-
-    gPad->UseCurrentStyle();
-
-    h_GlobalQA_zdc_energy_s->SetLineColor(kRed);
-    leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South");
-    h_GlobalQA_zdc_energy_s->DrawCopy();
-
-    TGraph *gr_1n = new TGraph();
-    gr_1n->SetPoint(0, 70, 0);
-    gr_1n->SetPoint(1, 70, 1e7);
-    gr_1n->SetLineColor(kBlack);
-    gr_1n->SetLineWidth(2);
-    gr_1n->SetLineStyle(9);
-    gr_1n->Draw("l");
-  
-    h_GlobalQA_zdc_energy_n->SetLineColor(kBlue);
-    leg10->AddEntry(h_GlobalQA_zdc_energy_n,"North");
-    h_GlobalQA_zdc_energy_n->DrawCopy("same");
+    h_GlobalQA_zdc_energy_n->Scale(1/h_GlobalQA_zdc_energy_n->Integral());
+    
+    if (h_GlobalQA_zdc_energy_s->GetMaximum() > h_GlobalQA_zdc_energy_n->GetMaximum())
+    {
+      h_GlobalQA_zdc_energy_s->SetLineColor(kRed);
+      leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South");
+      h_GlobalQA_zdc_energy_s->DrawCopy();
+      gPad->UseCurrentStyle();
+      
+      TGraph *gr_1n = new TGraph();
+      gr_1n->SetPoint(0, 70, 0);
+      gr_1n->SetPoint(1, 70, 1e7);
+      gr_1n->SetLineColor(kBlack);
+      gr_1n->SetLineWidth(2);
+      gr_1n->SetLineStyle(9);
+      gr_1n->Draw("l");
+      
+      h_GlobalQA_zdc_energy_n->SetLineColor(kBlue);
+      leg10->AddEntry(h_GlobalQA_zdc_energy_n,"North");
+      h_GlobalQA_zdc_energy_n->DrawCopy("same");
+    }
+    else
+    {
+      h_GlobalQA_zdc_energy_n->SetLineColor(kBlue);
+      leg10->AddEntry(h_GlobalQA_zdc_energy_n,"North");
+      h_GlobalQA_zdc_energy_n->DrawCopy();
+      gPad->UseCurrentStyle();
+      
+      TGraph *gr_1n = new TGraph();
+      gr_1n->SetPoint(0, 70, 0);
+      gr_1n->SetPoint(1, 70, 1e7);
+      gr_1n->SetLineColor(kBlack);
+      gr_1n->SetLineWidth(2);
+      gr_1n->SetLineStyle(9);
+      gr_1n->Draw("l");
+      
+      h_GlobalQA_zdc_energy_s->SetLineColor(kRed);
+      leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South");
+      h_GlobalQA_zdc_energy_s->DrawCopy("same");
+      
+    }
     
     leg10->Draw();
   }
@@ -449,8 +459,8 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
     printrms.SetNDC();
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
-    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
-    printrms.DrawText(0.2,0.55, boost::str(boost::format("RMS: %.2f") % rms).c_str());
+    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.1f") % mean).c_str());
+    printrms.DrawText(0.2,0.55, boost::str(boost::format("RMS: %.1f") % rms).c_str());
   }
   else 
   {
@@ -475,6 +485,12 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
 
 int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
 {
+  //gStyle->SetTitleSize(gStyle->GetTitleSize("X")*3.0, "X");
+  //gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*3.0, "Y");
+  //gStyle->SetLabelSize(gStyle->GetLabelSize("X")*2.5, "X");
+  //gStyle->SetLabelSize(gStyle->GetLabelSize("Y")*2.5, "Y");
+  //gStyle->SetLabelSize(gStyle->GetLabelSize("Z")*2.5, "Z");
+  
   QADrawClient *cl = QADrawClient::instance();
   int scaledowns[64] = { 0 };
   get_scaledowns(cl->RunNumber(), scaledowns);
@@ -498,10 +514,8 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   if (h_GlobalQA_ldClus_trig10 && h_GlobalQA_ldClus_trig25 && h_GlobalQA_ldClus_trig26 && h_GlobalQA_ldClus_trig27)
   {
     h_GlobalQA_ldClus_trig10->SetXTitle("Leading cluster energy [GeV]");
-    h_GlobalQA_ldClus_trig10->SetYTitle("Counts scaled by (prescale + 1)"); 
+    h_GlobalQA_ldClus_trig10->SetYTitle("Scaled counts"); 
     
-    gPad->UseCurrentStyle();
-    gPad->SetLogy();
     h_GlobalQA_ldClus_trig10->SetLineColor(kBlack);
     h_GlobalQA_ldClus_trig25->SetLineColor(kRed);
     h_GlobalQA_ldClus_trig26->SetLineColor(kGreen);
@@ -519,6 +533,10 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
 
     h_GlobalQA_ldClus_trig10->SetMinimum(0.5); 
     h_GlobalQA_ldClus_trig10->DrawCopy("hist");
+    gPad->UseCurrentStyle();
+    gPad->SetLogy();
+    h_GlobalQA_ldClus_trig10->SetLineColor(kBlack);
+    h_GlobalQA_ldClus_trig10->DrawCopy("hist same");
     h_GlobalQA_ldClus_trig25->DrawCopy("hist same");
     h_GlobalQA_ldClus_trig26->DrawCopy("hist same");
     h_GlobalQA_ldClus_trig27->DrawCopy("hist same");
@@ -532,10 +550,10 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   Pad[2][1]->cd();
   if (h_GlobalQA_edist_trig10)
   {
-    gPad->UseCurrentStyle();
-    h_GlobalQA_edist_trig10->SetXTitle("Trigger 10 max cluster\t ieta");
+    h_GlobalQA_edist_trig10->SetXTitle("Trigger 10 max cluster    ieta");
     h_GlobalQA_edist_trig10->SetYTitle("iphi");
     h_GlobalQA_edist_trig10->DrawCopy("colz");
+    gPad->UseCurrentStyle();
   }
   else
   {
@@ -544,10 +562,10 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   Pad[2][2]->cd();
   if (h_GlobalQA_edist_trig26)
   {
-    gPad->UseCurrentStyle();
-    h_GlobalQA_edist_trig26->SetXTitle("Trigger 26 max cluster\t ieta");
+    h_GlobalQA_edist_trig26->SetXTitle("Trigger 26 max cluster    ieta");
     h_GlobalQA_edist_trig26->SetYTitle("iphi");
     h_GlobalQA_edist_trig26->DrawCopy("colz");
+    gPad->UseCurrentStyle();
   }
   else
   {
@@ -561,8 +579,8 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   {
     h_GlobalQA_triggerVec->SetXTitle("Trigger index");
     h_GlobalQA_triggerVec->SetYTitle("Counts");
-    gPad->UseCurrentStyle();
     h_GlobalQA_triggerVec->DrawCopy("hist");
+    gPad->UseCurrentStyle();
   }
   else
   {
@@ -602,13 +620,12 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   }
   
   // Plot the trigger persistency
-  TLegend * leg30 = new TLegend(0.7, 0.8, 0.9 ,1.0);
+  TLegend * leg30 = new TLegend(0.5, 0.6, 0.9 ,0.9);
   Pad[3][0]->cd();
   if (pr_GlobalQA_evtNum_ldClus_trig10 && pr_GlobalQA_evtNum_ldClus_trig25 && pr_GlobalQA_evtNum_ldClus_trig26 && pr_GlobalQA_evtNum_ldClus_trig27)
   {
-    gPad->UseCurrentStyle();
     pr_GlobalQA_evtNum_ldClus_trig27->SetXTitle("Events binned by one thousand");
-    pr_GlobalQA_evtNum_ldClus_trig27->SetYTitle("Average leading cluster E [GeV]");
+    pr_GlobalQA_evtNum_ldClus_trig27->SetYTitle("Average max cluster E [GeV]");
 
 
     pr_GlobalQA_evtNum_ldClus_trig10->SetLineColor(kBlack);
@@ -642,6 +659,7 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
     pr_GlobalQA_evtNum_ldClus_trig27->SetMinimum(0);
     pr_GlobalQA_evtNum_ldClus_trig27->SetMinimum(8);
     pr_GlobalQA_evtNum_ldClus_trig27->DrawCopy("hist");
+    gPad->UseCurrentStyle();
     pr_GlobalQA_evtNum_ldClus_trig26->DrawCopy("hist same");
     pr_GlobalQA_evtNum_ldClus_trig25->DrawCopy("hist same");
     pr_GlobalQA_evtNum_ldClus_trig10->DrawCopy("hist same");
@@ -658,7 +676,6 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   Pad[3][1]->cd();
   if (pr_GlobalQA_rejection_trig25 && pr_GlobalQA_rejection_trig26 && pr_GlobalQA_rejection_trig27)
   {
-    gPad->UseCurrentStyle();
     pr_GlobalQA_rejection_trig27->SetXTitle("Events binned by one thousand");
     pr_GlobalQA_rejection_trig27->SetYTitle("Average rejection factor");
 
@@ -690,6 +707,7 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
    
     pr_GlobalQA_rejection_trig27->SetMinimum(0);
     pr_GlobalQA_rejection_trig27->DrawCopy("hist");
+    gPad->UseCurrentStyle();
     pr_GlobalQA_rejection_trig26->DrawCopy("hist same");
     pr_GlobalQA_rejection_trig25->DrawCopy("hist same");
 
@@ -705,7 +723,6 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   Pad[3][2]->cd();
   if (pr_GlobalQA_livetime_trig10 && pr_GlobalQA_livetime_trig26 && pr_GlobalQA_livetime_trig27)
   {
-    gPad->UseCurrentStyle();
     pr_GlobalQA_livetime_trig27->SetXTitle("Events binned by one thousand");
     pr_GlobalQA_livetime_trig27->SetYTitle("Average livetime factor");
 
@@ -737,6 +754,7 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
    
     pr_GlobalQA_livetime_trig27->SetMinimum(0);
     pr_GlobalQA_livetime_trig27->DrawCopy("hist");
+    gPad->UseCurrentStyle();
     pr_GlobalQA_livetime_trig26->DrawCopy("hist same");
     pr_GlobalQA_livetime_trig10->DrawCopy("hist same");
 
