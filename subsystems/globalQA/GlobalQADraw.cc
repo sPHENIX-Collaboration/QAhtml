@@ -220,7 +220,6 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   
   // Plot the z-vertices wide
   TLegend * leg00 = new TLegend(0.3, 0.7, 0.9, 0.9);
-  leg00->SetBorderSize(0);
   Pad[0][0]->cd();
   if (h_GlobalQA_mbd_zvtx_wide && h_GlobalQA_calc_zvtx_wide)
   {
@@ -230,13 +229,14 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     h_GlobalQA_mbd_zvtx_wide->SetMaximum(h_GlobalQA_mbd_zvtx_wide->GetMaximum() * 1.5);
     h_GlobalQA_mbd_zvtx_wide->SetLineColor(kRed+4);
     leg00->AddEntry(h_GlobalQA_mbd_zvtx_wide,"Provided z-vertex");
-     
+    h_GlobalQA_mbd_zvtx_wide->DrawCopy("hist");
+
     gPad->UseCurrentStyle();
     
     h_GlobalQA_mbd_zvtx_wide->SetLineColor(kRed+4);
 
     f->SetLineColor(kBlack);
-    f->DrawCopy("hist");
+    f->DrawCopy("same");
     
     //h_GlobalQA_calc_zvtx_wide->SetLineColor(kRed);
     //leg00->AddEntry(h_GlobalQA_calc_zvtx_wide,"Calculated z-vertex");
