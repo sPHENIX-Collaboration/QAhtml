@@ -50,14 +50,14 @@ int TPCSilDraw::Draw(const std::string &what)
   /* SetsPhenixStyle(); */
   int iret = 0;
   int idraw = 0;
-  if (what == "ALL" || what == "MATCHING")
-  {
-    iret += DrawMatchingInfo();
-    idraw++;
-  }
   if (what == "ALL" || what == "POSITION")
   {
     iret += DrawPositionInfo();
+    idraw++;
+  }
+  if (what == "ALL" || what == "CUTS")
+  {
+    iret += DrawCutHistograms();
     idraw++;
   }
   if (!idraw)
@@ -77,7 +77,7 @@ int TPCSilDraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("TPCSil Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  if (num == 1)
+  if (num != 0)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.32, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.37, 0.52, 0.64, 0.97, 0);
@@ -110,35 +110,27 @@ int TPCSilDraw::MakeCanvas(const std::string &name, int num)
   return 0;
 }
 
-int TPCSilDraw::DrawMatchingInfo()
+int TPCSilDraw::DrawPositionInfo()
 {
-  std::cout << "TPCSil DrawMatchingInfo() Beginning" << std::endl;
+  std::cout << "TPCSil DrawPositionInfo() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
 
   TH1 *h_crossing = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("crossing"))); 
-  TH1 *h_trackMatch = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("trackMatch"))); 
+  TH1F *h_xDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("xDiff")));
+  TH1F *h_yDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("yDiff")));
+  TH1F *h_zDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("zDiff")));
+  TH1F *h_phiDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("phiDiff")));
+  TH1F *h_etaDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("etaDiff")));
 
-  if (! gROOT->FindObject("matching_info"))
+  if (! gROOT->FindObject("crossing_info"))
   {
-    MakeCanvas("matching_info", 0);
+    MakeCanvas("crossing_info", 0);
   }
   TC[0]->Clear("D");
   Pad[0][0]->cd();
   if (h_crossing)
   {
     h_crossing->DrawCopy();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-  Pad[0][1]->cd();
-  if (h_trackMatch)
-  {
-    h_trackMatch->Scale(1./h_trackMatch->Integral());
-    h_trackMatch->DrawCopy();
     gPad->SetRightMargin(0.15);
   }
   else
@@ -160,22 +152,7 @@ int TPCSilDraw::DrawMatchingInfo()
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
   TC[0]->Update();
- 
-  std::cout << "DrawMatchingInfo Ending" << std::endl;
-  return 0;
-}
-
-int TPCSilDraw::DrawPositionInfo()
-{
-  std::cout << "TPCSil DrawPositionInfo() Beginning" << std::endl;
-  QADrawClient *cl = QADrawClient::instance();
-
-  TH1F *h_xDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("xDiff")));
-  TH1F *h_yDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("yDiff")));
-  TH1F *h_zDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("zDiff")));
-  TH1F *h_phiDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("phiDiff")));
-  TH1F *h_etaDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("etaDiff")));
-
+    
   if (! gROOT->FindObject("position_info"))
   {
     MakeCanvas("position_info", 1);
@@ -238,17 +215,17 @@ int TPCSilDraw::DrawPositionInfo()
     return -1;
   }
 
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();  // set to normalized coordinates
-  PrintRun.SetTextAlign(23); // center/top alignment
-  std::ostringstream runnostream1;
-  std::string runstring1;
-  runnostream1 << Name() << "_position Run " << cl->RunNumber();
-  runstring1 = runnostream1.str();
+  TText PrintRun2;
+  PrintRun2.SetTextFont(62);
+  PrintRun2.SetTextSize(0.04);
+  PrintRun2.SetNDC();  // set to normalized coordinates
+  PrintRun2.SetTextAlign(23); // center/top alignment
+  std::ostringstream runnostream2;
+  std::string runstring2;
+  runnostream2 << Name() << "_position Run " << cl->RunNumber();
+  runstring2 = runnostream2.str();
   transparent[1]->cd();
-  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+  PrintRun2.DrawText(0.5, 1., runstring2.c_str());
 
   TC[1]->Update();
  
@@ -256,6 +233,103 @@ int TPCSilDraw::DrawPositionInfo()
   return 0;
 }
  
+int TPCSilDraw::DrawCutHistograms()
+{
+  std::cout << "TPCSil DrawCutHistograms() Beginning" << std::endl;
+  QADrawClient *cl = QADrawClient::instance();
+
+  std::vector<std::string> cutNames = {"_xyCut", "_etaCut", "_phiCut"};
+
+  int i = 2;
+  for (const std::string& name : cutNames)
+  {
+    TH1F *h_xDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("xDiff") + name));
+    TH1F *h_yDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("yDiff") + name));
+    TH1F *h_zDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("zDiff") + name));
+    TH1F *h_phiDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("phiDiff") + name));
+    TH1F *h_etaDiff = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("etaDiff") + name));
+ 
+    if (! gROOT->FindObject((std::string("position") + name).c_str()))
+    {
+      MakeCanvas(std::string("position") + name, i);
+    }
+    TC[i]->Clear("D");
+
+    Pad[i][0]->cd();
+    if (h_xDiff)
+    {
+      h_xDiff->DrawCopy();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      // histogram is missing
+      return -1;
+    }
+    Pad[i][1]->cd();
+    if (h_yDiff)
+    {
+      h_yDiff->DrawCopy();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      // histogram is missing
+      return -1;
+    }
+    Pad[i][2]->cd();
+    if (h_zDiff)
+    {
+      h_zDiff->DrawCopy();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      // histogram is missing
+      return -1;
+    }
+    Pad[i][3]->cd();
+    if (h_etaDiff)
+    {
+      h_etaDiff->DrawCopy();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      // histogram is missing
+      return -1;
+    }
+    Pad[i][4]->cd();
+    if (h_phiDiff)
+    {
+      h_phiDiff->DrawCopy();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      // histogram is missing
+      return -1;
+    }
+    TText PrintRun;
+    PrintRun.SetTextFont(62);
+    PrintRun.SetTextSize(0.04);
+    PrintRun.SetNDC();  // set to normalized coordinates
+    PrintRun.SetTextAlign(23); // center/top alignment
+    std::ostringstream runnostream;
+    std::string runstring;
+    runnostream << Name() << "_cuts Run " << cl->RunNumber();
+    runstring = runnostream.str();
+    transparent[i]->cd();
+    PrintRun.DrawText(0.5, 1., runstring.c_str());
+
+    TC[i]->Update();
+    i++;
+  }
+ 
+  std::cout << "DrawCutHistograms Ending" << std::endl;
+  return 0;
+}
+
 int TPCSilDraw::MakeHtml(const std::string &what)
 {
   int iret = Draw(what);
@@ -268,16 +342,25 @@ int TPCSilDraw::MakeHtml(const std::string &what)
   std::string pngfile;
 
   // Register the 1st canvas png file to the menu and produces the png file.
-  if (what == "ALL" || what == "MATCHING")
-  {
-    pngfile = cl->htmlRegisterPage(*this, "matching_info", "1", "png");
-    cl->CanvasToPng(TC[0], pngfile);
-  }
   if (what == "ALL" || what == "POSITION")
   {
+    pngfile = cl->htmlRegisterPage(*this, "crossing_info", "1", "png");
+    cl->CanvasToPng(TC[0], pngfile);
     pngfile = cl->htmlRegisterPage(*this, "position_info", "2", "png");
     cl->CanvasToPng(TC[1], pngfile);
   }
+  if (what == "ALL" || what == "CUTS")
+  {
+    std::vector<std::string> cutNames = {"_xyCut", "_etaCut", "_phiCut"};
+    int i = 2;
+    for (const std::string& name : cutNames)
+    { 
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("position%s") % name).str(), (boost::format("%i") % (i + 1)).str(), "png");
+      cl->CanvasToPng(TC[i], pngfile);
+      i++;
+    }
+  }
+
   return 0;
 }
 
