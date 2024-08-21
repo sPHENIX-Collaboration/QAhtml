@@ -67,7 +67,6 @@ int CaloDraw::Draw(const std::string &what)
   if (what == "ALL" || what == "CEMC")
   {
     iret += DrawCemc();
-    std::cout << "CEMC: iret = " << iret << std::endl;
     idraw++;
   }
   if (what == "ALL" || what == "IHCAL")
