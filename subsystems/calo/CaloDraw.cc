@@ -48,7 +48,7 @@ CaloDraw::~CaloDraw()
 
 int CaloDraw::Draw(const std::string &what)
 {
-  /* SetsPhenixStyle(); */
+  /* SetsPhenixStyle(); 
   gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
   gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
   gStyle->SetPadLeftMargin(0.15);
@@ -62,6 +62,7 @@ int CaloDraw::Draw(const std::string &what)
   gStyle->SetPadTickY(1);
   gStyle->SetOptStat(10);
   gROOT->ForceStyle();
+*/
   int iret = 0;
   int idraw = 0;
   if (what == "ALL" || what == "CEMC")

@@ -1,11 +1,12 @@
 #include <qahtml/QADrawClient.h>
 #include <calo/CaloDraw.h>
 #include <calo/CaloGoodRunChecker.h>
+#include <sPhenixStyle.C>
 
 R__LOAD_LIBRARY(libqadrawcalo.so)
 
 void draw_calo(const std::string &rootfile) {
-  
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
   CaloDraw *ex = new CaloDraw();
