@@ -814,7 +814,7 @@ int CaloDraw::DrawZdcMbd()
   else
   {
     // histogram is missing
-    return -1;
+    /* return -1; */
   }
   Pad[4][1]->cd();
   if (zdc_Northcalib && zdc_Southcalib)
