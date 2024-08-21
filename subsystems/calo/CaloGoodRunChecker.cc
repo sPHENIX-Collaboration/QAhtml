@@ -659,7 +659,7 @@ void CaloGoodRunChecker::CaloWriteDB(std::string subsystem)
 
   // if the run is bad, we still want to update the comments field
   /*
-  if (!cemc_isgood)
+  if (!isGood)
   {
     return;
   }

@@ -67,6 +67,7 @@ int CaloDraw::Draw(const std::string &what)
   if (what == "ALL" || what == "CEMC")
   {
     iret += DrawCemc();
+    std::cout << "CEMC: iret = " << iret << std::endl;
     idraw++;
   }
   if (what == "ALL" || what == "IHCAL")
@@ -814,7 +815,7 @@ int CaloDraw::DrawZdcMbd()
   else
   {
     // histogram is missing
-    return -1;
+    /* return -1; */
   }
   Pad[4][1]->cd();
   if (zdc_Northcalib && zdc_Southcalib)
