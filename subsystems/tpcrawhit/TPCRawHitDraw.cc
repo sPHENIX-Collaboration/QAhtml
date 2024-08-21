@@ -5,6 +5,8 @@
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
 
+#include <tpc/TpcMap.h>
+
 #include <TCanvas.h>
 #include <TDatime.h>
 #include <TGraphErrors.h>
@@ -20,6 +22,7 @@
 #include <TLegend.h>
 #include <TLine.h>
 #include <TEllipse.h>
+#include <TRandom3.h>
 
 #include <boost/format.hpp>
 
@@ -397,11 +400,249 @@ int TPCRawHitDraw::DrawOnlMon()
     TC[q + 13]->Update(); 
   }
 
+  bool outFEEs[24][26] = {{false}};
+  float halfFEEs = 12*26;
+  float outN = 0;
+  float outS = 0;
+  for (int s = 0; s < 24; s++)
+  {
+    TH2* h2 = dynamic_cast <TH2 *> (cl->getHisto(histprefix + std::string("nhits_sec") + std::to_string(s) + std::string("_fees")));
+    TProfile* tp = h2->ProfileX();
+    for (int f = 0; f < 26; f++)
+    {
+      if (tp->GetBinContent(f+1) <= 10)
+      {
+        outFEEs[s][f] = true;
+        if (s < 12) outN++;
+        else if (s >= 12) outS++;
+      }    
+    }
+  }
+  float fracOutN = outN/halfFEEs;
+  float fracOutS = outS/halfFEEs;
+
+  int FEE_R[26]{2, 2, 1, 1, 1, 3, 3, 3, 3, 3, 3, 2, 2, 1, 2, 2, 1, 1, 2, 2, 3, 3, 3, 3, 3, 3};
+  int FEE_map[26]{4, 5, 0, 2, 1, 11, 9, 10, 8, 7, 6, 0, 1, 3, 7, 6, 5, 4, 3, 2, 0, 2, 1, 3, 5, 4};
+  TpcMap M;
+  M.setMapNames("AutoPad-R1-RevA.sch.ChannelMapping.csv", "AutoPad-R2-RevA-Pads.sch.ChannelMapping.csv", "AutoPad-R3-RevA.sch.ChannelMapping.csv");
+
+  double FEE_bounds[24][26][2] = {{{0}}};
+
+  for (int sector = 0; sector < 24; sector++)
+  {
+    for (int fee = 0; fee < 26; fee++)
+    {
+      int feeM = FEE_map[fee];
+      if (FEE_R[fee] == 2)
+      {
+        feeM += 6;
+      }
+      if (FEE_R[fee] == 3)
+      {
+        feeM += 14;
+      }
+      double lower = 0;
+      double upper = 0;
+      double phi = 0;
+      for (int channel = 0; channel < 256; channel++)
+      {
+        if (sector < 12)  // NS
+        {
+          phi = M.getPhi(feeM, channel) + (sector) *M_PI / 6;
+        }
+        else if (sector >= 12)  // SS
+        {
+          phi = M.getPhi(feeM, channel) + (18 - sector) * M_PI / 6;
+        }
+
+        if(channel == 0)
+        {
+          lower = phi;
+          upper = phi;
+        }
+        else
+        {
+          if (phi < lower) lower = phi;
+          else if (phi > upper) upper = phi;
+        }
+      }
+      FEE_bounds[sector][fee][0] = lower;
+      FEE_bounds[sector][fee][1] = upper;
+    }
+  }
+  float n1FEEs_N = 0;  
+  float n2FEEs_N = 0;  
+  float n3FEEs_N = 0;
+  float n1FEEs_S = 0;  
+  float n2FEEs_S = 0;  
+  float n3FEEs_S = 0;
+  float fracN1FEE = -1;  
+  float fracN2FEE = -1;  
+  float fracN3FEE = -1;  
+  float fracS1FEE = -1;  
+  float fracS2FEE = -1;  
+  float fracS3FEE = -1;  
+  float totalN = 0;  
+  float totalS = 0;  
+  TRandom3 randGen;
+  for (float nRand = 0; nRand < 100000; nRand++)
+  {
+    // North Bounds: [-0.25336, 6.01289]
+    // South Bounds: [-2.87135, 3.39489]
+    double randPhi = randGen.Uniform(-0.25336, 6.01289);
+    // NS
+    for (int sector = 0; sector < 12; sector++)
+    {
+      bool r1 = false;
+      bool r2 = false;
+      bool r3 = false;
+      bool feeOn1 = false;
+      bool feeOn2 = false;
+      bool feeOn3 = false;
+      bool foundOne = false;
+      for (int fee = 0; fee < 26; fee++)
+      {
+        int region = FEE_R[fee];
+        if ((region == 1 && r1) || (region == 2 && r2) || (region == 3 && r3)) continue;
+
+        if (randPhi >= FEE_bounds[sector][fee][0] && randPhi <= FEE_bounds[sector][fee][1])
+        {
+          foundOne = true;
+          if (region == 1)
+          {
+            r1 = true;
+            if (outFEEs[sector][fee] == false) feeOn1 = true;
+  
+            continue; 
+          }
+          else if (region == 2)
+          {
+            r2 = true;
+            if (outFEEs[sector][fee] == false) feeOn2 = true; 
+  
+            continue; 
+          }
+          else if (region == 3)
+          {
+            r3 = true;
+            if (outFEEs[sector][fee] == false) feeOn3 = true; 
+  
+            continue; 
+          }
+        } 
+      }
+      if (foundOne)
+      {
+        if (!(r1 && r2 && r3)) 
+        {
+          break;
+        }
+        totalN++;
+        if (feeOn1 && feeOn2 && feeOn3) n3FEEs_N++;
+        if ((feeOn1 && feeOn2) || (feeOn1 && feeOn3) || (feeOn2 && feeOn3)) n2FEEs_N++;
+        if (feeOn1 || feeOn2 || feeOn3) n1FEEs_N++;
+
+        break; 
+      }
+    }
+
+    randPhi = randGen.Uniform(-2.87135, 3.39489);
+    // SS
+    for (int sector = 12; sector < 24; sector++)
+    {
+      bool r1 = false;
+      bool r2 = false;
+      bool r3 = false;
+      bool feeOn1 = false;
+      bool feeOn2 = false;
+      bool feeOn3 = false;
+      bool foundOne = false;
+      for (int fee = 0; fee < 26; fee++)
+      {
+        int region = FEE_R[fee];
+        if ((region == 1 && r1) || (region == 2 && r2) || (region == 3 && r3)) continue;
+
+        if (randPhi >= FEE_bounds[sector][fee][0] && randPhi <= FEE_bounds[sector][fee][1])
+        {
+          foundOne = true;
+          if (region == 1)
+          {
+            r1 = true;
+            if (outFEEs[sector][fee] == false) feeOn1 = true;
+  
+            continue; 
+          }
+          else if (region == 2)
+          {
+            r2 = true;
+            if (outFEEs[sector][fee] == false) feeOn2 = true; 
+  
+            continue; 
+          }
+          else if (region == 3)
+          {
+            r3 = true;
+            if (outFEEs[sector][fee] == false) feeOn3 = true; 
+  
+            continue; 
+          }
+        } 
+      }
+      if (foundOne)
+      {
+        if (!(r1 && r2 && r3)) 
+        {
+          std::cout << "One R not found" << std::endl;
+          break;
+        }
+        totalS++;
+        if (feeOn1 && feeOn2 && feeOn3) n3FEEs_S++;
+        if ((feeOn1 && feeOn2) || (feeOn1 && feeOn3) || (feeOn2 && feeOn3)) n2FEEs_S++;
+        if (feeOn1 || feeOn2 || feeOn3) n1FEEs_S++;
+
+        break; 
+      }
+    }
+  }  
+  fracN1FEE = n1FEEs_N/totalN;    
+  fracN2FEE = n2FEEs_N/totalN;    
+  fracN3FEE = n3FEEs_N/totalN;    
+  fracS1FEE = n1FEEs_S/totalS;    
+  fracS2FEE = n2FEEs_S/totalS;    
+  fracS3FEE = n3FEEs_S/totalS;    
+
+  std::ostringstream fracnostream1, fracnostream2, fracnostream3, feeOutstream;
+  std::string fracstring1, fracstring2, fracstring3, feeOutString;
+  fracnostream1 << "Fraction of >= 1 FEE tracks: North = " << fracN1FEE << ", South = " << fracS1FEE << std::endl; 
+  fracnostream2 << "Fraction of >= 2 FEE tracks: North = " << fracN2FEE << ", South = " << fracS2FEE << std::endl; 
+  fracnostream3 << "Fraction of 3 FEE tracks: North = " << fracN3FEE << ", South = " << fracS3FEE << std::endl;
+  feeOutstream << "Fraction of FEEs Out: North = " << fracOutN << ", South = " << fracOutS << std::endl;
+  fracstring1 = fracnostream1.str();   
+  fracstring2 = fracnostream2.str();   
+  fracstring3 = fracnostream3.str();   
+  feeOutString = feeOutstream.str();
+
   if (! gROOT->FindObject("rawhit_xy"))
   {
     MakeCanvas("rawhit_xy", 17);
   }
   TC[17]->Clear("D");
+  TLatex *title1 = new TLatex();
+  title1->SetTextSize(0.04);
+  title1->SetNDC();
+  title1->DrawLatex(0.15, 0.9, fracstring1.c_str());
+  TLatex *title2 = new TLatex();
+  title2->SetTextSize(0.04);
+  title2->SetNDC();
+  title2->DrawLatex(0.15, 0.85, fracstring2.c_str());
+  TLatex *title3 = new TLatex();
+  title3->SetTextSize(0.04);
+  title3->SetNDC();
+  title3->DrawLatex(0.15, 0.8, fracstring3.c_str());
+  TLatex *title4 = new TLatex();
+  title4->SetTextSize(0.04);
+  title4->SetNDC();
+  title4->DrawLatex(0.15, 0.75, feeOutString.c_str());
   Pad[17][0]->cd();
   if (h_northHits)
   {
