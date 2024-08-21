@@ -1,10 +1,10 @@
 #include <qahtml/QADrawClient.h>
 #include <globalqa/GlobalQADraw.h>
-
+#include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawglobalqa.so)
 
 void draw_GlobalQA(const char *rootfile) {
-
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   GlobalQADraw *ex = new GlobalQADraw();
   cl->registerDrawer(ex);

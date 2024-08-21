@@ -1,10 +1,10 @@
 #include <qahtml/QADrawClient.h>
 #include <mvtx/MVTXDraw.h>
-
+#include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawmvtx.so)
 
 void draw_mvtx(const std::string &rootfile) {
-
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
   QADraw *ex = new MVTXDraw();

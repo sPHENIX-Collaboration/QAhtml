@@ -1,10 +1,10 @@
 #include <qahtml/QADrawClient.h>
 #include <bco/BCODraw.h>
-
+#include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawbco.so)
 
 void draw_packets(const std::string &rootfile) {
-
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
   QADraw *ex = new BCODraw();

@@ -78,7 +78,7 @@ GlobalQADraw::~GlobalQADraw()
 
 int GlobalQADraw::Draw(const std::string &what)
 {
-  /* sPHENIX style */ 
+  /* sPHENIX style
   gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
   gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
   gStyle->SetPadLeftMargin(0.15);
@@ -92,6 +92,7 @@ int GlobalQADraw::Draw(const std::string &what)
   gStyle->SetPadTickY(1);
   gStyle->SetOptStat(0);
   gROOT->ForceStyle();
+  */
   int iret = 0;
   int idraw = 0;
   if (what == "ALL" || what == "MBD")
