@@ -230,7 +230,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
     Pad[index_page][2]->SetLogy(1);
     if (h_pt && h_pt_pos && h_pt_neg)
     {
-        h_pt->SetTitle("p_{T} distribution for p_{T}>1GeV tracks");
+        h_pt->SetTitle("p_{T} distribution");
         h_pt->SetXTitle("p_{T} [GeV]");
         h_pt->SetYTitle("Entries");
         h_pt->SetMarkerColor(kBlack);
@@ -665,12 +665,19 @@ int TpcSeedsDraw::DrawClusterInfo2()
     TH2F *h_clusphisize1frac_pt_side1_1 = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_pt_side1_1")));
     TH2F *h_clusphisize1frac_pt_side1_2 = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_pt_side1_2")));
 
-    TH1F *h_clusphisize1frac_mean_side0_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side0_0")));
-    TH1F *h_clusphisize1frac_mean_side0_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side0_1")));
-    TH1F *h_clusphisize1frac_mean_side0_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side0_2")));
-    TH1F *h_clusphisize1frac_mean_side1_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side1_0")));
-    TH1F *h_clusphisize1frac_mean_side1_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side1_1")));
-    TH1F *h_clusphisize1frac_mean_side1_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side1_2")));
+    TH1F *h_clusphisize1frac_mean_numerator_side0_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side0_0")));
+    TH1F *h_clusphisize1frac_mean_numerator_side0_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side0_1")));
+    TH1F *h_clusphisize1frac_mean_numerator_side0_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side0_2")));
+    TH1F *h_clusphisize1frac_mean_numerator_side1_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side1_0")));
+    TH1F *h_clusphisize1frac_mean_numerator_side1_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side1_1")));
+    TH1F *h_clusphisize1frac_mean_numerator_side1_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side1_2")));
+
+    TH1F *h_clusphisize1frac_mean_denominator_side0_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side0_0")));
+    TH1F *h_clusphisize1frac_mean_denominator_side0_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side0_1")));
+    TH1F *h_clusphisize1frac_mean_denominator_side0_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side0_2")));
+    TH1F *h_clusphisize1frac_mean_denominator_side1_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side1_0")));
+    TH1F *h_clusphisize1frac_mean_denominator_side1_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side1_1")));
+    TH1F *h_clusphisize1frac_mean_denominator_side1_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side1_2")));
 
     const int index_page = 2;
 
@@ -681,7 +688,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     TC[index_page]->Clear("D");
 
     Pad[index_page][0]->cd();
-    if (h_clusphisize1frac_pt_side0_0 && h_clusphisize1frac_mean_side0_0)
+    if (h_clusphisize1frac_pt_side0_0 && h_clusphisize1frac_mean_numerator_side0_0 && h_clusphisize1frac_mean_denominator_side0_0)
     {
         h_clusphisize1frac_pt_side0_0->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side0_0->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -689,10 +696,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side0_0->SetTitle("TPC south in");
         h_clusphisize1frac_pt_side0_0->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -711,7 +718,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][2]->cd();
-    if (h_clusphisize1frac_pt_side0_1)
+    if (h_clusphisize1frac_pt_side0_1 && h_clusphisize1frac_mean_numerator_side0_1 && h_clusphisize1frac_mean_denominator_side0_1)
     {
         h_clusphisize1frac_pt_side0_1->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side0_1->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -719,10 +726,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side0_1->SetTitle("TPC south mid");
         h_clusphisize1frac_pt_side0_1->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -741,7 +748,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][4]->cd();
-    if (h_clusphisize1frac_pt_side0_2)
+    if (h_clusphisize1frac_pt_side0_2 && h_clusphisize1frac_mean_numerator_side0_2 && h_clusphisize1frac_mean_denominator_side0_2)
     {
         h_clusphisize1frac_pt_side0_2->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side0_2->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -749,10 +756,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side0_2->SetTitle("TPC south out");
         h_clusphisize1frac_pt_side0_2->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -771,7 +778,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][1]->cd();
-    if (h_clusphisize1frac_pt_side1_0)
+    if (h_clusphisize1frac_pt_side1_0 && h_clusphisize1frac_mean_numerator_side1_0 && h_clusphisize1frac_mean_denominator_side1_0)
     {
         h_clusphisize1frac_pt_side1_0->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side1_0->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -779,10 +786,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side1_0->SetTitle("TPC north in");
         h_clusphisize1frac_pt_side1_0->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -801,7 +808,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][3]->cd();
-    if (h_clusphisize1frac_pt_side1_1)
+    if (h_clusphisize1frac_pt_side1_1 && h_clusphisize1frac_mean_numerator_side1_1 && h_clusphisize1frac_mean_denominator_side1_1)
     {
         h_clusphisize1frac_pt_side1_1->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side1_1->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -809,10 +816,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side1_1->SetTitle("TPC north mid");
         h_clusphisize1frac_pt_side1_1->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -831,7 +838,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][5]->cd();
-    if (h_clusphisize1frac_pt_side1_2)
+    if (h_clusphisize1frac_pt_side1_2 && h_clusphisize1frac_mean_numerator_side1_2 && h_clusphisize1frac_mean_denominator_side1_2)
     {
         h_clusphisize1frac_pt_side1_2->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side1_2->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -839,10 +846,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side1_2->SetTitle("TPC north out");
         h_clusphisize1frac_pt_side1_2->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
