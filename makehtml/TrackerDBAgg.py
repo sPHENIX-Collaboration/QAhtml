@@ -8,8 +8,6 @@ import time
 import argparse
 
 track_hist_types = ["HIST_DST_STREAMING_EVENT", "HIST_DST_TRKR_HIT","HIST_DST_TRKR_CLUSTER", "HIST_DST_TRKR_SEED"]
-verbose = True
-test = True
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
@@ -86,7 +84,7 @@ def main():
                     if os.path.getmtime(newpath) > aggFileTime:
                         reagg = True
                         break
-            if verbose == True:
+            if args.verbose == True:
                 print("Agg file " + path + "  time is " + str(aggFileTime))
                 print("latest new file time is " + str(newFileTime))
             if reagg == False:
@@ -113,10 +111,10 @@ def main():
             # wait for at least 10 files
             if nfiles < 10:
                 continue
-            if verbose:
+            if args.verbose:
                 print("executing command")
                 print(command)
-            if not test:
+            if not args.test:
                 subprocess.run(command)
 
     conn.close()
