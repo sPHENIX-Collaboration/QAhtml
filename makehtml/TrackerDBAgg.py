@@ -20,7 +20,7 @@ print("Test is " + str(args.test))
 
 
 def get_unique_run_dataset_pairs(cursor, type):
-    query = "SELECT runnumber, dataset FROM datasets WHERE filename LIKE '{}%' AND runnumber=51569 GROUP BY runnumber, dataset;".format(type)
+    query = "SELECT runnumber, dataset FROM datasets WHERE filename LIKE '{}%' GROUP BY runnumber, dataset;".format(type)
    
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
