@@ -8,7 +8,8 @@ class SingleCanvasDrawer
 {
 public:
   SingleCanvasDrawer(std::string const& name) {m_name = name;}
-  virtual ~SingleCanvasDrawer() {delete m_canvas;}
+  virtual ~SingleCanvasDrawer() = default;
+  /// gSystem->Reset can leave m_canvas dangling
 
   TCanvas* GetCanvas() {return m_canvas;}
   std::string GetName() {return m_name;}
