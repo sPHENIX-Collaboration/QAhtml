@@ -92,12 +92,12 @@ def main():
                 path = (aggDirectory + histtype + "_run2pp_"+ana+"_" + dbtag + "-{:08d}-9000.root").format(run)
 
           
-            command = "hadd -ff -k " + path
+            command = ["hadd","-ff",path]
             for newpath in filepaths:
                 # make sure the file has the same db tag
                 if newpath.find(latestdbtag) == -1: 
                    continue
-                command += " " + newpath
+                command.append(str(newpath))
                 nfiles+=1
             
             # wait for at least 10 files
