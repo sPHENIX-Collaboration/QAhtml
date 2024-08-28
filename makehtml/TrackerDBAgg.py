@@ -95,12 +95,12 @@ def main():
                 path = (aggDirectory + histtype + "_run2pp_new_" + dbtag + "-{:08d}-9000.root").format(run)
 
           
-            command = "hadd -ff -k " + path
+            command = ["hadd","-ff",path]
             for newpath in filepaths:
                 # make sure the file has the same db tag
                 if newpath.find(latestdbtag) == -1: 
                    continue
-                command += " " + newpath
+                command.append(str(newpath))
                 nfiles+=1
                 # don't need loads of statistics for these, and it just clogs the aggregation processing
                 if histtype.find("CLUSTER") != -1 or histtype.find("HIT") != -1:
