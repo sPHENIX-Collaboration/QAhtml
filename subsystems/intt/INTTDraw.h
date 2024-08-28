@@ -1,17 +1,21 @@
 #ifndef INTT_INTTDRAW_H__
 #define INTT_INTTDRAW_H__
 
+#include "SingleCanvasDrawer.h"
+
 #include <qahtml/QADraw.h>
 
+#include <map>
+#include <string>
 #include <vector>
 
-class QADB;
-class QADBVar;
-class TCanvas;
-class TGraphErrors;
-class TPad;
-class TH1F;
-class TH2F;
+// class QADB;
+// class QADBVar;
+// class TCanvas;
+// class TGraphErrors;
+// class TPad;
+// class TH1F;
+// class TH2F;
 
 class INTTDraw : public QADraw
 {
@@ -24,13 +28,8 @@ class INTTDraw : public QADraw
   int DBVarInit();
 
  private:
-  int MakeCanvas(const std::string &name, int num);
-  int DrawChipInfo();
-  int DrawClusterInfo();
-  TCanvas *TC[2]{};
-  TPad *transparent[2]{};
-  TPad *Pad[2][4]{};
-  const char *histprefix;
+  std::map<std::string, SingleCanvasDrawer*> m_options;
+
 };
 
 #endif
