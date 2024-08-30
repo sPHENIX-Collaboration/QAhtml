@@ -23,6 +23,7 @@
 #include <TLine.h>
 #include <TEllipse.h>
 #include <TRandom3.h>
+#include <THStack.h>
 
 #include <boost/format.hpp>
 
@@ -82,7 +83,7 @@ int TPCRawHitDraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("TPC Raw Hit Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  if (num < 8 || (num > 8 && num < 17))
+  if (num < 16)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.32, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.37, 0.52, 0.64, 0.97, 0);
@@ -130,8 +131,6 @@ int TPCRawHitDraw::DrawSectorInfo()
     h_hits_secs.push_back(h); 
     h_hits_secs_fees.push_back(h2); 
   }
-  
-  TH1* h_bco = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("bco")));
 
   for (int q = 0; q < 4; q++)
   {
@@ -146,8 +145,14 @@ int TPCRawHitDraw::DrawSectorInfo()
       Pad[q][i]->cd();
       if (h_hits_secs[q*6 + i])
       {
+        h_hits_secs[q*6 + i]->GetXaxis()->SetNdivisions(5);
         h_hits_secs[q*6 + i]->DrawCopy();
         gPad->SetRightMargin(0.15);
+
+        TLatex *title = new TLatex();
+        title->SetTextSize(0.06);
+        title->SetNDC();
+        title->DrawLatex(0.6, 0.75, (boost::format("Sector %i") % (q*6 + i)).str().c_str());
       }
       else
       {
@@ -186,6 +191,7 @@ int TPCRawHitDraw::DrawSectorInfo()
       {
         h_hits_secs_fees[q*6 + i]->DrawCopy("COLZ");
         gPad->SetRightMargin(0.15);
+        gPad->SetLeftMargin(0.15);
       }
       else
       {
@@ -209,36 +215,6 @@ int TPCRawHitDraw::DrawSectorInfo()
     TC[q + 4]->Update(); 
   }
 
-  if (! gROOT->FindObject("rawhit_bco"))
-  {
-    MakeCanvas("rawhit_bco", 8);
-  }
-  TC[8]->Clear("D");
-  Pad[8][0]->cd();
-  if (h_bco)
-  {
-    h_bco->DrawCopy();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();  // set to normalized coordinates
-  PrintRun.SetTextAlign(23); // center/top alignment
-  std::ostringstream runnostream1;
-  std::string runstring1;
-  runnostream1 << Name() << "_bco Run " << cl->RunNumber();
-  runstring1 = runnostream1.str();
-  transparent[8]->cd();
-  PrintRun.DrawText(0.5, 1., runstring1.c_str());
-
-  TC[8]->Update(); 
- 
   std::cout << "DrawChipInfo Ending" << std::endl;
   return 0;
 }
@@ -282,30 +258,53 @@ int TPCRawHitDraw::DrawOnlMon()
   {
     if (! gROOT->FindObject((boost::format("sampleDist_%i") % q).str().c_str()))
     {
-      MakeCanvas((boost::format("sampleDist_%i") % q).str(), q + 9);
+      MakeCanvas((boost::format("sampleDist_%i") % q).str(), q + 8);
     }
-    TC[q + 9]->Clear("D");
+    TC[q + 8]->Clear("D");
 
     for (int i = 0; i < 6; i++)
     {
-      Pad[q + 9][i]->cd();
+      Pad[q + 8][i]->cd();
       if (h_hits_sample_1[q*6 + i] && h_hits_sample_2[q*6 + i] && h_hits_sample_3[q*6 + i])
       {
-        h_hits_sample_1[q*6 + i]->SetLineColor(kRed);
-        h_hits_sample_1[q*6 + i]->DrawCopy();
-        h_hits_sample_2[q*6 + i]->SetLineColor(kGreen);
-        h_hits_sample_2[q*6 + i]->DrawCopy("same");
-        h_hits_sample_3[q*6 + i]->SetLineColor(kBlue);
-        h_hits_sample_3[q*6 + i]->DrawCopy("same");
-
-        double maxBinContent = 0;
+        /*double maxBinContent = 0;
         for (int b = 1; b <= h_hits_sample_1[q*6 + i]->GetNbinsX(); b++) 
         {
-          double binContent = std::max({h_hits_sample_1[q*6 + i]->GetBinContent(b), h_hits_sample_2[q*6 + i]->GetBinContent(b), 
+          double binContent = std::max({h_hits_sample_1[q*6 + i]->GetBinContent(b), 
+                                        h_hits_sample_2[q*6 + i]->GetBinContent(b), 
                                         h_hits_sample_3[q*6 + i]->GetBinContent(b)});
-          if (binContent > maxBinContent) maxBinContent = binContent;
+          if (binContent > maxBinContent) 
+          {
+            maxBinContent = binContent;
+          }
         }
+
         h_hits_sample_1[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        h_hits_sample_2[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        h_hits_sample_3[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1);*/
+        
+        h_hits_sample_1[q*6 + i]->SetLineColor(kRed);
+        h_hits_sample_2[q*6 + i]->SetLineColor(kGreen);
+        h_hits_sample_3[q*6 + i]->SetLineColor(kBlue);
+
+        THStack *hs = new THStack("hs", "Stacked Histograms");        
+        hs->Add(h_hits_sample_1[q*6 + i]);
+        hs->Add(h_hits_sample_2[q*6 + i]);
+        hs->Add(h_hits_sample_3[q*6 + i]);
+
+        hs->Draw("nostack");
+
+        hs->GetXaxis()->SetTitle("Time Bin [1/20 MHz]");
+        hs->GetYaxis()->SetTitle("Entries");
+        hs->SetTitle((boost::format("Sector %i Sample Time Distribution") % (q*6 + i)).str().c_str());
+
+        //h_hits_sample_1[q*6 + i]->SetLineColor(kRed);
+        //h_hits_sample_1[q*6 + i]->DrawCopy();
+        //h_hits_sample_2[q*6 + i]->SetLineColor(kGreen);
+        //h_hits_sample_2[q*6 + i]->DrawCopy("same");
+        //h_hits_sample_3[q*6 + i]->SetLineColor(kBlue);
+        //h_hits_sample_3[q*6 + i]->DrawCopy("same");
+
         if (i == 0)
         {
           auto legend = new TLegend(0.7, 0.7, 0.9, 0.9);
@@ -333,23 +332,23 @@ int TPCRawHitDraw::DrawOnlMon()
     std::string runstring1;
     runnostream1 << Name() << "_sample Run " << cl->RunNumber();
     runstring1 = runnostream1.str();
-    transparent[q + 9]->cd();
+    transparent[q + 8]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-    TC[q + 9]->Update(); 
+    TC[q + 8]->Update(); 
   }
   
   for (int q = 0; q < 4; q++)
   {
     if (! gROOT->FindObject((boost::format("sec_adc_%i") % q).str().c_str()))
     {
-      MakeCanvas((boost::format("sec_adc_%i") % q).str(), q + 13);
+      MakeCanvas((boost::format("sec_adc_%i") % q).str(), q + 12);
     }
-    TC[q + 13]->Clear("D");
+    TC[q + 12]->Clear("D");
 
     for (int i = 0; i < 6; i++)
     {
-      Pad[q + 13][i]->cd();
+      Pad[q + 12][i]->cd();
       if (h_adc_1[q*6 + i] && h_adc_2[q*6 + i] && h_adc_3[q*6 + i])
       {
         h_adc_1[q*6 + i]->SetLineColor(kRed);
@@ -366,6 +365,8 @@ int TPCRawHitDraw::DrawOnlMon()
           if (binContent > maxBinContent) maxBinContent = binContent;
         }
         h_adc_1[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        h_adc_2[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        h_adc_3[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
         if (i == 0)
         {
           auto legend = new TLegend(0.45, 0.7, 0.7, 0.9);
@@ -394,10 +395,10 @@ int TPCRawHitDraw::DrawOnlMon()
     std::string runstring1;
     runnostream1 << Name() << "_adc Run " << cl->RunNumber();
     runstring1 = runnostream1.str();
-    transparent[q + 13]->cd();
+    transparent[q + 12]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-    TC[q + 13]->Update(); 
+    TC[q + 12]->Update(); 
   }
 
   bool outFEEs[24][26] = {{false}};
@@ -592,7 +593,6 @@ int TPCRawHitDraw::DrawOnlMon()
       {
         if (!(r1 && r2 && r3)) 
         {
-          std::cout << "One R not found" << std::endl;
           break;
         }
         totalS++;
@@ -624,9 +624,9 @@ int TPCRawHitDraw::DrawOnlMon()
 
   if (! gROOT->FindObject("rawhit_xy"))
   {
-    MakeCanvas("rawhit_xy", 17);
+    MakeCanvas("rawhit_xy", 16);
   }
-  TC[17]->Clear("D");
+  TC[16]->Clear("D");
   TLatex *title1 = new TLatex();
   title1->SetTextSize(0.04);
   title1->SetNDC();
@@ -643,7 +643,7 @@ int TPCRawHitDraw::DrawOnlMon()
   title4->SetTextSize(0.04);
   title4->SetNDC();
   title4->DrawLatex(0.15, 0.75, feeOutString.c_str());
-  Pad[17][0]->cd();
+  Pad[16][0]->cd();
   if (h_northHits)
   {
     h_northHits->DrawCopy("COLZ");
@@ -681,7 +681,7 @@ int TPCRawHitDraw::DrawOnlMon()
     // histogram is missing
     return -1;
   }
-  Pad[17][1]->cd();
+  Pad[16][1]->cd();
   if (h_southHits)
   {
     h_southHits->DrawCopy("COLZ");
@@ -728,10 +728,10 @@ int TPCRawHitDraw::DrawOnlMon()
   std::string runstring1;
   runnostream1 << Name() << "_hitsXY Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
-  transparent[17]->cd();
+  transparent[16]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-  TC[17]->Update(); 
+  TC[16]->Update(); 
  
   std::cout << "DrawOnlMon Ending" << std::endl;
   return 0;
@@ -760,23 +760,21 @@ int TPCRawHitDraw::MakeHtml(const std::string &what)
       pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_fee_rawhits_%i") % q).str(), (boost::format("%i") % (q + 5)).str(), "png");
       cl->CanvasToPng(TC[q + 4], pngfile);
     }
-    pngfile = cl->htmlRegisterPage(*this, "rawhit_bco", "9", "png");
-    cl->CanvasToPng(TC[8], pngfile);
   }
   if (what == "ALL" || what == "ONLMON")
   {
     for (int q = 0; q < 4; q++)
     {
-      pngfile = cl->htmlRegisterPage(*this, (boost::format("sampleDist_%i") % q).str(), (boost::format("%i") % (q + 10)).str(), "png");
-      cl->CanvasToPng(TC[q + 9], pngfile);
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("sampleDist_%i") % q).str(), (boost::format("%i") % (q + 9)).str(), "png");
+      cl->CanvasToPng(TC[q + 8], pngfile);
     }
     for (int q = 0; q < 4; q++)
     {
-      pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_adc_%i") % q).str(), (boost::format("%i") % (q + 14)).str(), "png");
-      cl->CanvasToPng(TC[q + 13], pngfile);
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_adc_%i") % q).str(), (boost::format("%i") % (q + 13)).str(), "png");
+      cl->CanvasToPng(TC[q + 12], pngfile);
     }
-    pngfile = cl->htmlRegisterPage(*this, "rawhit_xy", "18", "png");
-    cl->CanvasToPng(TC[17], pngfile);
+    pngfile = cl->htmlRegisterPage(*this, "rawhit_xy", "17", "png");
+    cl->CanvasToPng(TC[16], pngfile);
   }
   return 0;
 }
