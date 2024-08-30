@@ -11,6 +11,7 @@
 #include <TGraphErrors.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TProfile2D.h>
 #include <TLatex.h>
 #include <TString.h>
 #include <TPad.h>
@@ -109,7 +110,7 @@ int CaloDraw::MakeCanvas(const std::string &name, int num)
   TC[num]->UseCurrentStyle();
   gSystem->ProcessEvents();
 
-  if (num==1)
+  if (num==1 || num==11 || num==12 || num==13)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.25, 0.45, 0.75, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
@@ -170,10 +171,12 @@ int CaloDraw::DrawCemc()
   TH1F *emcal_proj = (TH1F *) proj(cemc_etaphi)->Clone("h_emcal_proj");
   TH1 *invMass = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("InvMass")));
   TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
+  TProfile2D *h_CaloValid_cemc_etaphi_pedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("cemc_etaphi_pedRMS")));
+  TProfile2D *h_CaloValid_cemc_etaphi_ZSpedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("cemc_etaphi_ZSpedRMS")));
   TH2 *cemc_hotmap = nullptr;
   if (calo_checker) cemc_hotmap = calo_checker->cemc_hcdmap;
   TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA")));
-
+  
   // canvas 1
   if (!gROOT->FindObject("cemc1"))
   {
@@ -341,6 +344,32 @@ int CaloDraw::DrawCemc()
     emcal_proj_masked->DrawCopy("HIST");
     gPad->UseCurrentStyle();
   }
+  if (!gROOT->FindObject("cemc4"))
+  {
+    MakeCanvas("cemc4", 11);
+  }
+  Pad[11][0]->cd();
+  if (h_CaloValid_cemc_etaphi_pedRMS)
+  {
+    h_CaloValid_cemc_etaphi_pedRMS->SetTitle("CaloValid EMCal Eta-Phi Ped RMS");
+    h_CaloValid_cemc_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} EMCal");
+    h_CaloValid_cemc_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} EMCal");
+    h_CaloValid_cemc_etaphi_pedRMS->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
+  Pad[11][1]->cd();
+  if (h_CaloValid_cemc_etaphi_ZSpedRMS)
+  {
+    h_CaloValid_cemc_etaphi_ZSpedRMS->SetTitle("CaloValid EMCal Eta-Phi ZSped RMS");
+    h_CaloValid_cemc_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} EMCal");
+    h_CaloValid_cemc_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} EMCal");
+    h_CaloValid_cemc_etaphi_ZSpedRMS->Draw("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
 
   // remove this plot 
   /*
@@ -388,8 +417,8 @@ int CaloDraw::DrawCemc()
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();          // set to normalized coordinates
   PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream1, runnostream2, runnostream3, runnostream4;
-  std::string runstring1, runstring2, runstring3, runstring4;
+  std::ostringstream runnostream1, runnostream2, runnostream3, runnostream4, runnostream5;
+  std::string runstring1, runstring2, runstring3, runstring4, runstring5;
   runnostream1 << Name() << "_cemc_towers Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
   runnostream2 << Name() << "_cemc_clusters Run " << cl->RunNumber();
@@ -398,18 +427,23 @@ int CaloDraw::DrawCemc()
   runstring3 = runnostream3.str();
   /* runnostream4 << Name() << "_cemc_summary Run " << cl->RunNumber(); */
   /* runstring4 = runnostream4.str(); */
+  runnostream5 << Name() << "_cemc_pedestal_RMS_ Run " << cl->RunNumber();
+  runstring5 = runnostream5.str();
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
   transparent[1]->cd();
   PrintRun.DrawText(0.5, 1., runstring2.c_str());
   transparent[6]->cd();
   PrintRun.DrawText(0.5, 1., runstring3.c_str());
+  transparent[11]->cd();
+  PrintRun.DrawText(0.5, 1., runstring5.c_str());
   /* transparent[7]->cd(); */
   /* PrintRun.DrawText(0.5, 1., runstring4.c_str()); */
 
   TC[0]->Update();
   TC[1]->Update();
   TC[6]->Update();
+  TC[11]->Update();
   /* TC[7]->Update(); */
   return 0;
 }
@@ -422,6 +456,8 @@ int CaloDraw::DrawIhcal()
   TH2F *ihcal_etaphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("ihcal_etaphi")));
   TH2 *ihcal_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_time")));
   TH1F *ihcal_proj = (TH1F *) proj(ihcal_etaphi)->Clone("h_ihcal_proj");
+  TProfile2D *h_CaloValid_ihcal_etaphi_pedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_pedRMS")));
+  TProfile2D *h_CaloValid_ihcal_etaphi_ZSpedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_ZSpedRMS")));
   TH2 *ihcal_hotmap = nullptr;
   if (calo_checker) ihcal_hotmap = calo_checker->ihcal_hcdmap;
   TH1 *ihcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_wQA")));
@@ -569,29 +605,61 @@ int CaloDraw::DrawIhcal()
       gPad->UseCurrentStyle();
     }
 
+  if (!gROOT->FindObject("ihcal4"))
+  {
+    MakeCanvas("ihcal4", 12);
+  }
+  Pad[12][0]->cd();
+  if (h_CaloValid_ihcal_etaphi_pedRMS)
+  {
+    h_CaloValid_ihcal_etaphi_pedRMS->SetTitle("CaloValid IHCal Eta-Phi Ped RMS");
+    h_CaloValid_ihcal_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} IHCal");
+    h_CaloValid_ihcal_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} IHCal");
+    h_CaloValid_ihcal_etaphi_pedRMS->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
+  Pad[12][1]->cd();
+  if (h_CaloValid_ihcal_etaphi_ZSpedRMS)
+  {
+    h_CaloValid_ihcal_etaphi_ZSpedRMS->SetTitle("CaloValid IHCal Eta-Phi ZSped RMS");
+    h_CaloValid_ihcal_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} IHCal");
+    h_CaloValid_ihcal_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} IHCal");
+    h_CaloValid_ihcal_etaphi_ZSpedRMS->Draw("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
+
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();          // set to normalized coordinates
   PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream1,runnostream2, runnostream3;
-  std::string runstring1, runstring2, runstring3;
+  std::ostringstream runnostream1,runnostream2, runnostream3, runnostream4;
+  std::string runstring1, runstring2, runstring3, runstring4;
   runnostream1 << Name() << "_ihcal Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
   runnostream2 << Name() << "_ihcal_tower_masking Run " << cl->RunNumber();
   runstring2 = runnostream2.str();
   // runnostream3 << Name() << "_ihcal_summary Run " << cl->RunNumber(); 
   //runstring3 = runnostream3.str(); 
+  runnostream4 << Name() << "_ihcal_pedestal_RMS_ Run " << cl->RunNumber();
+  runstring4 = runnostream4.str();
   transparent[2]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
   //transparent[7]->cd();
   //PrintRun.DrawText(0.5, 1., runstring3.c_str());
   transparent[8]->cd();
   PrintRun.DrawText(0.5, 1., runstring2.c_str());
+  transparent[12]->cd();
+  PrintRun.DrawText(0.5, 1., runstring4.c_str());
 
   TC[2]->Update();
   //TC[7]->Update();
   TC[8]->Update();
+  TC[12]->Update();
   return 0;
 }
 
@@ -603,6 +671,8 @@ int CaloDraw::DrawOhcal()
   TH2 *ohcal_e_chi2 = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_e_chi2")));
   TH2F *ohcal_etaphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("ohcal_etaphi")));
   TH2 *ohcal_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_time")));
+  TProfile2D *h_CaloValid_ohcal_etaphi_pedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_pedRMS")));
+  TProfile2D *h_CaloValid_ohcal_etaphi_ZSpedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_ZSpedRMS")));
   TH1F *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
   TH2 *ohcal_hotmap = nullptr;
   if (calo_checker) ohcal_hotmap = calo_checker->ohcal_hcdmap;
@@ -748,31 +818,61 @@ int CaloDraw::DrawOhcal()
       ohcal_proj_masked->DrawCopy("HIST");
       gPad->UseCurrentStyle();
     }
-
+  if (!gROOT->FindObject("ohcal4"))
+  {
+    MakeCanvas("ohcal4", 13);
+  }
+  Pad[13][0]->cd();
+  if (h_CaloValid_ohcal_etaphi_pedRMS)
+  {
+    h_CaloValid_ohcal_etaphi_pedRMS->SetTitle("CaloValid OHCal Eta-Phi Ped RMS");
+    h_CaloValid_ohcal_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} OHCal");
+    h_CaloValid_ohcal_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} OHCal");
+    h_CaloValid_ohcal_etaphi_pedRMS->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
+  Pad[13][1]->cd();
+  if (h_CaloValid_ohcal_etaphi_ZSpedRMS)
+  {
+    h_CaloValid_ohcal_etaphi_ZSpedRMS->SetTitle("CaloValid OHCal Eta-Phi ZSped RMS");
+    h_CaloValid_ohcal_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} OHCal");
+    h_CaloValid_ohcal_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} OHCal");
+    h_CaloValid_ohcal_etaphi_ZSpedRMS->Draw("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
 
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();          // set to normalized coordinates
   PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream1,runnostream2, runnostream3;;
-  std::string runstring1, runstring2, runstring3;
+  std::ostringstream runnostream1,runnostream2, runnostream3, runnostream4;
+  std::string runstring1, runstring2, runstring3, runstring4;
   runnostream1 << Name() << "_ohcal Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
   runnostream2 << Name() << "_ohcal_tower_masking Run " << cl->RunNumber();
   runstring2 = runnostream2.str();
   //runnostream3 << Name() << "_ohcal_summary Run " << cl->RunNumber();
   //runstring3 = runnostream3.str();
+  runnostream4 << Name() << "_ohcal_pedestal_RMS_ Run " << cl->RunNumber();
+  runstring4 = runnostream4.str();
   transparent[3]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
   //transparent[9]->cd();
   //PrintRun.DrawText(0.5, 1., runstring3.c_str());
   transparent[10]->cd();
   PrintRun.DrawText(0.5, 1., runstring2.c_str());
+  transparent[13]->cd();
+  PrintRun.DrawText(0.5, 1., runstring4.c_str());
 
   TC[3]->Update();
   //TC[9]->Update();
   TC[10]->Update();
+  TC[13]->Update();
   return 0;
 }
 
@@ -1000,6 +1100,8 @@ int CaloDraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(TC[1], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "EMCal/Masking", "cemc3", "png");
   cl->CanvasToPng(TC[6], pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "EMCal/Pedestal", "cemc5", "png");
+  cl->CanvasToPng(TC[11], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "EMCal/Summary", "cemc4", "png");
   cl->CanvasToPng(cemcSummary, pngfile);
   /* cl->CanvasToPng(TC[7], pngfile); */
@@ -1009,6 +1111,8 @@ int CaloDraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(TC[8], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "iHCal/Summary", "ihcal3", "png");
   cl->CanvasToPng(ihcalSummary, pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "iHCal/Pedestal", "ihcal4", "png");
+  cl->CanvasToPng(TC[12], pngfile);
  /* cl->CanvasToPng(TC[7], pngfile); */
   pngfile = cl->htmlRegisterPage(*this, "oHCal/Run", "ohcal", "png");
   cl->CanvasToPng(TC[3], pngfile);
@@ -1016,6 +1120,8 @@ int CaloDraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(TC[10], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "oHCal/Summary", "ohcal3", "png");
   cl->CanvasToPng(ohcalSummary, pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "oHCal/Pedestal", "ohcal4", "png");
+  cl->CanvasToPng(TC[13], pngfile);
  /* cl->CanvasToPng(TC[9], pngfile); */
   pngfile = cl->htmlRegisterPage(*this, "ZDC&MBD", "zdc&mbd", "png");
   cl->CanvasToPng(TC[4], pngfile);
