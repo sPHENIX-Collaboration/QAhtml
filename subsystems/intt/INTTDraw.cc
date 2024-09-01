@@ -4,33 +4,11 @@
 #include "INTTClusterDrawer.h"
 //...
 
-#include <sPhenixStyle.C>
-
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
+#include <qahtml/SingleCanvasDrawer.h>
 
-#include <TCanvas.h>
-#include <TDatime.h>
-#include <TGraphErrors.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TProfile.h>
-#include <TPad.h>
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TSystem.h>
-#include <TText.h>
-#include <TLatex.h>
-#include <TColor.h>
-#include <TLegend.h>
-
-#include <boost/format.hpp>
-
-#include <cmath>
-#include <ctime>
-#include <fstream>
 #include <iostream>
-#include <sstream>
 
 INTTDraw::INTTDraw(const std::string &name)
   : QADraw(name)
@@ -64,19 +42,23 @@ int INTTDraw::Draw(const std::string &what)
   for(auto const& [name, option] : m_options)
   {
     if(what != "ALL" && what != name)continue;
-    iret += option->DrawCanvas();
+	// I've seen people returning -1 on error instead of 1
+	// Increment if the return value is nonzero
+    iret += (option->DrawCanvas() != 0);
 	++idraw;
   }
 
   if(!idraw)
   {
-    std::cerr << "Unimplemented Drawing option:\n"
+    std::cerr << "Unimplemented drawing option:\n"
 	          << "\t" << what << "\n"
-	          << "Implemented options:" << std::endl;
+	          << "Implemented options:\n"
+	          << "\tALL" << std::endl;
 	for(auto const& [name, option] : m_options)
 	{
 		std::cerr << "\t" << name << std::endl;
 	}
+	++iret;
   }
 
   return iret;
@@ -84,26 +66,42 @@ int INTTDraw::Draw(const std::string &what)
  
 int INTTDraw::MakeHtml(const std::string &what)
 {
-  int iret = Draw(what);
-  if (iret) // on error no html output please
-  {
-    return iret;
-  }
-
   QADrawClient *cl = QADrawClient::instance();
-  std::string pngfile;
 
-  // Register the 1st canvas png file to the menu and produces the png file.
-
+  int iret = 0;
   int idraw = 0;
   for(auto const& [name, option] : m_options)
   {
-    ++idraw;
-    pngfile = cl->htmlRegisterPage(*this, name, std::to_string(idraw), "png");
+	++idraw;
+    if(what != "ALL" && what != name)continue;
+
+	// I've seen people returning -1 on error instead of 1
+	// Increment if the return value is nonzero
+	int rv = option->DrawCanvas() != 0;
+    iret += rv;
+
+	// on error no html output please
+	if(rv || !option->GetCanvas())continue;
+
+    // Registers the canvas png file to the menu and produces the png file
+	std::string pngfile = cl->htmlRegisterPage(*this, name, std::to_string(idraw), "png");
     cl->CanvasToPng(option->GetCanvas(), pngfile);
   }
 
-  return 0;
+  if(!idraw)
+  {
+    std::cerr << "Unimplemented drawing option:\n"
+	          << "\t" << what << "\n"
+	          << "Implemented options:\n"
+	          << "\tALL" << std::endl;
+	for(auto const& [name, option] : m_options)
+	{
+		std::cerr << "\t" << name << std::endl;
+	}
+	++iret;
+  }
+
+  return iret;
 }
 
 int INTTDraw::DBVarInit()

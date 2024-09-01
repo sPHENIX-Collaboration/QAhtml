@@ -39,17 +39,11 @@ INTTChipDrawer::~INTTChipDrawer()
 
 int INTTChipDrawer::MakeCanvas()
 {
-  if(gSystem->FindObject(m_name.c_str()))
+  if(SingleCanvasDrawer::MakeCanvas())
   {
     return 0;
   }
-
-  QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
-
-  m_canvas = new TCanvas(m_name.c_str(), "INTT Plots 0", -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
-  gSystem->ProcessEvents();
+  m_canvas->SetTitle("INTT Plots 0");
   
   Pad[0] = new TPad("mypad_0_0", "put",  0.05, 0.52, 0.45, 0.97, 0);
   Pad[1] = new TPad("mypad_0_1", "a",    0.5,  0.52, 0.95, 0.97, 0);

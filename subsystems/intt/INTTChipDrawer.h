@@ -1,7 +1,7 @@
 #ifndef INTT_CHIP_DRAWER_H
 #define INTT_CHIP_DRAWER_H
 
-#include "SingleCanvasDrawer.h"
+#include <qahtml/SingleCanvasDrawer.h>
 
 class TPad;
 

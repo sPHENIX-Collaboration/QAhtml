@@ -1,21 +1,12 @@
 #ifndef INTT_INTTDRAW_H__
 #define INTT_INTTDRAW_H__
 
-#include "SingleCanvasDrawer.h"
-
 #include <qahtml/QADraw.h>
 
 #include <map>
 #include <string>
-#include <vector>
 
-// class QADB;
-// class QADBVar;
-// class TCanvas;
-// class TGraphErrors;
-// class TPad;
-// class TH1F;
-// class TH2F;
+class SingleCanvasDrawer;
 
 class INTTDraw : public QADraw
 {
