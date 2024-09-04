@@ -67,9 +67,14 @@ int TpcSeedsDraw::Draw(const std::string &what)
         iret += DrawClusterInfo2();
         idraw++;
     }
-    if (what == "ALL" || what == "DCA")
+    if (what == "ALL" || what == "DCA1")
     {
-        iret += DrawDCAInfo();
+        iret += DrawDCAInfo1();
+        idraw++;
+    }
+    if (what == "ALL" || what == "DCA2")
+    {
+        iret += DrawDCAInfo2();
         idraw++;
     }
     if (what == "ALL" || what == "VERTEX")
@@ -885,35 +890,33 @@ int TpcSeedsDraw::DrawClusterInfo2()
     return 0;
 }
 
-int TpcSeedsDraw::DrawDCAInfo()
+int TpcSeedsDraw::DrawDCAInfo1()
 {
-    std::cout << "Tpc Seeds DrawDCAInfo() Beginning" << std::endl;
+    std::cout << "Tpc Seeds DrawDCAInfo1() Beginning" << std::endl;
     QADrawClient *cl = QADrawClient::instance();
 
-    TH2F *h_dcaxyorigin_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_pos")));
-    TH2F *h_dcaxyorigin_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_neg")));
-    TH2F *h_dcaxyvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_pos")));
-    TH2F *h_dcaxyvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_neg")));
+    TH2F *h_dcaxyorigin_phi_north_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_north_pos")));
+    TH2F *h_dcaxyorigin_phi_north_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_north_neg")));
+    TH2F *h_dcaxyorigin_phi_south_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_south_pos")));
+    TH2F *h_dcaxyorigin_phi_south_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_south_neg")));
     TH2F *h_dcazorigin_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazorigin_phi_pos")));
     TH2F *h_dcazorigin_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazorigin_phi_neg")));
-    TH2F *h_dcazvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_pos")));
-    TH2F *h_dcazvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_neg")));
 
     const int index_page = 3;
 
-    if (!gROOT->FindObject("dca_info"))
+    if (!gROOT->FindObject("dca_info1"))
     {
-        MakeCanvas("dca_info", index_page);
+        MakeCanvas("dca_info1", index_page);
     }
     TC[index_page]->Clear("D");
 
     Pad[index_page][0]->cd();
-    if (h_dcaxyorigin_phi_pos)
+    if (h_dcaxyorigin_phi_north_pos)
     {
-        h_dcaxyorigin_phi_pos->SetXTitle("#phi [rad]");
-        h_dcaxyorigin_phi_pos->SetYTitle("Positive track DCA_{xy} wrt origin [cm]");
-        h_dcaxyorigin_phi_pos->SetZTitle("Entries");
-        h_dcaxyorigin_phi_pos->DrawCopy("colz");
+        h_dcaxyorigin_phi_north_pos->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_north_pos->SetYTitle("Positive north track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_north_pos->SetZTitle("Entries");
+        h_dcaxyorigin_phi_north_pos->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -923,12 +926,12 @@ int TpcSeedsDraw::DrawDCAInfo()
     }
 
     Pad[index_page][1]->cd();
-    if (h_dcaxyorigin_phi_neg)
+    if (h_dcaxyorigin_phi_north_neg)
     {
-        h_dcaxyorigin_phi_neg->SetXTitle("#phi [rad]");
-        h_dcaxyorigin_phi_neg->SetYTitle("Negative track DCA_{xy} wrt origin [cm]");
-        h_dcaxyorigin_phi_neg->SetZTitle("Entries");
-        h_dcaxyorigin_phi_neg->DrawCopy("colz");
+        h_dcaxyorigin_phi_north_neg->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_north_neg->SetYTitle("Negative north track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_north_neg->SetZTitle("Entries");
+        h_dcaxyorigin_phi_north_neg->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -938,12 +941,12 @@ int TpcSeedsDraw::DrawDCAInfo()
     }
 
     Pad[index_page][2]->cd();
-    if (h_dcaxyvtx_phi_pos)
+    if (h_dcaxyorigin_phi_south_pos)
     {
-        h_dcaxyvtx_phi_pos->SetXTitle("#phi [rad]");
-        h_dcaxyvtx_phi_pos->SetYTitle("Positive track DCA_{xy} wrt vertex [cm]");
-        h_dcaxyvtx_phi_pos->SetZTitle("Entries");
-        h_dcaxyvtx_phi_pos->DrawCopy("colz");
+        h_dcaxyorigin_phi_south_pos->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_south_pos->SetYTitle("Positive south track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_south_pos->SetZTitle("Entries");
+        h_dcaxyorigin_phi_south_pos->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -953,12 +956,12 @@ int TpcSeedsDraw::DrawDCAInfo()
     }
 
     Pad[index_page][3]->cd();
-    if (h_dcaxyvtx_phi_neg)
+    if (h_dcaxyorigin_phi_south_neg)
     {
-        h_dcaxyvtx_phi_neg->SetXTitle("#phi [rad]");
-        h_dcaxyvtx_phi_neg->SetYTitle("Negative track DCA_{xy} wrt vertex [cm]");
-        h_dcaxyvtx_phi_neg->SetZTitle("Entries");
-        h_dcaxyvtx_phi_neg->DrawCopy("colz");
+        h_dcaxyorigin_phi_south_neg->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_south_neg->SetYTitle("Negative south track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_south_neg->SetZTitle("Entries");
+        h_dcaxyorigin_phi_south_neg->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -997,7 +1000,73 @@ int TpcSeedsDraw::DrawDCAInfo()
         return -1;
     }
 
-    Pad[index_page][6]->cd();
+    TText PrintRun;
+    PrintRun.SetTextFont(62);
+    PrintRun.SetTextSize(0.03);
+    PrintRun.SetNDC();         // set to normalized coordinates
+    PrintRun.SetTextAlign(23); // center/top alignment
+    std::ostringstream runnostream1;
+    std::string runstring1;
+    runnostream1 << Name() << "_tpcseeds DCA Info Page1 Run " << cl->RunNumber();
+    runstring1 = runnostream1.str();
+    transparent[index_page]->cd();
+    PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+    TC[index_page]->Update();
+
+    std::cout << "DrawDCAInfo1 Ending" << std::endl;
+    return 0;
+}
+
+int TpcSeedsDraw::DrawDCAInfo2()
+{
+    std::cout << "Tpc Seeds DrawDCAInfo2() Beginning" << std::endl;
+    QADrawClient *cl = QADrawClient::instance();
+
+    TH2F *h_dcaxyvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_pos")));
+    TH2F *h_dcaxyvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_neg")));
+    TH2F *h_dcazvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_pos")));
+    TH2F *h_dcazvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_neg")));
+
+    const int index_page = 4;
+
+    if (!gROOT->FindObject("dca_info2"))
+    {
+        MakeCanvas("dca_info2", index_page);
+    }
+    TC[index_page]->Clear("D");
+
+    Pad[index_page][0]->cd();
+    if (h_dcaxyvtx_phi_pos)
+    {
+        h_dcaxyvtx_phi_pos->SetXTitle("#phi [rad]");
+        h_dcaxyvtx_phi_pos->SetYTitle("Positive track DCA_{xy} wrt vertex [cm]");
+        h_dcaxyvtx_phi_pos->SetZTitle("Entries");
+        h_dcaxyvtx_phi_pos->DrawCopy("colz");
+        gPad->SetRightMargin(0.17);
+    }
+    else
+    {
+        // histogram is missing
+        return -1;
+    }
+
+    Pad[index_page][1]->cd();
+    if (h_dcaxyvtx_phi_neg)
+    {
+        h_dcaxyvtx_phi_neg->SetXTitle("#phi [rad]");
+        h_dcaxyvtx_phi_neg->SetYTitle("Negative track DCA_{xy} wrt vertex [cm]");
+        h_dcaxyvtx_phi_neg->SetZTitle("Entries");
+        h_dcaxyvtx_phi_neg->DrawCopy("colz");
+        gPad->SetRightMargin(0.17);
+    }
+    else
+    {
+        // histogram is missing
+        return -1;
+    }
+
+    Pad[index_page][2]->cd();
     if (h_dcazvtx_phi_pos)
     {
         h_dcazvtx_phi_pos->SetXTitle("#phi [rad]");
@@ -1012,7 +1081,7 @@ int TpcSeedsDraw::DrawDCAInfo()
         return -1;
     }
 
-    Pad[index_page][7]->cd();
+    Pad[index_page][3]->cd();
     if (h_dcazvtx_phi_neg)
     {
         h_dcazvtx_phi_neg->SetXTitle("#phi [rad]");
@@ -1034,14 +1103,14 @@ int TpcSeedsDraw::DrawDCAInfo()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds DCA Info Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds DCA Info Page2 Run " << cl->RunNumber();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
     TC[index_page]->Update();
 
-    std::cout << "DrawDCAInfo Ending" << std::endl;
+    std::cout << "DrawDCAInfo2 Ending" << std::endl;
     return 0;
 }
 
@@ -1058,7 +1127,7 @@ int TpcSeedsDraw::DrawVertexInfo()
     TH1F *h_vchi2dof = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("vertexchi2dof")));
     TH1F *h_ntrackpervertex = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("ntrackspervertex")));
 
-    const int index_page = 4;
+    const int index_page = 5;
 
     if (!gROOT->FindObject("vertex_info"))
     {
@@ -1215,16 +1284,22 @@ int TpcSeedsDraw::MakeHtml(const std::string &what)
         cl->CanvasToPng(TC[2], pngfile);
     }
 
-    if (what == "ALL" || what == "DCA")
+    if (what == "ALL" || what == "DCA1")
     {
-        pngfile = cl->htmlRegisterPage(*this, "dca_info", "4", "png");
+        pngfile = cl->htmlRegisterPage(*this, "dca_info1", "4", "png");
         cl->CanvasToPng(TC[3], pngfile);
     }
  
+    if (what == "ALL" || what == "DCA2")
+    {
+        pngfile = cl->htmlRegisterPage(*this, "dca_info2", "5", "png");
+        cl->CanvasToPng(TC[4], pngfile);
+    }
+
     if (what == "ALL" || what == "VERTEX")
     {
-        pngfile = cl->htmlRegisterPage(*this, "vertex_info", "5", "png");
-        cl->CanvasToPng(TC[4], pngfile);
+        pngfile = cl->htmlRegisterPage(*this, "vertex_info", "6", "png");
+        cl->CanvasToPng(TC[5], pngfile);
     }
     return 0;
 }
