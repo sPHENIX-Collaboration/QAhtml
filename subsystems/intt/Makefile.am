@@ -20,14 +20,12 @@ inttincludedir=$(pkgincludedir)/intt
 inttinclude_HEADERS = \
   INTTDraw.h \
   INTTChipDrawer.h \
-  INTTClusterDrawer.h \
-  SingleCanvasDrawer.h
+  INTTClusterDrawer.h
 
 libqadrawintt_la_SOURCES = \
   INTTDraw.cc \
   INTTChipDrawer.cc \
-  INTTClusterDrawer.cc \
-  SingleCanvasDrawer.cc
+  INTTClusterDrawer.cc
 
 noinst_PROGRAMS = \
   testexternals

@@ -1,15 +1,15 @@
-#ifndef INTT_CHIP_DRAWER_H
-#define INTT_CHIP_DRAWER_H
+#ifndef INTT_RAW_HIT_CHIP_DRAWER_H
+#define INTT_RAW_HIT_CHIP_DRAWER_H
 
 #include <qahtml/SingleCanvasDrawer.h>
 
 class TPad;
 
-class INTTChipDrawer : public SingleCanvasDrawer
+class INTTRawHitChipDrawer : public SingleCanvasDrawer
 {
 public:
-  INTTChipDrawer(std::string const& = "intt_chip_info");
-  virtual ~INTTChipDrawer();
+  INTTRawHitChipDrawer(std::string const& = "intt_raw_hit_chip_info", int = 0);
+  virtual ~INTTRawHitChipDrawer();
 
   int DrawCanvas() override;
 
@@ -21,8 +21,9 @@ protected:
 
 private:
   TPad *transparent{nullptr};
-  TPad *Pad[4]{nullptr};
+  int m_which_intt{0};
+
   const char* histprefix;
 };
 
-#endif//INTT_CHIP_DRAWER_H
+#endif//INTT_RAW_HIT_CHIP_DRAWER_H

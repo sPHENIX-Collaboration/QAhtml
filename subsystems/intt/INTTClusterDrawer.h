@@ -1,7 +1,7 @@
 #ifndef INTT_CLUSTER_DRAWER_H
 #define INTT_CLUSTER_DRAWER_H
 
-#include "SingleCanvasDrawer.h"
+#include <qahtml/SingleCanvasDrawer.h>
 
 class INTTClusterDrawer : public SingleCanvasDrawer
 {
