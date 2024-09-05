@@ -67,9 +67,14 @@ int TpcSeedsDraw::Draw(const std::string &what)
         iret += DrawClusterInfo2();
         idraw++;
     }
-    if (what == "ALL" || what == "DCA")
+    if (what == "ALL" || what == "DCA1")
     {
-        iret += DrawDCAInfo();
+        iret += DrawDCAInfo1();
+        idraw++;
+    }
+    if (what == "ALL" || what == "DCA2")
+    {
+        iret += DrawDCAInfo2();
         idraw++;
     }
     if (what == "ALL" || what == "VERTEX")
@@ -230,7 +235,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
     Pad[index_page][2]->SetLogy(1);
     if (h_pt && h_pt_pos && h_pt_neg)
     {
-        h_pt->SetTitle("p_{T} distribution for p_{T}>1GeV tracks");
+        h_pt->SetTitle("p_{T} distribution");
         h_pt->SetXTitle("p_{T} [GeV]");
         h_pt->SetYTitle("Entries");
         h_pt->SetMarkerColor(kBlack);
@@ -665,12 +670,19 @@ int TpcSeedsDraw::DrawClusterInfo2()
     TH2F *h_clusphisize1frac_pt_side1_1 = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_pt_side1_1")));
     TH2F *h_clusphisize1frac_pt_side1_2 = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_pt_side1_2")));
 
-    TH1F *h_clusphisize1frac_mean_side0_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side0_0")));
-    TH1F *h_clusphisize1frac_mean_side0_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side0_1")));
-    TH1F *h_clusphisize1frac_mean_side0_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side0_2")));
-    TH1F *h_clusphisize1frac_mean_side1_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side1_0")));
-    TH1F *h_clusphisize1frac_mean_side1_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side1_1")));
-    TH1F *h_clusphisize1frac_mean_side1_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_side1_2")));
+    TH1F *h_clusphisize1frac_mean_numerator_side0_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side0_0")));
+    TH1F *h_clusphisize1frac_mean_numerator_side0_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side0_1")));
+    TH1F *h_clusphisize1frac_mean_numerator_side0_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side0_2")));
+    TH1F *h_clusphisize1frac_mean_numerator_side1_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side1_0")));
+    TH1F *h_clusphisize1frac_mean_numerator_side1_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side1_1")));
+    TH1F *h_clusphisize1frac_mean_numerator_side1_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_numerator_side1_2")));
+
+    TH1F *h_clusphisize1frac_mean_denominator_side0_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side0_0")));
+    TH1F *h_clusphisize1frac_mean_denominator_side0_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side0_1")));
+    TH1F *h_clusphisize1frac_mean_denominator_side0_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side0_2")));
+    TH1F *h_clusphisize1frac_mean_denominator_side1_0 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side1_0")));
+    TH1F *h_clusphisize1frac_mean_denominator_side1_1 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side1_1")));
+    TH1F *h_clusphisize1frac_mean_denominator_side1_2 = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("clusphisize1frac_mean_denominator_side1_2")));
 
     const int index_page = 2;
 
@@ -681,7 +693,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     TC[index_page]->Clear("D");
 
     Pad[index_page][0]->cd();
-    if (h_clusphisize1frac_pt_side0_0 && h_clusphisize1frac_mean_side0_0)
+    if (h_clusphisize1frac_pt_side0_0 && h_clusphisize1frac_mean_numerator_side0_0 && h_clusphisize1frac_mean_denominator_side0_0)
     {
         h_clusphisize1frac_pt_side0_0->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side0_0->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -689,10 +701,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side0_0->SetTitle("TPC south in");
         h_clusphisize1frac_pt_side0_0->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_0->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_0->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side0_0->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -711,7 +723,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][2]->cd();
-    if (h_clusphisize1frac_pt_side0_1)
+    if (h_clusphisize1frac_pt_side0_1 && h_clusphisize1frac_mean_numerator_side0_1 && h_clusphisize1frac_mean_denominator_side0_1)
     {
         h_clusphisize1frac_pt_side0_1->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side0_1->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -719,10 +731,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side0_1->SetTitle("TPC south mid");
         h_clusphisize1frac_pt_side0_1->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_1->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_1->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side0_1->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -741,7 +753,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][4]->cd();
-    if (h_clusphisize1frac_pt_side0_2)
+    if (h_clusphisize1frac_pt_side0_2 && h_clusphisize1frac_mean_numerator_side0_2 && h_clusphisize1frac_mean_denominator_side0_2)
     {
         h_clusphisize1frac_pt_side0_2->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side0_2->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -749,10 +761,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side0_2->SetTitle("TPC south out");
         h_clusphisize1frac_pt_side0_2->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side0_2->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side0_2->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side0_2->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -771,7 +783,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][1]->cd();
-    if (h_clusphisize1frac_pt_side1_0)
+    if (h_clusphisize1frac_pt_side1_0 && h_clusphisize1frac_mean_numerator_side1_0 && h_clusphisize1frac_mean_denominator_side1_0)
     {
         h_clusphisize1frac_pt_side1_0->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side1_0->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -779,10 +791,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side1_0->SetTitle("TPC north in");
         h_clusphisize1frac_pt_side1_0->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_0->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_0->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side1_0->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -801,7 +813,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][3]->cd();
-    if (h_clusphisize1frac_pt_side1_1)
+    if (h_clusphisize1frac_pt_side1_1 && h_clusphisize1frac_mean_numerator_side1_1 && h_clusphisize1frac_mean_denominator_side1_1)
     {
         h_clusphisize1frac_pt_side1_1->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side1_1->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -809,10 +821,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side1_1->SetTitle("TPC north mid");
         h_clusphisize1frac_pt_side1_1->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_1->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_1->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side1_1->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -831,7 +843,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     }
 
     Pad[index_page][5]->cd();
-    if (h_clusphisize1frac_pt_side1_2)
+    if (h_clusphisize1frac_pt_side1_2 && h_clusphisize1frac_mean_numerator_side1_2 && h_clusphisize1frac_mean_denominator_side1_2)
     {
         h_clusphisize1frac_pt_side1_2->SetXTitle("p_{T} [GeV]");
         h_clusphisize1frac_pt_side1_2->SetYTitle("Fraction of TPC Cluster Phi Size == 1");
@@ -839,10 +851,10 @@ int TpcSeedsDraw::DrawClusterInfo2()
         h_clusphisize1frac_pt_side1_2->SetTitle("TPC north out");
         h_clusphisize1frac_pt_side1_2->DrawCopy("colz");
 
-        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(1)));
-        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(2)));
-        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(3)));
-        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_side1_2->GetBinContent(4)));
+        TText *text1 = new TText(1.10, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(1) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(1)));
+        TText *text2 = new TText(1.65, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(2) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(2)));
+        TText *text3 = new TText(2.20, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(3) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(3)));
+        TText *text4 = new TText(2.75, 0.90, Form("%.3f",h_clusphisize1frac_mean_numerator_side1_2->GetBinContent(4) / h_clusphisize1frac_mean_denominator_side1_2->GetBinContent(4)));
         text1->SetTextSize(0.06);
         text2->SetTextSize(0.06);
         text3->SetTextSize(0.06);
@@ -878,35 +890,33 @@ int TpcSeedsDraw::DrawClusterInfo2()
     return 0;
 }
 
-int TpcSeedsDraw::DrawDCAInfo()
+int TpcSeedsDraw::DrawDCAInfo1()
 {
-    std::cout << "Tpc Seeds DrawDCAInfo() Beginning" << std::endl;
+    std::cout << "Tpc Seeds DrawDCAInfo1() Beginning" << std::endl;
     QADrawClient *cl = QADrawClient::instance();
 
-    TH2F *h_dcaxyorigin_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_pos")));
-    TH2F *h_dcaxyorigin_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_neg")));
-    TH2F *h_dcaxyvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_pos")));
-    TH2F *h_dcaxyvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_neg")));
+    TH2F *h_dcaxyorigin_phi_north_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_north_pos")));
+    TH2F *h_dcaxyorigin_phi_north_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_north_neg")));
+    TH2F *h_dcaxyorigin_phi_south_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_south_pos")));
+    TH2F *h_dcaxyorigin_phi_south_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyorigin_phi_south_neg")));
     TH2F *h_dcazorigin_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazorigin_phi_pos")));
     TH2F *h_dcazorigin_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazorigin_phi_neg")));
-    TH2F *h_dcazvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_pos")));
-    TH2F *h_dcazvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_neg")));
 
     const int index_page = 3;
 
-    if (!gROOT->FindObject("dca_info"))
+    if (!gROOT->FindObject("dca_info1"))
     {
-        MakeCanvas("dca_info", index_page);
+        MakeCanvas("dca_info1", index_page);
     }
     TC[index_page]->Clear("D");
 
     Pad[index_page][0]->cd();
-    if (h_dcaxyorigin_phi_pos)
+    if (h_dcaxyorigin_phi_north_pos)
     {
-        h_dcaxyorigin_phi_pos->SetXTitle("#phi [rad]");
-        h_dcaxyorigin_phi_pos->SetYTitle("Positive track DCA_{xy} wrt origin [cm]");
-        h_dcaxyorigin_phi_pos->SetZTitle("Entries");
-        h_dcaxyorigin_phi_pos->DrawCopy("colz");
+        h_dcaxyorigin_phi_north_pos->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_north_pos->SetYTitle("Positive north track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_north_pos->SetZTitle("Entries");
+        h_dcaxyorigin_phi_north_pos->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -916,12 +926,12 @@ int TpcSeedsDraw::DrawDCAInfo()
     }
 
     Pad[index_page][1]->cd();
-    if (h_dcaxyorigin_phi_neg)
+    if (h_dcaxyorigin_phi_north_neg)
     {
-        h_dcaxyorigin_phi_neg->SetXTitle("#phi [rad]");
-        h_dcaxyorigin_phi_neg->SetYTitle("Negative track DCA_{xy} wrt origin [cm]");
-        h_dcaxyorigin_phi_neg->SetZTitle("Entries");
-        h_dcaxyorigin_phi_neg->DrawCopy("colz");
+        h_dcaxyorigin_phi_north_neg->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_north_neg->SetYTitle("Negative north track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_north_neg->SetZTitle("Entries");
+        h_dcaxyorigin_phi_north_neg->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -931,12 +941,12 @@ int TpcSeedsDraw::DrawDCAInfo()
     }
 
     Pad[index_page][2]->cd();
-    if (h_dcaxyvtx_phi_pos)
+    if (h_dcaxyorigin_phi_south_pos)
     {
-        h_dcaxyvtx_phi_pos->SetXTitle("#phi [rad]");
-        h_dcaxyvtx_phi_pos->SetYTitle("Positive track DCA_{xy} wrt vertex [cm]");
-        h_dcaxyvtx_phi_pos->SetZTitle("Entries");
-        h_dcaxyvtx_phi_pos->DrawCopy("colz");
+        h_dcaxyorigin_phi_south_pos->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_south_pos->SetYTitle("Positive south track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_south_pos->SetZTitle("Entries");
+        h_dcaxyorigin_phi_south_pos->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -946,12 +956,12 @@ int TpcSeedsDraw::DrawDCAInfo()
     }
 
     Pad[index_page][3]->cd();
-    if (h_dcaxyvtx_phi_neg)
+    if (h_dcaxyorigin_phi_south_neg)
     {
-        h_dcaxyvtx_phi_neg->SetXTitle("#phi [rad]");
-        h_dcaxyvtx_phi_neg->SetYTitle("Negative track DCA_{xy} wrt vertex [cm]");
-        h_dcaxyvtx_phi_neg->SetZTitle("Entries");
-        h_dcaxyvtx_phi_neg->DrawCopy("colz");
+        h_dcaxyorigin_phi_south_neg->SetXTitle("#phi [rad]");
+        h_dcaxyorigin_phi_south_neg->SetYTitle("Negative south track DCA_{xy} wrt origin [cm]");
+        h_dcaxyorigin_phi_south_neg->SetZTitle("Entries");
+        h_dcaxyorigin_phi_south_neg->DrawCopy("colz");
         gPad->SetRightMargin(0.17);
     }
     else
@@ -990,7 +1000,73 @@ int TpcSeedsDraw::DrawDCAInfo()
         return -1;
     }
 
-    Pad[index_page][6]->cd();
+    TText PrintRun;
+    PrintRun.SetTextFont(62);
+    PrintRun.SetTextSize(0.03);
+    PrintRun.SetNDC();         // set to normalized coordinates
+    PrintRun.SetTextAlign(23); // center/top alignment
+    std::ostringstream runnostream1;
+    std::string runstring1;
+    runnostream1 << Name() << "_tpcseeds DCA Info Page1 Run " << cl->RunNumber();
+    runstring1 = runnostream1.str();
+    transparent[index_page]->cd();
+    PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+    TC[index_page]->Update();
+
+    std::cout << "DrawDCAInfo1 Ending" << std::endl;
+    return 0;
+}
+
+int TpcSeedsDraw::DrawDCAInfo2()
+{
+    std::cout << "Tpc Seeds DrawDCAInfo2() Beginning" << std::endl;
+    QADrawClient *cl = QADrawClient::instance();
+
+    TH2F *h_dcaxyvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_pos")));
+    TH2F *h_dcaxyvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcaxyvtx_phi_neg")));
+    TH2F *h_dcazvtx_phi_pos = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_pos")));
+    TH2F *h_dcazvtx_phi_neg = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("dcazvtx_phi_neg")));
+
+    const int index_page = 4;
+
+    if (!gROOT->FindObject("dca_info2"))
+    {
+        MakeCanvas("dca_info2", index_page);
+    }
+    TC[index_page]->Clear("D");
+
+    Pad[index_page][0]->cd();
+    if (h_dcaxyvtx_phi_pos)
+    {
+        h_dcaxyvtx_phi_pos->SetXTitle("#phi [rad]");
+        h_dcaxyvtx_phi_pos->SetYTitle("Positive track DCA_{xy} wrt vertex [cm]");
+        h_dcaxyvtx_phi_pos->SetZTitle("Entries");
+        h_dcaxyvtx_phi_pos->DrawCopy("colz");
+        gPad->SetRightMargin(0.17);
+    }
+    else
+    {
+        // histogram is missing
+        return -1;
+    }
+
+    Pad[index_page][1]->cd();
+    if (h_dcaxyvtx_phi_neg)
+    {
+        h_dcaxyvtx_phi_neg->SetXTitle("#phi [rad]");
+        h_dcaxyvtx_phi_neg->SetYTitle("Negative track DCA_{xy} wrt vertex [cm]");
+        h_dcaxyvtx_phi_neg->SetZTitle("Entries");
+        h_dcaxyvtx_phi_neg->DrawCopy("colz");
+        gPad->SetRightMargin(0.17);
+    }
+    else
+    {
+        // histogram is missing
+        return -1;
+    }
+
+    Pad[index_page][2]->cd();
     if (h_dcazvtx_phi_pos)
     {
         h_dcazvtx_phi_pos->SetXTitle("#phi [rad]");
@@ -1005,7 +1081,7 @@ int TpcSeedsDraw::DrawDCAInfo()
         return -1;
     }
 
-    Pad[index_page][7]->cd();
+    Pad[index_page][3]->cd();
     if (h_dcazvtx_phi_neg)
     {
         h_dcazvtx_phi_neg->SetXTitle("#phi [rad]");
@@ -1027,14 +1103,14 @@ int TpcSeedsDraw::DrawDCAInfo()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds DCA Info Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds DCA Info Page2 Run " << cl->RunNumber();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
     TC[index_page]->Update();
 
-    std::cout << "DrawDCAInfo Ending" << std::endl;
+    std::cout << "DrawDCAInfo2 Ending" << std::endl;
     return 0;
 }
 
@@ -1051,7 +1127,7 @@ int TpcSeedsDraw::DrawVertexInfo()
     TH1F *h_vchi2dof = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("vertexchi2dof")));
     TH1F *h_ntrackpervertex = dynamic_cast<TH1F *>(cl->getHisto(histprefix + std::string("ntrackspervertex")));
 
-    const int index_page = 4;
+    const int index_page = 5;
 
     if (!gROOT->FindObject("vertex_info"))
     {
@@ -1208,16 +1284,22 @@ int TpcSeedsDraw::MakeHtml(const std::string &what)
         cl->CanvasToPng(TC[2], pngfile);
     }
 
-    if (what == "ALL" || what == "DCA")
+    if (what == "ALL" || what == "DCA1")
     {
-        pngfile = cl->htmlRegisterPage(*this, "dca_info", "4", "png");
+        pngfile = cl->htmlRegisterPage(*this, "dca_info1", "4", "png");
         cl->CanvasToPng(TC[3], pngfile);
     }
  
+    if (what == "ALL" || what == "DCA2")
+    {
+        pngfile = cl->htmlRegisterPage(*this, "dca_info2", "5", "png");
+        cl->CanvasToPng(TC[4], pngfile);
+    }
+
     if (what == "ALL" || what == "VERTEX")
     {
-        pngfile = cl->htmlRegisterPage(*this, "vertex_info", "5", "png");
-        cl->CanvasToPng(TC[4], pngfile);
+        pngfile = cl->htmlRegisterPage(*this, "vertex_info", "6", "png");
+        cl->CanvasToPng(TC[5], pngfile);
     }
     return 0;
 }

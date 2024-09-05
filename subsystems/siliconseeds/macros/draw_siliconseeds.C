@@ -2,11 +2,11 @@
 #include "siliconseeds/SiliconSeedsDraw.h"
 #include "siliconseeds/SiSeedsGoodRunChecker.h"
 #include "siliconseeds/OfflineQAKSTest.h"
-
+#include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawsiliconseeds.so)
 
 void draw_siliconseeds(const std::string &rootfile) {
-
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
   SiliconSeedsDraw *ex = new SiliconSeedsDraw();

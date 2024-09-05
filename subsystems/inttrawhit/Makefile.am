@@ -24,9 +24,13 @@ libqadrawinttrawhit_la_LIBADD = \
 inttrawhitincludedir=$(pkgincludedir)/intt
 
 inttrawhitinclude_HEADERS = \
+  INTTRawHitChipDrawer.h \
+  INTTRawHitSummaryDrawer.h \
   INTTRawHitDraw.h
 
 libqadrawinttrawhit_la_SOURCES = \
+  INTTRawHitChipDrawer.cc \
+  INTTRawHitSummaryDrawer.cc \
   INTTRawHitDraw.cc
 
 noinst_PROGRAMS = \

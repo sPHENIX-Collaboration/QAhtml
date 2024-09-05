@@ -18,10 +18,14 @@ libqadrawintt_la_LIBADD = \
 inttincludedir=$(pkgincludedir)/intt
 
 inttinclude_HEADERS = \
-  INTTDraw.h
+  INTTDraw.h \
+  INTTChipDrawer.h \
+  INTTClusterDrawer.h
 
 libqadrawintt_la_SOURCES = \
-  INTTDraw.cc
+  INTTDraw.cc \
+  INTTChipDrawer.cc \
+  INTTClusterDrawer.cc
 
 noinst_PROGRAMS = \
   testexternals

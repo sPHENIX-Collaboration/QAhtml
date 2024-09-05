@@ -1,10 +1,10 @@
 #include <qahtml/QADrawClient.h>
 #include <intt/INTTRawHitDraw.h>
-
+#include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawinttrawhit.so)
 
 void draw_intt_rawhit(const std::string &rootfile) {
-
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
   QADraw *ex = new INTTRawHitDraw();
