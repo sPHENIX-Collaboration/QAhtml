@@ -68,26 +68,31 @@ int CaloDraw::Draw(const std::string &what)
   {
     iret += DrawCemc();
     idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
   }
   if (what == "ALL" || what == "IHCAL")
   {
     iret += DrawIhcal();
     idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
   }
   if (what == "ALL" || what == "OHCAL")
   {
     iret += DrawOhcal();
     idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
   }
   if (what == "ALL" || what == "CORR")
   {
     iret += DrawCorr();
     idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
   }
   if (what == "ALL" || what == "ZDC")
   {
     iret += DrawZdcMbd();
     idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
   }
   if (!idraw)
   {
