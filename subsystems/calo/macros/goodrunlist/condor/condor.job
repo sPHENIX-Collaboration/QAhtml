@@ -66,6 +66,7 @@ concurrency_limits = CONCURRENCY_LIMIT_DEFAULT:2300
 
 # 176 jobs for aggruns_good_07052024.txt
 # 217 jobs for aggruns_good_07222024.txt
+# 250 jobs for aggruns_good_08072024.txt
 
-Queue 217
+Queue 250
 
