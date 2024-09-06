@@ -83,7 +83,7 @@ int TPCRawHitDraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("TPC Raw Hit Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  if (num < 16)
+  if (num < 24)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.32, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.37, 0.52, 0.64, 0.97, 0);
@@ -122,6 +122,8 @@ int TPCRawHitDraw::DrawSectorInfo()
 
   std::vector<TH1*> h_hits_secs;
   std::vector<TH2*> h_hits_secs_fees;
+  std::vector<TH1*> h_hits_secs_laser;
+  std::vector<TH2*> h_hits_secs_fees_laser;
 
   for (int s = 0; s < 24; s++)
   {
@@ -130,6 +132,12 @@ int TPCRawHitDraw::DrawSectorInfo()
 
     h_hits_secs.push_back(h); 
     h_hits_secs_fees.push_back(h2); 
+    
+    h = dynamic_cast <TH1 *> (cl->getHisto(histprefix + std::string("nhits_sec") + std::to_string(s) + "_laser"));
+    h2 = dynamic_cast <TH2 *> (cl->getHisto(histprefix + std::string("nhits_sec") + std::to_string(s) + std::string("_fees_laser")));
+    
+    h_hits_secs_laser.push_back(h); 
+    h_hits_secs_fees_laser.push_back(h2); 
   }
 
   for (int q = 0; q < 4; q++)
@@ -214,8 +222,91 @@ int TPCRawHitDraw::DrawSectorInfo()
 
     TC[q + 4]->Update(); 
   }
+  
+  for (int q = 0; q < 4; q++)
+  {
+    if (! gROOT->FindObject((boost::format("sec_laser_rawhits_%i") % q).str().c_str()))
+    {
+      MakeCanvas((boost::format("sec_laser_rawhits_%i") % q).str(), q+8);
+    }
+    TC[q+8]->Clear("D");
 
-  std::cout << "DrawChipInfo Ending" << std::endl;
+    for (int i = 0; i < 6; i++)
+    {
+      Pad[q+8][i]->cd();
+      if (h_hits_secs_laser[q*6 + i])
+      {
+        h_hits_secs_laser[q*6 + i]->GetXaxis()->SetNdivisions(5);
+        h_hits_secs_laser[q*6 + i]->DrawCopy();
+        gPad->SetRightMargin(0.15);
+
+        TLatex *title = new TLatex();
+        title->SetTextSize(0.06);
+        title->SetNDC();
+        title->DrawLatex(0.6, 0.75, (boost::format("Sector %i") % (q*6 + i)).str().c_str());
+      }
+      else
+      {
+        //histogram is missing
+        return -1;
+      }
+    }
+  
+    TText PrintRun;
+    PrintRun.SetTextFont(62);
+    PrintRun.SetTextSize(0.04);
+    PrintRun.SetNDC();  // set to normalized coordinates
+    PrintRun.SetTextAlign(23); // center/top alignment
+    std::ostringstream runnostream1;
+    std::string runstring1;
+    runnostream1 << Name() << "_nhits_laser Run " << cl->RunNumber();
+    runstring1 = runnostream1.str();
+    transparent[q+8]->cd();
+    PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+    TC[q+8]->Update(); 
+  }
+  
+  for (int q = 0; q < 4; q++)
+  {
+    if (! gROOT->FindObject((boost::format("sec_fee_laser_rawhits_%i") % q).str().c_str()))
+    {
+      MakeCanvas((boost::format("sec_fee_laser_rawhits_%i") % q).str(), q + 12);
+    }
+    TC[q + 12]->Clear("D");
+
+    for (int i = 0; i < 6; i++)
+    {
+      Pad[q + 12][i]->cd();
+      if (h_hits_secs_fees_laser[q*6 + i])
+      {
+        h_hits_secs_fees_laser[q*6 + i]->DrawCopy("COLZ");
+        gPad->SetRightMargin(0.15);
+        gPad->SetLeftMargin(0.15);
+      }
+      else
+      {
+        //histogram is missing
+        return -1;
+      }
+    }
+  
+    TText PrintRun;
+    PrintRun.SetTextFont(62);
+    PrintRun.SetTextSize(0.04);
+    PrintRun.SetNDC();  // set to normalized coordinates
+    PrintRun.SetTextAlign(23); // center/top alignment
+    std::ostringstream runnostream1;
+    std::string runstring1;
+    runnostream1 << Name() << "_nhits_fees_laser Run " << cl->RunNumber();
+    runstring1 = runnostream1.str();
+    transparent[q + 12]->cd();
+    PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+    TC[q + 12]->Update(); 
+  }
+
+  std::cout << "DrawSectorInfo Ending" << std::endl;
   return 0;
 }
  
@@ -258,13 +349,13 @@ int TPCRawHitDraw::DrawOnlMon()
   {
     if (! gROOT->FindObject((boost::format("sampleDist_%i") % q).str().c_str()))
     {
-      MakeCanvas((boost::format("sampleDist_%i") % q).str(), q + 8);
+      MakeCanvas((boost::format("sampleDist_%i") % q).str(), q + 16);
     }
-    TC[q + 8]->Clear("D");
+    TC[q + 16]->Clear("D");
 
     for (int i = 0; i < 6; i++)
     {
-      Pad[q + 8][i]->cd();
+      Pad[q + 16][i]->cd();
       if (h_hits_sample_1[q*6 + i] && h_hits_sample_2[q*6 + i] && h_hits_sample_3[q*6 + i])
       {
         /*double maxBinContent = 0;
@@ -332,23 +423,23 @@ int TPCRawHitDraw::DrawOnlMon()
     std::string runstring1;
     runnostream1 << Name() << "_sample Run " << cl->RunNumber();
     runstring1 = runnostream1.str();
-    transparent[q + 8]->cd();
+    transparent[q + 16]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-    TC[q + 8]->Update(); 
+    TC[q + 16]->Update(); 
   }
   
   for (int q = 0; q < 4; q++)
   {
     if (! gROOT->FindObject((boost::format("sec_adc_%i") % q).str().c_str()))
     {
-      MakeCanvas((boost::format("sec_adc_%i") % q).str(), q + 12);
+      MakeCanvas((boost::format("sec_adc_%i") % q).str(), q + 20);
     }
-    TC[q + 12]->Clear("D");
+    TC[q + 20]->Clear("D");
 
     for (int i = 0; i < 6; i++)
     {
-      Pad[q + 12][i]->cd();
+      Pad[q + 20][i]->cd();
       if (h_adc_1[q*6 + i] && h_adc_2[q*6 + i] && h_adc_3[q*6 + i])
       {
         h_adc_1[q*6 + i]->SetLineColor(kRed);
@@ -395,10 +486,10 @@ int TPCRawHitDraw::DrawOnlMon()
     std::string runstring1;
     runnostream1 << Name() << "_adc Run " << cl->RunNumber();
     runstring1 = runnostream1.str();
-    transparent[q + 12]->cd();
+    transparent[q + 20]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-    TC[q + 12]->Update(); 
+    TC[q + 20]->Update(); 
   }
 
   bool outFEEs[24][26] = {{false}};
@@ -411,7 +502,7 @@ int TPCRawHitDraw::DrawOnlMon()
     TProfile* tp = h2->ProfileX();
     for (int f = 0; f < 26; f++)
     {
-      if (tp->GetBinContent(f+1) <= 10)
+      if (tp->GetBinContent(f+1) <= 25)
       {
         outFEEs[s][f] = true;
         if (s < 12) outN++;
@@ -624,9 +715,9 @@ int TPCRawHitDraw::DrawOnlMon()
 
   if (! gROOT->FindObject("rawhit_xy"))
   {
-    MakeCanvas("rawhit_xy", 16);
+    MakeCanvas("rawhit_xy", 24);
   }
-  TC[16]->Clear("D");
+  TC[24]->Clear("D");
   TLatex *title1 = new TLatex();
   title1->SetTextSize(0.04);
   title1->SetNDC();
@@ -643,7 +734,7 @@ int TPCRawHitDraw::DrawOnlMon()
   title4->SetTextSize(0.04);
   title4->SetNDC();
   title4->DrawLatex(0.15, 0.75, feeOutString.c_str());
-  Pad[16][0]->cd();
+  Pad[24][0]->cd();
   if (h_northHits)
   {
     h_northHits->DrawCopy("COLZ");
@@ -681,7 +772,7 @@ int TPCRawHitDraw::DrawOnlMon()
     // histogram is missing
     return -1;
   }
-  Pad[16][1]->cd();
+  Pad[24][1]->cd();
   if (h_southHits)
   {
     h_southHits->DrawCopy("COLZ");
@@ -728,10 +819,10 @@ int TPCRawHitDraw::DrawOnlMon()
   std::string runstring1;
   runnostream1 << Name() << "_hitsXY Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
-  transparent[16]->cd();
+  transparent[24]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
-  TC[16]->Update(); 
+  TC[24]->Update(); 
  
   std::cout << "DrawOnlMon Ending" << std::endl;
   return 0;
@@ -760,21 +851,31 @@ int TPCRawHitDraw::MakeHtml(const std::string &what)
       pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_fee_rawhits_%i") % q).str(), (boost::format("%i") % (q + 5)).str(), "png");
       cl->CanvasToPng(TC[q + 4], pngfile);
     }
+    for (int q = 0; q < 4; q++)
+    {
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_laser_rawhits_%i") % q).str(), (boost::format("%i") % (q + 9)).str(), "png");
+      cl->CanvasToPng(TC[q + 8], pngfile);
+    }
+    for (int q = 0; q < 4; q++)
+    {
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_fee_laser_rawhits_%i") % q).str(), (boost::format("%i") % (q + 13)).str(), "png");
+      cl->CanvasToPng(TC[q + 12], pngfile);
+    }
   }
   if (what == "ALL" || what == "ONLMON")
   {
     for (int q = 0; q < 4; q++)
     {
-      pngfile = cl->htmlRegisterPage(*this, (boost::format("sampleDist_%i") % q).str(), (boost::format("%i") % (q + 9)).str(), "png");
-      cl->CanvasToPng(TC[q + 8], pngfile);
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("sampleDist_%i") % q).str(), (boost::format("%i") % (q + 17)).str(), "png");
+      cl->CanvasToPng(TC[q + 16], pngfile);
     }
     for (int q = 0; q < 4; q++)
     {
-      pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_adc_%i") % q).str(), (boost::format("%i") % (q + 13)).str(), "png");
-      cl->CanvasToPng(TC[q + 12], pngfile);
+      pngfile = cl->htmlRegisterPage(*this, (boost::format("sec_adc_%i") % q).str(), (boost::format("%i") % (q + 21)).str(), "png");
+      cl->CanvasToPng(TC[q + 20], pngfile);
     }
-    pngfile = cl->htmlRegisterPage(*this, "rawhit_xy", "17", "png");
-    cl->CanvasToPng(TC[16], pngfile);
+    pngfile = cl->htmlRegisterPage(*this, "rawhit_xy", "25", "png");
+    cl->CanvasToPng(TC[24], pngfile);
   }
   return 0;
 }
