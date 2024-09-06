@@ -180,7 +180,7 @@ int CaloDraw::DrawCemc()
   TProfile2D *h_CaloValid_cemc_etaphi_ZSpedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("cemc_etaphi_ZSpedRMS")));
   TH2 *cemc_hotmap = nullptr;
   if (calo_checker) cemc_hotmap = calo_checker->cemc_hcdmap;
-  TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA")));
+  /* TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA"))); */
   
   // canvas 1
   if (!gROOT->FindObject("cemc1"))
@@ -303,9 +303,9 @@ int CaloDraw::DrawCemc()
   TH2 *h_hitmask = nullptr;
   int nonzero_towers = 0;
   // Make masked tower histogram
-  if (cemc_etaphi_wQA && cemc_hotmap)
+  if (cemc_etaphi && cemc_hotmap)
   {
-    h_hitmask = (TH2*)cemc_etaphi_wQA->Clone("h_hitmask");
+    h_hitmask = (TH2*)cemc_etaphi->Clone("h_hitmask");
     int nbins = cemc_hotmap->GetNcells();
     for (int i=0; i<=nbins; i++)
     {
@@ -465,7 +465,7 @@ int CaloDraw::DrawIhcal()
   TProfile2D *h_CaloValid_ihcal_etaphi_ZSpedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_ZSpedRMS")));
   TH2 *ihcal_hotmap = nullptr;
   if (calo_checker) ihcal_hotmap = calo_checker->ihcal_hcdmap;
-  TH1 *ihcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_wQA")));
+  /* TH1 *ihcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi_wQA"))); */
 
 
   // canvas 1
@@ -564,9 +564,9 @@ int CaloDraw::DrawIhcal()
   TH2 *h_hitmask = nullptr;
   int nonzero_towers = 0;
   // Make masked tower histogram
-  if (ihcal_etaphi_wQA && ihcal_hotmap)
+  if (ihcal_etaphi && ihcal_hotmap)
     {
-      h_hitmask = (TH2*)ihcal_etaphi_wQA->Clone("h_hitmask");
+      h_hitmask = (TH2*)ihcal_etaphi->Clone("h_hitmask");
       int nbins = ihcal_hotmap->GetNcells();
       for (int i=0; i<=nbins; i++)
 	{
@@ -681,7 +681,7 @@ int CaloDraw::DrawOhcal()
   TH1F *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
   TH2 *ohcal_hotmap = nullptr;
   if (calo_checker) ohcal_hotmap = calo_checker->ohcal_hcdmap;
-  TH1 *ohcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_wQA")));
+  /* TH1 *ohcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_wQA"))); */
 
   // canvas 1
   if (!gROOT->FindObject("ohcal"))
@@ -778,9 +778,9 @@ int CaloDraw::DrawOhcal()
   TH2 *h_hitmask = nullptr;
   int nonzero_towers = 0;
   // Make masked tower histogram                                                                                                                                                                           
-  if (ohcal_etaphi_wQA && ohcal_hotmap)
+  if (ohcal_etaphi && ohcal_hotmap)
     {
-      h_hitmask = (TH2*)ohcal_etaphi_wQA->Clone("h_hitmask");
+      h_hitmask = (TH2*)ohcal_etaphi->Clone("h_hitmask");
       int nbins = ohcal_hotmap->GetNcells();
       for (int i=0; i<=nbins; i++)
         {
