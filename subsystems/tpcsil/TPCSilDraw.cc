@@ -130,7 +130,7 @@ int TPCSilDraw::DrawPositionInfo()
   Pad[0][0]->cd();
   if (h_crossing)
   {
-    h_crossing->DrawCopy();
+    h_crossing->DrawCopy("HIST");
     gPad->SetRightMargin(0.15);
   }
   else
@@ -162,8 +162,10 @@ int TPCSilDraw::DrawPositionInfo()
   Pad[1][0]->cd();
   if (h_xDiff)
   {
-    h_xDiff->DrawCopy();
-    gPad->SetRightMargin(0.15);
+    h_xDiff->GetYaxis()->SetTitle("Entries (No Cuts)");
+    h_xDiff->GetYaxis()->SetTitleOffset(2);
+    h_xDiff->DrawCopy("HIST");
+    gPad->SetLeftMargin(0.2);
   }
   else
   {
@@ -173,8 +175,10 @@ int TPCSilDraw::DrawPositionInfo()
   Pad[1][1]->cd();
   if (h_yDiff)
   {
-    h_yDiff->DrawCopy();
-    gPad->SetRightMargin(0.15);
+    h_yDiff->GetYaxis()->SetTitle("Entries (No Cuts)");
+    h_yDiff->GetYaxis()->SetTitleOffset(2);
+    h_yDiff->DrawCopy("HIST");
+    gPad->SetLeftMargin(0.2);
   }
   else
   {
@@ -184,8 +188,11 @@ int TPCSilDraw::DrawPositionInfo()
   Pad[1][2]->cd();
   if (h_zDiff)
   {
-    h_zDiff->DrawCopy();
-    gPad->SetRightMargin(0.15);
+    h_zDiff->GetYaxis()->SetTitle("Entries (No Cuts)");
+    h_zDiff->GetYaxis()->SetTitleOffset(2);
+    h_zDiff->GetXaxis()->SetNdivisions(5);
+    h_zDiff->DrawCopy("HIST");
+    gPad->SetLeftMargin(0.2);
   }
   else
   {
@@ -195,8 +202,11 @@ int TPCSilDraw::DrawPositionInfo()
   Pad[1][3]->cd();
   if (h_etaDiff)
   {
-    h_etaDiff->DrawCopy();
-    gPad->SetRightMargin(0.15);
+    h_etaDiff->GetYaxis()->SetTitle("Entries (No Cuts)");
+    h_etaDiff->GetYaxis()->SetTitleOffset(2);
+    h_etaDiff->GetXaxis()->SetNdivisions(5);
+    h_etaDiff->DrawCopy("HIST");
+    gPad->SetLeftMargin(0.2);
   }
   else
   {
@@ -206,8 +216,11 @@ int TPCSilDraw::DrawPositionInfo()
   Pad[1][4]->cd();
   if (h_phiDiff)
   {
-    h_phiDiff->DrawCopy();
-    gPad->SetRightMargin(0.15);
+    h_phiDiff->GetYaxis()->SetTitle("Entries (No Cuts)");
+    h_phiDiff->GetYaxis()->SetTitleOffset(2);
+    h_phiDiff->GetXaxis()->SetNdivisions(5);
+    h_phiDiff->DrawCopy("HIST");
+    gPad->SetLeftMargin(0.2);
   }
   else
   {
@@ -222,7 +235,7 @@ int TPCSilDraw::DrawPositionInfo()
   PrintRun2.SetTextAlign(23); // center/top alignment
   std::ostringstream runnostream2;
   std::string runstring2;
-  runnostream2 << Name() << "_position Run " << cl->RunNumber();
+  runnostream2 << Name() << "_No Cuts Run " << cl->RunNumber();
   runstring2 = runnostream2.str();
   transparent[1]->cd();
   PrintRun2.DrawText(0.5, 1., runstring2.c_str());
@@ -258,8 +271,11 @@ int TPCSilDraw::DrawCutHistograms()
     Pad[i][0]->cd();
     if (h_xDiff)
     {
-      h_xDiff->DrawCopy();
-      gPad->SetRightMargin(0.15);
+      std::string title = h_xDiff->GetTitle();
+      h_xDiff->GetYaxis()->SetTitle(title.c_str());
+      h_xDiff->GetYaxis()->SetTitleOffset(2);
+      h_xDiff->DrawCopy("HIST");
+      gPad->SetLeftMargin(0.2);
     }
     else
     {
@@ -269,8 +285,11 @@ int TPCSilDraw::DrawCutHistograms()
     Pad[i][1]->cd();
     if (h_yDiff)
     {
-      h_yDiff->DrawCopy();
-      gPad->SetRightMargin(0.15);
+      std::string title = h_yDiff->GetTitle();
+      h_yDiff->GetYaxis()->SetTitle(title.c_str());
+      h_yDiff->GetYaxis()->SetTitleOffset(2);
+      h_yDiff->DrawCopy("HIST");
+      gPad->SetLeftMargin(0.2);
     }
     else
     {
@@ -280,8 +299,12 @@ int TPCSilDraw::DrawCutHistograms()
     Pad[i][2]->cd();
     if (h_zDiff)
     {
-      h_zDiff->DrawCopy();
-      gPad->SetRightMargin(0.15);
+      std::string title = h_zDiff->GetTitle();
+      h_zDiff->GetYaxis()->SetTitle(title.c_str());
+      h_zDiff->GetYaxis()->SetTitleOffset(2);
+      h_zDiff->GetXaxis()->SetNdivisions(5);
+      h_zDiff->DrawCopy("HIST");
+      gPad->SetLeftMargin(0.2);
     }
     else
     {
@@ -291,8 +314,12 @@ int TPCSilDraw::DrawCutHistograms()
     Pad[i][3]->cd();
     if (h_etaDiff)
     {
-      h_etaDiff->DrawCopy();
-      gPad->SetRightMargin(0.15);
+      std::string title = h_etaDiff->GetTitle();
+      h_etaDiff->GetYaxis()->SetTitle(title.c_str());
+      h_etaDiff->GetYaxis()->SetTitleOffset(2);
+      h_etaDiff->GetXaxis()->SetNdivisions(5);
+      h_etaDiff->DrawCopy("HIST");
+      gPad->SetLeftMargin(0.2);
     }
     else
     {
@@ -302,8 +329,12 @@ int TPCSilDraw::DrawCutHistograms()
     Pad[i][4]->cd();
     if (h_phiDiff)
     {
-      h_phiDiff->DrawCopy();
-      gPad->SetRightMargin(0.15);
+      std::string title = h_phiDiff->GetTitle();
+      h_phiDiff->GetYaxis()->SetTitle(title.c_str());
+      h_phiDiff->GetYaxis()->SetTitleOffset(2);
+      h_phiDiff->GetXaxis()->SetNdivisions(5);
+      h_phiDiff->DrawCopy("HIST");
+      gPad->SetLeftMargin(0.2);
     }
     else
     {

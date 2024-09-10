@@ -273,9 +273,10 @@ int TPCDraw::DrawClusterInfo()
   Pad[12][0]->cd();
   if (h_clusterssector)
   {
+    h_clusterssector->RebinY(2);
     if (m_isStreaming)
     {
-      h_clusterssector->GetYaxis()->SetRangeUser(0,2500);
+      h_clusterssector->GetYaxis()->SetRangeUser(0,5000);
     }   
     else
     {
@@ -292,6 +293,7 @@ int TPCDraw::DrawClusterInfo()
   Pad[12][1]->cd();
   if (h_totalclusters)
   {
+    h_totalclusters->RebinY(2);
     if (m_isStreaming)
     {
       h_totalclusters->GetYaxis()->SetRangeUser(0,150);

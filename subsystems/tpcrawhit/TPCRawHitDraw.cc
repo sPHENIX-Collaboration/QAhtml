@@ -154,7 +154,7 @@ int TPCRawHitDraw::DrawSectorInfo()
       if (h_hits_secs[q*6 + i])
       {
         h_hits_secs[q*6 + i]->GetXaxis()->SetNdivisions(5);
-        h_hits_secs[q*6 + i]->DrawCopy();
+        h_hits_secs[q*6 + i]->DrawCopy("HIST");
         gPad->SetRightMargin(0.15);
 
         TLatex *title = new TLatex();
@@ -197,9 +197,10 @@ int TPCRawHitDraw::DrawSectorInfo()
       Pad[q + 4][i]->cd();
       if (h_hits_secs_fees[q*6 + i])
       {
+        h_hits_secs_fees[q*6 + i]->GetXaxis()->SetTitle((boost::format("FEE (Sector %i)") % (q*6+i)).str().c_str());
         h_hits_secs_fees[q*6 + i]->DrawCopy("COLZ");
         gPad->SetRightMargin(0.15);
-        gPad->SetLeftMargin(0.15);
+        gPad->SetLeftMargin(0.2);
       }
       else
       {
@@ -237,7 +238,7 @@ int TPCRawHitDraw::DrawSectorInfo()
       if (h_hits_secs_laser[q*6 + i])
       {
         h_hits_secs_laser[q*6 + i]->GetXaxis()->SetNdivisions(5);
-        h_hits_secs_laser[q*6 + i]->DrawCopy();
+        h_hits_secs_laser[q*6 + i]->DrawCopy("HIST");
         gPad->SetRightMargin(0.15);
 
         TLatex *title = new TLatex();
@@ -280,9 +281,10 @@ int TPCRawHitDraw::DrawSectorInfo()
       Pad[q + 12][i]->cd();
       if (h_hits_secs_fees_laser[q*6 + i])
       {
+        h_hits_secs_fees_laser[q*6 + i]->GetXaxis()->SetTitle((boost::format("FEE (Sector %i)") % (q*6+i)).str().c_str());
         h_hits_secs_fees_laser[q*6 + i]->DrawCopy("COLZ");
         gPad->SetRightMargin(0.15);
-        gPad->SetLeftMargin(0.15);
+        gPad->SetLeftMargin(0.2);
       }
       else
       {
@@ -383,9 +385,9 @@ int TPCRawHitDraw::DrawOnlMon()
         hs->Add(h_hits_sample_2[q*6 + i]);
         hs->Add(h_hits_sample_3[q*6 + i]);
 
-        hs->Draw("nostack");
+        hs->Draw("nostack HIST");
 
-        hs->GetXaxis()->SetTitle("Time Bin [1/20 MHz]");
+        hs->GetXaxis()->SetTitle((boost::format("Time Bin [1/20 MHz] (Sector %i)") % (q*6+i)).str().c_str());
         hs->GetYaxis()->SetTitle("Entries");
         hs->SetTitle((boost::format("Sector %i Sample Time Distribution") % (q*6 + i)).str().c_str());
 
@@ -399,13 +401,13 @@ int TPCRawHitDraw::DrawOnlMon()
         if (i == 0)
         {
           auto legend = new TLegend(0.7, 0.7, 0.9, 0.9);
-          legend->AddEntry(h_hits_sample_1[q*6 + i], "R1", "pl");
-          legend->AddEntry(h_hits_sample_2[q*6 + i], "R2", "pl");
-          legend->AddEntry(h_hits_sample_3[q*6 + i], "R3", "pl");
+          legend->AddEntry(h_hits_sample_1[q*6 + i], "R1", "L");
+          legend->AddEntry(h_hits_sample_2[q*6 + i], "R2", "L");
+          legend->AddEntry(h_hits_sample_3[q*6 + i], "R3", "L");
           legend->SetFillStyle(0);
           legend->Draw();
         }
-        gPad->SetRightMargin(0.15);
+        //gPad->SetRightMargin(0.15);
       }
       else
       {
@@ -421,7 +423,7 @@ int TPCRawHitDraw::DrawOnlMon()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_sample Run " << cl->RunNumber();
+    runnostream1 << Name() << "_Sample Time Dist Run " << cl->RunNumber();
     runstring1 = runnostream1.str();
     transparent[q + 16]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -443,32 +445,46 @@ int TPCRawHitDraw::DrawOnlMon()
       if (h_adc_1[q*6 + i] && h_adc_2[q*6 + i] && h_adc_3[q*6 + i])
       {
         h_adc_1[q*6 + i]->SetLineColor(kRed);
-        h_adc_1[q*6 + i]->DrawCopy();
+        //h_adc_1[q*6 + i]->GetXaxis()->SetTitle((boost::format("ADC-pedestal [ADU] (Sector %i)") % (q*6 + i)).str().c_str());
+        //h_adc_1[q*6 + i]->DrawCopy("HIST");
         h_adc_2[q*6 + i]->SetLineColor(kGreen);
-        h_adc_2[q*6 + i]->DrawCopy("same");
+        //h_adc_2[q*6 + i]->GetXaxis()->SetTitle((boost::format("ADC-pedestal [ADU] (Sector %i)") % (q*6 + i)).str().c_str());
+        //h_adc_2[q*6 + i]->DrawCopy("HIST same");
         h_adc_3[q*6 + i]->SetLineColor(kBlue);
-        h_adc_3[q*6 + i]->DrawCopy("same");
-        double maxBinContent = 0;
-        for (int b = 1; b <= h_adc_1[q*6 + i]->GetNbinsX(); b++) 
-        {
-          double binContent = std::max({h_adc_1[q*6 + i]->GetBinContent(b), h_adc_2[q*6 + i]->GetBinContent(b), 
-                                        h_adc_3[q*6 + i]->GetBinContent(b)});
-          if (binContent > maxBinContent) maxBinContent = binContent;
-        }
-        h_adc_1[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
-        h_adc_2[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
-        h_adc_3[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        //h_adc_3[q*6 + i]->GetXaxis()->SetTitle((boost::format("ADC-pedestal [ADU] (Sector %i)") % (q*6 + i)).str().c_str());
+        //h_adc_3[q*6 + i]->DrawCopy("HIST same");
+        //double maxBinContent = 0;
+        //for (int b = 1; b <= h_adc_1[q*6 + i]->GetNbinsX(); b++) 
+        //{
+        //  double binContent = std::max({h_adc_1[q*6 + i]->GetBinContent(b), h_adc_2[q*6 + i]->GetBinContent(b), 
+        //                                h_adc_3[q*6 + i]->GetBinContent(b)});
+        //  if (binContent > maxBinContent) maxBinContent = binContent;
+        //}
+        //h_adc_1[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        //h_adc_2[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        //h_adc_3[q*6 + i]->GetYaxis()->SetRangeUser(0, maxBinContent * 1.1); 
+        
+        THStack *hs = new THStack("hs", "Stacked Histograms");        
+        hs->Add(h_adc_1[q*6 + i]);
+        hs->Add(h_adc_2[q*6 + i]);
+        hs->Add(h_adc_3[q*6 + i]);
+
+        hs->Draw("nostack HIST");
+
+        hs->GetXaxis()->SetTitle((boost::format("ADC-pedestal [ADU] (Sector %i)") % (q*6+i)).str().c_str());
+        hs->GetYaxis()->SetTitle("Entries");
+
         if (i == 0)
         {
           auto legend = new TLegend(0.45, 0.7, 0.7, 0.9);
-          legend->AddEntry(h_adc_1[q*6 + i], "R1", "pl");
-          legend->AddEntry(h_adc_2[q*6 + i], "R2", "pl");
-          legend->AddEntry(h_adc_3[q*6 + i], "R3", "pl");
+          legend->AddEntry(h_adc_1[q*6 + i], "R1", "L");
+          legend->AddEntry(h_adc_2[q*6 + i], "R2", "L");
+          legend->AddEntry(h_adc_3[q*6 + i], "R3", "L");
           legend->SetFillStyle(0);
           legend->Draw();
         }
         gPad->SetLogy();
-        gPad->SetRightMargin(0.15);
+        //gPad->SetRightMargin(0.15);
       }
       else
       {
