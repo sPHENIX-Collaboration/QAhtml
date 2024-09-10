@@ -27,9 +27,9 @@ class TPCSilDraw : public QADraw
     int MakeCanvas(const std::string &name, int num);
     int DrawPositionInfo();
     int DrawCutHistograms();
-    TCanvas *TC[5]{};
-    TPad *transparent[5]{};
-    TPad *Pad[5][6]{};
+    TCanvas *TC[9]{};
+    TPad *transparent[9]{};
+    TPad *Pad[9][6]{};
     const char *histprefix;
 };
 

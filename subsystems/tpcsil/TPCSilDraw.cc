@@ -238,7 +238,7 @@ int TPCSilDraw::DrawCutHistograms()
   std::cout << "TPCSil DrawCutHistograms() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
 
-  std::vector<std::string> cutNames = {"_xyCut", "_etaCut", "_phiCut"};
+  std::vector<std::string> cutNames = {"_xyCut", "_etaCut", "_phiCut", "North", "South", "NorthAllCuts", "SouthAllCuts"};
 
   int i = 2;
   for (const std::string& name : cutNames)
@@ -351,7 +351,7 @@ int TPCSilDraw::MakeHtml(const std::string &what)
   }
   if (what == "ALL" || what == "CUTS")
   {
-    std::vector<std::string> cutNames = {"_xyCut", "_etaCut", "_phiCut"};
+    std::vector<std::string> cutNames = {"_xyCut", "_etaCut", "_phiCut", "North", "South", "NorthAllCuts", "SouthAllCuts"};
     int i = 2;
     for (const std::string& name : cutNames)
     { 
