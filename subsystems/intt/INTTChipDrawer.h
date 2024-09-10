@@ -2,6 +2,8 @@
 #define INTT_CHIP_DRAWER_H
 
 #include <qahtml/SingleCanvasDrawer.h>
+#include <TFile.h>
+#include<TH1F.h>
 
 class TPad;
 
@@ -23,6 +25,11 @@ private:
   TPad *transparent{nullptr};
   TPad *Pad[4]{nullptr};
   const char* histprefix;
+
+  TFile* file1;
+  TFile* file2;
+  TH1F* hist1;
+  TH1F* hist2;
 };
 
 #endif//INTT_CHIP_DRAWER_H

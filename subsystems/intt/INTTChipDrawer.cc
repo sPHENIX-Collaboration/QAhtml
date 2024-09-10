@@ -29,7 +29,11 @@
 INTTChipDrawer::INTTChipDrawer(std::string const& name)
   : SingleCanvasDrawer(name)
 {
-  histprefix = "h_InttClusterQA_"; 
+  histprefix = "h_InttClusterQA_";
+  file1 = TFile::Open("templete_file/physics_daq30_templete.root", "READ");
+  file2 = TFile::Open("templete_file/physics_daq35_templete.root", "READ");
+  hist1 = dynamic_cast<TH1F*>(file1->Get("hist_reference"));
+  hist2 = dynamic_cast<TH1F*>(file2->Get("hist_reference"));
 }
 
 INTTChipDrawer::~INTTChipDrawer()
@@ -98,6 +102,15 @@ int INTTChipDrawer::DrawCanvas()
     h_clusSize->SetYTitle("Normalized Entries");
     h_clusSize->Scale(1./h_clusSize->Integral());
     h_clusSize->DrawCopy();
+    if(cl->RunNumber()<49753){
+      hist1->SetMarkerStyle(0);
+      hist1->Draw("HIST E SAME");
+      hist1->SetLineColor(kRed);
+    }else{
+      hist2->SetMarkerStyle(0);
+      hist2->Draw("HIST E SAME");
+      hist2->SetLineColor(kRed); 
+    }
     gPad->SetRightMargin(0.15);
   }
   else
@@ -113,7 +126,7 @@ int INTTChipDrawer::DrawCanvas()
   PrintRun.SetTextAlign(23); // center/top alignment
   std::ostringstream runnostream1;
   std::string runstring1;
-  // runnostream1 << Name() << "_intt Info Run " << cl->RunNumber();
+  //runnostream1 << Name() << "_intt Info Run " << cl->RunNumber();
   runnostream1 << "INTTQA_intt Info Run " << cl->RunNumber();
   runstring1 = runnostream1.str();
   transparent->cd();
