@@ -17,6 +17,7 @@ class TH1;
 class TH2;
 
 // aliases for convenience
+using VPad1D    = std::vector<TPad*>;
 using VPad2D    = std::vector<std::vector<TPad*>>;
 using VPad3D    = std::vector<std::vector<std::vector<TPad*>>>;
 using VCanvas1D = std::vector<TCanvas*>;
@@ -45,9 +46,7 @@ class JetDraw : public QADraw
  
 
  private:
-  int MakeCanvas(const std::string &name, int num);
-  int nDrawError;
-  int idraw;
+  int MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads);
 
   int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawRho(uint32_t trigger);
@@ -70,10 +69,10 @@ class JetDraw : public QADraw
   VCanvas2D m_vecSeedCanvas;
 
   // for adding run numbers to canvases
-  VCanvas1D m_vecRhoRun;
-  VCanvas2D m_vecCstRun;
-  VCanvas2D m_vecKineRun;
-  VCanvas2D m_vecSeedRun;
+  VPad1D m_vecRhoRun;
+  VPad2D m_vecCstRun;
+  VPad2D m_vecKineRun;
+  VPad2D m_vecSeedRun;
 
   // for individual pads on each canvas
   VPad2D m_vecRhoPad;
