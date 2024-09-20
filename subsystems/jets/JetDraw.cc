@@ -27,9 +27,6 @@
 JetDraw::JetDraw(const std::string &name)
 : cl(QADrawClient::instance())
 {
-  if (name == "JetQA") {
-    // Handle specific condition
-  }
   memset(TC, 0, sizeof(TC));
   memset(transparent, 0, sizeof(transparent));
   memset(Pad, 0, sizeof(Pad));
