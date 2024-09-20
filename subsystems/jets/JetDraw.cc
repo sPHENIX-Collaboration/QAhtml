@@ -393,7 +393,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
 
  int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
 {
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   // TCanvas* canvas = new TCanvas( /* etc */ );                                                                                                                                                        
   TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_rhoarea")));
   TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_rhomult")));
