@@ -49,8 +49,6 @@ class JetDraw : public QADraw
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
   int DrawJetSeed(uint32_t trigger, JetRes reso);
 
-  TH1 *proj(TH2 *h2);
-  //  TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
   //  QADB *db {nullptr};
   const static int ncanvases = 8;
