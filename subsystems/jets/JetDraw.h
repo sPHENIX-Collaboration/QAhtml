@@ -44,7 +44,6 @@ class JetDraw : public QADraw
   int nDrawError;
   int idraw;
 
-  //  int Draw(const std::string &what);
   int DrawTrigAndRes(int trigToDraw, JetRes resToDraw);  // or uint32_t based on your types
   int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawRho(uint32_t trigger);
