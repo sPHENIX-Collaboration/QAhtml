@@ -820,7 +820,7 @@ int JetDraw::DBVarInit()
    jetSummary = c;
    jetSummary->cd();
 
-   //  QADrawClient *cl = QADrawClient::instance();
+   QADrawClient *cl = QADrawClient::instance();
    TPad* tr = new TPad("transparent_jet", "", 0, 0, 1, 1);
    tr->SetFillStyle(4000);
    tr->Draw();
