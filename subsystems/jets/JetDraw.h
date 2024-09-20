@@ -93,7 +93,6 @@ class JetDraw : public QADraw
   };
   // map of trigger index onto name
   std::map<uint32_t, std::string> m_mapTrigToName = {
-    /* maybe some others */
     {JetQADefs::GL1::Jet1, "Jet6GeV"},
     {JetQADefs::GL1::Jet2, "Jet8GeV"},
     {JetQADefs::GL1::Jet3, "Jet10GeV"},
