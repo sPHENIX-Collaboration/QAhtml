@@ -57,7 +57,6 @@ class JetDraw : public QADraw
   TPad *transparent[ncanvases]{};
   TPad *Pad[ncanvases][maxpads]{};
   TCanvas* jetSummary = nullptr;
-  // add summary canvases for hcal etc later
   const char* m_constituent_prefix;
   const char* m_rho_prefix;
   const char* m_kinematic_prefix;
