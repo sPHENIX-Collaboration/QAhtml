@@ -19,8 +19,7 @@ class TH2;
 class JetDraw : public QADraw
 {
  public:
-  JetDraw(const std::string &name = "JetQA");
-  ~JetDraw() override;
+
   // tags for jet resolutions
     enum JetRes
     {
@@ -28,7 +27,10 @@ class JetDraw : public QADraw
       R03,
       R04,
       R05
-    }; 
+    };
+    
+  JetDraw(const std::string &name = "JetQA");
+  ~JetDraw() override;
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
