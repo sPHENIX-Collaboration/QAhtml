@@ -1,6 +1,5 @@
 //Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth,  and Derek Anderson
 #include "JetDraw.h"
-//#include "JetGoodRunChecker.h"
 #include <sPhenixStyle.C>
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
