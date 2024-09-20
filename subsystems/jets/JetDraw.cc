@@ -71,8 +71,6 @@ int JetDraw::MakeHtml(const std::string &what) {
 
 int JetDraw::Draw(const std::string &what)
 {
-   if (what == "ALL") { /*Was not sure how to implement "what" so I have this here as a place holder*/
-   }
    // 1st make sure there's enough space for each trigger
    m_vecCanvas.resize( m_vecTrigToDraw.size() );
    // now loop over triggers
