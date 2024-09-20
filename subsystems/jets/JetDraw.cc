@@ -662,7 +662,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     break;
   }
   
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   TH2F *jetseedcount_rawetavsphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawetavsphi")));
   TH1F *jetseedcount_rawpt = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawpt")));
   TH1F *jetseedcount_rawptall = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawptall")));
