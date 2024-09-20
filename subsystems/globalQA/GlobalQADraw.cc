@@ -11,10 +11,12 @@
 #include <TH2.h>
 #include <TPad.h>
 #include <TProfile.h>
+#include <TProfile2D.h>
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
+#include <TLatex.h>
 #include <TLegend.h>
 #include <TF1.h>
 #include <TGaxis.h>
@@ -453,10 +455,14 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
 
 int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
 {
-  QADrawClient *cl = QADrawClient::instance();
-  TH1 *h_GlobalQA_sEPD_adcsum_s = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_sEPD_adcsum_s"));
-  TH1 *h_GlobalQA_sEPD_adcsum_n = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_sEPD_adcsum_n"));
-  TH2 *h2_GlobalQA_sEPD_adcsum_ns = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_sEPD_adcsum_ns"));
+    QADrawClient *cl = QADrawClient::instance();
+    TH1 *h_GlobalQA_sEPD_adcsum_s = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_sEPD_adcsum_s"));
+    TH1 *h_GlobalQA_sEPD_adcsum_n = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_sEPD_adcsum_n"));
+    TH2 *h2_GlobalQA_sEPD_adcsum_ns = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_sEPD_adcsum_ns"));
+    TProfile2D *h2Profile_GlobalQA_sEPD_tiles_north = dynamic_cast<TProfile2D *>(cl->getHisto("h2Profile_GlobalQA_sEPD_tiles_north"));
+    TProfile2D *h2Profile_GlobalQA_sEPD_tiles_south = dynamic_cast<TProfile2D *>(cl->getHisto("h2Profile_GlobalQA_sEPD_tiles_south"));
+    TH2 *h2_GlobalQA_sEPD_ADC_channel_north = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_sEPD_ADC_channel_north"));
+    TH2 *h2_GlobalQA_sEPD_ADC_channel_south = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_sEPD_ADC_channel_south"));
 
   if (!gROOT->FindObject("Global3"))
   {
@@ -466,11 +472,24 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
   Pad[2][0]->cd();
   if (h_GlobalQA_sEPD_adcsum_s && h_GlobalQA_sEPD_adcsum_n)
   {
-      h_GlobalQA_sEPD_adcsum_s->Scale(1/h_GlobalQA_sEPD_adcsum_s->Integral());
-      h_GlobalQA_sEPD_adcsum_n->Scale(1/h_GlobalQA_sEPD_adcsum_n->Integral());
+      // h_GlobalQA_sEPD_adcsum_s->Scale(1/h_GlobalQA_sEPD_adcsum_s->Integral());
+      // h_GlobalQA_sEPD_adcsum_n->Scale(1/h_GlobalQA_sEPD_adcsum_n->Integral());
+
+      double _max1 = h_GlobalQA_sEPD_adcsum_s->GetMaximum();
+      double _max2 = h_GlobalQA_sEPD_adcsum_n->GetMaximum();
+      double _add = 500.0;
+      double _histmax = _max2;
+
+      if(_max2 < _max1) _histmax = _max1;
+
+      h_GlobalQA_sEPD_adcsum_n->GetXaxis()->SetRangeUser(-10, 30000);
+      h_GlobalQA_sEPD_adcsum_s->GetXaxis()->SetRangeUser(-10, 30000);
+      h_GlobalQA_sEPD_adcsum_n->GetYaxis()->SetRangeUser(0, _histmax +_add);
+      h_GlobalQA_sEPD_adcsum_s->GetYaxis()->SetRangeUser(0, _histmax + _add);
+
       
       gPad->UseCurrentStyle();
-   
+
       h_GlobalQA_sEPD_adcsum_s->SetLineColor(kRed);
       h_GlobalQA_sEPD_adcsum_s->SetMarkerColor(kRed);
       h_GlobalQA_sEPD_adcsum_s->SetMarkerStyle(20);
@@ -478,7 +497,8 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
 
       leg10->AddEntry(h_GlobalQA_sEPD_adcsum_s,"South","l");
       h_GlobalQA_sEPD_adcsum_s->DrawCopy();
-      
+    
+  
       h_GlobalQA_sEPD_adcsum_n->SetLineColor(kBlue);
       h_GlobalQA_sEPD_adcsum_n->SetMarkerColor(kBlue);
       h_GlobalQA_sEPD_adcsum_n->SetMarkerStyle(20);
@@ -486,7 +506,6 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
       
       leg10->AddEntry(h_GlobalQA_sEPD_adcsum_n,"North","l");
       h_GlobalQA_sEPD_adcsum_n->DrawCopy("same");
-  
     
     leg10->Draw();
   }
@@ -498,16 +517,84 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
   Pad[2][1]->cd();
   if (h2_GlobalQA_sEPD_adcsum_ns)
   {
-      h2_GlobalQA_sEPD_adcsum_ns->DrawCopy("colz");
-      gPad->SetRightMargin(0.15);
-      gPad->SetLeftMargin(0.15);
-      gPad->UseCurrentStyle();
+     
+    h2_GlobalQA_sEPD_adcsum_ns->SetTitle("sEPD North-South Correlation");
+    h2_GlobalQA_sEPD_adcsum_ns->GetXaxis()->SetRangeUser(-10, 30000);
+    h2_GlobalQA_sEPD_adcsum_ns->GetYaxis()->SetRangeUser(-10, 30000);
+    h2_GlobalQA_sEPD_adcsum_ns->SetXTitle("sEPD south ADC sum");
+    h2_GlobalQA_sEPD_adcsum_ns->SetYTitle("sEPD north ADC sum");
+    h2_GlobalQA_sEPD_adcsum_ns->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  
   }
   else
   {
     return -1;
   }
+    
+    
+    Pad[2][2]->cd();
+    if (h2Profile_GlobalQA_sEPD_tiles_south && h2_GlobalQA_sEPD_ADC_channel_south)
+    {
+      
+      h2Profile_GlobalQA_sEPD_tiles_south->GetYaxis()->SetNdivisions(527);
+      h2Profile_GlobalQA_sEPD_tiles_south->GetXaxis()->SetNdivisions(527);
+      h2_GlobalQA_sEPD_ADC_channel_south->GetXaxis()->SetNdivisions(527);
+      h2_GlobalQA_sEPD_ADC_channel_south->GetYaxis()->SetNdivisions(527);
+      h2Profile_GlobalQA_sEPD_tiles_south->SetTitle("sEPD South Tile Mean ADC");
+      h2_GlobalQA_sEPD_ADC_channel_south->SetTitle("sEPD South Tile Mean ADC");
+      h2_GlobalQA_sEPD_ADC_channel_south->GetZaxis()->SetTitle("Mean ADC");
+      h2Profile_GlobalQA_sEPD_tiles_south->SetXTitle("#eta bin");
+      h2Profile_GlobalQA_sEPD_tiles_south->SetYTitle("#phi bin");
+      h2_GlobalQA_sEPD_ADC_channel_south->SetXTitle("#eta bin");
+      h2_GlobalQA_sEPD_ADC_channel_south->SetYTitle("#phi bin");
+      h2Profile_GlobalQA_sEPD_tiles_south->DrawCopy("COLZ");
+      h2_GlobalQA_sEPD_ADC_channel_south->Draw("text SAME");
 
+      TLatex l1;
+      l1.SetNDC();
+      l1.SetTextFont(43);
+      l1.SetTextSize(20);
+      l1.DrawLatex(0.4, 0.01, "sEPD South");
+
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      return -1;
+    }
+
+    Pad[2][3]->cd();
+    if (h2Profile_GlobalQA_sEPD_tiles_north && h2_GlobalQA_sEPD_ADC_channel_north)
+    {
+      h2Profile_GlobalQA_sEPD_tiles_north->GetYaxis()->SetNdivisions(527);
+      h2Profile_GlobalQA_sEPD_tiles_north->GetXaxis()->SetNdivisions(527);
+      h2_GlobalQA_sEPD_ADC_channel_north->GetXaxis()->SetNdivisions(527);
+      h2_GlobalQA_sEPD_ADC_channel_north->GetYaxis()->SetNdivisions(527);
+      h2Profile_GlobalQA_sEPD_tiles_north->SetTitle("sEPD North Tile Mean ADC");
+      h2_GlobalQA_sEPD_ADC_channel_north->SetTitle("sEPD North Tile Mean ADC");
+      h2_GlobalQA_sEPD_ADC_channel_north->GetZaxis()->SetTitle("Mean ADC");
+      h2Profile_GlobalQA_sEPD_tiles_north->SetXTitle("#eta bin");
+      h2Profile_GlobalQA_sEPD_tiles_north->SetYTitle("#phi bin");
+      h2_GlobalQA_sEPD_ADC_channel_north->SetXTitle("#eta bin");
+      h2_GlobalQA_sEPD_ADC_channel_north->SetYTitle("#phi bin");
+      h2Profile_GlobalQA_sEPD_tiles_north->DrawCopy("COLZ ");
+      h2_GlobalQA_sEPD_ADC_channel_north->Draw("text SAME");
+      TLatex l2;
+      l2.SetNDC();
+      l2.SetTextFont(43);
+      l2.SetTextSize(20);
+      l2.DrawLatex(0.4, 0.01, "sEPD North");
+
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
+    else
+    {
+      return -1;
+    }
 
   //db->DBcommit();
   TText PrintRun;
