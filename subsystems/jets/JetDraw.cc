@@ -25,7 +25,7 @@
 #include <sstream>
 
 JetDraw::JetDraw(const std::string &name)
-: cl(QADrawClient::instance())
+: QADraw(name)
 {
   memset(TC, 0, sizeof(TC));
   memset(transparent, 0, sizeof(transparent));
