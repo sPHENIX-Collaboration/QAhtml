@@ -64,7 +64,6 @@ class JetDraw : public QADraw
   const char* m_rho_prefix;
   const char* m_kinematic_prefix;
   const char* m_seed_prefix;
-  //  JetGoodRunChecker* cemc_checker = nullptr;
 
   // triggers we want to draw
   std::vector<uint32_t> m_vecTrigToDraw = {
