@@ -31,10 +31,10 @@ JetDraw::JetDraw(const std::string &name)
   memset(transparent, 0, sizeof(transparent));
   memset(Pad, 0, sizeof(Pad));
   DBVarInit();
-  histprefix = "h_constituentsinjets";
-  histprefix1 = "h_eventwiserho";
-  histprefix2 = "h_jetkinematiccheck";
-  histprefix3 = "h_jetseedcount";
+  m_constituent_prefix = "h_constituentsinjets";
+  m_rho_prefix = "h_eventwiserho";
+  m_kinematic_prefix = "h_jetkinematiccheck";
+  m_seed_prefix = "h_jetseedcount";
   return;
 }
 
