@@ -17,6 +17,13 @@ class TH1;
 class TH2;
 //class JetGoodRunChecker; TBD
 
+// aliases for convenience
+using VPad2D    = std::vector<std::vector<TPad*>>;
+using VPad3D    = std::vector<std::vector<std::vector<TPad*>>>;
+using VCanvas1D = std::vector<TCanvas*>;
+using VCanvas2D = std::vector<std::vector<TCanvas*>>;
+
+
 class JetDraw : public QADraw
 {
  public:
@@ -41,7 +48,6 @@ class JetDraw : public QADraw
  private:
   int MakeCanvas(const std::string &name, int num);
   QADrawClient* cl; // Declare cl here   
-  std::vector<std::vector<TCanvas*>> m_vecCanvas;  // Declare m_vecCanvas
   int nDrawError;
   int idraw;
 
@@ -56,12 +62,33 @@ class JetDraw : public QADraw
   //  TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
   //  QADB *db {nullptr};
+// REMOVE
   const static int ncanvases = 8;
   const static int maxpads = 6;
   TCanvas *TC[ncanvases]{};
   TPad *transparent[ncanvases]{};
   TPad *Pad[ncanvases][maxpads]{};
+//
   TCanvas* jetSummary = nullptr;
+
+  // canvases for drawing
+  VCanvas1D m_vecRhoCanvas;
+  VCanvas2D m_vecCstCanvas;
+  VCanvas2D m_vecKineCanvas;
+  VCanvas2D m_vecSeedCanvas;
+
+  // for adding run numbers to canvases
+  VCanvas1D m_vecRhoRun;
+  VCanvas2D m_vecCstRun;
+  VCanvas2D m_vecKineRun;
+  VCanvas2D m_vecSeedRun;
+
+  // for individual pads on each canvas
+  VPad2D m_vecRhoPad;
+  VPad3D m_vecCstPad;
+  VPad3D m_vecKinePad;
+  VPad3D m_vecSeedPad;
+
   // add summary canvases for hcal etc later
   const char *histprefix;
   const char *histprefix1;

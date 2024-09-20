@@ -31,9 +31,11 @@ JetDraw::JetDraw(const std::string &name)
   if (name == "JetQA") {
     // Handle specific condition
   }
+// REMOVE
   memset(TC, 0, sizeof(TC));
   memset(transparent, 0, sizeof(transparent));
   memset(Pad, 0, sizeof(Pad));
+//
   DBVarInit();
   histprefix = "h_constituentsinjets";
   histprefix1 = "h_eventwiserho";
@@ -57,20 +59,39 @@ int JetDraw::MakeHtml(const std::string &what) {
   if (drawError) {
     return drawError;  // Return if there is an error in Draw
   }
-    
-  int resolutionDrawError = 0;
-  for (uint32_t trigToDraw : m_vecTrigToDraw) {  // Loop over triggers
-    for (auto& resAndName : m_mapResToName) {  // Loop over resolution and name pairs
-      std::string pngFile = cl->htmlRegisterPage(
-						 *this,
-						 m_mapTrigToName[trigToDraw] + "/" + std::to_string(resAndName.first),
-						 m_mapTrigToName[trigToDraw] + "_" + resAndName.second,
-						 "png");
-      // Convert canvas to PNG
-      resolutionDrawError = cl->CanvasToPng(m_vecCanvas[trigToDraw][resAndName.first], pngFile);
-      if (resolutionDrawError) {
-	return resolutionDrawError;  // Handle errors appropriately
-      }
+
+  // loop over triggers to draw
+  for (std::size_t iTrigToDraw = 0; iTrigToDraw < m_vecTrigToDraw.size(); ++iTrigToDraw) {
+
+    // grab index & name of trigger being drawn
+    const uint32_t    idTrig   = m_vecTrigToDraw[iTrigToDraw];
+    const std::string nameTrig = m_mapTrigToName[idTrig];
+
+    // draw rho plots
+    const std::string pngRho = cl->htmlRegisterPage(*this, nameTrig, nameTrig, "png");
+    cl->CanvasToPng(m_vecRhoCanvas[iTrigToDraw], pngRho);
+
+    // loop over jet resolutions to draw
+    for (std::size_t iResToDraw = 0; iResToDraw < m_vecResToDraw.size(); ++iResToDraw) {
+
+      // grab index & name of resolution being drawn
+      const uint32_t    idRes   = m_vecResToDraw[iResToDraw];
+      const std::string nameRes = m_mapResToName[idRes];
+      const std::string dirRes  = nameTrig + "/" + nameRes;
+      const std::string fileRes = nameTrig + "_" + nameRes;
+
+      // draw constituent plots 
+      const std::string pngCst = cl->htmlRegisterPage(*this, dirRes, fileRes + "_cst", "png");
+      cl->CanvasToPng(m_vecCstCanvas[iTrigToDraw][iResToDraw], pngCst);
+
+      // draw kinematic plots 
+      const std::string pngKine = cl->htmlRegisterPage(*this, dirRes, fileRes + "_kine", "png");
+      cl->CanvasToPng(m_vecKineCanvas[iTrigToDraw][iResToDraw], pngKine);
+
+      // draw seed plots 
+      const std::string pngSeed = cl->htmlRegisterPage(*this, dirRes, fileRes + "_seed", "png");
+      cl->CanvasToPng(m_vecSeedCanvas[iTrigToDraw][iResToDraw], pngSeed);
+
     }
   }
   return iret;  // Return after processing all triggers and resolutions
@@ -80,8 +101,13 @@ int JetDraw::Draw(const std::string &what)
 {
    if (what == "ALL") { /*Was not sure how to implement "what" so I have this here as a place holder*/
    }
+
    // 1st make sure there's enough space for each trigger
-   m_vecCanvas.resize( m_vecTrigToDraw.size() );
+   m_vecRhoCanvas.resize( m_vecTrigToDraw.size() );
+   m_vecCstCanvas.resize( m_vecTrigToDraw.size() );
+   m_vecKineCanvas.resize( m_vecTrigToDraw.size() );
+   m_vecSeedCanvas.resize( m_vecTrigToDraw.size() );
+
    // now loop over triggers
    int iret = 0;
    // loop over indices of triggers we want to dsub
@@ -104,8 +130,10 @@ int JetDraw::Draw(const std::string &what)
          ++idraw;
        }
      }
-   }   
+   }
+
    /* SetsPhenixStyle(); */
+/* REMOVE
    gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
    gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
    gStyle->SetPadLeftMargin(0.15);
@@ -119,7 +147,7 @@ int JetDraw::Draw(const std::string &what)
    gStyle->SetPadTickY(1);
    gStyle->SetOptStat(10);
    gROOT->ForceStyle();
-   
+*/
    if (!idraw)
      {
        std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -213,31 +241,18 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   //  QADrawClient *cl = QADrawClient::instance();
   // TCanvas* canvas = new TCanvas( /* etc */ );
   /* do drawing */
-  TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_ncsts_cemc")));
-  TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_ncsts_ihcal")));
-  TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_ncsts_ohcal")));
-  TH1D *constituents_ncsts_total = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_ncsts_total")));
-  TH2D *constituents_ncstsvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(histprefix + std::string("_ncstsvscalolayer")));
-  TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_efracjet_cemc")));
-  TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_efracjet_ihcal")));
-  TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_efracjet_ohcal")));
-  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(histprefix + std::string("_efracjetcscalolayer")));
- 
-  // Ensure m_vecCanvas is a 2D vector if needed
-  if (trigToDraw >= m_vecCanvas.size()) {
-    m_vecCanvas.resize(trigToDraw + 1); // Resize if necessary
-  }
+  TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_cemc")));
+  TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ihcal")));
+  TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ohcal")));
+  TH1D *constituents_ncsts_total = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_total")));
+  TH2D *constituents_ncstsvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncstsvscalolayer")));
+  TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_cemc")));
+  TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ihcal")));
+  TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ohcal")));
+  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjetcscalolayer")));
 
-  // Initialize canvas if not already done
-  if (m_vecCanvas[trigToDraw].empty()) {
-    // Initialize with appropriate TCanvas* objects if needed
-    // Example: m_vecCanvas[trigToDraw].push_back(new TCanvas("canvas_name", "Title", 800, 600));
-  }
-
-  // Assuming you want to push TCanvas* objects into the vector
-  // Example canvas creation and pushing
-  TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
-  m_vecCanvas[trigToDraw].push_back(canvas);
+  //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
+  //m_vecCanvas[trigToDraw].push_back(canvas);
  
  // canvas 1                                                                                                                 
   if (!gROOT->FindObject("jet1"))                 
@@ -411,13 +426,9 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_sigmaarea")));
   TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_sigmamult")));
 
-  if (trigToDraw >= m_vecCanvas.size()) {
-    m_vecCanvas.resize(trigToDraw + 1); // Resize if necessary                                                                                                                          
-  }                                                                              
-  if (m_vecCanvas[trigToDraw].empty()) {
-  }               
-  TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
-  m_vecCanvas[trigToDraw].push_back(canvas);
+  //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
+  //m_vecCanvas[trigToDraw].push_back(canvas);
+
   // canvas 1
   if (!gROOT->FindObject("eventwiserho"))
     {
@@ -535,15 +546,8 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
   TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + std::string("_jettmassvspt_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
 
-  // Ensure m_vecCanvas is a 2D vector if needed                                                                               
-  if (trigToDraw >= m_vecCanvas.size()) {
-    m_vecCanvas.resize(trigToDraw + 1); // Resize if necessary                               
-  }
-  // Initialize canvas if not already done                 
-  if (m_vecCanvas[trigToDraw].empty()) {
-  }                                                                               
-  TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
-  m_vecCanvas[trigToDraw].push_back(canvas);
+  //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
+  //m_vecCanvas[trigToDraw].push_back(canvas);
   
   // canvas 1                                                                              
   if (!gROOT->FindObject("jetkinematiccheck"))
@@ -683,15 +687,9 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
   TH1F *jetseedcount_subptall = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subptall")));  
   TH1F *jetseedcount_subseedcount = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subseedcount")));
   
-  // Ensure m_vecCanvas is a 2D vector if needed                                      
-  if (trigToDraw >= m_vecCanvas.size()) {
-    m_vecCanvas.resize(trigToDraw + 1);
-  }
-  // Initialize canvas if not already done                                                                                                                
-  if (m_vecCanvas[trigToDraw].empty()) {
-  }                                                                                                                                                                                             
-  TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
-  m_vecCanvas[trigToDraw].push_back(canvas);
+  //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
+  //m_vecCanvas[trigToDraw].push_back(canvas);
+
   //canvas 1                                                                                  
   if (!gROOT->FindObject("jetseedcount1"))
     {
