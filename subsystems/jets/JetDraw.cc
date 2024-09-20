@@ -42,8 +42,8 @@ JetDraw::~JetDraw()
   return;
 }
 
-int JetDraw::MakeHtml(const std::string &what) {
-  int iret = 0;
+int JetDraw::MakeHtml(const std::string &what)
+{
   const int drawError = Draw(what);  // Call to Draw
   if (drawError) {
     return drawError;  // Return if there is an error in Draw
@@ -85,7 +85,9 @@ int JetDraw::MakeHtml(const std::string &what) {
       cl->CanvasToPng(m_vecSeedCanvas[iTrigToDraw][iResToDraw], pngSeed);
     }
   }
-  return iret;  // Return after processing all triggers and resolutions
+
+  // return w/o error
+  return 0;
 }
 
 int JetDraw::Draw(const std::string &what)
@@ -115,7 +117,7 @@ int JetDraw::Draw(const std::string &what)
      // draw rho plots
      if  (what == "ALL" || what == "RHO")
      {
-       iret += DrawRho(trigToDraw);
+       iret = DrawRho(trigToDraw);
        ++idraw;
      }
 
@@ -131,21 +133,21 @@ int JetDraw::Draw(const std::string &what)
        // draw constituent plots
        if (what == "ALL" || what == "CONTSTITUENTS")
        {
-	 iret += DrawConstituents(trigToDraw, static_cast<JetRes>(resToDraw));
+	 iret = DrawConstituents(trigToDraw, static_cast<JetRes>(resToDraw));
 	 ++idraw;
        }
 
        // draw kinematic plots
        if (what == "ALL" || what == "KINEMATICCHECK")
        {
-         iret += DrawJetKinematics(trigToDraw, static_cast<JetRes>(resToDraw));
+         iret = DrawJetKinematics(trigToDraw, static_cast<JetRes>(resToDraw));
          ++idraw;
        }
 
        // draw seed plots
        if (what == "ALL" || what == "SEEDCOUNT")
        {
-         iret += DrawJetSeed(trigToDraw, static_cast<JetRes>(resToDraw));
+         iret = DrawJetSeed(trigToDraw, static_cast<JetRes>(resToDraw));
          ++idraw;
        }
      }
@@ -154,8 +156,10 @@ int JetDraw::Draw(const std::string &what)
    if (!idraw)
    {
      std::cout << " Unimplemented Drawing option: " << what << std::endl;
-     iret = -1;
+     return -1;
    }
+
+   // should return -1 if error, 0 otherwise
    return iret;
 }
  
