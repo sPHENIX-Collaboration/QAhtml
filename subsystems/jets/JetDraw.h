@@ -46,7 +46,6 @@ class JetDraw : public QADraw
 
  private:
   int MakeCanvas(const std::string &name, int num);
-  QADrawClient* cl; // Declare cl here   
   int nDrawError;
   int idraw;
 

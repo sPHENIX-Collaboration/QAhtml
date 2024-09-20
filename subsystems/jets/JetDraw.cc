@@ -52,6 +52,9 @@ int JetDraw::MakeHtml(const std::string &what) {
     return drawError;  // Return if there is an error in Draw
   }
 
+  // instantiate draw client
+  QADrawClient *cl = QADrawClient::instance();
+
   // loop over triggers to draw
   for (std::size_t iTrigToDraw = 0; iTrigToDraw < m_vecTrigToDraw.size(); ++iTrigToDraw) {
 
@@ -104,7 +107,7 @@ int JetDraw::Draw(const std::string &what)
    for (uint32_t trigToDraw : m_vecTrigToDraw) { // loop over triggers
    
      // reserve space for each resolution to draw
-     m_vecCanvas[iTrig].resize( m_resToDraw.size() );
+     /* TODO may or may not need */
      ++iTrig;
      
      if  (what == "ALL" || what == "RHO") {
@@ -234,15 +237,15 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   }
 
   QADrawClient *cl = QADrawClient::instance();
-  TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_cemc")));
-  TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ihcal")));
-  TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ohcal")));
-  TH1D *constituents_ncsts_total = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_total")));
-  TH2D *constituents_ncstsvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncstsvscalolayer")));
-  TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_cemc")));
-  TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ihcal")));
-  TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ohcal")));
-  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjetcscalolayer")));
+  TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_cemc")));
+  TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ihcal")));
+  TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ohcal")));
+  TH1D *constituents_ncsts_total = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_total")));
+  TH2D *constituents_ncstsvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncstsvscalolayer")));
+  TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_cemc")));
+  TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ihcal")));
+  TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ohcal")));
+  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjetcscalolayer")));
 
   //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
   //m_vecCanvas[trigToDraw].push_back(canvas);
@@ -414,10 +417,10 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
 {
   QADrawClient *cl = QADrawClient::instance();
   // TCanvas* canvas = new TCanvas( /* etc */ );                                                                                                                                                        
-  TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_rhoarea")));
-  TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_rhomult")));
-  TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_sigmaarea")));
-  TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_sigmamult")));
+  TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhoarea")));
+  TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhomult")));
+  TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmaarea")));
+  TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmamult")));
 
   //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
   //m_vecCanvas[trigToDraw].push_back(canvas);
@@ -530,14 +533,14 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
 
   QADrawClient *cl = QADrawClient::instance();
 
-  TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] +std::string("_etavsphi_") + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw]));         
-  TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] + std::string("_jettmassvspt_") + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] + std::string("_spectra_") + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] +std::string("_etavsphi_") + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw]));         
+  TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jettmassvspt_") + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_spectra_") + m_mapResToTag[resToDraw]));
   
   // map of resolution index to tag for TProfiles                                                                                                                                               
-  TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
-  TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + std::string("_jettmassvspt_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
+  TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
+  TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jettmassvspt_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
 
   //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
   //m_vecCanvas[trigToDraw].push_back(canvas);
@@ -671,14 +674,14 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
   }
   
   QADrawClient *cl = QADrawClient::instance();
-  TH2F *jetseedcount_rawetavsphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawetavsphi")));
-  TH1F *jetseedcount_rawpt = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawpt")));
-  TH1F *jetseedcount_rawptall = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawptall")));
-  TH1F *jetseedcount_rawseedcount = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawseedcount")));
-  TH2F *jetseedcount_subetavsphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subetavsphi")));
-  TH1F *jetseedcount_subpt = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subpt")));
-  TH1F *jetseedcount_subptall = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subptall")));  
-  TH1F *jetseedcount_subseedcount = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subseedcount")));
+  TH2F *jetseedcount_rawetavsphi = dynamic_cast<TH2F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawetavsphi")));
+  TH1F *jetseedcount_rawpt = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawpt")));
+  TH1F *jetseedcount_rawptall = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawptall")));
+  TH1F *jetseedcount_rawseedcount = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawseedcount")));
+  TH2F *jetseedcount_subetavsphi = dynamic_cast<TH2F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subetavsphi")));
+  TH1F *jetseedcount_subpt = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subpt")));
+  TH1F *jetseedcount_subptall = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subptall")));  
+  TH1F *jetseedcount_subseedcount = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subseedcount")));
   
   //TCanvas* canvas = new TCanvas("canvas_name", "Title", 800, 600);
   //m_vecCanvas[trigToDraw].push_back(canvas);
