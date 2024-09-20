@@ -15,7 +15,6 @@ class TGraphErrors;
 class TPad;
 class TH1;
 class TH2;
-//class JetGoodRunChecker; TBD
 
 class JetDraw : public QADraw
 {
