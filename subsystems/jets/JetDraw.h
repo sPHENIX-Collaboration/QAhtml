@@ -50,7 +50,6 @@ class JetDraw : public QADraw
   int DrawJetSeed(uint32_t trigger, JetRes reso);
 
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
-  //  QADB *db {nullptr};
   const static int ncanvases = 8;
   const static int maxpads = 6;
   TCanvas *TC[ncanvases]{};
