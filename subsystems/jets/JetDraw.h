@@ -35,7 +35,6 @@ class JetDraw : public QADraw
   int DBVarInit();
   void SetJetSummary(TCanvas* c);
  
-  // void SetCemcChecker(JetGoodRunChecker* ch) {cemc_checker = ch;} TBD -- topical group input
 
  private:
   int MakeCanvas(const std::string &name, int num);
