@@ -1,4 +1,4 @@
-//Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth,  and Derek Anderson
+//Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, and Derek Anderson
 #include "JetDraw.h"
 #include <sPhenixStyle.C>
 #include <qahtml/QADrawClient.h>
@@ -27,10 +27,6 @@
 JetDraw::JetDraw(const std::string &name)
 : QADraw(name)
 {
-  memset(TC, 0, sizeof(TC));
-  memset(transparent, 0, sizeof(transparent));
-  memset(Pad, 0, sizeof(Pad));
-//
   DBVarInit();
   m_constituent_prefix = "h_constituentsinjets";
   m_rho_prefix = "h_eventwiserho";
@@ -154,28 +150,126 @@ int JetDraw::Draw(const std::string &what)
      }
    }
 
-   /* SetsPhenixStyle(); */
-/* TODO REMOVE
-   gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
-   gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
-   gStyle->SetPadLeftMargin(0.15);
-   gStyle->SetPadBottomMargin(0.15);
-   gStyle->SetTitleOffset(0.85, "XY");
-   gStyle->SetLabelSize(gStyle->GetLabelSize("X")*1.5, "X");
-   gStyle->SetLabelSize(gStyle->GetLabelSize("Y")*1.5, "Y");
-   gStyle->SetLabelSize(gStyle->GetLabelSize("Z")*1.5, "Z");
-   TGaxis::SetMaxDigits(4);
-   gStyle->SetPadTickX(1);
-   gStyle->SetPadTickY(1);
-   gStyle->SetOptStat(10);
-   gROOT->ForceStyle();
-*/
    if (!idraw)
-     {
-       std::cout << " Unimplemented Drawing option: " << what << std::endl;
-       iret = -1;
-     }
-     return iret;
+   {
+     std::cout << " Unimplemented Drawing option: " << what << std::endl;
+     iret = -1;
+   }
+   return iret;
+}
+
+int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
+{
+
+  // grab relevant histograms from draw client
+  QADrawClient *cl = QADrawClient::instance();
+
+  TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhoarea")));
+  TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhomult")));
+  TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmaarea")));
+  TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmamult")));
+
+  // form canvas name & if it doesn't exist yet, create it
+  const std::string rhoName = "evtRho_" + m_mapTrigToTag[trigToDraw];
+  if (!gROOT->FindObject(rhoName.data()))
+  {
+    m_vecRhoCanvas.push_back(nullptr);
+    m_vecRhoRun.push_back(nullptr);
+    MakeCanvas(rhoName, 4, m_vecRhoCanvas.back(), m_vecRhoRun.back(), m_vecRhoPad.back());
+  }
+
+  m_vecRhoPad.back().at(0)->cd();
+  if (eventwiserho_rhoarea)
+  {
+    eventwiserho_rhoarea->SetTitle("Rho Area");
+    eventwiserho_rhoarea->SetXTitle("#rho*A");
+    eventwiserho_rhoarea->SetYTitle("Counts");
+    // eventwiserho_rhoarea->GetXaxis()->SetNdivisions(505);
+    // eventwiserho_rhoarea->GetXaxis()->SetRangeUser(-1, 15);
+    eventwiserho_rhoarea->DrawCopy("HIST");  // 1D Histogram
+    gPad->UseCurrentStyle();
+    gPad->SetLogy();
+    gPad->SetLogz();
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  m_vecRhoPad.back().at(1)->cd();
+  if (eventwiserho_rhomult)
+  {
+    eventwiserho_rhomult->SetTitle("#rho Multiplicity");
+    eventwiserho_rhomult->SetXTitle("#rho_{mult}");
+    eventwiserho_rhomult->SetYTitle("Counts");
+    eventwiserho_rhomult->DrawCopy("HIST");  // 1D Histogram
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  m_vecRhoPad.back().at(2)->cd();
+  if (eventwiserho_sigmaarea)
+  {
+    eventwiserho_sigmaarea->SetTitle("Sigma Area");
+    eventwiserho_sigmaarea->SetXTitle("#sigma*A");
+    eventwiserho_sigmaarea->SetYTitle("Counts");
+    // eventwiserho_sigmaarea->GetXaxis()->SetNdivisions(505);
+    eventwiserho_sigmaarea->DrawCopy("HIST");  // 1D Histogram
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  m_vecRhoPad.back().at(3)->cd();
+  if (eventwiserho_sigmamult)
+  {
+    eventwiserho_sigmamult->SetTitle("#sigma Multiplicity");
+    eventwiserho_sigmamult->SetXTitle("#sigma_{mult}");
+    eventwiserho_sigmamult->SetYTitle("Counts");
+    eventwiserho_sigmamult->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+
+  // Generate run string from client
+  std::ostringstream runnostream;
+  runnostream << cl->RunNumber();
+
+  // prepend module name, component, trigger, and resolution
+  std::string runstring = Name();
+  runstring += "_EvtRho_";
+  runstring += m_mapTrigToName[trigToDraw];
+  runstring += " Run ";
+  runstring += runnostream.str();
+
+  // add runstring to relevant pad
+  m_vecRhoRun.back()->cd();
+  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
+  m_vecRhoCanvas.back()->Update();  // Update the pad
+
+  // return w/o error
+  return 0;
 }
  
 int JetDraw::MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads)
@@ -459,120 +553,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   m_vecCstRun.back().back()->cd();
   PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
   m_vecCstCanvas.back().back()->Update();  // Update the pad
-
-  // return w/o error
-  return 0;
-}
-
-int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
-{
-
-  // grab relevant histograms from draw client
-  QADrawClient *cl = QADrawClient::instance();
-
-  TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhoarea")));
-  TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhomult")));
-  TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmaarea")));
-  TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmamult")));
-
-  // form canvas name & if it doesn't exist yet, create it
-  const std::string rhoName = "evtRho_" + m_mapTrigToTag[trigToDraw];
-  if (!gROOT->FindObject(rhoName.data()))
-  {
-    m_vecRhoCanvas.push_back(nullptr);
-    m_vecRhoRun.push_back(nullptr);
-    MakeCanvas(rhoName, 4, m_vecRhoCanvas.back(), m_vecRhoRun.back(), m_vecRhoPad.back());
-  }
-
-  m_vecRhoPad.back().at(0)->cd();
-  if (eventwiserho_rhoarea)
-  {
-    eventwiserho_rhoarea->SetTitle("Rho Area");
-    eventwiserho_rhoarea->SetXTitle("#rho*A");
-    eventwiserho_rhoarea->SetYTitle("Counts");
-    // eventwiserho_rhoarea->GetXaxis()->SetNdivisions(505);
-    // eventwiserho_rhoarea->GetXaxis()->SetRangeUser(-1, 15);
-    eventwiserho_rhoarea->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    gPad->SetLogz();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecRhoPad.back().at(1)->cd();
-  if (eventwiserho_rhomult)
-  {
-    eventwiserho_rhomult->SetTitle("#rho Multiplicity");
-    eventwiserho_rhomult->SetXTitle("#rho_{mult}");
-    eventwiserho_rhomult->SetYTitle("Counts");
-    eventwiserho_rhomult->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecRhoPad.back().at(2)->cd();
-  if (eventwiserho_sigmaarea)
-  {
-    eventwiserho_sigmaarea->SetTitle("Sigma Area");
-    eventwiserho_sigmaarea->SetXTitle("#sigma*A");
-    eventwiserho_sigmaarea->SetYTitle("Counts");
-    // eventwiserho_sigmaarea->GetXaxis()->SetNdivisions(505);
-    eventwiserho_sigmaarea->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecRhoPad.back().at(3)->cd();
-  if (eventwiserho_sigmamult)
-  {
-    eventwiserho_sigmamult->SetTitle("#sigma Multiplicity");
-    eventwiserho_sigmamult->SetXTitle("#sigma_{mult}");
-    eventwiserho_sigmamult->SetYTitle("Counts");
-    eventwiserho_sigmamult->DrawCopy("COLZ");
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_EvtRho_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecRhoRun.back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecRhoCanvas.back()->Update();  // Update the pad
 
   // return w/o error
   return 0;
@@ -927,8 +907,9 @@ int JetDraw::DBVarInit()
   /* db->DBInit(); */
   return 0;
 }
- void JetDraw::SetJetSummary(TCanvas* c)
- {
+
+void JetDraw::SetJetSummary(TCanvas* c)
+{
    jetSummary = c;
    jetSummary->cd();
 
@@ -948,7 +929,8 @@ int JetDraw::DBVarInit()
    tr->cd();
    PrintRun.DrawText(0.5, 1., runstring.c_str());
    jetSummary->Update();
- }
+}
+
 void JetDraw::myText(double x, double y, int color, const char *text, double tsize)
 {
   TLatex l;
@@ -958,4 +940,3 @@ void JetDraw::myText(double x, double y, int color, const char *text, double tsi
   l.SetTextColor(color);
   l.DrawLatex(x, y, text);
 }
-

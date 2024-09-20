@@ -23,19 +23,18 @@ using VPad3D    = std::vector<std::vector<std::vector<TPad*>>>;
 using VCanvas1D = std::vector<TCanvas*>;
 using VCanvas2D = std::vector<std::vector<TCanvas*>>;
 
-
 class JetDraw : public QADraw
 {
  public:
 
   // tags for jet resolutions
-    enum JetRes
-    {
-      R02,
-      R03,
-      R04,
-      R05
-    };
+  enum JetRes
+  {
+    R02,
+    R03,
+    R04,
+    R05
+  };
     
   JetDraw(const std::string &name = "JetQA");
   ~JetDraw() override;
@@ -47,19 +46,12 @@ class JetDraw : public QADraw
 
  private:
   int MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads);
-
-  int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawRho(uint32_t trigger);
+  int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
   int DrawJetSeed(uint32_t trigger, JetRes reso);
-
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
-  const static int ncanvases = 8;
-  const static int maxpads = 6;
-  TCanvas *TC[ncanvases]{};
-  TPad *transparent[ncanvases]{};
-  TPad *Pad[ncanvases][maxpads]{};
-//
+
   TCanvas* jetSummary = nullptr;
 
   // canvases for drawing
@@ -92,6 +84,7 @@ class JetDraw : public QADraw
     JetQADefs::GL1::Jet3,
     JetQADefs::GL1::Jet4
   };
+
   // vector  we want to draw
   std::vector<uint32_t> m_vecResToDraw = {
     JetRes::R02,
@@ -115,6 +108,7 @@ class JetDraw : public QADraw
     {JetRes::R04, "r04"},
     {JetRes::R05, "r05"}
   };
+
   // map of trigger index onto name
   std::map<uint32_t, std::string> m_mapTrigToName = {
     {JetQADefs::GL1::Jet1, "Jet6GeV"},
