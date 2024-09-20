@@ -513,7 +513,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     break;
   }
 
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] +std::string("_etavsphi_") + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw]));         
