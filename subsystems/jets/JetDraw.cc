@@ -73,10 +73,16 @@ int JetDraw::Draw(const std::string &what)
 {
    // 1st make sure there's enough space for each trigger
    m_vecCanvas.resize( m_vecTrigToDraw.size() );
+   
    // now loop over triggers
    int iret = 0;
-   // loop over indices of triggers we want to dsub
-   for (uint32_t trigToDraw : m_vecTrigToDraw) { // loop over jet
+   int iTrig = 0;
+   for (uint32_t trigToDraw : m_vecTrigToDraw) { // loop over triggers
+   
+     // reserve space for each resolution to draw
+     m_vecCanvas[iTrig].resize( m_resToDraw.size() );
+     ++iTrig;
+     
      if  (what == "ALL" || what == "RHO") {
        iret += DrawRho(trigToDraw);
        ++idraw;
