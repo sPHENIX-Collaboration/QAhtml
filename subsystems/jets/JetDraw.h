@@ -30,7 +30,6 @@ class JetDraw : public QADraw
       R04,
       R05
     }; 
-  // int Draw(listOfTrigsToDraw);
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;   // rather than a string do draw from a list of ints
   int DBVarInit();
