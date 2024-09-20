@@ -32,6 +32,7 @@ JetDraw::JetDraw(const std::string &name)
   m_rho_prefix = "h_eventwiserho";
   m_kinematic_prefix = "h_jetkinematiccheck";
   m_seed_prefix = "h_jetseedcount";
+  m_jet_type = "towersub1_antikt";
   return;
 }
 
@@ -157,25 +158,81 @@ int JetDraw::Draw(const std::string &what)
    }
    return iret;
 }
+ 
+int JetDraw::MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads)
+{
+  // instantiate draw client & grab display size
+  QADrawClient *cl = QADrawClient::instance();
+  int xsize = cl->GetDisplaySizeX();
+  int ysize = cl->GetDisplaySizeY();
+
+  // emit warning if canvas is already initialized
+  if (canvas)
+  {
+    std::cerr << "Warning: overwriting canvas '" << name << "'." << std::endl;
+  }
+
+  // create canvas
+  // n.b. xpos (-1) negative means do not draw menu bar
+  canvas = new TCanvas(name.data(), "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  canvas->UseCurrentStyle();
+  gSystem->ProcessEvents();
+
+  // divide canvas into appropriate no. of pads
+  const int   nRow = std::min(nHist, 2);
+  const int   nCol = (nHist / 2) + (nHist % 2);
+  const float bRow = 0.01;
+  const float bCol = 0.01;
+  if (nHist > 1)
+  {
+    canvas->Divide(nRow, nCol, bRow, bCol);
+  }
+
+  // add pad pointers to vector & draw
+  const std::size_t nPads = nRow * nCol;
+  for (std::size_t iPad = 0; iPad < nPads; ++iPad)
+  {
+    pads.push_back( (TPad*) canvas->GetPad(iPad) );
+    pads.back()->Draw();
+  }
+
+  // emit warning if pad for run already exists
+  if (run)
+  {
+    std::cerr << "Warning: overwriting run pad for canvas '" << name << "'." << std::endl;
+  }
+
+  // create pad for run number
+  const std::string runPadName = name + "_run";
+  run = new TPad(runPadName.data(), "this does not show", 0, 0, 1, 1);
+  run->SetFillStyle(4000);
+  run->Draw();
+
+  // return w/o error
+  return 0;
+}
 
 int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
 {
 
+  // for rho histogram names
+  const std::string rhoHistName = std::string(m_rho_prefix) + "_" + m_mapTrigToTag[trigToDraw];
+
   // grab relevant histograms from draw client
   QADrawClient *cl = QADrawClient::instance();
 
-  TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhoarea")));
-  TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_rhomult")));
-  TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmaarea")));
-  TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(m_rho_prefix + m_mapTrigToTag[trigToDraw] + std::string("_sigmamult")));
+  TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_rhoarea"));
+  TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_rhomult"));
+  TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_sigmaarea"));
+  TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_sigmamult"));
 
   // form canvas name & if it doesn't exist yet, create it
-  const std::string rhoName = "evtRho_" + m_mapTrigToTag[trigToDraw];
-  if (!gROOT->FindObject(rhoName.data()))
+  const std::string rhoCanName = "evtRho_" + m_mapTrigToTag[trigToDraw];
+  if (!gROOT->FindObject(rhoCanName.data()))
   {
     m_vecRhoCanvas.push_back(nullptr);
     m_vecRhoRun.push_back(nullptr);
-    MakeCanvas(rhoName, 4, m_vecRhoCanvas.back(), m_vecRhoRun.back(), m_vecRhoPad.back());
+    MakeCanvas(rhoCanName, 4, m_vecRhoCanvas.back(), m_vecRhoRun.back(), m_vecRhoPad.back());
   }
 
   m_vecRhoPad.back().at(0)->cd();
@@ -271,59 +328,6 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
   // return w/o error
   return 0;
 }
- 
-int JetDraw::MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads)
-{
-  // instantiate draw client & grab display size
-  QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
-
-  // emit warning if canvas is already initialized
-  if (canvas)
-  {
-    std::cerr << "Warning: overwriting canvas '" << name << "'." << std::endl;
-  }
-
-  // create canvas
-  // n.b. xpos (-1) negative means do not draw menu bar
-  canvas = new TCanvas(name.data(), "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
-  canvas->UseCurrentStyle();
-  gSystem->ProcessEvents();
-
-  // divide canvas into appropriate no. of pads
-  const int   nRow = std::min(nHist, 2);
-  const int   nCol = (nHist / 2) + (nHist % 2);
-  const float bRow = 0.01;
-  const float bCol = 0.01;
-  if (nHist > 1)
-  {
-    canvas->Divide(nRow, nCol, bRow, bCol);
-  }
-
-  // add pad pointers to vector & draw
-  const std::size_t nPads = nRow * nCol;
-  for (std::size_t iPad = 0; iPad < nPads; ++iPad)
-  {
-    pads.push_back( (TPad*) canvas->GetPad(iPad) );
-    pads.back()->Draw();
-  }
-
-  // emit warning if pad for run already exists
-  if (run)
-  {
-    std::cerr << "Warning: overwriting run pad for canvas '" << name << "'." << std::endl;
-  }
-
-  // create pad for run number
-  const std::string runPadName = name + "_run";
-  run = new TPad(runPadName.data(), "this does not show", 0, 0, 1, 1);
-  run->SetFillStyle(4000);
-  run->Draw();
-
-  // return w/o error
-  return 0;
-}
 
 int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
 {
@@ -346,26 +350,29 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     break;
   }
 
+  // for constituent hist names
+  const std::string cstHistName = std::string(m_constituent_prefix) + "_" + m_mapTrigToTag[trigToDraw] + "_" + std::string(m_jet_type) + "_" + m_mapResToTag[resToDraw];
+
   // grab relevant histograms from draw client
   QADrawClient *cl = QADrawClient::instance();
 
-  TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_cemc")));
-  TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ihcal")));
-  TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ohcal")));
-  TH1D *constituents_ncsts_total = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_total")));
-  TH2D *constituents_ncstsvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncstsvscalolayer")));
-  TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_cemc")));
-  TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ihcal")));
-  TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjet_ohcal")));
-  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(m_constituent_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_efracjetcscalolayer")));
+  TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_cemc"));
+  TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_ihcal"));
+  TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_ohcal"));
+  TH1D *constituents_ncsts_total = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_total"));
+  TH2D *constituents_ncstsvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(cstHistName + "_ncstsvscalolayer"));
+  TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_cemc"));
+  TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_ihcal"));
+  TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_ohcal"));
+  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(cstHistName + "_efracjetcscalolayer"));
 
   // form canvas name & if it doesn't exist yet, create it
-  const std::string cstName = "jetCsts_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
-  if (!gROOT->FindObject(cstName.data()))
+  const std::string cstCanName = "jetCsts_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
+  if (!gROOT->FindObject(cstCanName.data()))
   {
     m_vecCstCanvas.back().push_back(nullptr);
     m_vecCstRun.back().push_back(nullptr);
-    MakeCanvas(cstName, 9, m_vecCstCanvas.back().back(), m_vecCstRun.back().back(), m_vecCstPad.back().back());
+    MakeCanvas(cstCanName, 9, m_vecCstCanvas.back().back(), m_vecCstRun.back().back(), m_vecCstPad.back().back());
   }
 
   m_vecCstPad.back().back().at(0)->cd();
@@ -579,24 +586,28 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     break;
   }
 
+  // for kinematic hist names
+  const std::string kineHistPrefix = std::string(m_kinematic_prefix) + "_" + m_mapTrigToTag[trigToDraw] + "_" + std::string(m_jet_type);
+  const std::string kineProfSuffix = m_mapResToTag[resToDraw] + "_pfx";
+
   // grab relevant histograms from draw client
   QADrawClient *cl = QADrawClient::instance();
 
-  TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] +std::string("_etavsphi_") + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jettmassvspt_") + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_spectra_") + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_etavsphi_" + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jettmassvspt_" + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw]));
 
-  TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
-  TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(m_kinematic_prefix + m_mapTrigToTag[trigToDraw] + std::string("_jettmassvspt_") + m_mapResToTag[resToDraw] + std::string("_pfx")));
+  TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + kineProfSuffix));
+  TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jettmassvspt_" + kineProfSuffix));
 
   // form canvas name & if it doesn't exist yet, create it
-  const std::string kineName = "jetKinematics_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
-  if (!gROOT->FindObject(kineName.data()))
+  const std::string kineCanName = "jetKinematics_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
+  if (!gROOT->FindObject(kineCanName.data()))
   {
     m_vecKineCanvas.back().push_back(nullptr);
     m_vecKineRun.back().push_back(nullptr);
-    MakeCanvas(kineName, 4, m_vecKineCanvas.back().back(), m_vecKineRun.back().back(), m_vecKinePad.back().back());
+    MakeCanvas(kineCanName, 4, m_vecKineCanvas.back().back(), m_vecKineRun.back().back(), m_vecKinePad.back().back());
   }
 
   m_vecKinePad.back().back().at(0)->cd();
@@ -731,26 +742,29 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     std::cerr << "Unknown resolution" << std::endl;
     break;
   }
-  
+
+  // for seed hist names
+  const std::string seedHistName = std::string(m_seed_prefix) + "_" + m_mapTrigToTag[trigToDraw] + "_" + std::string(m_jet_type) + "_" + m_mapResToTag[resToDraw];
+
   // grab relevant histograms from draw client
   QADrawClient *cl = QADrawClient::instance();
 
-  TH2F *jetseedcount_rawetavsphi = dynamic_cast<TH2F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawetavsphi")));
-  TH1F *jetseedcount_rawpt = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawpt")));
-  TH1F *jetseedcount_rawptall = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawptall")));
-  TH1F *jetseedcount_rawseedcount = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawseedcount")));
-  TH2F *jetseedcount_subetavsphi = dynamic_cast<TH2F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subetavsphi")));
-  TH1F *jetseedcount_subpt = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subpt")));
-  TH1F *jetseedcount_subptall = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subptall")));
-  TH1F *jetseedcount_subseedcount = dynamic_cast<TH1F *>(cl->getHisto(m_seed_prefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_subseedcount")));
+  TH2F *jetseedcount_rawetavsphi = dynamic_cast<TH2F *>(cl->getHisto(seedHistName + "_rawetavsphi"));
+  TH1F *jetseedcount_rawpt = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_rawpt"));
+  TH1F *jetseedcount_rawptall = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_rawptall"));
+  TH1F *jetseedcount_rawseedcount = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_rawseedcount"));
+  TH2F *jetseedcount_subetavsphi = dynamic_cast<TH2F *>(cl->getHisto(seedHistName + "_subetavsphi"));
+  TH1F *jetseedcount_subpt = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_subpt"));
+  TH1F *jetseedcount_subptall = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_subptall"));
+  TH1F *jetseedcount_subseedcount = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_subseedcount"));
 
   // form canvas name & if it doesn't exist yet, create it
-  const std::string seedName = "jetSeeds_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
-  if (!gROOT->FindObject(seedName.data()))
+  const std::string seedCanName = "jetSeeds_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
+  if (!gROOT->FindObject(seedCanName.data()))
   {
     m_vecSeedCanvas.back().push_back(nullptr);
     m_vecSeedRun.back().push_back(nullptr);
-    MakeCanvas(seedName, 8, m_vecSeedCanvas.back().back(), m_vecSeedRun.back().back(), m_vecSeedPad.back().back());
+    MakeCanvas(seedCanName, 8, m_vecSeedCanvas.back().back(), m_vecSeedRun.back().back(), m_vecSeedPad.back().back());
   }
 
   m_vecSeedPad.back().back().at(0)->cd();

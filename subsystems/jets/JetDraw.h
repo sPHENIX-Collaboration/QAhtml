@@ -35,14 +35,13 @@ class JetDraw : public QADraw
     R04,
     R05
   };
-    
+
   JetDraw(const std::string &name = "JetQA");
   ~JetDraw() override;
-  int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
+  int Draw(const std::string &what = "ALL") override;
   int DBVarInit();
   void SetJetSummary(TCanvas* c);
- 
 
  private:
   int MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads);
@@ -77,15 +76,18 @@ class JetDraw : public QADraw
   const char* m_kinematic_prefix;
   const char* m_seed_prefix;
 
+  // jet type (TODO will need to expand this to a vector in the future)
+  const char* m_jet_type;
+
   // triggers we want to draw
   std::vector<uint32_t> m_vecTrigToDraw = {
-    JetQADefs::GL1::Jet1,
-    JetQADefs::GL1::Jet2,
-    JetQADefs::GL1::Jet3,
-    JetQADefs::GL1::Jet4
+    JetQADefs::GL1::MBDNSJet1,
+    JetQADefs::GL1::MBDNSJet2,
+    JetQADefs::GL1::MBDNSJet3,
+    JetQADefs::GL1::MBDNSJet4
   };
 
-  // vector  we want to draw
+  // resolutions we want to draw
   std::vector<uint32_t> m_vecResToDraw = {
     JetRes::R02,
     JetRes::R03,
@@ -111,19 +113,19 @@ class JetDraw : public QADraw
 
   // map of trigger index onto name
   std::map<uint32_t, std::string> m_mapTrigToName = {
-    {JetQADefs::GL1::Jet1, "Jet6GeV"},
-    {JetQADefs::GL1::Jet2, "Jet8GeV"},
-    {JetQADefs::GL1::Jet3, "Jet10GeV"},
-    {JetQADefs::GL1::Jet4, "Jet12GeV"}
+    {JetQADefs::GL1::MBDNSJet1, "JetCoin6GeV"},
+    {JetQADefs::GL1::MBDNSJet2, "JetCoin8GeV"},
+    {JetQADefs::GL1::MBDNSJet3, "JetCoin10GeV"},
+    {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"}
   };
 
   // map trig to tag
   std::map<uint32_t, std::string> m_mapTrigToTag = {
     {JetQADefs::GL1::MBDNS1, "mbdns1"},
-    {JetQADefs::GL1::Jet1, "mbdnsjet1"},
-    {JetQADefs::GL1::Jet2, "mbdnsjet2"},
-    {JetQADefs::GL1::Jet3, "mbdnsjet3"},
-    {JetQADefs::GL1::Jet4, "mbdnsjet4"}
+    {JetQADefs::GL1::MBDNSJet1, "mbdnsjet1"},
+    {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
+    {JetQADefs::GL1::MBDNSJet3, "mbnsjet3"},
+    {JetQADefs::GL1::MBDNSJet4, "mbnsjet4"}
   };
 };
 #endif
