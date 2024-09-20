@@ -63,7 +63,6 @@ class JetDraw : public QADraw
 
   // triggers we want to draw
   std::vector<uint32_t> m_vecTrigToDraw = {
-    /* maybe some others */
     JetQADefs::GL1::Jet1,
     JetQADefs::GL1::Jet2,
     JetQADefs::GL1::Jet3,
