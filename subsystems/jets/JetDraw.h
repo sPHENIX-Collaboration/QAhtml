@@ -101,7 +101,6 @@ class JetDraw : public QADraw
 
   // map trig to tag
   std::map<uint32_t, std::string> m_mapTrigToTag = {
-    //    {JetQADefs::GL1::MBDN, "inclusive"}, // uint32_t name ??
     {JetQADefs::GL1::MBDNS1, "mbdns1"}, //  uint32_t name ??
     {JetQADefs::GL1::Jet1, "mbdnsjet1"},
     {JetQADefs::GL1::Jet2, "mbdnsjet2"},
