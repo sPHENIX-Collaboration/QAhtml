@@ -45,9 +45,6 @@ JetDraw::~JetDraw()
 }
 
 int JetDraw::MakeHtml(const std::string &what) {
-  if (what == "ALL") {
-    // Handle the "ALL" case here if necessary
-  } 
   int iret = 0;
   const int drawError = Draw(what);  // Call to Draw
   if (drawError) {
