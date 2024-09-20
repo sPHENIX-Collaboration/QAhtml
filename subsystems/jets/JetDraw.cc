@@ -121,7 +121,7 @@ int JetDraw::Draw(const std::string &what)
  
 int JetDraw::MakeCanvas(const std::string &name, int num)
 {
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
   // xpos (-1) negative: do not draw menu bar
