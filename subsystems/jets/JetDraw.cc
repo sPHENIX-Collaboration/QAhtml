@@ -1,6 +1,5 @@
 //Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth,  and Derek Anderson
 #include "JetDraw.h"
-//#include "JetGoodRunChecker.h"
 #include <sPhenixStyle.C>
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
@@ -26,21 +25,17 @@
 #include <sstream>
 
 JetDraw::JetDraw(const std::string &name)
-: cl(QADrawClient::instance())
+: QADraw(name)
 {
-  if (name == "JetQA") {
-    // Handle specific condition
-  }
-// REMOVE
   memset(TC, 0, sizeof(TC));
   memset(transparent, 0, sizeof(transparent));
   memset(Pad, 0, sizeof(Pad));
 //
   DBVarInit();
-  histprefix = "h_constituentsinjets";
-  histprefix1 = "h_eventwiserho";
-  histprefix2 = "h_jetkinematiccheck";
-  histprefix3 = "h_jetseedcount";
+  m_constituent_prefix = "h_constituentsinjets";
+  m_rho_prefix = "h_eventwiserho";
+  m_kinematic_prefix = "h_jetkinematiccheck";
+  m_seed_prefix = "h_jetseedcount";
   return;
 }
 
@@ -51,9 +46,6 @@ JetDraw::~JetDraw()
 }
 
 int JetDraw::MakeHtml(const std::string &what) {
-  if (what == "ALL") {
-    // Handle the "ALL" case here if necessary
-  } 
   int iret = 0;
   const int drawError = Draw(what);  // Call to Draw
   if (drawError) {
@@ -99,8 +91,6 @@ int JetDraw::MakeHtml(const std::string &what) {
 
 int JetDraw::Draw(const std::string &what)
 {
-   if (what == "ALL") { /*Was not sure how to implement "what" so I have this here as a place holder*/
-   }
 
    // 1st make sure there's enough space for each trigger
    m_vecRhoCanvas.resize( m_vecTrigToDraw.size() );
@@ -110,8 +100,13 @@ int JetDraw::Draw(const std::string &what)
 
    // now loop over triggers
    int iret = 0;
-   // loop over indices of triggers we want to dsub
-   for (uint32_t trigToDraw : m_vecTrigToDraw) { // loop over jet
+   int iTrig = 0;
+   for (uint32_t trigToDraw : m_vecTrigToDraw) { // loop over triggers
+   
+     // reserve space for each resolution to draw
+     m_vecCanvas[iTrig].resize( m_resToDraw.size() );
+     ++iTrig;
+     
      if  (what == "ALL" || what == "RHO") {
        iret += DrawRho(trigToDraw);
        ++idraw;
@@ -158,7 +153,7 @@ int JetDraw::Draw(const std::string &what)
  
 int JetDraw::MakeCanvas(const std::string &name, int num)
 {
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
   // xpos (-1) negative: do not draw menu bar
@@ -238,9 +233,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     break;
   }
 
-  //  QADrawClient *cl = QADrawClient::instance();
-  // TCanvas* canvas = new TCanvas( /* etc */ );
-  /* do drawing */
+  QADrawClient *cl = QADrawClient::instance();
   TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_cemc")));
   TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ihcal")));
   TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_ncsts_ohcal")));
@@ -419,7 +412,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
 
  int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
 {
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   // TCanvas* canvas = new TCanvas( /* etc */ );                                                                                                                                                        
   TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_rhoarea")));
   TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(histprefix1 + m_mapTrigToTag[trigToDraw] + std::string("_rhomult")));
@@ -535,7 +528,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     break;
   }
 
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
   TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] +std::string("_etavsphi_") + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(histprefix2 + m_mapTrigToTag[trigToDraw] + std::string("_jetmassvseta_") + m_mapResToTag[resToDraw]));         
@@ -677,7 +670,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     break;
   }
   
-  //  QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
   TH2F *jetseedcount_rawetavsphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawetavsphi")));
   TH1F *jetseedcount_rawpt = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawpt")));
   TH1F *jetseedcount_rawptall = dynamic_cast<TH1F *>(cl->getHisto(histprefix3 + m_mapTrigToTag[trigToDraw] + m_mapResToTag[resToDraw] + std::string("_rawptall")));
@@ -829,7 +822,7 @@ int JetDraw::DBVarInit()
    jetSummary = c;
    jetSummary->cd();
 
-   //  QADrawClient *cl = QADrawClient::instance();
+   QADrawClient *cl = QADrawClient::instance();
    TPad* tr = new TPad("transparent_jet", "", 0, 0, 1, 1);
    tr->SetFillStyle(4000);
    tr->Draw();

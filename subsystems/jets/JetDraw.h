@@ -15,7 +15,6 @@ class TGraphErrors;
 class TPad;
 class TH1;
 class TH2;
-//class JetGoodRunChecker; TBD
 
 // aliases for convenience
 using VPad2D    = std::vector<std::vector<TPad*>>;
@@ -27,8 +26,7 @@ using VCanvas2D = std::vector<std::vector<TCanvas*>>;
 class JetDraw : public QADraw
 {
  public:
-  JetDraw(const std::string &name = "JetQA");
-  ~JetDraw() override;
+
   // tags for jet resolutions
     enum JetRes
     {
@@ -36,14 +34,15 @@ class JetDraw : public QADraw
       R03,
       R04,
       R05
-    }; 
-  // int Draw(listOfTrigsToDraw);
+    };
+    
+  JetDraw(const std::string &name = "JetQA");
+  ~JetDraw() override;
   int Draw(const std::string &what = "ALL") override;
-  int MakeHtml(const std::string &what = "ALL") override;   // rather than a string do draw from a list of ints
+  int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
   void SetJetSummary(TCanvas* c);
  
-  // void SetCemcChecker(JetGoodRunChecker* ch) {cemc_checker = ch;} TBD -- topical group input
 
  private:
   int MakeCanvas(const std::string &name, int num);
@@ -51,18 +50,12 @@ class JetDraw : public QADraw
   int nDrawError;
   int idraw;
 
-  //  int Draw(const std::string &what);
-  int DrawTrigAndRes(int trigToDraw, JetRes resToDraw);  // or uint32_t based on your types
   int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawRho(uint32_t trigger);
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
   int DrawJetSeed(uint32_t trigger, JetRes reso);
 
-  TH1 *proj(TH2 *h2);
-  //  TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
-  //  QADB *db {nullptr};
-// REMOVE
   const static int ncanvases = 8;
   const static int maxpads = 6;
   TCanvas *TC[ncanvases]{};
@@ -89,16 +82,13 @@ class JetDraw : public QADraw
   VPad3D m_vecKinePad;
   VPad3D m_vecSeedPad;
 
-  // add summary canvases for hcal etc later
-  const char *histprefix;
-  const char *histprefix1;
-  const char *histprefix2;
-  const char *histprefix3;
-  //  JetGoodRunChecker* cemc_checker = nullptr;
+  const char* m_constituent_prefix;
+  const char* m_rho_prefix;
+  const char* m_kinematic_prefix;
+  const char* m_seed_prefix;
 
   // triggers we want to draw
   std::vector<uint32_t> m_vecTrigToDraw = {
-    /* maybe some others */
     JetQADefs::GL1::Jet1,
     JetQADefs::GL1::Jet2,
     JetQADefs::GL1::Jet3,
@@ -129,7 +119,6 @@ class JetDraw : public QADraw
   };
   // map of trigger index onto name
   std::map<uint32_t, std::string> m_mapTrigToName = {
-    /* maybe some others */
     {JetQADefs::GL1::Jet1, "Jet6GeV"},
     {JetQADefs::GL1::Jet2, "Jet8GeV"},
     {JetQADefs::GL1::Jet3, "Jet10GeV"},
@@ -138,8 +127,7 @@ class JetDraw : public QADraw
 
   // map trig to tag
   std::map<uint32_t, std::string> m_mapTrigToTag = {
-    //    {JetQADefs::GL1::MBDN, "inclusive"}, // uint32_t name ??
-    {JetQADefs::GL1::MBDNS1, "mbdns1"}, //  uint32_t name ??
+    {JetQADefs::GL1::MBDNS1, "mbdns1"},
     {JetQADefs::GL1::Jet1, "mbdnsjet1"},
     {JetQADefs::GL1::Jet2, "mbdnsjet2"},
     {JetQADefs::GL1::Jet3, "mbdnsjet3"},
