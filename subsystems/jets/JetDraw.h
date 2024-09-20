@@ -62,10 +62,10 @@ class JetDraw : public QADraw
   TPad *Pad[ncanvases][maxpads]{};
   TCanvas* jetSummary = nullptr;
   // add summary canvases for hcal etc later
-  const char *histprefix;
-  const char *histprefix1;
-  const char *histprefix2;
-  const char *histprefix3;
+  const char* m_constituent_prefix;
+  const char* m_rho_prefix;
+  const char* m_kinematic_prefix;
+  const char* m_seed_prefix;
   //  JetGoodRunChecker* cemc_checker = nullptr;
 
   // triggers we want to draw
