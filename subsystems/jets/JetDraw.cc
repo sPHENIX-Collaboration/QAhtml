@@ -202,8 +202,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   }
 
   QADrawClient *cl = QADrawClient::instance();
-  // TCanvas* canvas = new TCanvas( /* etc */ );
-  /* do drawing */
   TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_ncsts_cemc")));
   TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_ncsts_ihcal")));
   TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(histprefix + std::string("_ncsts_ohcal")));
