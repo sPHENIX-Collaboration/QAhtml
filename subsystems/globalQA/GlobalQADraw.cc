@@ -472,9 +472,6 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
   Pad[2][0]->cd();
   if (h_GlobalQA_sEPD_adcsum_s && h_GlobalQA_sEPD_adcsum_n)
   {
-      // h_GlobalQA_sEPD_adcsum_s->Scale(1/h_GlobalQA_sEPD_adcsum_s->Integral());
-      // h_GlobalQA_sEPD_adcsum_n->Scale(1/h_GlobalQA_sEPD_adcsum_n->Integral());
-
       double _max1 = h_GlobalQA_sEPD_adcsum_s->GetMaximum();
       double _max2 = h_GlobalQA_sEPD_adcsum_n->GetMaximum();
       double _add = 500.0;
@@ -484,10 +481,14 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
 
       h_GlobalQA_sEPD_adcsum_n->GetXaxis()->SetRangeUser(-10, 30000);
       h_GlobalQA_sEPD_adcsum_s->GetXaxis()->SetRangeUser(-10, 30000);
-      h_GlobalQA_sEPD_adcsum_n->GetYaxis()->SetRangeUser(0, _histmax +_add);
+      h_GlobalQA_sEPD_adcsum_n->GetYaxis()->SetRangeUser(0, _histmax + _add);
       h_GlobalQA_sEPD_adcsum_s->GetYaxis()->SetRangeUser(0, _histmax + _add);
 
-      
+      h_GlobalQA_sEPD_adcsum_s->Scale(1/h_GlobalQA_sEPD_adcsum_s->Integral());
+      h_GlobalQA_sEPD_adcsum_n->Scale(1/h_GlobalQA_sEPD_adcsum_n->Integral());
+ 
+      h_GlobalQA_sEPD_adcsum_s->SetYTitle("Normalized Counts");
+    
       gPad->UseCurrentStyle();
 
       h_GlobalQA_sEPD_adcsum_s->SetLineColor(kRed);
@@ -537,7 +538,6 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     Pad[2][2]->cd();
     if (h2Profile_GlobalQA_sEPD_tiles_south && h2_GlobalQA_sEPD_ADC_channel_south)
     {
-      
       h2Profile_GlobalQA_sEPD_tiles_south->GetYaxis()->SetNdivisions(527);
       h2Profile_GlobalQA_sEPD_tiles_south->GetXaxis()->SetNdivisions(527);
       h2_GlobalQA_sEPD_ADC_channel_south->GetXaxis()->SetNdivisions(527);
@@ -550,16 +550,20 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
       h2_GlobalQA_sEPD_ADC_channel_south->SetXTitle("#eta bin");
       h2_GlobalQA_sEPD_ADC_channel_south->SetYTitle("#phi bin");
       h2Profile_GlobalQA_sEPD_tiles_south->DrawCopy("COLZ");
-      h2_GlobalQA_sEPD_ADC_channel_south->Draw("text SAME");
+      if(h2_GlobalQA_sEPD_ADC_channel_south->GetEntries() == 372)
+      {
+        h2_GlobalQA_sEPD_ADC_channel_south->Draw("text SAME");
+      }
+      
 
       TLatex l1;
       l1.SetNDC();
       l1.SetTextFont(43);
       l1.SetTextSize(20);
-      l1.DrawLatex(0.4, 0.01, "sEPD South");
-
+      l1.DrawLatex(0.3, 0.01, "sEPD South Tile <ADC>");
       gPad->UseCurrentStyle();
       gPad->SetRightMargin(0.15);
+      gPad->SetLogz();
     }
     else
     {
@@ -581,15 +585,18 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
       h2_GlobalQA_sEPD_ADC_channel_north->SetXTitle("#eta bin");
       h2_GlobalQA_sEPD_ADC_channel_north->SetYTitle("#phi bin");
       h2Profile_GlobalQA_sEPD_tiles_north->DrawCopy("COLZ ");
-      h2_GlobalQA_sEPD_ADC_channel_north->Draw("text SAME");
+      if(h2_GlobalQA_sEPD_ADC_channel_north->GetEntries() == 372)
+      {
+        h2_GlobalQA_sEPD_ADC_channel_north->Draw("text SAME");
+      }
       TLatex l2;
       l2.SetNDC();
       l2.SetTextFont(43);
       l2.SetTextSize(20);
-      l2.DrawLatex(0.4, 0.01, "sEPD North");
-
+      l2.DrawLatex(0.3, 0.01, "sEPD North Tile <ADC>");
       gPad->UseCurrentStyle();
       gPad->SetRightMargin(0.15);
+      gPad->SetLogz();
     }
     else
     {
