@@ -16,59 +16,78 @@ class TPad;
 class TH1;
 class TH2;
 
+// aliases for convenience
+using VPad1D    = std::vector<TPad*>;
+using VPad2D    = std::vector<std::vector<TPad*>>;
+using VPad3D    = std::vector<std::vector<std::vector<TPad*>>>;
+using VCanvas1D = std::vector<TCanvas*>;
+using VCanvas2D = std::vector<std::vector<TCanvas*>>;
+
 class JetDraw : public QADraw
 {
  public:
 
   // tags for jet resolutions
-    enum JetRes
-    {
-      R02,
-      R03,
-      R04,
-      R05
-    };
-    
+  enum JetRes
+  {
+    R02,
+    R03,
+    R04,
+    R05
+  };
+
   JetDraw(const std::string &name = "JetQA");
   ~JetDraw() override;
-  int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
+  int Draw(const std::string &what = "ALL") override;
   int DBVarInit();
   void SetJetSummary(TCanvas* c);
- 
 
  private:
-  int MakeCanvas(const std::string &name, int num);
-  QADrawClient* cl; // Declare cl here   
-  std::vector<std::vector<TCanvas*>> m_vecCanvas;  // Declare m_vecCanvas
-  int nDrawError;
-  int idraw;
-
-  int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
+  int MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads);
   int DrawRho(uint32_t trigger);
+  int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
   int DrawJetSeed(uint32_t trigger, JetRes reso);
-
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
-  const static int ncanvases = 8;
-  const static int maxpads = 6;
-  TCanvas *TC[ncanvases]{};
-  TPad *transparent[ncanvases]{};
-  TPad *Pad[ncanvases][maxpads]{};
+
   TCanvas* jetSummary = nullptr;
+
+  // canvases for drawing
+  VCanvas1D m_vecRhoCanvas;
+  VCanvas2D m_vecCstCanvas;
+  VCanvas2D m_vecKineCanvas;
+  VCanvas2D m_vecSeedCanvas;
+
+  // for adding run numbers to canvases
+  VPad1D m_vecRhoRun;
+  VPad2D m_vecCstRun;
+  VPad2D m_vecKineRun;
+  VPad2D m_vecSeedRun;
+
+  // for individual pads on each canvas
+  VPad2D m_vecRhoPad;
+  VPad3D m_vecCstPad;
+  VPad3D m_vecKinePad;
+  VPad3D m_vecSeedPad;
+
   const char* m_constituent_prefix;
   const char* m_rho_prefix;
   const char* m_kinematic_prefix;
   const char* m_seed_prefix;
 
+  // jet type (TODO will need to expand this to a vector in the future)
+  const char* m_jet_type;
+
   // triggers we want to draw
   std::vector<uint32_t> m_vecTrigToDraw = {
-    JetQADefs::GL1::Jet1,
-    JetQADefs::GL1::Jet2,
-    JetQADefs::GL1::Jet3,
-    JetQADefs::GL1::Jet4
+    JetQADefs::GL1::MBDNSJet1,
+    JetQADefs::GL1::MBDNSJet2,
+    JetQADefs::GL1::MBDNSJet3,
+    JetQADefs::GL1::MBDNSJet4
   };
-  // vector  we want to draw
+
+  // resolutions we want to draw
   std::vector<uint32_t> m_vecResToDraw = {
     JetRes::R02,
     JetRes::R03,
@@ -91,21 +110,22 @@ class JetDraw : public QADraw
     {JetRes::R04, "r04"},
     {JetRes::R05, "r05"}
   };
+
   // map of trigger index onto name
   std::map<uint32_t, std::string> m_mapTrigToName = {
-    {JetQADefs::GL1::Jet1, "Jet6GeV"},
-    {JetQADefs::GL1::Jet2, "Jet8GeV"},
-    {JetQADefs::GL1::Jet3, "Jet10GeV"},
-    {JetQADefs::GL1::Jet4, "Jet12GeV"}
+    {JetQADefs::GL1::MBDNSJet1, "JetCoin6GeV"},
+    {JetQADefs::GL1::MBDNSJet2, "JetCoin8GeV"},
+    {JetQADefs::GL1::MBDNSJet3, "JetCoin10GeV"},
+    {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"}
   };
 
   // map trig to tag
   std::map<uint32_t, std::string> m_mapTrigToTag = {
     {JetQADefs::GL1::MBDNS1, "mbdns1"},
-    {JetQADefs::GL1::Jet1, "mbdnsjet1"},
-    {JetQADefs::GL1::Jet2, "mbdnsjet2"},
-    {JetQADefs::GL1::Jet3, "mbdnsjet3"},
-    {JetQADefs::GL1::Jet4, "mbdnsjet4"}
+    {JetQADefs::GL1::MBDNSJet1, "mbdnsjet1"},
+    {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
+    {JetQADefs::GL1::MBDNSJet3, "mbnsjet3"},
+    {JetQADefs::GL1::MBDNSJet4, "mbnsjet4"}
   };
 };
 #endif
