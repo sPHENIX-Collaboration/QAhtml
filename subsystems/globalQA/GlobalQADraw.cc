@@ -370,13 +370,13 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
       leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South","l");
       h_GlobalQA_zdc_energy_s->DrawCopy();
       
-      TGraph *gr_1n = new TGraph();
-      gr_1n->SetPoint(0, 70, 0);
-      gr_1n->SetPoint(1, 70, 1e7);
-      gr_1n->SetLineColor(kBlack);
-      gr_1n->SetLineWidth(2);
-      gr_1n->SetLineStyle(9);
-      gr_1n->Draw("l");
+      // TGraph *gr_1n = new TGraph();
+      // gr_1n->SetPoint(0, 70, 0);
+      // gr_1n->SetPoint(1, 70, 1e7);
+      // gr_1n->SetLineColor(kBlack);
+      // gr_1n->SetLineWidth(2);
+      // gr_1n->SetLineStyle(9);
+      // gr_1n->Draw("l");
       
       h_GlobalQA_zdc_energy_n->SetLineColor(kBlue);
       h_GlobalQA_zdc_energy_n->SetMarkerColor(kBlue);
@@ -484,10 +484,10 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
       h_GlobalQA_sEPD_adcsum_n->GetYaxis()->SetRangeUser(0, _histmax + _add);
       h_GlobalQA_sEPD_adcsum_s->GetYaxis()->SetRangeUser(0, _histmax + _add);
 
-      h_GlobalQA_sEPD_adcsum_s->Scale(1/h_GlobalQA_sEPD_adcsum_s->Integral());
-      h_GlobalQA_sEPD_adcsum_n->Scale(1/h_GlobalQA_sEPD_adcsum_n->Integral());
+      // h_GlobalQA_sEPD_adcsum_s->Scale(1/h_GlobalQA_sEPD_adcsum_s->Integral());
+      // h_GlobalQA_sEPD_adcsum_n->Scale(1/h_GlobalQA_sEPD_adcsum_n->Integral());
  
-      h_GlobalQA_sEPD_adcsum_s->SetYTitle("Normalized Counts");
+      h_GlobalQA_sEPD_adcsum_s->SetYTitle("Counts");
     
       gPad->UseCurrentStyle();
 
@@ -563,7 +563,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
       l1.DrawLatex(0.3, 0.01, "sEPD South Tile <ADC>");
       gPad->UseCurrentStyle();
       gPad->SetRightMargin(0.15);
-      gPad->SetLogz();
+      // gPad->SetLogz();
     }
     else
     {
@@ -596,7 +596,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
       l2.DrawLatex(0.3, 0.01, "sEPD North Tile <ADC>");
       gPad->UseCurrentStyle();
       gPad->SetRightMargin(0.15);
-      gPad->SetLogz();
+      // gPad->SetLogz();
     }
     else
     {
