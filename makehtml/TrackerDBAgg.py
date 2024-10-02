@@ -7,7 +7,8 @@ import glob
 import time
 import argparse
 
-track_hist_types = ["HIST_DST_STREAMING_EVENT", "HIST_DST_TRKR_HIT","HIST_DST_TRKR_CLUSTER", "HIST_DST_TRKR_SEED"]
+track_hist_types = ["HIST_DST_STREAMING_EVENT", "HIST_DST_TRKR_HIT"],"HIST_DST_TRKR_CLUSTER", "HIST_DST_TRKR_SEED"]
+runtype = "_run2pp"
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
@@ -20,14 +21,17 @@ print("Test is " + str(args.test))
 
 
 def get_unique_run_dataset_pairs(cursor, type):
-    query = "SELECT runnumber, dataset FROM datasets WHERE filename LIKE '{}%' GROUP BY runnumber, dataset;".format(type)
+    dsttype = type + runtype
+    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset;".format(dsttype)
    
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
     return runnumbers
 
 def getPaths(cursor, run, dataset, type):
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype LIKE '{}%' AND files.lfn=datasets.filename".format(run,dataset,type)
+    dsttype = type + runtype
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND files.lfn=datasets.filename".format(run,dataset,dsttype)
+    print(query)
     cursor.execute(query)
     filepaths = {(row.full_file_path) for row in cursor.fetchall()}
     return filepaths
@@ -49,6 +53,7 @@ def main():
             if run < 50000:
                 continue
             filepaths = getPaths(cursor, run, dbtag, histtype)
+            
             filepathWildcard = aggDirectory + histtype + "*" + dbtag + "*" + str(run) + "*"
             
             filepath = glob.glob(filepathWildcard)
@@ -92,7 +97,7 @@ def main():
             filestoadd = []
             nfiles = 0
             if len(path) == 0:
-                path = (aggDirectory + histtype + "_run2pp_new_" + dbtag + "-{:08d}-9000.root").format(run)
+                path = (aggDirectory + histtype + "_run2pp_" + dbtag + "-{:08d}-9000.root").format(run)
 
           
             command = ["hadd","-ff",path]

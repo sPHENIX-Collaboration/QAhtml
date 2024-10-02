@@ -7,7 +7,9 @@ import glob
 import time
 import argparse
 
-track_hist_types = ["HIST_CALOQA"]
+track_hist_types = ["HIST_CALOQA", "HIST_JETS"]
+runtype = "_run2pp"
+
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
@@ -20,14 +22,15 @@ print("Test is " + str(args.test))
 
 
 def get_unique_run_dataset_pairs(cursor, type):
-    query = "SELECT runnumber, dataset FROM datasets WHERE filename LIKE '{}%' GROUP BY runnumber, dataset;".format(type)
-   
+    dsttype = type + runtype
+    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}'  GROUP BY runnumber,dataset;".format(dsttype)
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
     return runnumbers
 
 def getPaths(cursor, run, dataset, type):
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype LIKE '{}%' AND files.lfn=datasets.filename".format(run,dataset,type)
+    dsttype = type + runtype
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND files.lfn=datasets.filename".format(run,dataset,dsttype)
     cursor.execute(query)
     filepaths = {(row.full_file_path) for row in cursor.fetchall()}
     return filepaths
@@ -89,9 +92,10 @@ def main():
             filestoadd = []
             nfiles = 0
             if len(path) == 0:
-                path = (aggDirectory + histtype + "_run2pp_"+ana+"_" + dbtag + "-{:08d}-9000.root").format(run)
+                path = (aggDirectory + histtype + "_run2pp_" + dbtag + "-{:08d}-9000.root").format(run)
 
-          
+            if args.verbose == True:
+                print("agg file path is " + path)
             command = ["hadd","-ff",path]
             for newpath in filepaths:
                 # make sure the file has the same db tag
