@@ -44,7 +44,7 @@ class JetDraw : public QADraw
   void SetJetSummary(TCanvas* c);
 
  private:
-  int MakeCanvas(const std::string &name, const int nHist, TCanvas* canvas, TPad* run, VPad1D& pads);
+  int MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& run);
   int DrawRho(uint32_t trigger);
   int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
