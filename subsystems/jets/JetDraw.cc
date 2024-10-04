@@ -108,12 +108,6 @@ int JetDraw::Draw(const std::string &what)
      m_vecKineRun.push_back( {} );
      m_vecSeedRun.push_back( {} );
 
-     // and same for the pad vectors (incl. the rho pads)
-     m_vecRhoPad.push_back( {} );
-     m_vecCstPad.push_back( {} );
-     m_vecKinePad.push_back( {} );
-     m_vecSeedPad.push_back( {} );
-
      // draw rho plots
      if  (what == "ALL" || what == "RHO")
      {
@@ -124,11 +118,6 @@ int JetDraw::Draw(const std::string &what)
      // now loop over resolutions to draw
      for (uint32_t resToDraw : m_vecResToDraw)
      {
-
-       // add new column for reso.-depdent pad vectors
-       m_vecCstPad.back().push_back( {} );
-       m_vecKinePad.back().push_back( {} );
-       m_vecSeedPad.back().push_back( {} );
 
        // draw constituent plots
        if (what == "ALL" || what == "CONTSTITUENTS")

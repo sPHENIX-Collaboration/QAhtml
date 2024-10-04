@@ -19,7 +19,6 @@ class TH2;
 // aliases for convenience
 using VPad1D    = std::vector<TPad*>;
 using VPad2D    = std::vector<std::vector<TPad*>>;
-using VPad3D    = std::vector<std::vector<std::vector<TPad*>>>;
 using VCanvas1D = std::vector<TCanvas*>;
 using VCanvas2D = std::vector<std::vector<TCanvas*>>;
 
@@ -64,12 +63,6 @@ class JetDraw : public QADraw
   VPad2D m_vecCstRun;
   VPad2D m_vecKineRun;
   VPad2D m_vecSeedRun;
-
-  // for individual pads on each canvas
-  VPad2D m_vecRhoPad;
-  VPad3D m_vecCstPad;
-  VPad3D m_vecKinePad;
-  VPad3D m_vecSeedPad;
 
   const char* m_constituent_prefix;
   const char* m_rho_prefix;
