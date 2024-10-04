@@ -41,6 +41,7 @@ class JetDraw : public QADraw
   int Draw(const std::string &what = "ALL") override;
   int DBVarInit();
   void SetJetSummary(TCanvas* c);
+  void SetDoDebug(const bool debug);
 
  private:
   int MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& run);
@@ -63,6 +64,9 @@ class JetDraw : public QADraw
   VPad2D m_vecCstRun;
   VPad2D m_vecKineRun;
   VPad2D m_vecSeedRun;
+
+  // turn debugging statements on/off
+  bool m_do_debug;
 
   const char* m_constituent_prefix;
   const char* m_rho_prefix;

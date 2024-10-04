@@ -28,6 +28,7 @@ JetDraw::JetDraw(const std::string &name)
 : QADraw(name)
 {
   DBVarInit();
+  m_do_debug = false;
   m_constituent_prefix = "h_constituentsinjets";
   m_rho_prefix = "h_eventwiserho";
   m_kinematic_prefix = "h_jetkinematiccheck";
@@ -306,20 +307,20 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   // Use resToDraw to select histograms or adjust drawing logic
   switch (resToDraw) {
   case R02:
-    std::cout << "Resolution R02" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R02" << std::endl;
     break;
   case R03:
-    std::cout << "Resolution R03" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R03" << std::endl;
     break;
   case R04:
-    std::cout << "Resolution R04" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R04" << std::endl;
     break;
   case R05:
-    std::cout << "Resolution R05" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R05" << std::endl;
     break;
   default:
     std::cerr << "Unknown resolution" << std::endl;
-    break;
+    return -1;
   }
 
   // for constituent hist names
@@ -540,20 +541,20 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   // Use resToDraw to select histograms or adjust drawing logic
   switch (resToDraw) {
   case R02:
-    std::cout << "Resolution R02" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R02" << std::endl;
     break;
   case R03:
-    std::cout << "Resolution R03" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R03" << std::endl;
     break;
   case R04:
-    std::cout << "Resolution R04" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R04" << std::endl;
     break;
   case R05:
-    std::cout << "Resolution R05" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R05" << std::endl;
     break;
   default:
     std::cerr << "Unknown resolution" << std::endl;
-    break;
+    return -1;
   }
 
   // for kinematic hist names
@@ -695,20 +696,20 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
   // Use resToDraw to select histograms or adjust drawing logic                                                                           
   switch (resToDraw) {
   case R02:
-    std::cout << "Resolution R02" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R02" << std::endl;
     break;
   case R03:
-    std::cout << "Resolution R03" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R03" << std::endl;
     break;
   case R04:
-    std::cout << "Resolution R04" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R04" << std::endl;
     break;
   case R05:
-    std::cout << "Resolution R05" << std::endl;
+    if (m_do_debug) std::cout << "Resolution R05" << std::endl;
     break;
   default:
     std::cerr << "Unknown resolution" << std::endl;
-    break;
+    return -1;
   }
 
   // for seed hist names
@@ -909,6 +910,11 @@ void JetDraw::SetJetSummary(TCanvas* c)
    tr->cd();
    PrintRun.DrawText(0.5, 1., runstring.c_str());
    jetSummary->Update();
+}
+
+void JetDraw::SetDoDebug(const bool debug)
+{
+  m_do_debug = debug;
 }
 
 void JetDraw::myText(double x, double y, int color, const char *text, double tsize)
