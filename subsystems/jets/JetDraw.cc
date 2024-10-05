@@ -424,7 +424,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncstsvscalolayer->SetYTitle("Calo Layer");
     constituents_ncstsvscalolayer->SetZTitle("Counts");
     constituents_ncstsvscalolayer->DrawCopy("COLZ"); // 2D Histogram
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
@@ -443,7 +442,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjetvscalolayer->SetYTitle("Calo Layer");
     constituents_efracjetvscalolayer->SetZTitle("Counts");
     constituents_efracjetvscalolayer->DrawCopy("COLZ"); // 2D Histogram
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
@@ -461,7 +459,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_cemc->SetXTitle("Jet E fraction");
     constituents_efracjet_cemc->SetYTitle("Counts");
     constituents_efracjet_cemc->DrawCopy("HIST"); // 1D Histogram
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
@@ -479,7 +476,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_ihcal->SetXTitle("Jet E Fraction");
     constituents_efracjet_ihcal->SetYTitle("Counts");
     constituents_efracjet_ihcal->DrawCopy("HIST"); // 1D Histogram
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
@@ -497,7 +493,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_ohcal->SetXTitle("Jet E Fraction");
     constituents_efracjet_ohcal->SetYTitle("Counts");
     constituents_efracjet_ohcal->DrawCopy("HIST");  // 1D Histogram
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
@@ -589,7 +584,6 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     // jetkinematiccheck_etavsphi->GetXaxis()->SetNdivisions(505);
     // jetkinematiccheck_etavsphi->GetXaxis()->SetRangeUser(-1, 15);
     jetkinematiccheck_etavsphi->DrawCopy("COLZ");  // 2D Histogram
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
@@ -613,7 +607,6 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_jetmassvseta_pfx->SetYTitle("Jet #eta");
     jetkinematiccheck_jetmassvseta_pfx->SetZTitle("Counts");
     jetkinematiccheck_jetmassvseta_pfx->DrawCopy("SAME");  // Profile
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
@@ -637,7 +630,6 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_jetmassvspt_pfx->SetYTitle("Jet p_{T} [GeV/c]");
     jetkinematiccheck_jetmassvspt_pfx->SetZTitle("Counts");
     jetkinematiccheck_jetmassvspt_pfx->DrawCopy("SAME");  // Profile
-    gStyle->SetPalette(4, kBird);
     gPad->UseCurrentStyle();
     gPad->Update();
     gPad->SetRightMargin(0.15);
