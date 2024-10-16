@@ -337,7 +337,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_cemc"));
   TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_ihcal"));
   TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_ohcal"));
-  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(cstHistName + "_efracjetcscalolayer"));
+  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(cstHistName + "_efracjetvscalolayer"));
 
   // form canvas name & if it doesn't exist yet, create it
   const std::string cstCanName = "jetCsts_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
@@ -561,11 +561,11 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
 
   TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_etavsphi_" + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jettmassvspt_" + m_mapResToTag[resToDraw]));
+  TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw]));
 
   TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + kineProfSuffix));
-  TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jettmassvspt_" + kineProfSuffix));
+  TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + kineProfSuffix));
 
   // form canvas name & if it doesn't exist yet, create it
   const std::string kineCanName = "jetKinematics_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];

@@ -121,8 +121,8 @@ class JetDraw : public QADraw
     {JetQADefs::GL1::MBDNS1, "mbdns1"},
     {JetQADefs::GL1::MBDNSJet1, "mbdnsjet1"},
     {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
-    {JetQADefs::GL1::MBDNSJet3, "mbnsjet3"},
-    {JetQADefs::GL1::MBDNSJet4, "mbnsjet4"}
+    {JetQADefs::GL1::MBDNSJet3, "mbdnsjet3"},
+    {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"}
   };
 };
 #endif
