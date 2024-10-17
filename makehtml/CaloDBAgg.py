@@ -8,7 +8,7 @@ import time
 import argparse
 
 track_hist_types = ["HIST_CALOQA", "HIST_JETS"]
-runtypes = ["_run2pp", "_run2auau"]
+runtypes = ["_run2pp","_run2auau"]
 
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
@@ -49,8 +49,7 @@ def main():
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
 
             for run, dbtag in runs_dbtags:
-                if dbtag.find("new") != -1:
-                    continue
+
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 filepathWildcard = aggDirectory + histtype + "*" + dbtag + "*" + str(run) + "*"
 
