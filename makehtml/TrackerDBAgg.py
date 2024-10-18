@@ -97,7 +97,7 @@ def main():
                 filestoadd = []
                 nfiles = 0
                 if len(path) == 0:
-                    path = (aggDirectory + histtype + "_run2pp_" + dbtag + "-{:08d}-9000.root").format(run)
+                    path = (aggDirectory + histtype + runtype+"_" + dbtag + "-{:08d}-9000.root").format(run)
 
 
                 command = ["hadd","-ff",path]
