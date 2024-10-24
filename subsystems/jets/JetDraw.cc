@@ -284,7 +284,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
 
   // Generate run string from client
   std::ostringstream runnostream;
-  runnostream << cl->RunNumber();
+  runnostream << cl->RunNumber() << ", build " << cl->build();
 
   // prepend module name, component, trigger, and resolution
   std::string runstring = Name();
@@ -511,7 +511,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
 
   // Generate run string from client
   std::ostringstream runnostream;
-  runnostream << cl->RunNumber();
+  runnostream << cl->RunNumber() << ", build " << cl->build();
 
   // prepend module name, component, trigger, and resolution
   std::string runstring = Name();
@@ -663,7 +663,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
 
   // Generate run string from client
   std::ostringstream runnostream;
-  runnostream << cl->RunNumber();
+  runnostream << cl->RunNumber() << ", build " << cl->build();
 
   // prepend module name, component, trigger, and resolution
   std::string runstring = Name();
@@ -854,7 +854,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
 
   // Generate run string from client
   std::ostringstream runnostream;
-  runnostream << cl->RunNumber();
+  runnostream << cl->RunNumber() << ", build " << cl->build();
 
   // prepend module name, component, trigger, and resolution
   std::string runstring = Name();
@@ -897,7 +897,7 @@ void JetDraw::SetJetSummary(TCanvas* c)
    PrintRun.SetTextAlign(23);  // center/top alignment                                                                                                                                                                                                                           
    std::ostringstream runnostream;
    std::string runstring;
-   runnostream << Name() << "_jet_summary Run " << cl->RunNumber();
+   runnostream << Name() << "_jet_summary Run " << cl->RunNumber() << ", build " << cl->build();
    runstring = runnostream.str();
    tr->cd();
    PrintRun.DrawText(0.5, 1., runstring.c_str());
