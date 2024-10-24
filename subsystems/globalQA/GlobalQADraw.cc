@@ -331,7 +331,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   PrintRun.SetTextAlign(23);  // center/top alignment
   std::ostringstream runnostream;
   std::string runstring;
-  runnostream << Name() << "_MBD Run " << cl->RunNumber();
+  runnostream << Name() << "_MBD Run " << cl->RunNumber() << ", build " << cl->build();
   runstring = runnostream.str();
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
@@ -445,7 +445,7 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
   PrintRun.SetTextAlign(23);  // center/top alignment
   std::ostringstream runnostream;
   std::string runstring;
-  runnostream << Name() << "_ZDC Run " << cl->RunNumber();
+  runnostream << Name() << "_ZDC Run " << cl->RunNumber() << ", build " << cl->build();
   runstring = runnostream.str();
   transparent[1]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
@@ -611,7 +611,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
   PrintRun.SetTextAlign(23);  // center/top alignment
   std::ostringstream runnostream;
   std::string runstring;
-  runnostream << Name() << "_sEPD Run " << cl->RunNumber();
+  runnostream << Name() << "_sEPD Run " << cl->RunNumber() << ", build " << cl->build();
   runstring = runnostream.str();
   transparent[2]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());

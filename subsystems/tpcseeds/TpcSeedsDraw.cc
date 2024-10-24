@@ -363,7 +363,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds Track Info Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds Track Info Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -647,7 +647,7 @@ int TpcSeedsDraw::DrawClusterInfo1()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds Cluster Info Page1 Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds Cluster Info Page1 Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -879,7 +879,7 @@ int TpcSeedsDraw::DrawClusterInfo2()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds Cluster Info Page2 Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds Cluster Info Page2 Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -1007,7 +1007,7 @@ int TpcSeedsDraw::DrawDCAInfo1()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds DCA Info Page1 Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds DCA Info Page1 Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -1103,7 +1103,7 @@ int TpcSeedsDraw::DrawDCAInfo2()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds DCA Info Page2 Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds DCA Info Page2 Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -1243,7 +1243,7 @@ int TpcSeedsDraw::DrawVertexInfo()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpcseeds Vertex Info Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpcseeds Vertex Info Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[index_page]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
