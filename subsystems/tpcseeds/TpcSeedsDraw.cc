@@ -1367,7 +1367,7 @@ int TpcSeedsDraw::DrawdEdxInfo2()
       h_dedx_z0->GetXaxis()->SetRangeUser(0, 3000);
       h_dedx_z4->GetXaxis()->SetRangeUser(0, 3000);
 
-      h_dedx_z0->Scale(h_dedx_z4->Integral() / h_dedx_z4->Integral());
+      h_dedx_z0->Scale(h_dedx_z4->Integral() / h_dedx_z0->Integral());
 
       float ymax = h_dedx_z0->GetMaximum() > h_dedx_z4->GetMaximum() ? h_dedx_z0->GetMaximum() : h_dedx_z4->GetMaximum();
 
@@ -1456,7 +1456,7 @@ int TpcSeedsDraw::DrawdEdxInfo2()
       h_dedx_z9->GetXaxis()->SetRangeUser(0, 3000);
       h_dedx_z5->GetXaxis()->SetRangeUser(0, 3000);
 
-      h_dedx_z9->Scale(h_dedx_z5->Integral() / h_dedx_z5->Integral());
+      h_dedx_z9->Scale(h_dedx_z5->Integral() / h_dedx_z9->Integral());
 
       float ymax = h_dedx_z9->GetMaximum() > h_dedx_z5->GetMaximum() ? h_dedx_z9->GetMaximum() : h_dedx_z5->GetMaximum();
 
