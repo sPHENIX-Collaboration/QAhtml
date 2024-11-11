@@ -5,6 +5,7 @@
 #include <qahtml/QADrawDB.h>
 #include <TCanvas.h>
 #include <TDatime.h>
+#include <TFile.h>
 #include <TGraphErrors.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -918,3 +919,132 @@ void JetDraw::myText(double x, double y, int color, const char *text, double tsi
   l.SetTextColor(color);
   l.DrawLatex(x, y, text);
 }
+
+
+// ----------------------------------------------------------------------------
+//! Save canvases to file
+// ----------------------------------------------------------------------------
+/*! Helper method to save all canvases to
+ *  a specified file. This is useful for
+ *  debugging and quick testing when
+ *  adjusting plotting details/etc.
+ */
+void JetDraw::SaveCanvasesToFile(TFile* file)
+{
+
+  // emit debugging message
+  if (m_do_debug)
+  {
+
+    std::cout << "Saving plots to file:\n"
+              << "  " << file -> GetName()
+              << std::endl;
+  }
+
+  // check if you can cd into file
+  //   - if not, exit
+  const bool isGoodCD = file -> cd();
+  if (!isGoodCD)
+  {
+    if (m_do_debug)
+    {
+      std::cerr << PHWHERE << "WARNING: couldn't cd into output file!" << std::endl;
+    }
+    return;
+  }
+
+  // for tracking how many plots were saved
+  std::size_t nWrite = 0;
+
+  // save rho canvases
+  for (auto rho : m_vecRhoCanvas) {
+
+
+    rho -> Write();
+    ++nWrite;
+
+/* TO REMOVE
+    std::cout << "  RHO TEST " << rho << std::endl;
+
+    // grab name
+    std::string sname( rho -> GetName() );
+    sname += ".root";
+    std::cout << "Saving " << sname << "..." << std::endl;
+
+    rho -> Draw();
+
+    // actually save histogram
+    rho -> SaveAs( sname.data() );
+*/
+
+  }
+  if (m_do_debug) std::cout << "  -- Saved rho plots." << std::endl;
+
+  // save constituent canvases
+  for (auto cstRow : m_vecCstCanvas) {
+    for (auto cst : cstRow) {
+
+      cst -> Write();
+      ++nWrite;
+
+/* TO REMOVE
+      // grab name
+      std::string sname( cst -> GetName() );
+      sname += ".root";
+
+      // actually save histogram
+      cst -> SaveAs( sname.data() );
+      std::cout << "Saving " << cst -> GetName() << "..." << std::endl;
+*/
+    }
+  }
+  if (m_do_debug) std::cout << "  -- Saved constituent plots." << std::endl;
+
+  // save kinematics canvases
+  for (auto kinRow : m_vecKineCanvas) {
+    for (auto kin : kinRow) {
+
+      kin -> Write();
+      ++nWrite;
+
+/* TO REMOVE
+      // grab name
+      std::string sname( kin -> GetName() );
+      sname += ".root";
+
+      // actually save histogram
+      kin -> SaveAs( sname.data() );
+      std::cout << "Saving " << kin -> GetName() << "..." << std::endl;
+*/
+    }
+  }
+  if (m_do_debug) std::cout << "  -- Saved kinematic plots." << std::endl;
+
+  // save seed canvases
+  for (auto sedRow : m_vecSeedCanvas) {
+    for (auto sed : sedRow) {
+
+      sed -> Write();
+      ++nWrite;
+
+/* TO REMOVE
+      // grab name
+      std::string sname( sed -> GetName() );
+      sname += ".root";
+
+      // actually save histogram
+      sed -> SaveAs( sname.data() );
+      std::cout << "Saving " << sed -> GetName() << "..." << std::endl;
+*/
+    }
+  }
+  if (m_do_debug) std::cout << "  -- Saved seed plots." << std::endl;
+
+  // announce how many plots saved & exit
+  if (m_do_debug)
+  {
+    std::cout << "Finished saving plots: " << nWrite << " plots written." << std::endl;
+  }
+  return;
+
+}  // end 'SaveCanvasesToFile(TFile*)'

@@ -11,10 +11,11 @@
 class QADB;
 class QADBVar;
 class TCanvas;
+class TFile;
 class TGraphErrors;
-class TPad;
 class TH1;
 class TH2;
+class TPad;
 
 // aliases for convenience
 using VPad1D    = std::vector<TPad*>;
@@ -50,6 +51,7 @@ class JetDraw : public QADraw
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
   int DrawJetSeed(uint32_t trigger, JetRes reso);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
+  void SaveCanvasesToFile(TFile* file);
 
   TCanvas* jetSummary = nullptr;
 
