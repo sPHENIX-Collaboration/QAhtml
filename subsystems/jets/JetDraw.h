@@ -43,6 +43,7 @@ class JetDraw : public QADraw
   int DBVarInit();
   void SetJetSummary(TCanvas* c);
   void SetDoDebug(const bool debug);
+  void SaveCanvasesToFile(TFile* file);
 
  private:
   int MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& run);
@@ -51,7 +52,6 @@ class JetDraw : public QADraw
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
   int DrawJetSeed(uint32_t trigger, JetRes reso);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
-  void SaveCanvasesToFile(TFile* file);
 
   TCanvas* jetSummary = nullptr;
 

@@ -910,17 +910,6 @@ void JetDraw::SetDoDebug(const bool debug)
   m_do_debug = debug;
 }
 
-void JetDraw::myText(double x, double y, int color, const char *text, double tsize)
-{
-  TLatex l;
-  l.SetTextAlign(22);
-  l.SetTextSize(tsize);
-  l.SetNDC();
-  l.SetTextColor(color);
-  l.DrawLatex(x, y, text);
-}
-
-
 // ----------------------------------------------------------------------------
 //! Save canvases to file
 // ----------------------------------------------------------------------------
@@ -958,44 +947,18 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
 
   // save rho canvases
   for (auto rho : m_vecRhoCanvas) {
-
-
+    rho -> Draw();
     rho -> Write();
     ++nWrite;
-
-/* TO REMOVE
-    std::cout << "  RHO TEST " << rho << std::endl;
-
-    // grab name
-    std::string sname( rho -> GetName() );
-    sname += ".root";
-    std::cout << "Saving " << sname << "..." << std::endl;
-
-    rho -> Draw();
-
-    // actually save histogram
-    rho -> SaveAs( sname.data() );
-*/
-
   }
   if (m_do_debug) std::cout << "  -- Saved rho plots." << std::endl;
 
   // save constituent canvases
   for (auto cstRow : m_vecCstCanvas) {
     for (auto cst : cstRow) {
-
+      cst -> Draw();
       cst -> Write();
       ++nWrite;
-
-/* TO REMOVE
-      // grab name
-      std::string sname( cst -> GetName() );
-      sname += ".root";
-
-      // actually save histogram
-      cst -> SaveAs( sname.data() );
-      std::cout << "Saving " << cst -> GetName() << "..." << std::endl;
-*/
     }
   }
   if (m_do_debug) std::cout << "  -- Saved constituent plots." << std::endl;
@@ -1003,19 +966,9 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   // save kinematics canvases
   for (auto kinRow : m_vecKineCanvas) {
     for (auto kin : kinRow) {
-
+      kin -> Draw();
       kin -> Write();
       ++nWrite;
-
-/* TO REMOVE
-      // grab name
-      std::string sname( kin -> GetName() );
-      sname += ".root";
-
-      // actually save histogram
-      kin -> SaveAs( sname.data() );
-      std::cout << "Saving " << kin -> GetName() << "..." << std::endl;
-*/
     }
   }
   if (m_do_debug) std::cout << "  -- Saved kinematic plots." << std::endl;
@@ -1023,19 +976,9 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   // save seed canvases
   for (auto sedRow : m_vecSeedCanvas) {
     for (auto sed : sedRow) {
-
+      sed -> Draw();
       sed -> Write();
       ++nWrite;
-
-/* TO REMOVE
-      // grab name
-      std::string sname( sed -> GetName() );
-      sname += ".root";
-
-      // actually save histogram
-      sed -> SaveAs( sname.data() );
-      std::cout << "Saving " << sed -> GetName() << "..." << std::endl;
-*/
     }
   }
   if (m_do_debug) std::cout << "  -- Saved seed plots." << std::endl;
@@ -1048,3 +991,13 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   return;
 
 }  // end 'SaveCanvasesToFile(TFile*)'
+
+void JetDraw::myText(double x, double y, int color, const char *text, double tsize)
+{
+  TLatex l;
+  l.SetTextAlign(22);
+  l.SetTextSize(tsize);
+  l.SetNDC();
+  l.SetTextColor(color);
+  l.DrawLatex(x, y, text);
+}
