@@ -924,7 +924,6 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   // emit debugging message
   if (m_do_debug)
   {
-
     std::cout << "Saving plots to file:\n"
               << "  " << file -> GetName()
               << std::endl;
