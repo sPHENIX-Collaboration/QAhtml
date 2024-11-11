@@ -945,7 +945,8 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   std::size_t nWrite = 0;
 
   // save rho canvases
-  for (auto rho : m_vecRhoCanvas) {
+  for (auto rho : m_vecRhoCanvas)
+  {
     rho -> Draw();
     rho -> Write();
     ++nWrite;
@@ -953,8 +954,10 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   if (m_do_debug) std::cout << "  -- Saved rho plots." << std::endl;
 
   // save constituent canvases
-  for (auto cstRow : m_vecCstCanvas) {
-    for (auto cst : cstRow) {
+  for (auto cstRow : m_vecCstCanvas)
+  {
+    for (auto cst : cstRow)
+    {
       cst -> Draw();
       cst -> Write();
       ++nWrite;
@@ -963,8 +966,10 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   if (m_do_debug) std::cout << "  -- Saved constituent plots." << std::endl;
 
   // save kinematics canvases
-  for (auto kinRow : m_vecKineCanvas) {
-    for (auto kin : kinRow) {
+  for (auto kinRow : m_vecKineCanvas)
+  {
+    for (auto kin : kinRow)
+    {
       kin -> Draw();
       kin -> Write();
       ++nWrite;
@@ -973,8 +978,10 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   if (m_do_debug) std::cout << "  -- Saved kinematic plots." << std::endl;
 
   // save seed canvases
-  for (auto sedRow : m_vecSeedCanvas) {
-    for (auto sed : sedRow) {
+  for (auto sedRow : m_vecSeedCanvas)
+  {
+    for (auto sed : sedRow)
+    {
       sed -> Draw();
       sed -> Write();
       ++nWrite;
