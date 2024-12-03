@@ -58,12 +58,12 @@ int MicromegasDraw::Draw(const std::string &what)
   return iret;
 }
 
-TH1F* MicromegasDraw::ClusterAverage(TH2F* hist, std::string type)
+TH1* MicromegasDraw::ClusterAverage(TH2* hist, std::string type)
 {
   int nX = hist->GetNbinsX();
   int nY = hist->GetNbinsY();
 
-  TH1F* graph = new TH1F( Form("avg_%s", type.c_str()), "", nX, hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+  auto graph = new TH1F( Form("avg_%s", type.c_str()), "", nX, hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
 
   std::vector<double> xValues, yAverages;
 
@@ -130,11 +130,11 @@ int MicromegasDraw::DrawClusterInfo()
 {
   QADrawClient *cl = QADrawClient::instance();
 
-  TH1F* h_cluster_count_ref = dynamic_cast<TH1F*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
-  TH1F* h_cluster_count_found = dynamic_cast<TH1F*>(cl->getHisto("h_MicromegasClusterQA_clustercount_found"));
-  TH2F* h_cluster_multiplicity_raw = dynamic_cast<TH2F*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
-  TH2F* h_cluster_size_raw = dynamic_cast<TH2F*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
-  TH2F* h_cluster_charge_raw = dynamic_cast<TH2F*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
+  auto h_cluster_count_ref = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
+  auto h_cluster_count_found = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_found"));
+  auto h_cluster_multiplicity_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
+  auto h_cluster_size_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
+  auto h_cluster_charge_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
 
   if (!h_cluster_count_ref || !h_cluster_count_found || !h_cluster_multiplicity_raw || !h_cluster_size_raw || !h_cluster_charge_raw)
   {
@@ -142,12 +142,12 @@ int MicromegasDraw::DrawClusterInfo()
     return -1;
   }
 
-  TH1F *efficiency = (TH1F*)h_cluster_count_found->Clone("efficiency");
+  auto efficiency = static_cast<TH1*>(h_cluster_count_found->Clone("efficiency"));
   efficiency->Divide(h_cluster_count_ref);
 
-  TH1F* h_cluster_multiplicity = ClusterAverage(h_cluster_multiplicity_raw, "mult");
-  TH1F* h_cluster_size = ClusterAverage(h_cluster_size_raw, "size");
-  TH1F* h_cluster_charge = ClusterAverage(h_cluster_charge_raw, "charge");
+  auto h_cluster_multiplicity = ClusterAverage(h_cluster_multiplicity_raw, "mult");
+  auto h_cluster_size = ClusterAverage(h_cluster_size_raw, "size");
+  auto h_cluster_charge = ClusterAverage(h_cluster_charge_raw, "charge");
 
   if (!TC[0])
   {
@@ -197,10 +197,10 @@ int MicromegasDraw::DrawClusterInfo()
 int MicromegasDraw::DrawBCOInfo()
 {
   QADrawClient *cl = QADrawClient::instance();
-  TH1F* h_waveform_bco_dropped = dynamic_cast<TH1F*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
-  TH1F* h_waveform_pool_dropped = dynamic_cast<TH1F*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
-  TH1F* h_waveform_total = dynamic_cast<TH1F*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
-  TH1F* h_gl1_raw = dynamic_cast<TH1F*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
+  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
+  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
+  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
+  auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
 
   if (!h_waveform_bco_dropped || !h_waveform_pool_dropped || !h_waveform_total || !h_gl1_raw)
     {
@@ -208,8 +208,7 @@ int MicromegasDraw::DrawBCOInfo()
       return -1;
     }
 
-  TH1F *h_drop= new TH1F("h_drop", "Drop Rate", 3, 0, 3);
-
+  auto h_drop= new TH1F("h_drop", "Drop Rate", 3, 0, 3);
   h_drop->GetXaxis()->SetBinLabel(1, "5001");
   h_drop->GetXaxis()->SetBinLabel(2, "5002");
   h_drop->GetXaxis()->SetBinLabel(3, "all");
@@ -217,18 +216,18 @@ int MicromegasDraw::DrawBCOInfo()
   h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
   h_drop->SetTitle("Fraction of Dropped Waveforms by packet");
 
-  h_drop->SetBinContent(1, ( h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/h_waveform_total->GetBinContent(1));
-  h_drop->SetBinContent(2, ( h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/h_waveform_total->GetBinContent(2));
-  h_drop->SetBinContent(3, ( h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(h_waveform_total->GetBinContent(1)+h_waveform_total->GetBinContent(2)) );
+  h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/h_waveform_total->GetBinContent(1));
+  h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/h_waveform_total->GetBinContent(2));
+  h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(h_waveform_total->GetBinContent(1)+h_waveform_total->GetBinContent(2)) );
 
-  TH1F *h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
+  auto h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
   h_gl1->GetXaxis()->SetBinLabel(1, "5001");
   h_gl1->GetXaxis()->SetBinLabel(2, "5002");
   h_gl1->GetXaxis()->SetBinLabel(3, "all");
 
-  h_gl1->SetBinContent(3,h_gl1_raw->GetBinContent(4)/h_gl1_raw->GetBinContent(1));
-  h_gl1->SetBinContent(2,h_gl1_raw->GetBinContent(3)/h_gl1_raw->GetBinContent(1));
-  h_gl1->SetBinContent(1,h_gl1_raw->GetBinContent(2)/h_gl1_raw->GetBinContent(1));
+  h_gl1->SetBinContent(3,double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
+  h_gl1->SetBinContent(2,double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
+  h_gl1->SetBinContent(1,double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
 
   if (!TC[1])
   {
@@ -268,7 +267,7 @@ int MicromegasDraw::DrawBCOInfo()
   h_gl1->SetMaximum(1.6);
   h_gl1->DrawCopy();
 
-  TLegend* legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
+  auto legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
   legend_gl1->SetHeader("Values", "C");
   legend_gl1->SetTextSize(0.045);
   legend_gl1->SetBorderSize(0);
@@ -294,7 +293,7 @@ int MicromegasDraw::MakeHtml(const std::string &what)
     return iret;
   }
 
-  QADrawClient *cl = QADrawClient::instance();
+  auto cl = QADrawClient::instance();
   std::string pngfile;
 
   // Register the canvas png file to the menu and produces the png file.
