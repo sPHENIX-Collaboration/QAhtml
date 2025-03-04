@@ -41,7 +41,8 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
 def getPaths(cursor, run, dataset, type, runtype):
     dsttype = type + runtype
     query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND files.lfn=datasets.filename".format(run,dataset,dsttype)
-    print(query)
+    if args.verbose == True:
+        print(query)
     cursor.execute(query)
     filepaths = {(row.full_file_path) for row in cursor.fetchall()}
     return filepaths
@@ -60,7 +61,8 @@ def main():
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     for runtype in runtypes:
         for histtype in track_hist_types:
-            print(histtype)
+            if args.verbose == True:
+                print("hist type is: " + histtype)
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
 
             for run, dbtag in runs_dbtags:
@@ -73,7 +75,7 @@ def main():
                 index = tags.index(runtype[1:])
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
-                anadbtag = tags[index+2]
+                anadbtag = dbtag
                 dsttypetag = tags[index+3]
                 rundirtag = tags[index+4]
                 
@@ -101,6 +103,7 @@ def main():
 
                 #need to figure out the latest db tag
                 latestdbtag= ""
+                latestdbtagInt = 0
                 for newpath in filepaths:
                     thistag = getBuildDbTag(runtype, newpath)
                     tags = thistag.split("_")
@@ -109,6 +112,7 @@ def main():
                         break
                     if int(tags[1]) > latestdbtagInt:
                         latestdbtag=thistag
+                        latestdbtagInt = int(tags[1])
 
                 reagg=False
                 if len(path) == 0:
@@ -133,7 +137,8 @@ def main():
                 if len(path) == 0:
                     path = (completeAggDir + histtype + runtype+"_" + dbtag + "-{:08d}-9000.root").format(run)
 
-
+                if args.verbose == True:
+                    print("agg file path is " + path)
                 command = ["hadd","-ff",path]
                 for newpath in filepaths:
                     # make sure the file has the same db tag

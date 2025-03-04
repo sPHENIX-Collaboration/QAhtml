@@ -8,7 +8,7 @@ import time
 import argparse
 
 track_hist_types = ["HIST_CALOQA", "HIST_JETS"]
-runtypes = ["_run2pp","_run2auau"]
+runtypes = ["_run3auau"]
 
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
@@ -32,12 +32,18 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
 def getPaths(cursor, run, dataset, type, runtype):
     dsttype = type + runtype
     query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND files.lfn=datasets.filename".format(run,dataset,dsttype)
+    if args.verbose == True:
+        print(query)
     cursor.execute(query)
     filepaths = {(row.full_file_path) for row in cursor.fetchall()}
     return filepaths
 
-def getDbTag(filename):
-     return filename[filename.find("2024p")+5:filename.find("2024p")+8]
+def getBuildDbTag(filename):
+    parts = filename.split(os.sep)
+    index = parts.index(type[1:])
+    if args.verbose == True:
+        print("db tag is " + parts[index+2])
+    return parts[index+2]
 
 def main():   
     import time
@@ -49,11 +55,36 @@ def main():
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
 
             for run, dbtag in runs_dbtags:
-
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
-                filepathWildcard = aggDirectory + histtype + "*" + dbtag + "*" + str(run) + "*"
+                if args.verbose == True:
+                    print("all total filepaths")
+                    print(filepaths)
 
+                tags = next(iter(filepaths)).split(os.sep)
+                index = tags.index(runtype[1:])
+                collisiontag = tags[index]
+                beamtag = tags[index+1]
+                anadbtag = dbtag
+                dsttypetag = tags[index+3]
+                rundirtag = tags[index+4]
+                
+                # make an analogous path to the production DST in sphenix/data
+                completeAggDir = aggDirectory + collisiontag + "/" + beamtag + "/" + anadbtag + "/" + dsttypetag + "/" + rundirtag + "/"
+                if args.verbose == True:
+                    print("aggregated directory")
+                    print(completeAggDir)
+                    
+                filepathWildcard = completeAggDir + histtype + "*" + dbtag + "*" + str(run) + "*"
+
+                if not os.path.isdir(completeAggDir):
+                    if args.verbose == True:
+                        print("making a new aggregated dir")
+                    if not args.test == True:
+                        os.makedirs(completeAggDir, exist_ok=True)
+
+                
                 filepath = glob.glob(filepathWildcard)
+
                 path = ""
                 aggFileTime = 0
                 if len(filepath) > 0:
@@ -62,12 +93,13 @@ def main():
 
                 #need to figure out the latest db tag
                 latestdbtag= ""
-                ana = ""
                 latestdbtagInt=0
                 for newpath in filepaths:
-                    thistag = getDbTag(newpath)
-                    ana = newpath[newpath.find("ana")+3:newpath.find("ana")+6]
-                    if int(thistag) > latestdbtagInt:
+                    thistag = getBuildDbTag(runtype,newpath)
+                    tags = thistag.split("_")
+                    if tags[1].find("nocdbtag") != -1:
+                        break
+                    if int(tags[1]) > latestdbtagInt:
                         latestdbtag=thistag
                         latestdbtagInt = int(thistag)
 
@@ -92,7 +124,7 @@ def main():
                 filestoadd = []
                 nfiles = 0
                 if len(path) == 0:
-                    path = (aggDirectory + histtype + runtype + "_" + dbtag + "-{:08d}-9000.root").format(run)
+                    path = (completeAggDir + histtype + runtype + "_" + dbtag + "-{:08d}-9000.root").format(run)
 
                 if args.verbose == True:
                     print("agg file path is " + path)
