@@ -7,8 +7,18 @@ import glob
 import time
 import argparse
 
-track_hist_types = ["HIST_DST_STREAMING_EVENT", "HIST_DST_TRKR_HIT","HIST_DST_TRKR_CLUSTER", "HIST_DST_TRKR_SEED"]
-runtypes = ["_run2pp","_run2auau"]
+track_hist_types = []
+for i in range(24):
+    track_hist_types.append(("HIST_DST_STREAMING_EVENT_TPC{:02d}").format(i))
+    if i < 8:
+        track_hist_types.append("HIST_DST_STREAMING_EVENT_INTT"+str(i))
+    if i < 6:
+        track_hist_types.append("HIST_DST_STREAMING_EVENT_MVTX"+str(i))
+        
+track_hist_types.append("HIST_DST_TRKR_CLUSTER")
+track_hist_types.append("HIST_DST_TRKR_SEED")
+
+runtypes = ["_run3auau"]
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
@@ -36,8 +46,12 @@ def getPaths(cursor, run, dataset, type, runtype):
     filepaths = {(row.full_file_path) for row in cursor.fetchall()}
     return filepaths
 
-def getDbTag(filename):
-     return filename[filename.find("2024p")+5:filename.find("2024p")+8]
+def getBuildDbTag(type, filename):
+    parts = filename.split(os.sep)
+    index = parts.index(type[1:])
+    if args.verbose == True:
+        print("db tag is " + parts[index+2])
+    return parts[index+2]
 
 def main():   
     import time
@@ -50,31 +64,51 @@ def main():
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
 
             for run, dbtag in runs_dbtags:
-                if run < 50000:
-                    continue
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
-
-                filepathWildcard = aggDirectory + histtype + "*" + dbtag + "*" + str(run) + "*"
+                if args.verbose == True:
+                    print("all total filepaths")
+                    print(filepaths)
+                    
+                tags = next(iter(filepaths)).split(os.sep)
+                index = tags.index(runtype[1:])
+                collisiontag = tags[index]
+                beamtag = tags[index+1]
+                anadbtag = tags[index+2]
+                dsttypetag = tags[index+3]
+                rundirtag = tags[index+4]
+                
+                # make an analogous path to the production DST in sphenix/data
+                completeAggDir = aggDirectory + collisiontag + "/" + beamtag + "/" + anadbtag + "/" + dsttypetag + "/" + rundirtag + "/"
+                if args.verbose == True:
+                    print("aggregated directory")
+                    print(completeAggDir)
+                #check for a similar file in this dir
+                filepathWildcard = completeAggDir + histtype + "*" + dbtag + "*" + str(run) + "*"
+                if not os.path.isdir(completeAggDir):
+                    if args.verbose == True:
+                        print("making a new aggregated dir")
+                    if not args.test == True:
+                        os.makedirs(completeAggDir, exist_ok=True)
 
                 filepath = glob.glob(filepathWildcard)
+
                 path = ""
                 aggFileTime = 0
                 if len(filepath) > 0:
                     path = filepath[0]
                     aggFileTime = os.path.getmtime(path)
-                    # if it is a cluster or hit dst, just skip it. those
-                    # are not starved for statistics
-                    if histtype.find("CLUSTER") != -1 or histtype.find("HIT") != -1:
-                        continue
+                
 
                 #need to figure out the latest db tag
                 latestdbtag= ""
-                latestdbtagInt=0
                 for newpath in filepaths:
-                    thistag = getDbTag(newpath)
-                    if int(thistag) > latestdbtagInt:
+                    thistag = getBuildDbTag(runtype, newpath)
+                    tags = thistag.split("_")
+                    if tags[1].find("nocdbtag") != -1:
                         latestdbtag=thistag
-                        latestdbtagInt = int(thistag)
+                        break
+                    if int(tags[1]) > latestdbtagInt:
+                        latestdbtag=thistag
 
                 reagg=False
                 if len(path) == 0:
@@ -97,7 +131,7 @@ def main():
                 filestoadd = []
                 nfiles = 0
                 if len(path) == 0:
-                    path = (aggDirectory + histtype + runtype+"_" + dbtag + "-{:08d}-9000.root").format(run)
+                    path = (completeAggDir + histtype + runtype+"_" + dbtag + "-{:08d}-9000.root").format(run)
 
 
                 command = ["hadd","-ff",path]
@@ -108,7 +142,7 @@ def main():
                     command.append(str(newpath))
                     nfiles+=1
                     # don't need loads of statistics for these, and it just clogs the aggregation processing
-                    if histtype.find("CLUSTER") != -1 or histtype.find("HIT") != -1:
+                    if histtype.find("CLUSTER") != -1:
                         if nfiles == 10:
                             break;
                     elif nfiles > 100:
