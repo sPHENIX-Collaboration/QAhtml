@@ -127,8 +127,7 @@ def main():
                 filestoadd = []
                 nfiles = 0
                 lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
-                if len(path) == 0:
-                    path = completeAggDir + lfn
+                path = completeAggDir + lfn
 
                 if args.verbose == True:
                     print("agg file path is " + path)
@@ -171,7 +170,8 @@ def main():
                     md5=EXCLUDED.md5
                     ;
                     """.format(lfn,path,size,md5)
-                    
+                    if args.verbose :
+                        print(insertquery)
                     FCWritecursor.execute(insertquery)
                     FCWritecursor.commit()
 
@@ -188,7 +188,8 @@ def main():
                     events=EXCLUDED.events
                     ;
                     """.format(lfn,run,size,dbtag,histtype)
-                    
+                    if args.verbose :
+                        print(insertquery)
                     FCWritecursor.execute(insertquery)
                     FCWritecursor.commit()
                     
