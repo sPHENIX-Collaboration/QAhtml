@@ -6,6 +6,7 @@ import subprocess
 import glob
 import time
 import argparse
+import hashlib
 
 track_hist_types = []
 for i in range(24):
@@ -56,6 +57,8 @@ def getBuildDbTag(type, filename):
 
 def main():   
     import time
+    FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
+    FCWritecursor = FCWrite.cursor()
     conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
     cursor = conn.cursor()
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
@@ -134,8 +137,9 @@ def main():
                     continue
                 filestoadd = []
                 nfiles = 0
+                lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
                 if len(path) == 0:
-                    path = (completeAggDir + histtype + runtype+"_" + dbtag + "-{:08d}-9000.root").format(run)
+                    path = completeAggDir + lfn
 
                 if args.verbose == True:
                     print("agg file path is " + path)
@@ -158,9 +162,53 @@ def main():
                 if args.verbose:
                     print("executing command")
                     print(command)
+                
                 if not args.test:
                     subprocess.run(command)
+                    
+                    #insert into filecatalog
+                    size= int( os.path.getsize(path) )
+                    file_hash=None
+                    with open( path, "rb") as f:
+                        file_hash = hashlib.md5()
+                        chunk = f.read(8192)
+                        while chunk:
+                            file_hash.update(chunk)
+                            chunk = f.read(8192)
+                    md5 = file_hash.hexdigest()
+                    
+                    insertquery="""
+                    insert into files (lfn,full_host_name,full_file_path,time,size,md5) 
+                    values ('{}','gpfs','{}','now',{},'{}')
+                    on conflict
+                    on constraint files_pkey
+                    do update set 
+                    time=EXCLUDED.time,
+                    size=EXCLUDED.size,
+                    md5=EXCLUDED.md5
+                    ;
+                    """.format(lfn,path,size,md5)
+                    
+                    
+                    FCWritecursor.execute(insertquery)
+                    FCWritecursor.commit()
 
+                    insertquery="""
+                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
+                    values ('{}','{}',9999,'{}','{}','{}')
+                    on conflict
+                    on constraint datasets_pkey
+                    do update set
+                    runnumber=EXCLUDED.runnumber,
+                    segment=EXCLUDED.segment,
+                    size=EXCLUDED.size,
+                    dsttype=EXCLUDED.dsttype,
+                    events=EXCLUDED.events
+                    ;
+                    """.format(lfn,run,size,dbtag,histtype)
+                    FCWritecursor.execute(insertquery)
+                    FCWritecursor.commit()
     conn.close()
+    FCWrite.close()
 if __name__ == "__main__":
     main()
