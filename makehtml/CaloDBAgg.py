@@ -6,6 +6,7 @@ import subprocess
 import glob
 import time
 import argparse
+import hashlib
 
 track_hist_types = ["HIST_CALOQA", "HIST_JETS"]
 runtypes = ["_run3auau"]
@@ -38,7 +39,7 @@ def getPaths(cursor, run, dataset, type, runtype):
     filepaths = {(row.full_file_path) for row in cursor.fetchall()}
     return filepaths
 
-def getBuildDbTag(filename):
+def getBuildDbTag(type, filename):
     parts = filename.split(os.sep)
     index = parts.index(type[1:])
     if args.verbose == True:
@@ -49,6 +50,8 @@ def main():
     import time
     conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
     cursor = conn.cursor()
+    FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc;READONLY=True")
+    FCWritecursor = FCWrite.cursor()
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     for runtype in runtypes:
         for histtype in track_hist_types:
@@ -101,7 +104,7 @@ def main():
                         break
                     if int(tags[1]) > latestdbtagInt:
                         latestdbtag=thistag
-                        latestdbtagInt = int(thistag)
+                        latestdbtagInt = int(tags[1])
 
                 reagg=False
                 if len(path) == 0:
@@ -123,8 +126,9 @@ def main():
                     continue
                 filestoadd = []
                 nfiles = 0
+                lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9000.root".format(run)
                 if len(path) == 0:
-                    path = (completeAggDir + histtype + runtype + "_" + dbtag + "-{:08d}-9000.root").format(run)
+                    path = completeAggDir + lfn
 
                 if args.verbose == True:
                     print("agg file path is " + path)
@@ -145,6 +149,50 @@ def main():
                 if not args.test:
                     subprocess.run(command)
 
+                    #insert into filecatalog
+                    size= int( os.path.getsize(path) )
+                    file_hash=None
+                    with open( path, "rb") as f:
+                        file_hash = hashlib.md5()
+                        chunk = f.read(8192)
+                        while chunk:
+                            file_hash.update(chunk)
+                            chunk = f.read(8192)
+                    md5 = file_hash.hexdigest()
+                    
+                    insertquery="""
+                    insert into files (lfn,full_host_name,full_file_path,time,size,md5) 
+                    values ('{}','gpfs','{}','now',{},'{}')
+                    on conflict
+                    on constraint files_pkey
+                    do update set 
+                    time=EXCLUDED.time,
+                    size=EXCLUDED.size,
+                    md5=EXCLUDED.md5
+                    ;
+                    """.format(lfn,path,size,md5)
+                    
+                    FCWritecursor.execute(insertquery)
+
+
+                    insertquery="""
+                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
+                    values ('{}','{}',9000,'{}','{}','{}')
+                    on conflict
+                    on constraint datasets_pkey
+                    do update set
+                    runnumber=EXCLUDED.runnumber,
+                    segment=EXCLUDED.segment,
+                    size=EXCLUDED.size,
+                    dsttype=EXCLUDED.dsttype,
+                    events=EXCLUDED.events
+                    ;
+                    """.format(lfn,run,size,dbtag,histtype)
+                    
+                    FCWritecursor.execute(insertquery)
+
+                    
     conn.close()
+    FCWrite.close()
 if __name__ == "__main__":
     main()

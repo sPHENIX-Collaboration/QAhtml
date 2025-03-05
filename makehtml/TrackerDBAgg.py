@@ -6,6 +6,7 @@ import subprocess
 import glob
 import time
 import argparse
+import hashlib
 
 track_hist_types = []
 for i in range(24):
@@ -187,11 +188,25 @@ def main():
                     md5=EXCLUDED.md5
                     ;
                     """.format(lfn,path,size,md5)
-                    if args.verbose == True:
-                        print("insert query:")
-                        print(insertquery)
-                    FCWritecursor.execute(insertquery)
                     
+                    FCWritecursor.execute(insertquery)
+
+
+                    insertquery="""
+                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
+                    values ('{}','{}',9000,'{}','{}','{}')
+                    on conflict
+                    on constraint datasets_pkey
+                    do update set
+                    runnumber=EXCLUDED.runnumber,
+                    segment=EXCLUDED.segment,
+                    size=EXCLUDED.size,
+                    dsttype=EXCLUDED.dsttype,
+                    events=EXCLUDED.events
+                    ;
+                    """.format(lfn,run,size,dbtag,histtype)
+                    
+                    FCWritecursor.execute(insertquery)
     conn.close()
     FCWrite.close()
 if __name__ == "__main__":
