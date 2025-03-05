@@ -50,7 +50,7 @@ def main():
     import time
     conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
     cursor = conn.cursor()
-    FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc;READONLY=True")
+    FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
     FCWritecursor = FCWrite.cursor()
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     for runtype in runtypes:
@@ -126,7 +126,7 @@ def main():
                     continue
                 filestoadd = []
                 nfiles = 0
-                lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9000.root".format(run)
+                lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
                 if len(path) == 0:
                     path = completeAggDir + lfn
 
@@ -173,11 +173,11 @@ def main():
                     """.format(lfn,path,size,md5)
                     
                     FCWritecursor.execute(insertquery)
-
+                    FCWritecursor.commit()
 
                     insertquery="""
                     insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',9000,'{}','{}','{}')
+                    values ('{}','{}',9999,'{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
@@ -190,7 +190,7 @@ def main():
                     """.format(lfn,run,size,dbtag,histtype)
                     
                     FCWritecursor.execute(insertquery)
-
+                    FCWritecursor.commit()
                     
     conn.close()
     FCWrite.close()
