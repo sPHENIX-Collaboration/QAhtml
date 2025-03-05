@@ -189,10 +189,9 @@ def main():
                     md5=EXCLUDED.md5
                     ;
                     """.format(lfn,path,size,md5)
-                    if args.verbose == True:
+                    if args.verbose :
                         print(insertquery)
                     FCWritecursor.execute(insertquery)
-                if not args.test:    
                     FCWritecursor.commit()
 
                     insertquery="""
@@ -208,10 +207,10 @@ def main():
                     events=EXCLUDED.events
                     ;
                     """.format(lfn,run,size,dbtag,histtype)
-                    if args.verbose == True:
+                    if args.verbose :
                         print(insertquery)
                     FCWritecursor.execute(insertquery)
-                if not args.test:    
+                    
                     FCWritecursor.commit()
     conn.close()
     FCWrite.close()
