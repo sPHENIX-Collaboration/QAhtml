@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 
 import os
 import pyodbc
@@ -49,8 +49,6 @@ def getPaths(cursor, run, dataset, type, runtype):
 def getBuildDbTag(type, filename):
     parts = filename.split(os.sep)
     index = parts.index(type[1:])
-    if args.verbose == True:
-        print("db tag is " + parts[index+2])
     return parts[index+2]
 
 def main():
@@ -67,6 +65,7 @@ def main():
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
 
             for run, dbtag in runs_dbtags:
+                print("Processing run " + str(run))
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
                     print("all total filepaths")
@@ -132,6 +131,7 @@ def main():
                     print("Agg file " + path + "  time is " + str(aggFileTime))
                     print("latest new file time is " + str(newFileTime))
                 if reagg == False:
+                    print("Don't need to reagg " + path)
                     continue
                 filestoadd = []
                 nfiles = 0
@@ -157,6 +157,7 @@ def main():
                         break
                 # wait for at least 10 files
                 if nfiles < 10:
+                    print("not enough files")
                     continue
                 if args.verbose:
                     print("executing command")
