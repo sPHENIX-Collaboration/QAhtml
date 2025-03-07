@@ -16,7 +16,7 @@ if args.test and not args.verbose:
 # subsys dir name : [file prefix, output hist png file prefix, qahtml draw macro]
 #subsys = { "mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"], "tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"],"micromegas" : ["HIST_DST_TRKR_CLUSTER","MicromegasQA","draw_micromegas.C"], "siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"], "bco" : ["HIST_DST_STREAMING_EVENT","BCOQA","draw_packets.C"],"mvtxrawhit" : ["HIST_DST_TRKR_CLUSTER","MVTXRAWHITQA","draw_mvtx_rawhit.C"], "inttrawhit" : ["HIST_DST_TRKR_CLUSTER","INTTRAWHITQA","draw_intt_rawhit.C"], "tpcrawhit" : ["HIST_DST_TRKR_CLUSTER","TpcRawHitQA","draw_tpc_rawhit.C"], "tpcsil" : ["HIST_DST_TRKR_SEED","TpcSiliconQA","draw_tpcsil.C"]}
 
-subsys = {"bco" : ["HIST_DST_STREAMING_EVENT_INTT0","BCOQA","draw_packets.C"]}
+subsys = { "mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"], "tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"],"micromegas" : ["HIST_DST_TRKR_CLUSTER","MicromegasQA","draw_micromegas.C"],"mvtxrawhit" : ["HIST_DST_TRKR_CLUSTER","MVTXRAWHITQA","draw_mvtx_rawhit.C"], "inttrawhit" : ["HIST_DST_TRKR_CLUSTER","INTTRAWHITQA","draw_intt_rawhit.C"], "tpcrawhit" : ["HIST_DST_TRKR_CLUSTER","TpcRawHitQA","draw_tpc_rawhit.C"]}
 runtypes = ["_run3auau"]
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
@@ -54,7 +54,6 @@ def main():
             subsysAggRuns = {}
             subsysAggRunsDbtag = {}
             for aggfile in full_paths:
-                print(aggfile)
                 runnumber = int(aggfile.split("/")[-1].split("-")[1])
                 dbtag = getBuildDbTag(runtype, aggfile.split("/")[-1])
                 if runnumber in subsysAggRuns:
@@ -64,6 +63,7 @@ def main():
                         subsysAggRunsDbtag[runnumber] = dbtag
                     else:
                         continue
+                else:
                     subsysAggRuns[runnumber] = os.path.getmtime(aggfile)
                     subsysAggRunsDbtag[runnumber] = dbtag
             if args.verbose:
@@ -80,7 +80,7 @@ def main():
                 for rundir in next(os.walk(qapath+"/"+d))[1] :
                     if args.verbose:
                         print("checking rundir "+rundir)
-                        runnum = int(rundir.split("/")[-1])
+                    runnum = int(rundir.split("/")[-1])
                     if runnum < 57000:
                         continue
                     qafiles = glob.glob(qapath+"/"+d+"/"+rundir+"/"+subsys[s][1]+"*")
@@ -102,8 +102,7 @@ def main():
                     if run < 57000:
                         continue
                     aggFile= get_file(cursor, subsys[s][0], run)
-                    print("agg file is ")
-                    print(aggFile)
+                    
                     if len(aggFile) == 0:
                         print("There is no aggregated histos file for run " + str(run))
                         print("Doing nothing.")
@@ -146,5 +145,7 @@ def main():
                 print(updatedRuns)
 
     conn.close()
+
+    
 if __name__ == "__main__":
     main()
