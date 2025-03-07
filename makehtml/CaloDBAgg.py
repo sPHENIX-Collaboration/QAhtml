@@ -24,7 +24,7 @@ print("Test is " + str(args.test))
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type + runtype
-    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}'  GROUP BY runnumber,dataset;".format(dsttype)
+    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber,dataset;".format(dsttype)
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
     
@@ -42,8 +42,6 @@ def getPaths(cursor, run, dataset, type, runtype):
 def getBuildDbTag(type, filename):
     parts = filename.split(os.sep)
     index = parts.index(type[1:])
-    if args.verbose == True:
-        print("db tag is " + parts[index+2])
     return parts[index+2]
 
 def main():   
@@ -56,8 +54,8 @@ def main():
     for runtype in runtypes:
         for histtype in track_hist_types:
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
-
             for run, dbtag in runs_dbtags:
+                print("Processing run " + str(run))
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
                     print("all total filepaths")
@@ -102,9 +100,9 @@ def main():
                     tags = thistag.split("_")
                     if tags[1].find("nocdbtag") != -1:
                         break
-                    if int(tags[1]) > latestdbtagInt:
+                    if int(tags[1].split("p")[1]) > latestdbtagInt:
                         latestdbtag=thistag
-                        latestdbtagInt = int(tags[1])
+                        latestdbtagInt = int(tags[1].split("p")[1])
 
                 reagg=False
                 if len(path) == 0:
@@ -123,6 +121,7 @@ def main():
                     print("Agg file " + path + "  time is " + str(aggFileTime))
                     print("latest new file time is " + str(newFileTime))
                 if reagg == False:
+                    print("Don't need to reagg " + path)
                     continue
                 filestoadd = []
                 nfiles = 0
@@ -141,6 +140,7 @@ def main():
 
                 # wait for at least 10 files
                 if nfiles < 10:
+                    print("not enough files " + str(run))
                     continue
                 if args.verbose:
                     print("executing command")
