@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 import os
 import pyodbc
@@ -8,16 +8,14 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = []
-for i in range(24):
-    track_hist_types.append(("HIST_DST_STREAMING_EVENT_TPC{:02d}").format(i))
-    if i < 8:
-        track_hist_types.append("HIST_DST_STREAMING_EVENT_INTT"+str(i))
-    if i < 6:
-        track_hist_types.append("HIST_DST_STREAMING_EVENT_MVTX"+str(i))
-        
-track_hist_types.append("HIST_DST_TRKR_CLUSTER")
-track_hist_types.append("HIST_DST_TRKR_SEED")
+track_hist_types = ["HIST_DST_TRKR_CLUSTER","HIST_DST_TRKR_SEED"]
+#for i in range(24):
+    #track_hist_types.append(("HIST_DST_STREAMING_EVENT_TPC{:02d}").format(i))
+#    if i < 8:
+#        track_hist_types.append("HIST_DST_STREAMING_EVENT_INTT"+str(i))
+#    if i < 6:
+#        track_hist_types.append("HIST_DST_STREAMING_EVENT_MVTX"+str(i))
+
 
 runtypes = ["_run3auau"]
 
@@ -55,7 +53,7 @@ def getBuildDbTag(type, filename):
         print("db tag is " + parts[index+2])
     return parts[index+2]
 
-def main():   
+def main():
     import time
     FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
     FCWritecursor = FCWrite.cursor()
@@ -113,9 +111,9 @@ def main():
                     if tags[1].find("nocdbtag") != -1:
                         latestdbtag=thistag
                         break
-                    if int(tags[1]) > latestdbtagInt:
+                    if int(tags[1].split("p")[1]) > latestdbtagInt:
                         latestdbtag=thistag
-                        latestdbtagInt = int(tags[1])
+                        latestdbtagInt = int(tags[1].split("p")[1])
 
                 reagg=False
                 if len(path) == 0:
@@ -138,10 +136,11 @@ def main():
                 filestoadd = []
                 nfiles = 0
                 lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
-                if len(path) == 0:
-                    path = completeAggDir + lfn
+                
+                path = completeAggDir + lfn
 
                 if args.verbose == True:
+                    print ("lfn is " + lfn)
                     print("agg file path is " + path)
                 command = ["hadd","-ff",path]
                 for newpath in filepaths:
@@ -188,8 +187,8 @@ def main():
                     md5=EXCLUDED.md5
                     ;
                     """.format(lfn,path,size,md5)
-                    
-                    
+                    if args.verbose :
+                        print(insertquery)
                     FCWritecursor.execute(insertquery)
                     FCWritecursor.commit()
 
@@ -206,7 +205,10 @@ def main():
                     events=EXCLUDED.events
                     ;
                     """.format(lfn,run,size,dbtag,histtype)
+                    if args.verbose :
+                        print(insertquery)
                     FCWritecursor.execute(insertquery)
+                    
                     FCWritecursor.commit()
     conn.close()
     FCWrite.close()
