@@ -18,7 +18,6 @@ subsys = { "mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : [
 runtypes = ["_run3auau"]
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
-aggpath = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/run3auau"
 
 def get_aggregated_files(cursor, dsttype):
     query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999)".format(dsttype)
@@ -74,7 +73,6 @@ def main():
             qaFilesModified = {}
 
             for d in next(os.walk(qapath))[1] :
-                print("checking dir " + d)
                 for rundir in next(os.walk(qapath+"/"+d))[1] :
                     if args.verbose:
                         print("checking rundir "+rundir)
@@ -119,7 +117,7 @@ def main():
                         fileToDraw = ""
                         # find the file with the most recent db tag
                         for file in aggFile:
-                            # find the db string. Needs to be generalized
+                            # find the db string
                             filename = file.split("/")[-1]
                             dbtag = getBuildDbTag(runtype, filename)
                             if(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :

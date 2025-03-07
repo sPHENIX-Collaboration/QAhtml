@@ -131,7 +131,6 @@ def main():
                     print("Agg file " + path + "  time is " + str(aggFileTime))
                     print("latest new file time is " + str(newFileTime))
                 if reagg == False:
-                    print("Don't need to reagg " + path)
                     continue
                 filestoadd = []
                 nfiles = 0

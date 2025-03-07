@@ -54,8 +54,8 @@ def main():
     for runtype in runtypes:
         for histtype in track_hist_types:
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
-
             for run, dbtag in runs_dbtags:
+                print("Processing run " + str(run))
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
                     print("all total filepaths")
