@@ -17,6 +17,11 @@ config.guess
 config.sub
 ltmain.sh
 
+# agg running artifacts
+*.log
+aggrunning*
+htmlrunning*
+
 # Prerequisites
 *.d
 
