@@ -80,7 +80,7 @@ def main():
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
                 anadbtag = dbtag
-                dsttypetag = hist
+                dsttypetag = hist[5:]
                 rundirtag = tags[index+4]
                 # make an analogous path to the production DST in sphenix/data
                 completeAggDir = aggDirectory + collisiontag + "/" + beamtag + "/" + anadbtag + "/" + dsttypetag + "/" + rundirtag + "/"
@@ -163,8 +163,8 @@ def main():
                     """.format(lfn,path,size,md5)
                     if args.verbose :
                         print(insertquery)
-                    FCWritecursor.execute(insertquery)
-                    FCWritecursor.commit()
+                    FCWriteCursor.execute(insertquery)
+                    FCWriteCursor.commit()
 
                     insertquery="""
                     insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
@@ -181,9 +181,9 @@ def main():
                     """.format(lfn,run,size,dbtag,hist)
                     if args.verbose :
                         print(insertquery)
-                    FCWritecursor.execute(insertquery)
+                    FCWriteCursor.execute(insertquery)
                     
-                    FCWritecursor.commit()
+                    FCWriteCursor.commit()
 
                     
 

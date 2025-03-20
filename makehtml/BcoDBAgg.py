@@ -8,15 +8,16 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = ["HIST_DST_STREAMING_EVENT_TPOT"]
-for i in range(24):
-    track_hist_types.append(("HIST_DST_STREAMING_EVENT_TPC{:02d}").format(i))
-    if i < 8:
-        track_hist_types.append("HIST_DST_STREAMING_EVENT_INTT"+str(i))
-    if i < 6:
-        track_hist_types.append("HIST_DST_STREAMING_EVENT_MVTX"+str(i))
+track_hist_types = []
+for i in range(6):
+    track_hist_types.append("HIST_DST_STREAMING_EVENT_MVTX"+str(i))
+for j in range(8):
+    track_hist_types.append("HIST_DST_STREAMING_EVENT_INTT"+str(j))
+for k in range(24):
+    track_hist_types.append(("HIST_DST_STREAMING_EVENT_TPC{:02d}").format(k))
+track_hist_types.append("HIST_DST_STREAMING_EVENT_TPOT")
 
-
+print(track_hist_types)
 runtypes = ["_run3auau"]
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
@@ -58,10 +59,10 @@ def main():
     conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
     cursor = conn.cursor()
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
+  
     for runtype in runtypes:
         for histtype in track_hist_types:
-            if args.verbose == True:
-                print("hist type is: " + histtype)
+            print("hist type is: " + histtype)
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
 
             for run, dbtag in runs_dbtags:
@@ -122,6 +123,8 @@ def main():
                     for newpath in filepaths:
                         if newpath.find(latestdbtag) == -1:
                             continue
+                        if not os.path.exists(newpath):
+                            continue
                         if os.path.getmtime(newpath) > newFileTime:
                             newFileTime = os.path.getmtime(newpath)
                         if os.path.getmtime(newpath) > aggFileTime:
@@ -146,8 +149,9 @@ def main():
                     # make sure the file has the same db tag
                     if newpath.find(latestdbtag) == -1: 
                        continue
-                    command.append(str(newpath))
-                    nfiles+=1
+                    if os.path.exists(str(newpath)):
+                        command.append(str(newpath))
+                        nfiles+=1
                 if args.verbose:
                     print("executing command for "+str(nfiles) + " files")
                     print(command)
