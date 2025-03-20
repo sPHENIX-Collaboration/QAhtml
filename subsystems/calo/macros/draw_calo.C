@@ -1,11 +1,12 @@
 #include <qahtml/QADrawClient.h>
 #include <calo/CaloDraw.h>
 #include <calo/CaloGoodRunChecker.h>
+#include <sPhenixStyle.C>
 
 R__LOAD_LIBRARY(libqadrawcalo.so)
 
 void draw_calo(const std::string &rootfile) {
-  
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
   CaloDraw *ex = new CaloDraw();
@@ -56,13 +57,15 @@ void draw_calo(const std::string &rootfile) {
   // std::cout << "Hot/cold/dead maps deleted." << std::endl;
 
   // Write good/bad run status to triage database
-  std::cout << "Writing emcal_auto to run triage DB... ";
-  ch->CaloWriteDB("emcal");
-  std::cout << "Done!" << std::endl;
-  /*
-  ch->CaloWriteDB("ihcal");
-  ch->CaloWriteDB("ohcal");
-  */
+  //  std::cout << "Writing emcal_auto to run triage DB... ";
+  //ch->CaloWriteDB("emcal");
+  //std::cout << "Done!!" << std::endl;
+  //std::cout << "Writing ihcal_auto to run triage DB... ";
+  //ch->CaloWriteDB("ihcal");
+  //std::cout << "Done!" << std::endl;
+  //std::cout << "Writing ohcal_auto to run triage DB... ";
+  //ch->CaloWriteDB("ohcal");
+  //std::cout << "Done!" << std::endl;
 
   delete cl;
 
