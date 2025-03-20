@@ -56,9 +56,8 @@ class CaloDraw : public QADraw
   int canvas_xsize = 1600;
   int canvas_ysize = 800;
 
-  // add summary canvases for hcal etc later
   const char *histprefix;
-  // for EMCal good run determination and hcal
+  // for good run determination
   CaloGoodRunChecker* calo_checker = nullptr;
 
   // New member variable to store reference file path

@@ -15,14 +15,16 @@ noinst_HEADERS = \
 
 pkginclude_HEADERS = \
   QADrawClient.h \
-  QADraw.h
+  QADraw.h \
+  SingleCanvasDrawer.h
 
 libqadrawclient_la_SOURCES = \
   ClientHistoList.cc \
   QADrawClient.cc \
   QADraw.cc \
   QAHtml.cc \
-  QARunDBodbc.cc
+  QARunDBodbc.cc \
+  SingleCanvasDrawer.cc
 
 libqadrawclient_la_LIBADD = \
   -L$(libdir) \

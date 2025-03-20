@@ -1,10 +1,10 @@
 #include <qahtml/QADrawClient.h>
 #include <tpc/TPCRawHitDraw.h>
-
+#include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawtpcrawhit.so)
 
 void draw_tpc_rawhit(const std::string &rootfile) {
-
+  SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
   /* cl->Verbosity(1); */
   QADraw *ex = new TPCRawHitDraw();

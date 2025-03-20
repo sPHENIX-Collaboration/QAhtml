@@ -11,10 +11,12 @@
 #include <TH2.h>
 #include <TPad.h>
 #include <TProfile.h>
+#include <TProfile2D.h>
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
+#include <TLatex.h>
 #include <TLegend.h>
 #include <TF1.h>
 #include <TGaxis.h>
@@ -61,8 +63,8 @@ void get_scaledowns(int runnumber, int scaledowns[])
   delete db;
 }
 
-GlobalQADraw::GlobalQADraw(const std::string &name)
-  : QADraw(name)
+  GlobalQADraw::GlobalQADraw(const std::string &name)
+: QADraw(name)
 {
   memset(TC, 0, sizeof(TC));
   memset(transparent, 0, sizeof(transparent));
@@ -79,20 +81,21 @@ GlobalQADraw::~GlobalQADraw()
 
 int GlobalQADraw::Draw(const std::string &what)
 {
-  /* sPHENIX style */ 
-  gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
-  gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
-  gStyle->SetPadLeftMargin(0.15);
-  gStyle->SetPadBottomMargin(0.15);
-  gStyle->SetTitleOffset(0.85, "XY");
-  gStyle->SetLabelSize(gStyle->GetLabelSize("X")*1.5, "X");
-  gStyle->SetLabelSize(gStyle->GetLabelSize("Y")*1.5, "Y");
-  gStyle->SetLabelSize(gStyle->GetLabelSize("Z")*1.5, "Z");
-  TGaxis::SetMaxDigits(4);
-  gStyle->SetPadTickX(1);
-  gStyle->SetPadTickY(1);
-  gStyle->SetOptStat(0);
-  gROOT->ForceStyle();
+  /* sPHENIX style
+     gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
+     gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
+     gStyle->SetPadLeftMargin(0.15);
+     gStyle->SetPadBottomMargin(0.15);
+     gStyle->SetTitleOffset(0.85, "XY");
+     gStyle->SetLabelSize(gStyle->GetLabelSize("X")*1.5, "X");
+     gStyle->SetLabelSize(gStyle->GetLabelSize("Y")*1.5, "Y");
+     gStyle->SetLabelSize(gStyle->GetLabelSize("Z")*1.5, "Z");
+     TGaxis::SetMaxDigits(4);
+     gStyle->SetPadTickX(1);
+     gStyle->SetPadTickY(1);
+     gStyle->SetOptStat(0);
+     gROOT->ForceStyle();
+     */
   int iret = 0;
   int idraw = 0;
   if (what == "ALL" || what == "MBD")
@@ -105,9 +108,9 @@ int GlobalQADraw::Draw(const std::string &what)
     iret += DrawZDC(what);
     idraw++;
   }
-  if (what == "ALL" || what == "Trigger")
+  if (what == "ALL" || what == "sEPD")
   {
-    iret += DrawTrigger(what);
+    iret += DrawsEPD(what);
     idraw++;
   }
   if (!idraw)
@@ -126,30 +129,53 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
   int ysize = cl->GetDisplaySizeY();
   if (num == 0)
   {
+
+    const double padWidth = 0.32; // width of each pad
+    const double padHeight = 0.30; // height of each pad
+    const double padSpacing = 0.02; // spacing between pads
+
+    // total width and height needed for pads
+    double totalWidth = padWidth * 3 + padSpacing * 2; 
+    double totalHeight = padHeight * 3 + padSpacing * 2; 
+
+    //ensure the total width and height do not exceed 1.0 (normalized coordinates)
+    if (totalWidth > 1.0 || totalHeight > 1.0)
+    {
+      std::cerr << "Canvas cannot contain all pads without overlapping!" << std::endl;
+      std::cerr << "Total width: " << totalWidth << ", Total height: " << totalHeight << std::endl;
+      return -1;
+    }
+
     // xpos (-1) negative: do not draw menu bar
-    TC[num] = new TCanvas(name.c_str(),"MBD Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+    TC[num] = new TCanvas(name.c_str(), "MBD Plots", -1, 0, (int)(xsize * totalWidth ), (int)(ysize * totalHeight + 0.2));  
     TC[num]->UseCurrentStyle();
     gSystem->ProcessEvents();
 
-    Pad[num][0] = new TPad("mypad00", "mbd_zvtx_wide", 0.05, 0.32, 0.45, 0.97, 0);
-    Pad[num][1] = new TPad("mypad01", "mbd_charge", 0.5, 0.52, 0.95, 0.97, 0);
-    Pad[num][2] = new TPad("mypad02", "mbd_nhit", 0.5, 0.02, 0.95, 0.47, 0);
-    Pad[num][3] = new TPad("mypad03", "mbd_zvtxq", 0.05, 0.02, 0.45, 0.28, 0);
+    Pad[num][0] = new TPad("mypad00", "mbd_zvtx_wide", 0.05, 0.60, 0.32, 0.95); 
+    Pad[num][1] = new TPad("mypad01", "mbd_zvtxq", 0.35, 0.60, 0.62, 0.95);    
+    //Pad[num][2] = new TPad("mypad02", "mbd_charge_sum", 0.65, 0.60, 0.95, 0.95); 
+    Pad[num][2] = new TPad("mypad03", "mbd_charesum_correlation", 0.05, 0.05, 0.32, 0.30);  
+    Pad[num][3] = new TPad("mypad04", "mbd_nhit", 0.05, 0.30, 0.32, 0.60);  
+    Pad[num][4] = new TPad("mypad05", "mbd_charge", 0.35, 0.30, 0.62, 0.60); 
+    Pad[num][5] = new TPad("mypad06", "mbd_nhits_correlation", 0.35, 0.05, 0.62, 0.30);  
 
 
     Pad[num][0]->Draw();
     Pad[num][1]->Draw();
     Pad[num][2]->Draw();
     Pad[num][3]->Draw();
+    Pad[num][4]->Draw();
+    Pad[num][5]->Draw();
+    //Pad[num][6]->Draw();
   }
-  
+
   if (num == 1)
   {
     TC[num] = new TCanvas(name.c_str(),"ZDC Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
     TC[num]->UseCurrentStyle();
     gSystem->ProcessEvents();
 
-    Pad[num][0] = new TPad("mypad10", "zdc_energy", 0.05, 0.52, 0.45, 0.97, 0);
+    Pad[num][0] = new TPad("mypad10", "zdc_energy", 0.05, 0.52, 0.50, 0.97, 0);
     Pad[num][1] = new TPad("mypad11", "zdc_zvtx", 0.5, 0.52, 0.95, 0.97, 0);
     Pad[num][2] = new TPad("mypad12", "zdc_zvtx_wide", 0.5, 0.02, 0.95, 0.47, 0);
 
@@ -160,14 +186,14 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
 
   if (num == 2)
   {
-    TC[num] = new TCanvas(name.c_str(),"Photon Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+    TC[num] = new TCanvas(name.c_str(),"sEPD Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
     TC[num]->UseCurrentStyle();
     gSystem->ProcessEvents();
 
-    Pad[num][0] = new TPad("mypad20", "trigger_eff", 0.05, 0.52, 0.45, 0.97, 0);
-    Pad[num][1] = new TPad("mypad21", "trigger_2d_photon", 0.5, 0.52, 0.95, 0.97, 0);
-    Pad[num][2] = new TPad("mypad22", "trigger_2d_mbd", 0.5, 0.02, 0.95, 0.47, 0);
-    Pad[num][3] = new TPad("mypad23", "triggers", 0.05, 0.02, 0.45, 0.47, 0);
+    Pad[num][0] = new TPad("mypad00", "sEPD South Map", 0.05, 0.52, 0.50, 0.97, 0);
+    Pad[num][1] = new TPad("mypad01", "sEPD North Map", 0.5, 0.52, 0.95, 0.97, 0);
+    Pad[num][2] = new TPad("mypad02", "sEPD NS ADC distribution", 0.5, 0.02, 0.95, 0.47, 0);
+    Pad[num][3] = new TPad("mypad03", "sEPD NS Correlation", 0.05, 0.02, 0.50, 0.47, 0);
 
     Pad[num][0]->Draw();
     Pad[num][1]->Draw();
@@ -175,26 +201,11 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
     Pad[num][3]->Draw();
   }
 
-  if (num == 3)
-  {
-    TC[num] = new TCanvas(name.c_str(),"Average Plots", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
-    TC[num]->UseCurrentStyle();
-    gSystem->ProcessEvents();
-
-    Pad[num][0] = new TPad("mypad30", "trigger_leading", 0.05, 0.67, 0.95, 0.97, 0);
-    Pad[num][1] = new TPad("mypad31", "trigger_rejection", 0.05, 0.34, 0.95, 0.64, 0);
-    Pad[num][2] = new TPad("mypad32", "trigger_livetime", 0.05, 0.01, 0.95, 0.31, 0);
-
-    Pad[num][0]->Draw();
-    Pad[num][1]->Draw();
-    Pad[num][2]->Draw();
-  }
 
   // this one is used to plot the run number on the canvas
   transparent[num] = new TPad("transparent0", "this does not show", 0, 0, 1, 1);
   transparent[num]->SetFillStyle(4000);
   transparent[num]->Draw();
-
 
   return 0;
 }
@@ -202,133 +213,109 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
 int GlobalQADraw::DrawMBD(const std::string & /*what*/)
 {
   QADrawClient *cl = QADrawClient::instance();
-  //TH1 *h_GlobalQA_mbd_zvtx = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_zvtx"));
   TH1 *h_GlobalQA_mbd_zvtx_wide = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_zvtx_wide"));
-  //TH1 *h_GlobalQA_calc_zvtx = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_calc_zvtx"));
   TH1 *h_GlobalQA_calc_zvtx_wide = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_calc_zvtx_wide"));
   TH1 *h_GlobalQA_mbd_charge_s = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_charge_s"));
   TH1 *h_GlobalQA_mbd_charge_n = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_charge_n"));
   TH1 *h_GlobalQA_mbd_nhit_s  = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_nhit_s"));
   TH1 *h_GlobalQA_mbd_nhit_n = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_nhit_n"));
   TH1 *h_GlobalQA_mbd_zvtxq = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_zvtxq"));
+  TH1 *h_GlobalQA_mbd_charge_sum = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_mbd_charge_sum "));
+  TH2 *h2_GlobalQA_mbd_charge_NS_correlation = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_mbd_charge_NS_correlation"));
+  TH2 *h2_GlobalQA_mbd_nhits_NS_correlation = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_mbd_nhits_NS_correlation"));
+
+  //check if the first attempt was unsuccessful
+  if (!h_GlobalQA_mbd_charge_sum)
+  {
+    std::cerr << "h_GlobalQA_mbd_charge_sum not found with space, trying without space..." << std::endl;
+
+    // now check if it can be retrieved without the space
+    h_GlobalQA_mbd_charge_sum = dynamic_cast<TH1*>(cl->getHisto("h_GlobalQA_mbd_charge_sum")); 
+  }
+
+  //check to see if the histogram was found
+  if (!h_GlobalQA_mbd_charge_sum)
+  {
+    std::cerr << "h_GlobalQA_mbd_charge_sum has not been found" << std::endl;
+  } 
+  else
+  {
+    std::cerr << "h_GlobalQA_mbd_charge_sum found." << std::endl;
+  }
+
+  if (!h2_GlobalQA_mbd_charge_NS_correlation)
+  {
+    std::cerr<<" h2_GlobalQA_mbd_charge_NS_correlation Not Found"<<std::endl;
+    return -1;
+  }
+
+  if (!h2_GlobalQA_mbd_nhits_NS_correlation)
+  {
+    std::cerr<<" h2_GlobalQA_mbd_nhits_NS_correlation Not Found"<<std::endl;
+    return -1;
+  }
+
+  //run type
+  if(cl->RunNumber()>= 4200 && cl->RunNumber()<=53900)
+  { 
+    run_type = 1; //pp run 
+    std::cout<<"MBDRun_pp :"<<cl->RunNumber()<<std::endl;
+  }
+  else
+  {
+    run_type = 0 ; //AuAu run 
+    std::cout<<"MBDRun_AuAu :"<<cl->RunNumber()<<std::endl;
+  }
+
+
 
   if (!gROOT->FindObject("Global1"))
   {
     MakeCanvas("Global1",0);
   }
   TC[0]->Clear("D");
-  
+
   // Plot the z-vertices wide
-  TLegend * leg00 = new TLegend(0.58, 0.7, 0.84, 0.89);
-  leg00->SetTextSize(0.035);
-  leg00->SetBorderSize(0);
+  TLegend * leg00 = new TLegend(0.3, 0.7, 0.9, 0.9);
   Pad[0][0]->cd();
   if (h_GlobalQA_mbd_zvtx_wide && h_GlobalQA_calc_zvtx_wide)
   {
+
     TF1 * f = new TF1("f", "gaus", -100,100);
     f->SetParameters(h_GlobalQA_mbd_zvtx_wide->GetMaximum(), h_GlobalQA_mbd_zvtx_wide->GetMean(), h_GlobalQA_mbd_zvtx_wide->GetRMS() );
     h_GlobalQA_mbd_zvtx_wide->Fit("f");
-    leg00->AddEntry(h_GlobalQA_mbd_zvtx_wide,"Provided z-vertex");
-     
+    h_GlobalQA_mbd_zvtx_wide->SetMaximum(h_GlobalQA_mbd_zvtx_wide->GetMaximum() * 1.5);
+    h_GlobalQA_mbd_zvtx_wide->SetLineColor(kRed+4);
+    leg00->AddEntry(h_GlobalQA_mbd_zvtx_wide,"Provided z-vertex","l");
+    h_GlobalQA_mbd_zvtx_wide->DrawCopy("hist");
+
     gPad->UseCurrentStyle();
 
     h_GlobalQA_mbd_zvtx_wide->SetLineColor(kRed+4);
-    h_GlobalQA_mbd_zvtx_wide->DrawCopy("hist");
 
     f->SetLineColor(kBlack);
     f->DrawCopy("same");
-       
-    h_GlobalQA_calc_zvtx_wide->SetLineColor(kMagenta+1);
-    leg00->AddEntry(h_GlobalQA_calc_zvtx_wide,"Calculated z-vertex");
-    h_GlobalQA_calc_zvtx_wide->DrawCopy("hist same");
-    
-    TText printmean;
-    TText printrms;
-    printmean.SetTextFont(62);
-    printrms.SetTextFont(62);
-    printmean.SetTextSize(0.06);
-    printrms.SetTextSize(0.06);
-    printmean.SetNDC();
-    printrms.SetNDC();
+
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
-    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
-    printrms.DrawText(0.2,0.55,boost::str(boost::format("RMS: %.2f") % rms).c_str());
-  
-    
+    leg00->AddEntry((TObject*)0, boost::str(boost::format("Mean: %.1f") % mean).c_str(), "");
+    leg00->AddEntry((TObject*)0, boost::str(boost::format("RMS: %.1f") % rms).c_str(), "");
+
     leg00->Draw();
   }
   else
   {
     return -1;
+
   }
-
-  // Plot the charge distribution 
-  TLegend * leg01 = new TLegend(0.7, 0.7, 0.9, 0.9);
-  Pad[0][1]->cd();
-  if (h_GlobalQA_mbd_charge_s && h_GlobalQA_mbd_charge_n)
-  {
-   
-    gPad->UseCurrentStyle();
-    gPad->SetLogy();
-
-     h_GlobalQA_mbd_charge_s->SetLineColor(kRed);
-    leg01->AddEntry(h_GlobalQA_mbd_charge_s,"South");
-    h_GlobalQA_mbd_charge_s->DrawCopy("hist");
-      
-    h_GlobalQA_mbd_charge_n->SetLineColor(kBlue);
-    leg01->AddEntry(h_GlobalQA_mbd_charge_n,"North");
-    h_GlobalQA_mbd_charge_n->DrawCopy("hist same");
-  
-    leg01->Draw();
-  }
-  else
-  {
-    return -1;
-  }
-
-  // Plot the hit distribution
-  TLegend * leg02 = new TLegend(0.7, 0.7, 0.9, 0.9);
-  Pad[0][2]->cd();
-  if (h_GlobalQA_mbd_nhit_s && h_GlobalQA_mbd_nhit_n)
-  {
-  
-    gPad->UseCurrentStyle();
-    gPad->SetLogy();
-
-    h_GlobalQA_mbd_nhit_s->SetLineColor(kRed);
-    leg02->AddEntry(h_GlobalQA_mbd_nhit_s,"South");
-    h_GlobalQA_mbd_nhit_s->DrawCopy("hist");
-
-    h_GlobalQA_mbd_nhit_n->SetLineColor(kBlue);
-    leg02->AddEntry(h_GlobalQA_mbd_nhit_n,"North");
-    
-    TText printnhits;
-    TText printnhitn;
-    printnhits.SetTextFont(62);
-    printnhitn.SetTextFont(62);
-    printnhits.SetTextSize(0.06);
-    printnhitn.SetTextSize(0.06);
-    printnhits.SetNDC();
-    printnhitn.SetNDC();
-    float means = h_GlobalQA_mbd_nhit_s->GetMean();
-    float meann = h_GlobalQA_mbd_nhit_n->GetMean();
-    
-    h_GlobalQA_mbd_nhit_n->DrawCopy("hist same");
-    printnhits.DrawText(0.5,0.6,boost::str(boost::format("South mean: %.2f") % means).c_str());
-    printnhitn.DrawText(0.5,0.45,boost::str(boost::format("North mean: %.2f") % meann).c_str());
-
-    leg02->Draw();
-  }
-
   // Plot the number of mbd plots available
-  Pad[0][3]->cd();
+  Pad[0][1]->cd();
   gPad->UseCurrentStyle();
   if (h_GlobalQA_mbd_zvtxq)
   {
     h_GlobalQA_mbd_zvtxq->Scale(1.0 / h_GlobalQA_mbd_zvtxq->GetEntries());
     h_GlobalQA_mbd_zvtxq->GetYaxis()->SetRangeUser(0,1);
-    
+
     TText printyes;
     TText printno;
     printyes.SetTextFont(62);
@@ -339,18 +326,284 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     printno.SetNDC();
     float yes = h_GlobalQA_mbd_zvtxq->GetBinContent(2) * 100;
     float no = h_GlobalQA_mbd_zvtxq->GetBinContent(1) * 100;
-    
+
     h_GlobalQA_mbd_zvtxq->DrawCopy("hist");
-    printyes.DrawText(0.6,0.7,boost::str(boost::format("zvtx provided:\n %.2f%s") % yes % "%").c_str());
-    printno.DrawText(0.2,0.7, boost::str(boost::format("No zvtx:\n %.2f%s") % no % "%").c_str());
-    
+    printyes.DrawText(0.55,0.7,boost::str(boost::format("zvtx provided:\n %.1f%s") % yes % "%").c_str());
+    printno.DrawText(0.2,0.7, boost::str(boost::format("No zvtx:\n %.1f%s") % no % "%").c_str());
+
     gPad->UseCurrentStyle();
   }
   else
   {
     return -1;
+
   }
-  
+
+
+  // Plot the charge sum correlation distribution 
+  TLegend * leg03 = new TLegend(0.6, 0.6, 0.9, 0.9);
+  Pad[0][2]->cd();
+  if (h2_GlobalQA_mbd_charge_NS_correlation && h_GlobalQA_mbd_charge_sum )
+  {  
+    Double_t nevents = h_GlobalQA_mbd_charge_sum->Integral();
+    h_GlobalQA_mbd_charge_sum->Fill(-1000,nevents); // underflow bin keeps track of nevents
+    Double_t norm = 1.0/nevents;
+    h_GlobalQA_mbd_charge_sum ->Scale( norm );
+    h2_GlobalQA_mbd_charge_NS_correlation->Scale( norm );
+
+    gPad->UseCurrentStyle();
+    gPad->SetLogz();
+
+    if (run_type == 1)
+    {
+      // rebin the hist by a factor of 4 in both dimensions
+      TH2F *h2_GlobalQA_mbd_charge_NS_correlation_rebinned = (TH2F*)h2_GlobalQA_mbd_charge_NS_correlation->Rebin2D(4,4, nullptr);
+
+      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->SetTitle("MBD North-South Charge Correlation");
+      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->SetXTitle("MBD south charge sum");
+      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->SetYTitle("MBD north charge sum");
+      // h2_GlobalQA_mbd_charge_NS_correlation->DrawCopy("COLZ");
+      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->DrawCopy("COLZ");
+    }
+    else if (run_type == 0)
+    {
+      TH2F *h2_GlobalQA_mbd_charge_NS_correlation_auau = new TH2F("h2_GlobalQA_mbd_charge_NS_correlation_auau","h2_GlobalQA_mbd_charge_NS_correlation_auau", 150, 0, 1500, 150, 0, 1500);
+
+      for (int xbin = 1; xbin <= h2_GlobalQA_mbd_charge_NS_correlation->GetNbinsX(); xbin++)
+      {
+        for (int ybin = 1; ybin <= h2_GlobalQA_mbd_charge_NS_correlation->GetNbinsY(); ybin++) 
+        {
+
+          double content = h2_GlobalQA_mbd_charge_NS_correlation->GetBinContent(xbin, ybin);
+          double error = h2_GlobalQA_mbd_charge_NS_correlation->GetBinError(xbin, ybin);
+
+          h2_GlobalQA_mbd_charge_NS_correlation_auau->Fill(h2_GlobalQA_mbd_nhits_NS_correlation->GetXaxis()->GetBinCenter(xbin), h2_GlobalQA_mbd_nhits_NS_correlation->GetYaxis()->GetBinCenter(ybin), content);
+          //get the error 
+          h2_GlobalQA_mbd_charge_NS_correlation_auau->SetBinError(h2_GlobalQA_mbd_charge_NS_correlation_auau->FindBin(h2_GlobalQA_mbd_charge_NS_correlation->GetXaxis()->GetBinCenter(xbin),h2_GlobalQA_mbd_charge_NS_correlation_auau->GetYaxis()->GetBinCenter(ybin)), error);
+
+        }
+
+      }
+
+      h2_GlobalQA_mbd_charge_NS_correlation_auau->SetTitle("MBD North-South Charge Correlation");
+      h2_GlobalQA_mbd_charge_NS_correlation_auau->SetXTitle("MBD south charge sum");
+      h2_GlobalQA_mbd_charge_NS_correlation_auau->SetYTitle("MBD north charge sum");
+
+      h2_GlobalQA_mbd_charge_NS_correlation_auau->DrawCopy("COLZ");
+      //h2_GlobalQA_mbd_charge_NS_correlation_auau->DrawCopy("E");  
+
+
+      leg03->Draw();
+    }
+  }
+  else
+  {
+    return -1;
+
+  }
+
+  // Plot the hit distribution
+  TLegend * leg04 = new TLegend(0.6, 0.6, 0.9, 0.9);
+  Pad[0][3]->cd();
+  if (h_GlobalQA_mbd_nhit_s && h_GlobalQA_mbd_nhit_n)
+  {
+
+    gPad->UseCurrentStyle();
+    gPad->SetLogy();
+    if (run_type == 1)
+    {
+      //pp run
+      h_GlobalQA_mbd_nhit_s->SetLineColor(kRed);
+      leg04->AddEntry(h_GlobalQA_mbd_nhit_s,"South","l");
+      h_GlobalQA_mbd_nhit_s->DrawCopy("hist");
+
+      h_GlobalQA_mbd_nhit_n->SetLineColor(kBlue);
+      leg04->AddEntry(h_GlobalQA_mbd_nhit_n,"North","l");
+
+      float means = h_GlobalQA_mbd_nhit_s->GetMean();
+      float meann = h_GlobalQA_mbd_nhit_n->GetMean();
+      leg04->AddEntry((TObject*)0, boost::str(boost::format("South mean: %.1f") % means).c_str(), ""); 
+      leg04->AddEntry((TObject*)0, boost::str(boost::format("North mean: %.1f") % meann).c_str(), ""); 
+
+      h_GlobalQA_mbd_nhit_n->DrawCopy("hist same");
+
+    }
+    else if(run_type == 0)
+    {  
+      //AuAu run 
+
+      //MBD south arm
+      TH1F *h_GlobalQA_mbd_nhit_s_auau = new TH1F("h_GlobalQA_mbd_nhit_s_auau","h_GlobalQA_mbd_nhit_s_auau", 64, 0, 64);
+      //fill
+      for (int xbin = 1; xbin <= h_GlobalQA_mbd_nhit_s->GetNbinsX(); xbin++)
+      {
+        double content = h_GlobalQA_mbd_nhit_s->GetBinContent(xbin);
+        double Xvalue = h_GlobalQA_mbd_nhit_s->GetXaxis()->GetBinCenter(xbin);
+
+        //check only fill if the original values are within the new range
+        if (Xvalue >= 0 && Xvalue <= 64)
+        {
+          h_GlobalQA_mbd_nhit_s_auau->Fill(Xvalue,content);
+        }
+      }
+
+      h_GlobalQA_mbd_nhit_s_auau->SetLineColor(kRed);
+      leg04->AddEntry(h_GlobalQA_mbd_nhit_s_auau,"South","l");
+      h_GlobalQA_mbd_nhit_s_auau->DrawCopy("hist");
+
+      //MBD north arm
+      TH1F *h_GlobalQA_mbd_nhit_n_auau = new TH1F("h_GlobalQA_mbd_nhit_n_auau","h_GlobalQA_mbd_nhit_n_auau", 64, 0, 64);
+      //fill
+      for (int xbin = 1; xbin <= h_GlobalQA_mbd_nhit_n->GetNbinsX(); xbin++)
+      {
+        double content = h_GlobalQA_mbd_nhit_n->GetBinContent(xbin);
+        double Xvalue = h_GlobalQA_mbd_nhit_n->GetXaxis()->GetBinCenter(xbin);
+        //check only fill if the original values are within the new range
+        if (Xvalue >= 0 && Xvalue <= 64)
+        {
+          h_GlobalQA_mbd_nhit_n_auau->Fill(Xvalue,content);
+        }
+      }
+
+      h_GlobalQA_mbd_nhit_n_auau->SetLineColor(kBlue);
+      leg04->AddEntry(h_GlobalQA_mbd_nhit_n_auau,"North","l");
+
+      float means = h_GlobalQA_mbd_nhit_s_auau->GetMean();
+      float meann = h_GlobalQA_mbd_nhit_n_auau->GetMean();
+      leg04->AddEntry((TObject*)0, boost::str(boost::format("South mean: %.1f") % means).c_str(), ""); 
+      leg04->AddEntry((TObject*)0, boost::str(boost::format("North mean: %.1f") % meann).c_str(), ""); 
+
+      h_GlobalQA_mbd_nhit_n_auau->DrawCopy("hist same");
+
+    }
+
+    leg04->Draw();
+  }
+  else
+  {
+    return -1;
+
+  }
+
+  // Plot the charge distribution 
+  TLegend * leg01 = new TLegend(0.6, 0.6, 0.9, 0.9);
+  Pad[0][4]->cd();
+  if (h_GlobalQA_mbd_charge_s && h_GlobalQA_mbd_charge_n)
+  {
+
+    gPad->UseCurrentStyle();
+    gPad->SetLogy();
+
+    if (run_type == 1)
+    {
+
+      h_GlobalQA_mbd_charge_s->SetLineColor(kRed);
+      leg01->AddEntry(h_GlobalQA_mbd_charge_s,"South","l");
+      h_GlobalQA_mbd_charge_s->DrawCopy("hist");
+
+      h_GlobalQA_mbd_charge_n->SetLineColor(kBlue);
+      leg01->AddEntry(h_GlobalQA_mbd_charge_n,"North","l");
+      h_GlobalQA_mbd_charge_n->DrawCopy("hist same");
+
+      float means = h_GlobalQA_mbd_charge_s->GetMean();
+      float meann = h_GlobalQA_mbd_charge_n->GetMean();
+      leg01->AddEntry((TObject*)0, boost::str(boost::format("South mean: %.1f") % means).c_str(), ""); 
+      leg01->AddEntry((TObject*)0, boost::str(boost::format("North mean: %.1f") % meann).c_str(), ""); 
+    }
+    else if (run_type == 0)
+    {
+      //MBD south arm
+      TH1F *h_GlobalQA_mbd_charge_s_auau = new TH1F("h_GlobalQA_mbd_charge_s_auau","h_GlobalQA_mbd_charge_s_auau", 150, 0, 1500);
+      //fill
+      for (int xbin = 1; xbin <= h_GlobalQA_mbd_charge_s->GetNbinsX(); xbin++)
+      {
+        double content = h_GlobalQA_mbd_charge_s->GetBinContent(xbin);
+        double Xvalue = h_GlobalQA_mbd_charge_s->GetXaxis()->GetBinCenter(xbin);
+
+        //check only fill if the original values are within the new range
+        if (Xvalue >= 0 && Xvalue <= 1500)
+        {
+          h_GlobalQA_mbd_charge_s_auau->Fill(Xvalue,content);
+        }
+      }
+
+      h_GlobalQA_mbd_charge_s_auau->SetLineColor(kRed);
+      leg01->AddEntry(h_GlobalQA_mbd_charge_s_auau,"South","l");
+      h_GlobalQA_mbd_charge_s_auau->DrawCopy("hist");
+
+      //MBD north arm
+      TH1F *h_GlobalQA_mbd_charge_n_auau = new TH1F("h_GlobalQA_mbd_charge_n_auau","h_GlobalQA_mbd_charge_n_auau", 150, 0, 1500);
+      //fill
+      for (int xbin = 1; xbin <= h_GlobalQA_mbd_charge_n->GetNbinsX(); xbin++)
+      {
+        double content = h_GlobalQA_mbd_charge_n->GetBinContent(xbin);
+        double Xvalue = h_GlobalQA_mbd_charge_n->GetXaxis()->GetBinCenter(xbin);
+
+        //check only fill if the original values are within the new range
+        if (Xvalue >= 0 && Xvalue <= 1500)
+        {
+          h_GlobalQA_mbd_charge_n_auau->Fill(Xvalue,content);
+        }
+      }
+
+      h_GlobalQA_mbd_charge_n_auau->SetLineColor(kBlue);
+      leg01->AddEntry(h_GlobalQA_mbd_charge_n_auau,"North","l");
+
+      float means = h_GlobalQA_mbd_charge_s_auau->GetMean();
+      float meann = h_GlobalQA_mbd_charge_n_auau->GetMean();
+      leg01->AddEntry((TObject*)0, boost::str(boost::format("South mean: %.1f") % means).c_str(), ""); 
+      leg01->AddEntry((TObject*)0, boost::str(boost::format("North mean: %.1f") % meann).c_str(), ""); 
+
+      h_GlobalQA_mbd_charge_n_auau->DrawCopy("hist same");
+
+
+
+    }
+    leg01->Draw();
+
+  }
+  else
+  {
+    return -1;
+
+  }
+
+  // Plot the hits correlation
+  TLegend * leg05 = new TLegend(0.6, 0.6, 0.9, 0.9);
+  Pad[0][5]->cd();
+  if (h2_GlobalQA_mbd_nhits_NS_correlation)
+  {
+
+    gPad->UseCurrentStyle();
+    gPad->SetLogz();
+    if (run_type==1)
+    {
+      h2_GlobalQA_mbd_nhits_NS_correlation->SetTitle("Run_pp_MBD South-North nhits Correlation");
+      h2_GlobalQA_mbd_nhits_NS_correlation->SetXTitle("MBD south nhits(Run_pp)");
+      h2_GlobalQA_mbd_nhits_NS_correlation->SetYTitle("MBD north nhits(Run_pp)");
+
+      h2_GlobalQA_mbd_nhits_NS_correlation->DrawCopy("COLZ");
+
+      leg05->Draw();
+    }
+    else if(run_type==0)
+    {
+      TH2F *h2_GlobalQA_mbd_nhits_NS_correlation_rebinned = (TH2F*)h2_GlobalQA_mbd_nhits_NS_correlation->Rebin2D(4,4, nullptr);
+
+      h2_GlobalQA_mbd_nhits_NS_correlation_rebinned->SetTitle("Run_AuAu_MBD South-North nhits Correlation");
+      h2_GlobalQA_mbd_nhits_NS_correlation_rebinned->SetXTitle("MBD south nhits(Run_AuAu)");
+      h2_GlobalQA_mbd_nhits_NS_correlation_rebinned->SetYTitle("MBD north nhits(Run_AuAu)");
+
+      h2_GlobalQA_mbd_nhits_NS_correlation_rebinned->DrawCopy("COLZ");
+
+      leg05->Draw();
+    }
+  }
+  else
+  {
+    return -1;
+
+  }
 
   //db->DBcommit();
 
@@ -361,13 +614,16 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   PrintRun.SetTextAlign(23);  // center/top alignment
   std::ostringstream runnostream;
   std::string runstring;
-  runnostream << Name() << "_MBD Run " << cl->RunNumber();
+  runnostream << Name() << "_MBD Run " << cl->RunNumber() << ", build " << cl->build();
   runstring = runnostream.str();
   transparent[0]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
   TC[0]->Update();
+
   return 0;
 }
+
+
 int GlobalQADraw::DrawZDC(const std::string & /*what*/)
 {
   QADrawClient *cl = QADrawClient::instance();
@@ -386,26 +642,35 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
   if (h_GlobalQA_zdc_energy_s && h_GlobalQA_zdc_energy_n)
   {
     h_GlobalQA_zdc_energy_s->Scale(1/h_GlobalQA_zdc_energy_s->Integral());
-    h_GlobalQA_zdc_energy_n->Scale(1/h_GlobalQA_zdc_energy_n->Integral()); 
+    h_GlobalQA_zdc_energy_n->Scale(1/h_GlobalQA_zdc_energy_n->Integral());
 
     gPad->UseCurrentStyle();
 
     h_GlobalQA_zdc_energy_s->SetLineColor(kRed);
-    leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South");
+    h_GlobalQA_zdc_energy_s->SetMarkerColor(kRed);
+    h_GlobalQA_zdc_energy_s->SetMarkerStyle(20);
+    h_GlobalQA_zdc_energy_s->SetMarkerSize(0.8);
+
+    leg10->AddEntry(h_GlobalQA_zdc_energy_s,"South","l");
     h_GlobalQA_zdc_energy_s->DrawCopy();
 
-    TGraph *gr_1n = new TGraph();
-    gr_1n->SetPoint(0, 70, 0);
-    gr_1n->SetPoint(1, 70, 1e7);
-    gr_1n->SetLineColor(kBlack);
-    gr_1n->SetLineWidth(2);
-    gr_1n->SetLineStyle(9);
-    gr_1n->Draw("l");
-  
+    // TGraph *gr_1n = new TGraph();
+    // gr_1n->SetPoint(0, 70, 0);
+    // gr_1n->SetPoint(1, 70, 1e7);
+    // gr_1n->SetLineColor(kBlack);
+    // gr_1n->SetLineWidth(2);
+    // gr_1n->SetLineStyle(9);
+    // gr_1n->Draw("l");
+
     h_GlobalQA_zdc_energy_n->SetLineColor(kBlue);
-    leg10->AddEntry(h_GlobalQA_zdc_energy_n,"North");
+    h_GlobalQA_zdc_energy_n->SetMarkerColor(kBlue);
+    h_GlobalQA_zdc_energy_n->SetMarkerStyle(20);
+    h_GlobalQA_zdc_energy_n->SetMarkerSize(0.8);
+
+    leg10->AddEntry(h_GlobalQA_zdc_energy_n,"North","l");
     h_GlobalQA_zdc_energy_n->DrawCopy("same");
-    
+
+
     leg10->Draw();
   }
   else
@@ -432,13 +697,12 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
     TF1 * f = new TF1("f", "gaus", -100,100);
     f->SetParameters(h_GlobalQA_zdc_zvtx_wide->GetMaximum(), h_GlobalQA_zdc_zvtx_wide->GetMean(), h_GlobalQA_zdc_zvtx_wide->GetRMS() );
     h_GlobalQA_zdc_zvtx_wide->Fit("f");
-
     h_GlobalQA_zdc_zvtx_wide->DrawCopy();
     gPad->UseCurrentStyle();
-    
+
     f->SetLineColor(kBlack);
     f->DrawCopy("same");
-    
+
     TText printmean;
     TText printrms;
     printmean.SetTextFont(62);
@@ -449,8 +713,8 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
     printrms.SetNDC();
     float mean = f->GetParameter(1);
     float rms = f->GetParameter(2);
-    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.2f") % mean).c_str());
-    printrms.DrawText(0.2,0.55, boost::str(boost::format("RMS: %.2f") % rms).c_str());
+    printmean.DrawText(0.2,0.7,boost::str(boost::format("Mean: %.1f") % mean).c_str());
+    printrms.DrawText(0.2,0.55, boost::str(boost::format("RMS: %.1f") % rms).c_str());
   }
   else 
   {
@@ -465,7 +729,7 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
   PrintRun.SetTextAlign(23);  // center/top alignment
   std::ostringstream runnostream;
   std::string runstring;
-  runnostream << Name() << "_ZDC Run " << cl->RunNumber();
+  runnostream << Name() << "_ZDC Run " << cl->RunNumber() << ", build " << cl->build();
   runstring = runnostream.str();
   transparent[1]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
@@ -473,102 +737,156 @@ int GlobalQADraw::DrawZDC(const std::string & /*what*/)
   return 0;
 }
 
-int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
+int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
 {
   QADrawClient *cl = QADrawClient::instance();
-  int scaledowns[64] = { 0 };
-  get_scaledowns(cl->RunNumber(), scaledowns);
-
-  TH1 *h_GlobalQA_ldClus_trig10 = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_ldClus_trig10"));
-  TH1 *h_GlobalQA_ldClus_trig25 = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_ldClus_trig25"));
-  TH1 *h_GlobalQA_ldClus_trig26 = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_ldClus_trig26"));
-  TH1 *h_GlobalQA_ldClus_trig27 = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_ldClus_trig27"));
-  TH1 *h_GlobalQA_triggerVec = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_triggerVec"));
-  TH2 *h_GlobalQA_edist_trig10 = dynamic_cast<TH2 *>(cl->getHisto("h_GlobalQA_edist_trig10"));
-  TH2 *h_GlobalQA_edist_trig26 = dynamic_cast<TH2 *>(cl->getHisto("h_GlobalQA_edist_trig26"));
+  TH1 *h_GlobalQA_sEPD_adcsum_s = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_sEPD_adcsum_s"));
+  TH1 *h_GlobalQA_sEPD_adcsum_n = dynamic_cast<TH1 *>(cl->getHisto("h_GlobalQA_sEPD_adcsum_n"));
+  TH2 *h2_GlobalQA_sEPD_adcsum_ns = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_sEPD_adcsum_ns"));
+  TProfile2D *h2Profile_GlobalQA_sEPD_tiles_north = dynamic_cast<TProfile2D *>(cl->getHisto("h2Profile_GlobalQA_sEPD_tiles_north"));
+  TProfile2D *h2Profile_GlobalQA_sEPD_tiles_south = dynamic_cast<TProfile2D *>(cl->getHisto("h2Profile_GlobalQA_sEPD_tiles_south"));
+  TH2 *h2_GlobalQA_sEPD_ADC_channel_north = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_sEPD_ADC_channel_north"));
+  TH2 *h2_GlobalQA_sEPD_ADC_channel_south = dynamic_cast<TH2 *>(cl->getHisto("h2_GlobalQA_sEPD_ADC_channel_south"));
 
   if (!gROOT->FindObject("Global3"))
   {
     MakeCanvas("Global3",2);
   }
-  
-  // Plot the Trigger efficiency
-  TLegend * leg20 = new TLegend(0.5, 0.7, 0.9 ,0.9);
+  TLegend * leg10 = new TLegend(0.7, 0.7, 0.9 ,0.9);
   Pad[2][0]->cd();
-  if (h_GlobalQA_ldClus_trig10 && h_GlobalQA_ldClus_trig25 && h_GlobalQA_ldClus_trig26 && h_GlobalQA_ldClus_trig27)
+  if (h_GlobalQA_sEPD_adcsum_s && h_GlobalQA_sEPD_adcsum_n)
   {
-    h_GlobalQA_ldClus_trig10->SetXTitle("Leading cluster energy [GeV]");
-    h_GlobalQA_ldClus_trig10->SetYTitle("Counts scaled by (prescale + 1)"); 
-    
+    double _max1 = h_GlobalQA_sEPD_adcsum_s->GetMaximum();
+    double _max2 = h_GlobalQA_sEPD_adcsum_n->GetMaximum();
+    double _add = 500.0;
+    double _histmax = _max2;
+
+    if(_max2 < _max1) _histmax = _max1;
+
+    h_GlobalQA_sEPD_adcsum_n->GetXaxis()->SetRangeUser(-10, 30000);
+    h_GlobalQA_sEPD_adcsum_s->GetXaxis()->SetRangeUser(-10, 30000);
+    h_GlobalQA_sEPD_adcsum_n->GetYaxis()->SetRangeUser(0, _histmax + _add);
+    h_GlobalQA_sEPD_adcsum_s->GetYaxis()->SetRangeUser(0, _histmax + _add);
+
+    // h_GlobalQA_sEPD_adcsum_s->Scale(1/h_GlobalQA_sEPD_adcsum_s->Integral());
+    // h_GlobalQA_sEPD_adcsum_n->Scale(1/h_GlobalQA_sEPD_adcsum_n->Integral());
+
+    h_GlobalQA_sEPD_adcsum_s->SetYTitle("Counts");
+
     gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    h_GlobalQA_ldClus_trig10->SetLineColor(kBlack);
-    h_GlobalQA_ldClus_trig25->SetLineColor(kRed);
-    h_GlobalQA_ldClus_trig26->SetLineColor(kGreen);
-    h_GlobalQA_ldClus_trig27->SetLineColor(kBlue);
 
-    leg20->AddEntry(h_GlobalQA_ldClus_trig10, "10. MBD N+S >= 1");
-    leg20->AddEntry(h_GlobalQA_ldClus_trig25, "25. MBD N+S >= 1 && Photon 3");
-    leg20->AddEntry(h_GlobalQA_ldClus_trig26, "26. MBD N+S >= 1 && Photon 4");
-    leg20->AddEntry(h_GlobalQA_ldClus_trig27, "27. MBD N+S >= 1 && Photon 5");
-   
-    h_GlobalQA_ldClus_trig10->Scale(scaledowns[10] + 1);
-    h_GlobalQA_ldClus_trig25->Scale(scaledowns[25] + 1);
-    h_GlobalQA_ldClus_trig26->Scale(scaledowns[26] + 1);
-    h_GlobalQA_ldClus_trig27->Scale(scaledowns[27] + 1);
+    h_GlobalQA_sEPD_adcsum_s->SetLineColor(kRed);
+    h_GlobalQA_sEPD_adcsum_s->SetMarkerColor(kRed);
+    h_GlobalQA_sEPD_adcsum_s->SetMarkerStyle(20);
+    h_GlobalQA_sEPD_adcsum_s->SetMarkerSize(0.8);
 
-    h_GlobalQA_ldClus_trig10->SetMinimum(0.5); 
-    h_GlobalQA_ldClus_trig10->DrawCopy("hist");
-    h_GlobalQA_ldClus_trig25->DrawCopy("hist same");
-    h_GlobalQA_ldClus_trig26->DrawCopy("hist same");
-    h_GlobalQA_ldClus_trig27->DrawCopy("hist same");
-    
-    leg20->Draw();
+    leg10->AddEntry(h_GlobalQA_sEPD_adcsum_s,"South","l");
+    h_GlobalQA_sEPD_adcsum_s->DrawCopy();
+
+
+    h_GlobalQA_sEPD_adcsum_n->SetLineColor(kBlue);
+    h_GlobalQA_sEPD_adcsum_n->SetMarkerColor(kBlue);
+    h_GlobalQA_sEPD_adcsum_n->SetMarkerStyle(20);
+    h_GlobalQA_sEPD_adcsum_n->SetMarkerSize(0.8);
+
+    leg10->AddEntry(h_GlobalQA_sEPD_adcsum_n,"North","l");
+    h_GlobalQA_sEPD_adcsum_n->DrawCopy("same");
+
+    leg10->Draw();
   }
   else
   {
     return -1;
   }
+
   Pad[2][1]->cd();
-  if (h_GlobalQA_edist_trig10)
+  if (h2_GlobalQA_sEPD_adcsum_ns)
   {
+
+    h2_GlobalQA_sEPD_adcsum_ns->SetTitle("sEPD North-South Correlation");
+    h2_GlobalQA_sEPD_adcsum_ns->GetXaxis()->SetRangeUser(-10, 30000);
+    h2_GlobalQA_sEPD_adcsum_ns->GetYaxis()->SetRangeUser(-10, 30000);
+    h2_GlobalQA_sEPD_adcsum_ns->SetXTitle("sEPD south ADC sum");
+    h2_GlobalQA_sEPD_adcsum_ns->SetYTitle("sEPD north ADC sum");
+    h2_GlobalQA_sEPD_adcsum_ns->DrawCopy("COLZ");
     gPad->UseCurrentStyle();
-    h_GlobalQA_edist_trig10->SetXTitle("Trigger 10 max cluster\t ieta");
-    h_GlobalQA_edist_trig10->SetYTitle("iphi");
-    h_GlobalQA_edist_trig10->DrawCopy("colz");
+    gPad->SetRightMargin(0.15);
+
   }
   else
   {
     return -1;
   }
+
+
   Pad[2][2]->cd();
-  if (h_GlobalQA_edist_trig26)
+  if (h2Profile_GlobalQA_sEPD_tiles_south && h2_GlobalQA_sEPD_ADC_channel_south)
   {
+    h2Profile_GlobalQA_sEPD_tiles_south->GetYaxis()->SetNdivisions(527);
+    h2Profile_GlobalQA_sEPD_tiles_south->GetXaxis()->SetNdivisions(527);
+    h2_GlobalQA_sEPD_ADC_channel_south->GetXaxis()->SetNdivisions(527);
+    h2_GlobalQA_sEPD_ADC_channel_south->GetYaxis()->SetNdivisions(527);
+    h2Profile_GlobalQA_sEPD_tiles_south->SetTitle("sEPD South Tile Mean ADC");
+    h2_GlobalQA_sEPD_ADC_channel_south->SetTitle("sEPD South Tile Mean ADC");
+    h2_GlobalQA_sEPD_ADC_channel_south->GetZaxis()->SetTitle("Mean ADC");
+    h2Profile_GlobalQA_sEPD_tiles_south->SetXTitle("#eta bin");
+    h2Profile_GlobalQA_sEPD_tiles_south->SetYTitle("#phi bin");
+    h2_GlobalQA_sEPD_ADC_channel_south->SetXTitle("#eta bin");
+    h2_GlobalQA_sEPD_ADC_channel_south->SetYTitle("#phi bin");
+    h2Profile_GlobalQA_sEPD_tiles_south->DrawCopy("COLZ");
+    if(h2_GlobalQA_sEPD_ADC_channel_south->GetEntries() == 372)
+    {
+      h2_GlobalQA_sEPD_ADC_channel_south->Draw("text SAME");
+    }
+
+
+    TLatex l1;
+    l1.SetNDC();
+    l1.SetTextFont(43);
+    l1.SetTextSize(20);
+    l1.DrawLatex(0.3, 0.01, "sEPD South Tile <ADC>");
     gPad->UseCurrentStyle();
-    h_GlobalQA_edist_trig26->SetXTitle("Trigger 26 max cluster\t ieta");
-    h_GlobalQA_edist_trig26->SetYTitle("iphi");
-    h_GlobalQA_edist_trig26->DrawCopy("colz");
+    gPad->SetRightMargin(0.15);
+    // gPad->SetLogz();
   }
   else
   {
     return -1;
   }
 
-
-  // Plot the triggervector
   Pad[2][3]->cd();
-  if (h_GlobalQA_triggerVec)
+  if (h2Profile_GlobalQA_sEPD_tiles_north && h2_GlobalQA_sEPD_ADC_channel_north)
   {
-    h_GlobalQA_triggerVec->SetXTitle("Trigger index");
-    h_GlobalQA_triggerVec->SetYTitle("Counts");
+    h2Profile_GlobalQA_sEPD_tiles_north->GetYaxis()->SetNdivisions(527);
+    h2Profile_GlobalQA_sEPD_tiles_north->GetXaxis()->SetNdivisions(527);
+    h2_GlobalQA_sEPD_ADC_channel_north->GetXaxis()->SetNdivisions(527);
+    h2_GlobalQA_sEPD_ADC_channel_north->GetYaxis()->SetNdivisions(527);
+    h2Profile_GlobalQA_sEPD_tiles_north->SetTitle("sEPD North Tile Mean ADC");
+    h2_GlobalQA_sEPD_ADC_channel_north->SetTitle("sEPD North Tile Mean ADC");
+    h2_GlobalQA_sEPD_ADC_channel_north->GetZaxis()->SetTitle("Mean ADC");
+    h2Profile_GlobalQA_sEPD_tiles_north->SetXTitle("#eta bin");
+    h2Profile_GlobalQA_sEPD_tiles_north->SetYTitle("#phi bin");
+    h2_GlobalQA_sEPD_ADC_channel_north->SetXTitle("#eta bin");
+    h2_GlobalQA_sEPD_ADC_channel_north->SetYTitle("#phi bin");
+    h2Profile_GlobalQA_sEPD_tiles_north->DrawCopy("COLZ ");
+    if(h2_GlobalQA_sEPD_ADC_channel_north->GetEntries() == 372)
+    {
+      h2_GlobalQA_sEPD_ADC_channel_north->Draw("text SAME");
+    }
+    TLatex l2;
+    l2.SetNDC();
+    l2.SetTextFont(43);
+    l2.SetTextSize(20);
+    l2.DrawLatex(0.3, 0.01, "sEPD North Tile <ADC>");
     gPad->UseCurrentStyle();
-    h_GlobalQA_triggerVec->DrawCopy("hist");
+    gPad->SetRightMargin(0.15);
+    // gPad->SetLogz();
   }
   else
   {
-    return 1;
+    return -1;
   }
-  
+
   //db->DBcommit();
   TText PrintRun;
   PrintRun.SetTextFont(62);
@@ -577,181 +895,11 @@ int GlobalQADraw::DrawTrigger(const std::string & /*what*/)
   PrintRun.SetTextAlign(23);  // center/top alignment
   std::ostringstream runnostream;
   std::string runstring;
-  runnostream << Name() << "_Trigger Run " << cl->RunNumber();
+  runnostream << Name() << "_sEPD Run " << cl->RunNumber() << ", build " << cl->build();
   runstring = runnostream.str();
   transparent[2]->cd();
   PrintRun.DrawText(0.5, 1., runstring.c_str());
   TC[2]->Update();
-
-
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig10 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig10"));
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig25 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig25"));
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig26 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig26"));
-  TH1 *pr_GlobalQA_evtNum_ldClus_trig27 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_evtNum_ldClus_trig27"));
-  TH1 *pr_GlobalQA_rejection_trig25 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_rejection_trig25"));
-  TH1 *pr_GlobalQA_rejection_trig26 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_rejection_trig26"));
-  TH1 *pr_GlobalQA_rejection_trig27 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_rejection_trig27"));
-  TH1 *pr_GlobalQA_livetime_trig10 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_livetime_trig10"));
-  TH1 *pr_GlobalQA_livetime_trig26 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_livetime_trig26"));
-  TH1 *pr_GlobalQA_livetime_trig27 = dynamic_cast<TH1 *>(cl->getHisto("pr_GlobalQA_livetime_trig27"));
-
-  // Second page
-  if (!gROOT->FindObject("Global4"))
-  {
-    MakeCanvas("Global4",3);
-  }
-  
-  // Plot the trigger persistency
-  TLegend * leg30 = new TLegend(0.7, 0.8, 0.9 ,1.0);
-  Pad[3][0]->cd();
-  if (pr_GlobalQA_evtNum_ldClus_trig10 && pr_GlobalQA_evtNum_ldClus_trig25 && pr_GlobalQA_evtNum_ldClus_trig26 && pr_GlobalQA_evtNum_ldClus_trig27)
-  {
-    gPad->UseCurrentStyle();
-    pr_GlobalQA_evtNum_ldClus_trig27->SetXTitle("Events binned by one thousand");
-    pr_GlobalQA_evtNum_ldClus_trig27->SetYTitle("Average leading cluster E [GeV]");
-
-
-    pr_GlobalQA_evtNum_ldClus_trig10->SetLineColor(kBlack);
-    pr_GlobalQA_evtNum_ldClus_trig25->SetLineColor(kRed);
-    pr_GlobalQA_evtNum_ldClus_trig26->SetLineColor(kGreen);
-    pr_GlobalQA_evtNum_ldClus_trig27->SetLineColor(kBlue);
-    
-    int last = 0;
-    for (int i = 1; i < pr_GlobalQA_evtNum_ldClus_trig10->GetNbinsX(); i++)
-    {
-      if (pr_GlobalQA_evtNum_ldClus_trig10->GetBinContent(i) != 0)
-      {
-        last = i;
-      }
-      else 
-      {
-        break;
-      }
-    }
-
-    pr_GlobalQA_evtNum_ldClus_trig10->GetXaxis()->SetRangeUser(0,last); 
-    pr_GlobalQA_evtNum_ldClus_trig25->GetXaxis()->SetRangeUser(0,last);
-    pr_GlobalQA_evtNum_ldClus_trig26->GetXaxis()->SetRangeUser(0,last);
-    pr_GlobalQA_evtNum_ldClus_trig27->GetXaxis()->SetRangeUser(0,last);
-
-    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig10, "10. MBD N+S >= 1");
-    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig25, "25. MBD N+S >= 1 && Photon 3 GeV");
-    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig26, "26. MBD N+S >= 1 && Photon 4 GeV");
-    leg30->AddEntry(pr_GlobalQA_evtNum_ldClus_trig27, "27. MBD N+S >= 1 && Photon 5 GeV");
-   
-    pr_GlobalQA_evtNum_ldClus_trig27->SetMinimum(0);
-    pr_GlobalQA_evtNum_ldClus_trig27->SetMinimum(8);
-    pr_GlobalQA_evtNum_ldClus_trig27->DrawCopy("hist");
-    pr_GlobalQA_evtNum_ldClus_trig26->DrawCopy("hist same");
-    pr_GlobalQA_evtNum_ldClus_trig25->DrawCopy("hist same");
-    pr_GlobalQA_evtNum_ldClus_trig10->DrawCopy("hist same");
-
-    leg30->Draw();
-  }
-  else
-  {
-    return 1;
-  }
-
-  // Plot the trigger rejections
-  TLegend * leg31 = new TLegend(0.5, 0.7, 0.9 ,0.9);
-  Pad[3][1]->cd();
-  if (pr_GlobalQA_rejection_trig25 && pr_GlobalQA_rejection_trig26 && pr_GlobalQA_rejection_trig27)
-  {
-    gPad->UseCurrentStyle();
-    pr_GlobalQA_rejection_trig27->SetXTitle("Events binned by one thousand");
-    pr_GlobalQA_rejection_trig27->SetYTitle("Average rejection factor");
-
-
-    pr_GlobalQA_rejection_trig25->SetLineColor(kRed);
-    pr_GlobalQA_rejection_trig26->SetLineColor(kGreen);
-    pr_GlobalQA_rejection_trig27->SetLineColor(kBlue);
-    
-    int last = 0;
-    for (int i = 1; i < pr_GlobalQA_rejection_trig25->GetNbinsX(); i++)
-    {
-      if (pr_GlobalQA_rejection_trig25->GetBinContent(i) != 0)
-      {
-        last = i;
-      }
-      else 
-      {
-        break;
-      }
-    }
-
-    pr_GlobalQA_rejection_trig25->GetXaxis()->SetRangeUser(0,last);
-    pr_GlobalQA_rejection_trig26->GetXaxis()->SetRangeUser(0,last);
-    pr_GlobalQA_rejection_trig27->GetXaxis()->SetRangeUser(0,last);
-
-    leg31->AddEntry(pr_GlobalQA_rejection_trig25, "25. MBD N+S >= 1 && Photon 3 GeV");
-    leg31->AddEntry(pr_GlobalQA_rejection_trig26, "26. MBD N+S >= 1 && Photon 4 GeV");
-    leg31->AddEntry(pr_GlobalQA_rejection_trig27, "27. MBD N+S >= 1 && Photon 5 GeV");
-   
-    pr_GlobalQA_rejection_trig27->SetMinimum(0);
-    pr_GlobalQA_rejection_trig27->DrawCopy("hist");
-    pr_GlobalQA_rejection_trig26->DrawCopy("hist same");
-    pr_GlobalQA_rejection_trig25->DrawCopy("hist same");
-
-    //leg31->Draw();
-  }
-  else
-  {
-    return 1;
-  }
-
-  // Plot the trigger livetimes
-  TLegend * leg32 = new TLegend(0.5, 0.7, 0.9 ,0.9);
-  Pad[3][2]->cd();
-  if (pr_GlobalQA_livetime_trig10 && pr_GlobalQA_livetime_trig26 && pr_GlobalQA_livetime_trig27)
-  {
-    gPad->UseCurrentStyle();
-    pr_GlobalQA_livetime_trig27->SetXTitle("Events binned by one thousand");
-    pr_GlobalQA_livetime_trig27->SetYTitle("Average livetime factor");
-
-
-    pr_GlobalQA_livetime_trig10->SetLineColor(kRed);
-    pr_GlobalQA_livetime_trig26->SetLineColor(kGreen);
-    pr_GlobalQA_livetime_trig27->SetLineColor(kBlue);
-    
-    int last = 0;
-    for (int i = 1; i < pr_GlobalQA_livetime_trig10->GetNbinsX(); i++)
-    {
-      if (pr_GlobalQA_livetime_trig10->GetBinContent(i) != 0)
-      {
-        last = i;
-      }
-      else 
-      {
-        break;
-      }
-    }
-
-    pr_GlobalQA_livetime_trig10->GetXaxis()->SetRangeUser(0,last);
-    pr_GlobalQA_livetime_trig26->GetXaxis()->SetRangeUser(0,last);
-    pr_GlobalQA_livetime_trig27->GetXaxis()->SetRangeUser(0,last);
-
-    leg32->AddEntry(pr_GlobalQA_livetime_trig10, "25. MBD N+S >= 1 && Photon 3 GeV");
-    leg32->AddEntry(pr_GlobalQA_livetime_trig26, "26. MBD N+S >= 1 && Photon 4 GeV");
-    leg32->AddEntry(pr_GlobalQA_livetime_trig27, "27. MBD N+S >= 1 && Photon 5 GeV");
-   
-    pr_GlobalQA_livetime_trig27->SetMinimum(0);
-    pr_GlobalQA_livetime_trig27->DrawCopy("hist");
-    pr_GlobalQA_livetime_trig26->DrawCopy("hist same");
-    pr_GlobalQA_livetime_trig10->DrawCopy("hist same");
-
-    //leg32->Draw();
-  }
-  else
-  {
-    return 1;
-  }
-  
-  
-  //db->DBcommit();
-  transparent[3]->cd();
-  PrintRun.DrawText(0.5, 1., runstring.c_str());
-  TC[3]->Update();
   return 0;
 }
 
@@ -770,10 +918,10 @@ int GlobalQADraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(TC[0], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "ZDC", "global2", "png");
   cl->CanvasToPng(TC[1], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "Trigger/photon", "global3", "png");
+  pngfile = cl->htmlRegisterPage(*this, "sEPD", "global3", "png");
   cl->CanvasToPng(TC[2], pngfile);
-  pngfile = cl->htmlRegisterPage(*this, "Trigger/persistency", "global4", "png");
-  cl->CanvasToPng(TC[3], pngfile);
+
+
 
   return 0;
 }

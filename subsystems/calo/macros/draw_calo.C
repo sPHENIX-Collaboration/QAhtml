@@ -57,6 +57,7 @@ void draw_calo(const std::string &rootfile) {
   // std::cout << "Hot/cold/dead maps deleted." << std::endl;
 
   // Write good/bad run status to triage database
+
   //  std::cout << "Writing emcal_auto to run triage DB... ";
   //ch->CaloWriteDB("emcal");
   //std::cout << "Done!!" << std::endl;
@@ -66,7 +67,6 @@ void draw_calo(const std::string &rootfile) {
   //std::cout << "Writing ohcal_auto to run triage DB... ";
   //ch->CaloWriteDB("ohcal");
   //std::cout << "Done!" << std::endl;
-
   delete cl;
 
   gSystem->Exit(0);

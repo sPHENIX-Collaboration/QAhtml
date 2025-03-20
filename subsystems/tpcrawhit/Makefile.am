@@ -19,7 +19,8 @@ libqadrawtpcrawhit_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb
+  -lqadrawdb \
+  -ltpc
 
 tpcrawhitincludedir=$(pkgincludedir)/tpc
 

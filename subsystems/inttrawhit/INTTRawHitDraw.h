@@ -1,17 +1,11 @@
-#ifndef INTT_INTTDRAW_H__
-#define INTT_INTTDRAW_H__
+#ifndef INTT_INTT_RAW_HIT_DRAW_H__
+#define INTT_INTT_RAW_HIT_DRAW_H__
 
 #include <qahtml/QADraw.h>
 
-#include <vector>
+#include <map>
 
-class QADB;
-class QADBVar;
-class TCanvas;
-class TGraphErrors;
-class TPad;
-class TH1F;
-class TH2F;
+class SingleCanvasDrawer;
 
 class INTTRawHitDraw : public QADraw
 {
@@ -24,15 +18,8 @@ class INTTRawHitDraw : public QADraw
   int DBVarInit();
 
  private:
-  int MakeCanvas(const std::string &name, int num);
-  int MakeChipCanvas(const std::string &name, int num);
-  int DrawChipInfo();
-  int DrawSummary();
-  TCanvas *TC[2]{};
-  TCanvas *chipCanvas[8]{};
-  TPad *transparent[2]{};
-  TPad *Pad[2][8]{};
-  const char *histprefix;
+  std::map<std::string, SingleCanvasDrawer*> m_options;
+
 };
 
 #endif

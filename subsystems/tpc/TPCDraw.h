@@ -23,6 +23,11 @@ class TPCDraw : public QADraw
   int MakeHtml(const std::string &what = "ALL") override;
   int DBVarInit();
 
+  void setStreamingStatus(bool val)
+  {
+    m_isStreaming = val;
+  }
+
  private:
   int MakeCanvas(const std::string &name, int num);
   int DrawChannelHits();
@@ -30,9 +35,11 @@ class TPCDraw : public QADraw
   int DrawClusterInfo();
   int DrawRegionInfo();
   int DrawResidInfo();
-  TCanvas *TC[21]{};
-  TPad *transparent[21]{};
-  TPad *Pad[21][6]{};
+  TCanvas *TC[19]{};
+  TPad *transparent[19]{};
+  TPad *Pad[19][6]{};
+  
+  bool m_isStreaming = true;
 };
 
 #endif

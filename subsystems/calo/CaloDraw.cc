@@ -52,7 +52,8 @@ return;
 
 int CaloDraw::Draw(const std::string &what)
 {
-/* SetsPhenixStyle(); 
+
+  /* SetsPhenixStyle(); 
   gStyle->SetTitleSize(gStyle->GetTitleSize("X")*2.0, "X");
   gStyle->SetTitleSize(gStyle->GetTitleSize("Y")*2.0, "Y");
   gStyle->SetPadLeftMargin(0.15);
@@ -66,136 +67,138 @@ int CaloDraw::Draw(const std::string &what)
   gStyle->SetPadTickY(1);
   gStyle->SetOptStat(10);
   gROOT->ForceStyle();
-*/
-int iret = 0;
-int idraw = 0;
-if (what == "ALL" || what == "CEMC")
+  */
+
+  int iret = 0;
+  int idraw = 0;
+  if (what == "ALL" || what == "CEMC")
   {
-iret += DrawCemc();
-idraw++;
-/* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
-}
-if (what == "ALL" || what == "IHCAL")
+    iret += DrawCemc();
+    idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
+  }
+  if (what == "ALL" || what == "IHCAL")
   {
-iret += DrawIhcal();
-idraw++;
-/* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
-}
-if (what == "ALL" || what == "OHCAL")
+    iret += DrawIhcal();
+    idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
+  }
+  if (what == "ALL" || what == "OHCAL")
   {
-iret += DrawOhcal();
-idraw++;
-/* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
-}
-if (what == "ALL" || what == "CORR")
+    iret += DrawOhcal();
+    idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
+  }
+  if (what == "ALL" || what == "CORR")
   {
-iret += DrawCorr();
-idraw++;
-/* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
-}
-if (what == "ALL" || what == "ZDC")
+    iret += DrawCorr();
+    idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
+  }
+  if (what == "ALL" || what == "ZDC")
   {
-iret += DrawZdcMbd();
-idraw++;
-/* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
-}
-if (!idraw)
+    iret += DrawZdcMbd();
+    idraw++;
+    /* std::cout << "iret = " << iret << ", idraw = " << idraw << std::endl; */
+  }
+  if (!idraw)
+
   {
-std::cout << " Unimplemented Drawing option: " << what << std::endl;
-iret = -1;
-}
-return iret;
+    std::cout << " Unimplemented Drawing option: " << what << std::endl;
+    iret = -1;
+  }
+  return iret;
 }
 
 int CaloDraw::MakeCanvas(const std::string &name, int num)
 {
-/* QADrawClient *cl = QADrawClient::instance(); */
-/* int xsize = cl->GetDisplaySizeX(); */
-/* int ysize = cl->GetDisplaySizeY(); */
-/* TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)); */
-// xpos (-1) negative: do not draw menu bar
-TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, canvas_xsize, canvas_ysize);
-TC[num]->UseCurrentStyle();
-gSystem->ProcessEvents();
+  /* QADrawClient *cl = QADrawClient::instance(); */
+  /* int xsize = cl->GetDisplaySizeX(); */
+  /* int ysize = cl->GetDisplaySizeY(); */
+  /* TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)); */
+  // xpos (-1) negative: do not draw menu bar
+  TC[num] = new TCanvas(name.c_str(), (boost::format("Calo Plots %d") % num).str().c_str(), -1, 0, canvas_xsize, canvas_ysize);
+  TC[num]->UseCurrentStyle();
+  gSystem->ProcessEvents();
 
-if (num==1 || num==11 || num==12 || num==13)
-  {
-Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.25, 0.45, 0.75, 0);
-Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
+  if (num==1 || num==11 || num==12 || num==13)
+    {
+    Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.25, 0.45, 0.75, 0);
+    Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
 
-Pad[num][0]->Draw();
-Pad[num][1]->Draw();
-}
- else if (num==7)
-   {
-Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "", 0.05, 0.05, 0.95, 0.95, 0);
-Pad[num][0]->Draw();
-}
- else if (num==5)
-   {
-TC[num]->Divide(3, 2, 0.025, 0.025);
-Pad[num][0] = (TPad*)TC[num]->GetPad(1);
-Pad[num][1] = (TPad*)TC[num]->GetPad(2);
-Pad[num][2] = (TPad*)TC[num]->GetPad(3);
-Pad[num][3] = (TPad*)TC[num]->GetPad(4);
-Pad[num][4] = (TPad*)TC[num]->GetPad(5);
-Pad[num][5] = (TPad*)TC[num]->GetPad(6);
+    Pad[num][0]->Draw();
+    Pad[num][1]->Draw();
+    }
+  else if (num==7)
+    {
+     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "", 0.05, 0.05, 0.95, 0.95, 0);
+     Pad[num][0]->Draw();
+    }
+  else if (num==5)
+    {
+      TC[num]->Divide(3, 2, 0.025, 0.025);
+      Pad[num][0] = (TPad*)TC[num]->GetPad(1);
+      Pad[num][1] = (TPad*)TC[num]->GetPad(2);
+      Pad[num][2] = (TPad*)TC[num]->GetPad(3);
+      Pad[num][3] = (TPad*)TC[num]->GetPad(4);
+      Pad[num][4] = (TPad*)TC[num]->GetPad(5);
+      Pad[num][5] = (TPad*)TC[num]->GetPad(6);
 
-Pad[num][0]->Draw();
-Pad[num][1]->Draw();
-Pad[num][2]->Draw();
-Pad[num][3]->Draw();
-Pad[num][4]->Draw();
-Pad[num][5]->Draw();
-}
- else
-   {
-Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.45, 0.97, 0);
-Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.52, 0.95, 0.97, 0);
-Pad[num][2] = new TPad((boost::format("mypad%d2") % num).str().c_str(), "name", 0.05, 0.02, 0.45, 0.47, 0);
-Pad[num][3] = new TPad((boost::format("mypad%d3") % num).str().c_str(), "here", 0.5, 0.02, 0.95, 0.47, 0);
+      Pad[num][0]->Draw();
+      Pad[num][1]->Draw();
+      Pad[num][2]->Draw();
+      Pad[num][3]->Draw();
+      Pad[num][4]->Draw();
+      Pad[num][5]->Draw();
+    }
+  else
+    {
+      Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.45, 0.97, 0);
+      Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.52, 0.95, 0.97, 0);
+      Pad[num][2] = new TPad((boost::format("mypad%d2") % num).str().c_str(), "name", 0.05, 0.02, 0.45, 0.47, 0);
+      Pad[num][3] = new TPad((boost::format("mypad%d3") % num).str().c_str(), "here", 0.5, 0.02, 0.95, 0.47, 0);
 
-Pad[num][0]->Draw();
-Pad[num][1]->Draw();
-Pad[num][2]->Draw();
-Pad[num][3]->Draw();
-}
+      Pad[num][0]->Draw();
+      Pad[num][1]->Draw();
+      Pad[num][2]->Draw();
+      Pad[num][3]->Draw();
+    }
 
-// this one is used to plot the run number on the canvas
-transparent[num] = new TPad((boost::format("transparent%d") % num).str().c_str(), "this does not show", 0, 0, 1, 1);
-transparent[num]->SetFillStyle(4000);
-transparent[num]->Draw();
+  // this one is used to plot the run number on the canvas
+  transparent[num] = new TPad((boost::format("transparent%d") % num).str().c_str(), "this does not show", 0, 0, 1, 1);
+  transparent[num]->SetFillStyle(4000);
+  transparent[num]->Draw();
 
-return 0;
+  return 0;
 }
 
 int CaloDraw::DrawCemc()
 {
-QADrawClient *cl = QADrawClient::instance();
+  QADrawClient *cl = QADrawClient::instance();
 
-TH2 *cemc_e_chi2 = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("cemc_e_chi2")));
-TH2F *cemc_etaphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("cemc_etaphi")));
- TH2 *cemc_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_time")));
- TH1F *emcal_proj = (TH1F *) proj(cemc_etaphi)->Clone("h_emcal_proj");
- TH1 *invMass = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("InvMass")));
- TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
- TProfile2D *h_CaloValid_cemc_etaphi_pedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("cemc_etaphi_pedRMS")));
- TProfile2D *h_CaloValid_cemc_etaphi_ZSpedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("cemc_etaphi_ZSpedRMS")));
- TH2 *cemc_hotmap = nullptr;
- if (calo_checker) cemc_hotmap = calo_checker->cemc_hcdmap;
- /* TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA"))); */
+  TH2 *cemc_e_chi2 = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("cemc_e_chi2")));
+  TH2F *cemc_etaphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("cemc_etaphi")));
+  TH2 *cemc_etaphi_time = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_time")));
+  TH1F *emcal_proj = (TH1F *) proj(cemc_etaphi)->Clone("h_emcal_proj");
+  TH1 *invMass = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("InvMass")));
+  TH2 *etaphi_clus = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("etaphi_clus")));
+  TProfile2D *h_CaloValid_cemc_etaphi_pedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("cemc_etaphi_pedRMS")));
+  TProfile2D *h_CaloValid_cemc_etaphi_ZSpedRMS = dynamic_cast<TProfile2D *>(cl->getHisto(histprefix + std::string("cemc_etaphi_ZSpedRMS")));
+  TH2 *cemc_hotmap = nullptr;
+  if (calo_checker) cemc_hotmap = calo_checker->cemc_hcdmap;
+  /* TH1 *cemc_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("cemc_etaphi_wQA"))); */
   
- // canvas 1
- if (!gROOT->FindObject("cemc1"))
-   {
-     MakeCanvas("cemc1", 0);
-   }
- /* TC[0]->Clear("D"); */
- Pad[0][0]->cd();
- if (cemc_e_chi2)
-   {
-     cemc_e_chi2->SetTitle("EMCal #chi^{2} vs Energy");
-     cemc_e_chi2->SetXTitle("Tower E (GeV) EMCal");
+  // canvas 1
+  if (!gROOT->FindObject("cemc1"))
+  {
+    MakeCanvas("cemc1", 0);
+  }
+  /* TC[0]->Clear("D"); */
+  Pad[0][0]->cd();
+  if (cemc_e_chi2)
+  {
+    cemc_e_chi2->SetTitle("EMCal #chi^{2} vs Energy");
+    cemc_e_chi2->SetXTitle("Tower E (GeV) EMCal");
     cemc_e_chi2->SetYTitle("Tower #chi^{2} EMCal");
     cemc_e_chi2->GetXaxis()->SetNdivisions(505);
     cemc_e_chi2->GetXaxis()->SetRangeUser(-1, 15);
@@ -333,136 +336,162 @@ TH2F *cemc_etaphi = dynamic_cast<TH2F *>(cl->getHisto(histprefix + std::string("
   int nonzero_towers = 0;
   // Make masked tower histogram
   if (cemc_etaphi && cemc_hotmap)
+  {
+    h_hitmask = (TH2*)cemc_etaphi->Clone("h_hitmask");
+    int nbins = cemc_hotmap->GetNcells();
+    for (int i=0; i<=nbins; i++)
     {
-  h_hitmask = (TH2*)cemc_etaphi->Clone("h_hitmask");
-  int nbins = cemc_hotmap->GetNcells();
-  for (int i=0; i<=nbins; i++)
-    {
-  if (cemc_hotmap->GetBinContent(i) != 0)
-    {
-  h_hitmask->SetBinContent(i, 0);
-  nonzero_towers++;
-}
-}
-  h_hitmask->SetTitle("EMCal Tower Hits w/ Masking");
-  h_hitmask->SetXTitle("#it{#eta}_{i}");
-  h_hitmask->SetYTitle("#it{#phi}_{i}");
-  h_hitmask->DrawCopy("COLZ");
-  gPad->UseCurrentStyle();
-  gPad->SetRightMargin(0.15);
-}
+      if (cemc_hotmap->GetBinContent(i) != 0)
+	{
+	  h_hitmask->SetBinContent(i, 0);
+	  nonzero_towers++;
+	}
+    }
+    h_hitmask->SetTitle("EMCal Tower Hits w/ Masking");
+    h_hitmask->SetXTitle("#it{#eta}_{i}");
+    h_hitmask->SetYTitle("#it{#phi}_{i}");
+    h_hitmask->DrawCopy("COLZ");
+    gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.15);
+  }
   Pad[6][2]->cd();
-myText(0.25, 0.80, kBlack, "Hot Tower Mask Legend:");
-myText(0.25, 0.75, kBlack, "0/empty = good tower");
-myText(0.25, 0.70, kGray+2, "1 = dead tower");
-myText(0.25, 0.65, kRed, "2 = hot tower");
-myText(0.25, 0.60, kBlue, "3 = cold tower");
-int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
-if (calo_checker)
+  myText(0.25, 0.80, kBlack, "Hot Tower Mask Legend:");
+  myText(0.25, 0.75, kBlack, "0/empty = good tower");
+  myText(0.25, 0.70, kGray+2, "1 = dead tower");
+  myText(0.25, 0.65, kRed, "2 = hot tower");
+  myText(0.25, 0.60, kBlue, "3 = cold tower");
+  int dead_towers = 999999; int hot_towers = 999999; int cold_towers = 999999;
+  if (calo_checker)
   {
     dead_towers = calo_checker->cemc_dead_towers;
     hot_towers = calo_checker->cemc_hot_towers;
     cold_towers = calo_checker->cemc_cold_towers;
   }
-myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
-myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
-Pad[6][3]->cd();
-TH1F *emcal_proj_masked = nullptr;
-if (h_hitmask) emcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_emcal_proj_masked");
-if (emcal_proj_masked)
-  {
-    emcal_proj_masked->SetTitle("EMCal #eta Projection w/ Masking");
-    emcal_proj_masked->SetXTitle("#it{#eta}_{i} EMCal");
-    /* emcal_proj_masked->GetXaxis()->SetNdivisions(505); */
-    emcal_proj_masked->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
-    emcal_proj_masked->DrawCopy("HIST");
-    gPad->UseCurrentStyle();
-  }
+  myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
+  myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
+  Pad[6][3]->cd();
+  TH1F *emcal_proj_masked = nullptr;
+  if (h_hitmask) emcal_proj_masked = (TH1F *) proj(h_hitmask)->Clone("h_emcal_proj_masked");
+  if (emcal_proj_masked)
+    {
+      emcal_proj_masked->SetTitle("EMCal #eta Projection w/ Masking");
+      emcal_proj_masked->SetXTitle("#it{#eta}_{i} EMCal");
+      /* emcal_proj_masked->GetXaxis()->SetNdivisions(505); */
+      emcal_proj_masked->SetYTitle("N^{twr}(E_{T} > 1 GeV)");
+      emcal_proj_masked->DrawCopy("HIST");
+      gPad->UseCurrentStyle();
+    }
+  if (!gROOT->FindObject("cemc4"))
+    {
+      MakeCanvas("cemc4", 11);
+    }
+  Pad[11][0]->cd();
+  if (h_CaloValid_cemc_etaphi_pedRMS)
+    {
+      h_CaloValid_cemc_etaphi_pedRMS->SetTitle("CaloValid EMCal Eta-Phi Ped RMS");
+      h_CaloValid_cemc_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_pedRMS->DrawCopy("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
+  Pad[11][1]->cd();
+  if (h_CaloValid_cemc_etaphi_ZSpedRMS)
+    {
+      h_CaloValid_cemc_etaphi_ZSpedRMS->SetTitle("CaloValid EMCal Eta-Phi ZSped RMS");
+      h_CaloValid_cemc_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_ZSpedRMS->Draw("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
 
 // ---- Begin: Overlay hardcoded reference for EMCal #eta Projection (masked) ----
- {
-   TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-   if (!refFile || refFile->IsZombie()) {
-     std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-   } else {
-     TH2F *ref_cemc_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_cemc_etaphi"));
-     if (!ref_cemc_etaphi) {
-       std::cerr << "Error: Could not find 'h_CaloValid_cemc_etaphi' for masked projection in reference file." << std::endl;
-     } else {
-       TH1F *ref_emcal_proj_masked = (TH1F*) proj(ref_cemc_etaphi)->Clone("h_ref_emcal_proj_masked");
-       if (!ref_emcal_proj_masked) {
-	 std::cerr << "Error: Could not create reference masked EMCal projection." << std::endl;
-       } else {
-	 ref_emcal_proj_masked->SetLineColor(kRed);
-	 ref_emcal_proj_masked->SetLineWidth(2);
-	 ref_emcal_proj_masked->Draw("SAME");
-       }
-     }
-     refFile->Close();
-   }
- }
+  {
+    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
+    if (!refFile || refFile->IsZombie()) {
+      std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
+    } else {
+      TH2F *ref_cemc_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_cemc_etaphi"));
+      if (!ref_cemc_etaphi) {
+	std::cerr << "Error: Could not find 'h_CaloValid_cemc_etaphi' for masked projection in reference file." << std::endl;
+      } else {
+	TH1F *ref_emcal_proj_masked = (TH1F*) proj(ref_cemc_etaphi)->Clone("h_ref_emcal_proj_masked");
+	if (!ref_emcal_proj_masked) {
+	  std::cerr << "Error: Could not create reference masked EMCal projection." << std::endl;
+	} else {
+	  ref_emcal_proj_masked->SetLineColor(kRed);
+	  ref_emcal_proj_masked->SetLineWidth(2);
+	  ref_emcal_proj_masked->Draw("SAME");
+	}
+      }
+      refFile->Close();
+    }
+  }
  // ---- End: Overlay hardcoded reference for EMCal #eta Projection (masked) ----
 
-if (!gROOT->FindObject("cemc4"))
-  {
-    MakeCanvas("cemc4", 11);
-  }
-Pad[11][0]->cd();
-if (h_CaloValid_cemc_etaphi_pedRMS)
-  {
-    h_CaloValid_cemc_etaphi_pedRMS->SetTitle("CaloValid EMCal Eta-Phi Ped RMS");
-    h_CaloValid_cemc_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} EMCal");
-    h_CaloValid_cemc_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} EMCal");
-    h_CaloValid_cemc_etaphi_pedRMS->DrawCopy("COLZ");
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-Pad[11][1]->cd();
-if (h_CaloValid_cemc_etaphi_ZSpedRMS)
-  {
-    h_CaloValid_cemc_etaphi_ZSpedRMS->SetTitle("CaloValid EMCal Eta-Phi ZSped RMS");
-    h_CaloValid_cemc_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} EMCal");
-    h_CaloValid_cemc_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} EMCal");
-    h_CaloValid_cemc_etaphi_ZSpedRMS->Draw("COLZ");
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
+  if (!gROOT->FindObject("cemc4"))
+    {
+      MakeCanvas("cemc4", 11);
+    }
+  Pad[11][0]->cd();
+  if (h_CaloValid_cemc_etaphi_pedRMS)
+    {
+      h_CaloValid_cemc_etaphi_pedRMS->SetTitle("CaloValid EMCal Eta-Phi Ped RMS");
+      h_CaloValid_cemc_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_pedRMS->DrawCopy("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
+  Pad[11][1]->cd();
+  if (h_CaloValid_cemc_etaphi_ZSpedRMS)
+    {
+      h_CaloValid_cemc_etaphi_ZSpedRMS->SetTitle("CaloValid EMCal Eta-Phi ZSped RMS");
+      h_CaloValid_cemc_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} EMCal");
+      h_CaloValid_cemc_etaphi_ZSpedRMS->Draw("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
+    }
 
-// remove this plot 
-/*
-  TH2 *ohcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi")));
-  TH1 *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
-  TH2 *ihcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi")));
-TH1 *ihcal_proj = (TH1 *) proj(ihcal_etaphi)->Clone("h_ihcal_proj");
-TH1 *h_fb_ratio_emcal = FBratio(emcal_proj);
-TH1 *h_fb_ratio_ohcal = FBratio(ohcal_proj);
-TH1 *h_fb_ratio_ihcal = FBratio(ihcal_proj);
-Pad[0][6]->cd();
-h_fb_ratio_emcal->Draw("ex0");
-h_fb_ratio_emcal->SetTitle("Calo North-South Ratio");
-h_fb_ratio_emcal->SetYTitle("N^{twr}(#eta_{i})/N^{twr}(#eta_{N-i})");
-h_fb_ratio_emcal->SetXTitle("#eta_{i}");
-h_fb_ratio_emcal->GetYaxis()->SetRangeUser(0.1, 2);
-h_fb_ratio_ohcal->Draw("ex0 same");
-h_fb_ratio_ohcal->SetLineColor(kBlue);
-h_fb_ratio_ohcal->SetMarkerColor(kBlue);
-h_fb_ratio_ohcal->SetMarkerStyle(22);
-h_fb_ratio_ihcal->Draw("ex0 same");
-h_fb_ratio_ihcal->SetLineColor(kRed);
-h_fb_ratio_ihcal->SetMarkerColor(kRed);
-h_fb_ratio_ihcal->SetMarkerStyle(33);
-gPad->UseCurrentStyle();
-
-myText(0.52, 0.20, 1, "EMCal");
-myText(0.67, 0.20, kBlue, "oHCal");
-myText(0.82, 0.20, kRed, "iHCal");
+  // remove this plot 
+  /*
+    TH2 *ohcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi")));
+    TH1 *ohcal_proj = (TH1F *) proj(ohcal_etaphi)->Clone("h_ohcal_proj");
+    TH2 *ihcal_etaphi = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("ihcal_etaphi")));
+    TH1 *ihcal_proj = (TH1 *) proj(ihcal_etaphi)->Clone("h_ihcal_proj");
+    TH1 *h_fb_ratio_emcal = FBratio(emcal_proj);
+    TH1 *h_fb_ratio_ohcal = FBratio(ohcal_proj);
+    TH1 *h_fb_ratio_ihcal = FBratio(ihcal_proj);
+    Pad[0][6]->cd();
+    h_fb_ratio_emcal->Draw("ex0");
+    h_fb_ratio_emcal->SetTitle("Calo North-South Ratio");
+    h_fb_ratio_emcal->SetYTitle("N^{twr}(#eta_{i})/N^{twr}(#eta_{N-i})");
+    h_fb_ratio_emcal->SetXTitle("#eta_{i}");
+    h_fb_ratio_emcal->GetYaxis()->SetRangeUser(0.1, 2);
+    h_fb_ratio_ohcal->Draw("ex0 same");
+    h_fb_ratio_ohcal->SetLineColor(kBlue);
+    h_fb_ratio_ohcal->SetMarkerColor(kBlue);
+    h_fb_ratio_ohcal->SetMarkerStyle(22);
+    h_fb_ratio_ihcal->Draw("ex0 same");
+    h_fb_ratio_ihcal->SetLineColor(kRed);
+    h_fb_ratio_ihcal->SetMarkerColor(kRed);
+    h_fb_ratio_ihcal->SetMarkerStyle(33);
+    gPad->UseCurrentStyle();
+    
+    myText(0.52, 0.20, 1, "EMCal");
+    myText(0.67, 0.20, kBlue, "oHCal");
+    myText(0.82, 0.20, kRed, "iHCal");
   */
-
-/* db->DBcommit(); */
-
-/*
+  
+  /* db->DBcommit(); */
+  
+  /*
   // retrieve variables from previous runs
   vector<QADrawDBVar> history;
   time_t current = cl->BeginRunUnixTime();
@@ -470,41 +499,42 @@ myText(0.82, 0.20, kRed, "iHCal");
   time_t back =   current - 24*3600;
   db->GetVar(back,current,"meanpx",history);
   DrawGraph(Pad[3],history,back,current);
-*/
-TText PrintRun;
-PrintRun.SetTextFont(62);
-PrintRun.SetTextSize(0.04);
-PrintRun.SetNDC();          // set to normalized coordinates
-PrintRun.SetTextAlign(23);  // center/top alignment
-std::ostringstream runnostream1, runnostream2, runnostream3, runnostream4, runnostream5;
-std::string runstring1, runstring2, runstring3, runstring4, runstring5;
-runnostream1 << Name() << "_cemc_towers Run " << cl->RunNumber() << ", build " << cl->build();
-runstring1 = runnostream1.str();
-runnostream2 << Name() << "_cemc_clusters Run " << cl->RunNumber() << ", build " << cl->build();
-runstring2 = runnostream2.str();
-runnostream3 << Name() << "_cemc_tower_masking Run " << cl->RunNumber() << ", build " << cl->build();
-runstring3 = runnostream3.str();
-/* runnostream4 << Name() << "_cemc_summary Run " << cl->RunNumber() << ", build " << cl->build(); */
-/* runstring4 = runnostream4.str(); */
-runnostream5 << Name() << "_cemc_pedestal_RMS_ Run " << cl->RunNumber() << ", build " << cl->build();
-runstring5 = runnostream5.str();
-transparent[0]->cd();
-PrintRun.DrawText(0.5, 1., runstring1.c_str());
-transparent[1]->cd();
-PrintRun.DrawText(0.5, 1., runstring2.c_str());
-transparent[6]->cd();
-PrintRun.DrawText(0.5, 1., runstring3.c_str());
-transparent[11]->cd();
-PrintRun.DrawText(0.5, 1., runstring5.c_str());
-/* transparent[7]->cd(); */
-/* PrintRun.DrawText(0.5, 1., runstring4.c_str()); */
+  */
 
-TC[0]->Update();
-TC[1]->Update();
-TC[6]->Update();
-TC[11]->Update();
-/* TC[7]->Update(); */
-return 0;
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream1, runnostream2, runnostream3, runnostream4, runnostream5;
+  std::string runstring1, runstring2, runstring3, runstring4, runstring5;
+  runnostream1 << Name() << "_cemc_towers Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring1 = runnostream1.str();
+  runnostream2 << Name() << "_cemc_clusters Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring2 = runnostream2.str();
+  runnostream3 << Name() << "_cemc_tower_masking Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring3 = runnostream3.str();
+  /* runnostream4 << Name() << "_cemc_summary Run " << cl->RunNumber() << ", build " << cl->build(); */
+  /* runstring4 = runnostream4.str(); */
+  runnostream5 << Name() << "_cemc_pedestal_RMS_ Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring5 = runnostream5.str();
+  transparent[0]->cd();
+  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+  transparent[1]->cd();
+  PrintRun.DrawText(0.5, 1., runstring2.c_str());
+  transparent[6]->cd();
+  PrintRun.DrawText(0.5, 1., runstring3.c_str());
+  transparent[11]->cd();
+  PrintRun.DrawText(0.5, 1., runstring5.c_str());
+  /* transparent[7]->cd(); */
+  /* PrintRun.DrawText(0.5, 1., runstring4.c_str()); */
+
+  TC[0]->Update();
+  TC[1]->Update();
+  TC[6]->Update();
+  TC[11]->Update();
+  /* TC[7]->Update(); */
+  return 0;
 }
 
 int CaloDraw::DrawIhcal()
@@ -603,10 +633,6 @@ int CaloDraw::DrawIhcal()
   }
   // ---- End: Overlay hardcoded reference for IHCal #eta Projection ----
 
-
-
-
-
   // Canvas 2
   // do "summary" canvas before tower masking canvas, so ihcalGoodRun gets called first
   //  if (!gROOT->FindObject("ihcal3")) 
@@ -651,13 +677,13 @@ int CaloDraw::DrawIhcal()
       h_hitmask = (TH2*)ihcal_etaphi->Clone("h_hitmask");
       int nbins = ihcal_hotmap->GetNcells();
       for (int i=0; i<=nbins; i++)
-{
-  if (ihcal_hotmap->GetBinContent(i) != 0)
-    {
-      h_hitmask->SetBinContent(i, 0);
-      nonzero_towers++;
-    }
-}
+	{
+	  if (ihcal_hotmap->GetBinContent(i) != 0)
+	    {
+	      h_hitmask->SetBinContent(i, 0);
+	      nonzero_towers++;
+	    }
+	}
       h_hitmask->SetTitle("IHcal Tower Hits w/ Masking");
       h_hitmask->SetXTitle("#it{#eta}_{i}");
       h_hitmask->SetYTitle("#it{#phi}_{i}");
@@ -693,87 +719,94 @@ int CaloDraw::DrawIhcal()
     }
 
   // ---- Begin: Overlay hardcoded reference for IHCal #eta Projection (masked) ----
-  {
-    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-    if (!refFile || refFile->IsZombie()) {
-      std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-    } else {
-      TH2F *ref_ihcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ihcal_etaphi"));
-      if (!ref_ihcal_etaphi) {
-	std::cerr << "Error: Could not find 'h_CaloValid_ihcal_etaphi' for masked projection in reference file." << std::endl;
-      } else {
-        TH1F *ref_ihcal_proj_masked = (TH1F*) proj(ref_ihcal_etaphi)->Clone("h_ref_ihcal_proj_masked");
-        if (!ref_ihcal_proj_masked) {
-	  std::cerr << "Error: Could not create reference masked IHCal projection." << std::endl;
-        } else {
-          ref_ihcal_proj_masked->SetLineColor(kRed);
-          ref_ihcal_proj_masked->SetLineWidth(2);
-          ref_ihcal_proj_masked->Draw("SAME");
-        }
-      }
-      refFile->Close();
-    }
-  }
+	  {
+	    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
+	    if (!refFile || refFile->IsZombie())
+	      {
+		std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
+	      } 
+	    else
+	      {
+		TH2F *ref_ihcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ihcal_etaphi"));
+		if (!ref_ihcal_etaphi)
+		  {
+		    std::cerr << "Error: Could not find 'h_CaloValid_ihcal_etaphi' for masked projection in reference file." << std::endl;
+		  } 
+		else
+		  {
+		    TH1F *ref_ihcal_proj_masked = (TH1F*) proj(ref_ihcal_etaphi)->Clone("h_ref_ihcal_proj_masked");
+		    if (!ref_ihcal_proj_masked)
+		      {
+			std::cerr << "Error: Could not create reference masked IHCal projection." << std::endl;
+		      } 
+		    else
+		      {
+			ref_ihcal_proj_masked->SetLineColor(kRed);
+			ref_ihcal_proj_masked->SetLineWidth(2);
+			ref_ihcal_proj_masked->Draw("SAME");
+		      }
+		  }
+		refFile->Close();
+	      }
+	  }
   // ---- End: Overlay hardcoded reference for IHCal #eta Projection (masked) ----
 
-  if (!gROOT->FindObject("ihcal4"))
-  {
-    MakeCanvas("ihcal4", 12);
-  }
-  Pad[12][0]->cd();
-  if (h_CaloValid_ihcal_etaphi_pedRMS)
-  {
-    h_CaloValid_ihcal_etaphi_pedRMS->SetTitle("CaloValid IHCal Eta-Phi Ped RMS");
-    h_CaloValid_ihcal_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} IHCal");
-    h_CaloValid_ihcal_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} IHCal");
-    h_CaloValid_ihcal_etaphi_pedRMS->DrawCopy("COLZ");
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-  Pad[12][1]->cd();
-  if (h_CaloValid_ihcal_etaphi_ZSpedRMS)
-  {
-    h_CaloValid_ihcal_etaphi_ZSpedRMS->SetTitle("CaloValid IHCal Eta-Phi ZSped RMS");
-    h_CaloValid_ihcal_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} IHCal");
-    h_CaloValid_ihcal_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} IHCal");
-    h_CaloValid_ihcal_etaphi_ZSpedRMS->Draw("COLZ");
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-  std::ostringstream runnostream1,runnostream2, runnostream3, runnostream4;
-  std::string runstring1, runstring2, runstring3, runstring4;
-  runnostream1 << Name() << "_ihcal Run " << cl->RunNumber() << ", build " << cl->build();
-  runstring1 = runnostream1.str();
-  runnostream2 << Name() << "_ihcal_tower_masking Run " << cl->RunNumber() << ", build " << cl->build();
-  runstring2 = runnostream2.str();
-  // runnostream3 << Name() << "_ihcal_summary Run " << cl->RunNumber() << ", build " << cl->build(); 
-  //runstring3 = runnostream3.str(); 
-  runnostream4 << Name() << "_ihcal_pedestal_RMS_ Run " << cl->RunNumber() << ", build " << cl->build();
-  runstring4 = runnostream4.str();
-  transparent[2]->cd();
-  PrintRun.DrawText(0.5, 1., runstring1.c_str());
-  //transparent[7]->cd();
-  //PrintRun.DrawText(0.5, 1., runstring3.c_str());
-  transparent[8]->cd();
-  PrintRun.DrawText(0.5, 1., runstring2.c_str());
-  transparent[12]->cd();
-  PrintRun.DrawText(0.5, 1., runstring4.c_str());
-
-  TC[2]->Update();
-  //TC[7]->Update();
-  TC[8]->Update();
-  TC[12]->Update();
-  return 0;
+	  if (!gROOT->FindObject("ihcal4"))
+	    {
+	      MakeCanvas("ihcal4", 12);
+	    }
+	  Pad[12][0]->cd();
+	  if (h_CaloValid_ihcal_etaphi_pedRMS)
+	    {
+	      h_CaloValid_ihcal_etaphi_pedRMS->SetTitle("CaloValid IHCal Eta-Phi Ped RMS");
+	      h_CaloValid_ihcal_etaphi_pedRMS->SetXTitle("#it{#eta}_{i} IHCal");
+	      h_CaloValid_ihcal_etaphi_pedRMS->SetYTitle("#it{#phi}_{i} IHCal");
+	      h_CaloValid_ihcal_etaphi_pedRMS->DrawCopy("COLZ");
+	      gPad->UseCurrentStyle();
+	      gPad->SetRightMargin(0.15);
+	      gPad->UseCurrentStyle();
+	      gPad->SetRightMargin(0.15);
+	    }
+	  Pad[12][1]->cd();
+	  if (h_CaloValid_ihcal_etaphi_ZSpedRMS)
+	    {
+	      h_CaloValid_ihcal_etaphi_ZSpedRMS->SetTitle("CaloValid IHCal Eta-Phi ZSped RMS");
+	      h_CaloValid_ihcal_etaphi_ZSpedRMS->SetXTitle("#it{#eta}_{i} IHCal");
+	      h_CaloValid_ihcal_etaphi_ZSpedRMS->SetYTitle("#it{#phi}_{i} IHCal");
+	      h_CaloValid_ihcal_etaphi_ZSpedRMS->Draw("COLZ");
+	      gPad->UseCurrentStyle();
+	      gPad->SetRightMargin(0.15);
+	    }
+	  
+	  TText PrintRun;
+	  PrintRun.SetTextFont(62);
+	  PrintRun.SetTextSize(0.04);
+	  PrintRun.SetNDC();          // set to normalized coordinates
+	  PrintRun.SetTextAlign(23);  // center/top alignment
+	  std::ostringstream runnostream1,runnostream2, runnostream3, runnostream4;
+	  std::string runstring1, runstring2, runstring3, runstring4;
+	  runnostream1 << Name() << "_ihcal Run " << cl->RunNumber() << ", build " << cl->build();
+	  runstring1 = runnostream1.str();
+	  runnostream2 << Name() << "_ihcal_tower_masking Run " << cl->RunNumber() << ", build " << cl->build();
+	  runstring2 = runnostream2.str();
+	  // runnostream3 << Name() << "_ihcal_summary Run " << cl->RunNumber() << ", build " << cl->build(); 
+	  //runstring3 = runnostream3.str(); 
+	  runnostream4 << Name() << "_ihcal_pedestal_RMS_ Run " << cl->RunNumber() << ", build " << cl->build();
+	  runstring4 = runnostream4.str();
+	  transparent[2]->cd();
+	  PrintRun.DrawText(0.5, 1., runstring1.c_str());
+	  //transparent[7]->cd();
+	  //PrintRun.DrawText(0.5, 1., runstring3.c_str());
+	  transparent[8]->cd();
+	  PrintRun.DrawText(0.5, 1., runstring2.c_str());
+	  transparent[12]->cd();
+	  PrintRun.DrawText(0.5, 1., runstring4.c_str());
+	  TC[2]->Update();
+	  //TC[7]->Update();
+	  TC[8]->Update();
+	  TC[12]->Update();
+	  return 0;
 }
-
 
 int CaloDraw::DrawOhcal()
 {
@@ -788,41 +821,40 @@ int CaloDraw::DrawOhcal()
   TH2 *ohcal_hotmap = nullptr;
   if (calo_checker) ohcal_hotmap = calo_checker->ohcal_hcdmap;
   /* TH1 *ohcal_etaphi_wQA = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("ohcal_etaphi_wQA"))); */
-
   // canvas 1
   if (!gROOT->FindObject("ohcal"))
-  {
-    MakeCanvas("ohcal", 3);
-  }
+    {
+      MakeCanvas("ohcal", 3);
+    }
   /* TC[3]->Clear("D"); */
   Pad[3][0]->cd();
   if (ohcal_e_chi2)
-  {
-    ohcal_e_chi2->SetTitle("oHCal #chi^{2} vs Energy");
-    ohcal_e_chi2->SetXTitle("Tower E (GeV) oHCal");
-    ohcal_e_chi2->SetYTitle("Tower #chi^{2} oHCal");
-    ohcal_e_chi2->GetXaxis()->SetNdivisions(505);
-    ohcal_e_chi2->GetXaxis()->SetRangeUser(-1, 15);
-    ohcal_e_chi2->DrawCopy("COLZ");
-    gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    gPad->SetLogz();
-    gPad->SetRightMargin(0.15);
-  }
+    {
+      ohcal_e_chi2->SetTitle("oHCal #chi^{2} vs Energy");
+      ohcal_e_chi2->SetXTitle("Tower E (GeV) oHCal");
+      ohcal_e_chi2->SetYTitle("Tower #chi^{2} oHCal");
+      ohcal_e_chi2->GetXaxis()->SetNdivisions(505);
+      ohcal_e_chi2->GetXaxis()->SetRangeUser(-1, 15);
+      ohcal_e_chi2->DrawCopy("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetLogy();
+      gPad->SetLogz();
+      gPad->SetRightMargin(0.15);
+    }
   else
-  {
-  // histogram is missing
-  return -1;
-}
+    {
+      // histogram is missing
+      return -1;
+    }
   Pad[3][1]->cd();
   if (ohcal_etaphi)
     {
-  ohcal_etaphi->SetTitle("oHCal Occupancy");
-  ohcal_etaphi->SetXTitle("#it{#eta}_{i} oHCal");
-  ohcal_etaphi->SetYTitle("#it{#phi}_{i} oHCal");
-  ohcal_etaphi->DrawCopy("COLZ");
-  gPad->UseCurrentStyle();
-  gPad->SetRightMargin(0.15);
+      ohcal_etaphi->SetTitle("oHCal Occupancy");
+      ohcal_etaphi->SetXTitle("#it{#eta}_{i} oHCal");
+      ohcal_etaphi->SetYTitle("#it{#phi}_{i} oHCal");
+      ohcal_etaphi->DrawCopy("COLZ");
+      gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.15);
     }
   Pad[3][2]->cd();
   if (ohcal_etaphi_time)
@@ -844,7 +876,7 @@ int CaloDraw::DrawOhcal()
       ohcal_proj->DrawCopy("HIST");
       gPad->UseCurrentStyle();
     }
-
+  
   // ---- Begin: Overlay hardcoded reference for OHCal #eta Projection ----
   {
     TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
@@ -896,7 +928,7 @@ int CaloDraw::DrawOhcal()
       ohcal_hotmap->SetTitle("OHcal Hot Tower Mask");
       ohcal_hotmap->SetXTitle("#it{#eta}_{i}");
       ohcal_hotmap->SetYTitle("#it{#phi}_{i}");
-      // change to a discrete color palette                                                                                                                                                                
+      // change to a discrete color palette                                                                                                                                            
       int palette[4] = {kWhite, kGray+2, kRed, kBlue};
       ohcal_hotmap->GetZaxis()->SetRangeUser(-0.5,3.5);
       ohcal_hotmap->DrawCopy("COLZ");
@@ -955,30 +987,40 @@ int CaloDraw::DrawOhcal()
       ohcal_proj_masked->DrawCopy("HIST");
       gPad->UseCurrentStyle();
     }
-  // ---- Begin: Overlay hardcoded reference for OHCal #eta Projection (masked) ----
+
+    // --- Begin: Overlay hardcoded reference for OHCal #eta Projection (masked) ----
   {
     TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-    if (!refFile || refFile->IsZombie()) {
-      std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-    } else {
-      TH2F *ref_ohcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ohcal_etaphi"));
-      if (!ref_ohcal_etaphi) {
-	std::cerr << "Error: Could not find 'h_CaloValid_ohcal_etaphi' for masked projection in reference file." << std::endl;
-      } else {
-        TH1F *ref_ohcal_proj_masked = (TH1F*) proj(ref_ohcal_etaphi)->Clone("h_ref_ohcal_proj_masked");
-        if (!ref_ohcal_proj_masked) {
-	  std::cerr << "Error: Could not create reference masked OHCal projection." << std::endl;
-        } else {
-          ref_ohcal_proj_masked->SetLineColor(kRed);
-          ref_ohcal_proj_masked->SetLineWidth(2);
-          ref_ohcal_proj_masked->Draw("SAME");
-        }
+    if (!refFile || refFile->IsZombie())
+      {
+	std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
+      } 
+    else
+      {
+	TH2F *ref_ohcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ohcal_etaphi"));
+	if (!ref_ohcal_etaphi)
+	  {
+	    std::cerr << "Error: Could not find 'h_CaloValid_ohcal_etaphi' for masked projection in reference file." << std::endl;
+	  } 
+	else
+	  {
+	    TH1F *ref_ohcal_proj_masked = (TH1F*) proj(ref_ohcal_etaphi)->Clone("h_ref_ohcal_proj_masked");
+	    if (!ref_ohcal_proj_masked)
+	      {
+		std::cerr << "Error: Could not create reference masked OHCal projection." << std::endl;
+	      }
+	    else
+	      {
+		ref_ohcal_proj_masked->SetLineColor(kRed);
+		ref_ohcal_proj_masked->SetLineWidth(2);
+		ref_ohcal_proj_masked->Draw("SAME");
+	      }
+	  }
+	refFile->Close();
       }
-      refFile->Close();
-    }
   }
   // ---- End: Overlay hardcoded reference for OHCal #eta Projection (masked) ----
-
+  
   if (!gROOT->FindObject("ohcal4"))
     {
       MakeCanvas("ohcal4", 13);
@@ -1005,7 +1047,6 @@ int CaloDraw::DrawOhcal()
       gPad->UseCurrentStyle();
       gPad->SetRightMargin(0.15);
     }
-
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
@@ -1055,9 +1096,6 @@ int CaloDraw::DrawZdcMbd()
   if (zdc_Northcalib && zdc_Southcalib)
     {
       zdc_Northcalib->SetLineColor(kBlue);
-      
-
-
       zdc_Northcalib->GetXaxis()->SetRangeUser(0.0, 12000);
       zdc_Northcalib->SetTitle("ZDC Total Energy");
       zdc_Northcalib->SetXTitle("#Sigma #it{E}^{ZDC Side}");
@@ -1065,7 +1103,6 @@ int CaloDraw::DrawZdcMbd()
       zdc_Northcalib->GetXaxis()->SetNdivisions(505);
       zdc_Northcalib->DrawCopy();
       gPad->UseCurrentStyle();
-
       zdc_Southcalib->SetLineColor(kRed);
       zdc_Southcalib->DrawCopy("same");
       gPad->SetLogy();
@@ -1274,7 +1311,7 @@ int CaloDraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(ihcalSummary, pngfile);
   pngfile = cl->htmlRegisterPage(*this, "iHCal/Pedestal", "ihcal4", "png");
   cl->CanvasToPng(TC[12], pngfile);
-  /* cl->CanvasToPng(TC[7], pngfile); */
+ /* cl->CanvasToPng(TC[7], pngfile); */
   pngfile = cl->htmlRegisterPage(*this, "oHCal/Run", "ohcal", "png");
   cl->CanvasToPng(TC[3], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "oHCal/Masking", "ohcal2", "png");
@@ -1283,7 +1320,8 @@ int CaloDraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(ohcalSummary, pngfile);
   pngfile = cl->htmlRegisterPage(*this, "oHCal/Pedestal", "ohcal4", "png");
   cl->CanvasToPng(TC[13], pngfile);
-  /* cl->CanvasToPng(TC[9], pngfile); */
+ /* cl->CanvasToPng(TC[9], pngfile); */
+
   pngfile = cl->htmlRegisterPage(*this, "ZDC&MBD", "zdc&mbd", "png");
   cl->CanvasToPng(TC[4], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "Correlations", "correlations", "png");

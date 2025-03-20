@@ -3,15 +3,10 @@
 
 #include <qahtml/QADraw.h>
 
-#include <vector>
+#include <map>
+#include <string>
 
-class QADB;
-class QADBVar;
-class TCanvas;
-class TGraphErrors;
-class TPad;
-class TH1F;
-class TH2F;
+class SingleCanvasDrawer;
 
 class INTTDraw : public QADraw
 {
@@ -24,13 +19,8 @@ class INTTDraw : public QADraw
   int DBVarInit();
 
  private:
-  int MakeCanvas(const std::string &name, int num);
-  int DrawChipInfo();
-  int DrawClusterInfo();
-  TCanvas *TC[2]{};
-  TPad *transparent[2]{};
-  TPad *Pad[2][4]{};
-  const char *histprefix;
+  std::map<std::string, SingleCanvasDrawer*> m_options;
+
 };
 
 #endif

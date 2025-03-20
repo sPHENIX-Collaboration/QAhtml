@@ -67,13 +67,6 @@ int TPCDraw::Draw(const std::string &what)
     iret += DrawRegionInfo();
     idraw++;
   }
-  /*
-  if (what == "ALL" || what == "RESID")
-  {
-    iret += DrawResidInfo();
-    idraw++;
-  }
-  */
   if (!idraw)
   {
     std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -84,6 +77,7 @@ int TPCDraw::Draw(const std::string &what)
 
 int TPCDraw::MakeCanvas(const std::string &name, int num)
 {
+  std::cout << num << std::endl;
   QADrawClient *cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
@@ -91,7 +85,7 @@ int TPCDraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("TPC Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  if (num != 12 && num != 18 && num != 19 && num != 20)
+  if (num != 12 && num != 18)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.45, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.52, 0.95, 0.97, 0);
@@ -103,7 +97,7 @@ int TPCDraw::MakeCanvas(const std::string &name, int num)
     Pad[num][2]->Draw();
     Pad[num][3]->Draw();
   } 
-  else if (num == 12 || num == 20)
+  else if (num == 12)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "no", 0.05, 0.25, 0.45, 0.75);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "no", 0.5, 0.25, 0.95, 0.75);
@@ -111,7 +105,7 @@ int TPCDraw::MakeCanvas(const std::string &name, int num)
     Pad[num][0]->Draw();
     Pad[num][1]->Draw();
   }
-  else if (num ==18 || num == 19)
+  else if (num == 18)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.32, 0.97, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.37, 0.52, 0.64, 0.97, 0);
@@ -193,7 +187,7 @@ int TPCDraw::DrawChannelHits()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpc Hits Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpc Hits Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[quad]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -252,7 +246,7 @@ int TPCDraw::DrawChannelADCs()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpc ADC Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpc ADC Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[quad + 6]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -279,6 +273,15 @@ int TPCDraw::DrawClusterInfo()
   Pad[12][0]->cd();
   if (h_clusterssector)
   {
+    h_clusterssector->RebinY(2);
+    if (m_isStreaming)
+    {
+      h_clusterssector->GetYaxis()->SetRangeUser(0,5000);
+    }   
+    else
+    {
+      h_clusterssector->GetYaxis()->SetRangeUser(0,1000);
+    }
     h_clusterssector->DrawCopy("COLZ");
     gPad->SetRightMargin(0.15); 
   } 
@@ -290,7 +293,16 @@ int TPCDraw::DrawClusterInfo()
   Pad[12][1]->cd();
   if (h_totalclusters)
   {
-    h_totalclusters->GetYaxis()->SetRangeUser(0,100);
+    h_totalclusters->RebinY(2);
+    if (m_isStreaming)
+    {
+      h_totalclusters->GetYaxis()->SetRangeUser(0,150);
+    }
+    else
+    {
+      h_totalclusters->GetYaxis()->SetRangeUser(0,100);
+    }
+    h_totalclusters->GetYaxis()->SetTitle("Clusters per Event");
     h_totalclusters->DrawCopy("COLZ");
     gPad->SetRightMargin(0.15); 
   } 
@@ -307,7 +319,7 @@ int TPCDraw::DrawClusterInfo()
   PrintRun.SetTextAlign(23); // center/top alignment
   std::ostringstream runnostream1;
   std::string runstring1;
-  runnostream1 << Name() << "_tpc_cluster_info Run " << cl->RunNumber();
+  runnostream1 << Name() << "_tpc_cluster_info Run " << cl->RunNumber() << ", build " << cl->build();
   runstring1 = runnostream1.str();
   transparent[12]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -348,9 +360,21 @@ int TPCDraw::DrawRegionInfo()
     {
       Pad[13+k][reg]->cd();
       if (h_regions[reg])
-      {
+      { 
         h_regions[reg]->DrawCopy();
         gPad->SetRightMargin(0.15);
+
+        TLatex *title = new TLatex();
+        title->SetTextSize(0.06);
+        title->SetNDC();
+        if (k == 2)
+        {
+          title->DrawLatex(0.25, 0.75, (boost::format("Region %i") % (reg+1)).str().c_str());
+        }
+        else
+        {
+          title->DrawLatex(0.6, 0.75, (boost::format("Region %i") % (reg+1)).str().c_str());
+        }
       }
       else
       {
@@ -365,7 +389,7 @@ int TPCDraw::DrawRegionInfo()
     PrintRun.SetTextAlign(23); // center/top alignment
     std::ostringstream runnostream1;
     std::string runstring1;
-    runnostream1 << Name() << "_tpc_region_info Run " << cl->RunNumber();
+    runnostream1 << Name() << "_tpc_region_info Run " << cl->RunNumber() << ", build " << cl->build();
     runstring1 = runnostream1.str();
     transparent[13+k]->cd();
     PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -393,6 +417,11 @@ int TPCDraw::DrawRegionInfo()
     {
       h_regions[2*reg]->DrawCopy();
       gPad->SetRightMargin(0.15);
+        
+      TLatex *title = new TLatex();
+      title->SetTextSize(0.06);
+      title->SetNDC();
+      title->DrawLatex(0.35, 0.75, (boost::format("Region %i Side 0") % (reg+1)).str().c_str());
     }
     else
     {
@@ -404,6 +433,11 @@ int TPCDraw::DrawRegionInfo()
     {
       h_regions[2*reg + 1]->DrawCopy();
       gPad->SetRightMargin(0.15);
+      
+      TLatex *title = new TLatex();
+      title->SetTextSize(0.06);
+      title->SetNDC();
+      title->DrawLatex(0.35, 0.75, (boost::format("Region %i Side 1") % (reg+1)).str().c_str());
     }
     else
     {
@@ -418,7 +452,7 @@ int TPCDraw::DrawRegionInfo()
   PrintRun.SetTextAlign(23); // center/top alignment
   std::ostringstream runnostream1;
   std::string runstring1;
-  runnostream1 << Name() << "_tpc_region_info Run " << cl->RunNumber();
+  runnostream1 << Name() << "_tpc_region_info Run " << cl->RunNumber() << ", build " << cl->build();
   runstring1 = runnostream1.str();
   transparent[18]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
@@ -429,116 +463,6 @@ int TPCDraw::DrawRegionInfo()
   return 0;
 }
  
-int TPCDraw::DrawResidInfo()
-{
-  std::cout << "TPC DrawResidInfo() Beginning" << std::endl;
-  QADrawClient *cl = QADrawClient::instance();
-
-  std::vector<std::string> histNames;
-  histNames.push_back("clusphisize1pT_side0");
-  histNames.push_back("clusphisize1pT_side1");
-  histNames.push_back("clusphisizegeq1pT_side0");
-  histNames.push_back("clusphisizegeq1pT_side1");
-
-  if (! gROOT->FindObject("tpc_regions_phisize_pT"))
-  {
-    MakeCanvas("tpc_regions_phisize_pT", 19);
-  }
-  TC[19]->Clear("D");
-  for (int reg = 0; reg < 3; reg++)
-  {
-    std::vector<TH1F*> h_regions;
-    int names = histNames.size();
-    for (int k = 0; k < names; k++)
-    {
-      TH1F *h_region = dynamic_cast <TH1F *> (cl->getHisto((boost::format("h_TpcClusterQA_%s_%i") % histNames[k] % reg).str()));
-      h_regions.push_back(h_region);
-    }
-    Pad[19][reg]->cd();
-    if (h_regions[0] && h_regions[2])
-    {
-      TH1F *frac = (TH1F*)h_regions[0]->Clone();
-      frac->Divide(h_regions[2]);
-      frac->SetTitle((boost::format("PhiSize == 1 Ratio, Side 0, Region %i") % reg).str().c_str());
-      frac->SetXTitle("p_{T} [GeV/c]");
-      frac->SetYTitle("phisize==1/phisize>=1");
-      frac->GetXaxis()->SetNdivisions(4);
-      frac->GetXaxis()->SetRangeUser(0.8,3.2);
-      frac->GetYaxis()->SetRangeUser(0.0,1.0);
-      frac->DrawCopy();
-      gPad->SetRightMargin(0.15);
-    }
-    else
-    {
-      // histogram is missing
-      return -1; 
-    }
-    Pad[19][reg+3]->cd();
-    if (h_regions[1] && h_regions[3])
-    {
-      TH1F *frac = (TH1F*)h_regions[1]->Clone();
-      frac->Divide(h_regions[3]);
-      frac->SetTitle((boost::format("PhiSize == 1 Ratio, Side 1, Region %i") % reg).str().c_str());
-      frac->SetXTitle("p_{T} [GeV/c]");
-      frac->SetYTitle("phisize==1/phisize>=1");
-      frac->GetXaxis()->SetNdivisions(4);
-      frac->GetXaxis()->SetRangeUser(0.8,3.2);
-      frac->GetYaxis()->SetRangeUser(0.0,1.0);
-      frac->DrawCopy();
-      gPad->SetRightMargin(0.15);
-    }
-    else
-    {
-      // histogram is missing
-      return -1; 
-    }
-  } 
-
-  TH1I *h_ntpc = dynamic_cast <TH1I *> (cl->getHisto("h_TpcClusterQA_ntpc"));
-  if (! gROOT->FindObject("tpc_ntpc"))
-  {
-    MakeCanvas("tpc_ntpc", 20);
-  }
-  TC[20]->Clear("D");
-  Pad[20][0]->cd();
-  if (h_ntpc)
-  {
-    h_ntpc->DrawCopy();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1; 
-  }
-  
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();  // set to normalized coordinates
-  PrintRun.SetTextAlign(23); // center/top alignment
-  std::ostringstream runnostream1;
-  std::string runstring1;
-  runnostream1 << Name() << "_tpc_region_phisize_info Run " << cl->RunNumber();
-  runstring1 = runnostream1.str();
-  transparent[19]->cd();
-  PrintRun.DrawText(0.5, 1., runstring1.c_str());
-  std::ostringstream runnostream2;
-  std::string runstring2;
-  runnostream2 << Name() << "_tpc_ntp_info Run " << cl->RunNumber();
-  runstring2 = runnostream2.str();
-  transparent[20]->cd();
-  PrintRun.DrawText(0.5, 1., runstring2.c_str());
-  std::cout << "Done with text" << std::endl;
-
-  TC[19]->Update();
-  TC[20]->Update();
-   
-  std::cout << "DrawResidInfo Ending" << std::endl;
-
-  return 0;
-}
-
 int TPCDraw::MakeHtml(const std::string &what)
 {
   int iret = Draw(what);
@@ -586,13 +510,6 @@ int TPCDraw::MakeHtml(const std::string &what)
       pngfile = cl->htmlRegisterPage(*this, (boost::format("TPC_Regions_%s") % histNames[quad]).str(), (boost::format("%i") % (quad + 14)).str(), "png");
       cl->CanvasToPng(TC[quad + 13], pngfile);
     }
-  }
-  if (what == "ALL" || what == "RESID")
-  {
-    pngfile = cl->htmlRegisterPage(*this, "tpc_regions_phisize_pT", "20", "png");
-    cl->CanvasToPng(TC[19], pngfile);
-    pngfile = cl->htmlRegisterPage(*this, "tpc_ntpc", "21", "png");
-    cl->CanvasToPng(TC[20], pngfile);
   }
   return 0;
 }
