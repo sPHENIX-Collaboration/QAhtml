@@ -74,7 +74,8 @@ def main():
         qaFilesModified = {}
         for d in next(os.walk(qapath))[1] :
             for rundir in next(os.walk(qapath+"/"+d))[1] :
-
+                if args.verbose:
+                    print("checking rundir "+rundir)
                 runnum = int(rundir.split("/")[-1])
                 if runnum < 57000:
                     continue
@@ -84,7 +85,7 @@ def main():
                     modtime = os.path.getmtime(f)
                     if modtime > maxmodtime :
                         maxmodtime = modtime
-                qaFilesModified[runnum] = maxmodtime
+                        qaFilesModified[runnum] = maxmodtime
         if args.verbose :
             print(s + " modification time of all QA files:")
             print(qaFilesModified)
@@ -93,6 +94,8 @@ def main():
         updatedRuns = []
         for run in subsysAggRuns:
             if (not run in qaFilesModified) or (qaFilesModified[run] < subsysAggRuns[run]) :
+                if run < 57000:
+                    continue
                 aggFile=get_file(cursor, subsys[s][0], run)
                 if len(aggFile) == 0:
                     print("There is no aggregated histos file for run " + str(run))
