@@ -8,7 +8,7 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = ["HIST_CALOQA", "HIST_JETS"]
+track_hist_types = ["HIST_CALOFITTINGQA","HIST_CALOQA", "HIST_JETS"]
 runtypes = ["_run3auau"]
 
 

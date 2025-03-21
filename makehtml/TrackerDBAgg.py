@@ -9,13 +9,6 @@ import argparse
 import hashlib
 
 track_hist_types = ["HIST_DST_TRKR_CLUSTER","HIST_DST_TRKR_SEED"]
-#for i in range(24):
-    #track_hist_types.append(("HIST_DST_STREAMING_EVENT_TPC{:02d}").format(i))
-#    if i < 8:
-#        track_hist_types.append("HIST_DST_STREAMING_EVENT_INTT"+str(i))
-#    if i < 6:
-#        track_hist_types.append("HIST_DST_STREAMING_EVENT_MVTX"+str(i))
-
 
 runtypes = ["_run3auau"]
 
