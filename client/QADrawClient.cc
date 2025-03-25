@@ -412,7 +412,7 @@ int QADrawClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
   // create a unique filename (okay tempnam is not totally safe against
   // multiple procs getting the same name but the local /tmp filesystem should
   // prevent at least multiple machines colliding)
-  char *tmpname = tempnam("/tmp", "TC");
+  /*char *tmpname = tempnam("/tmp", "TC");
   canvas->Print(tmpname, "gif");  // write gif format
   TImage *img = TImage::Open(tmpname);
   if(Verbosity() > 0)
@@ -421,9 +421,11 @@ int QADrawClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
   }
   img->WriteImage(pngfilename.c_str());
   delete img;
-  remove(tmpname);
+  remove(tmpname);*/
   // NOLINTNEXTLINE(hicpp-no-malloc)
-  free(tmpname);
+  //free(tmpname);
+  
+  canvas->SaveAs(pngfilename.c_str());
   return 0;
 }
 
