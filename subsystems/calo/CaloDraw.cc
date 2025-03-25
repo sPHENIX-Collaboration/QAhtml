@@ -6,7 +6,6 @@
 
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
-
 #include <TCanvas.h>
 #include <TDatime.h>
 #include <TGraphErrors.h>
@@ -247,28 +246,28 @@ int CaloDraw::DrawCemc()
   }
 
   // ---- Begin: Overlay hardcoded reference for EMCal #eta Projection ----
-  {
-    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-    if (!refFile || refFile->IsZombie()) {
-      std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-    } else {
+  //{
+    //TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
+    //if (!refFile || refFile->IsZombie()) {
+      //std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
+      //} else {
       // Get the 2D histogram from the reference file using the correct name
-      TH2F *ref_cemc_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_cemc_etaphi"));
-      if (!ref_cemc_etaphi) {
-	std::cerr << "Error: Could not find 'h_CaloValid_cemc_etaphi' in reference file." << std::endl;
-      } else {
-        TH1F *ref_emcal_proj = (TH1F*) proj(ref_cemc_etaphi)->Clone("h_ref_emcal_proj");
-        if (!ref_emcal_proj) {
-	  std::cerr << "Error: Could not create reference EMCal projection." << std::endl;
-        } else {
-          ref_emcal_proj->SetLineColor(kRed);
-          ref_emcal_proj->SetLineWidth(2);
-          ref_emcal_proj->Draw("SAME");
-        }
-      }
-      refFile->Close();
-    }
-  }
+      //TH2F *ref_cemc_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_cemc_etaphi"));
+      //if (!ref_cemc_etaphi) {
+	//std::cerr << "Error: Could not find 'h_CaloValid_cemc_etaphi' in reference file." << std::endl;
+	//} else {
+        //TH1F *ref_emcal_proj = (TH1F*) proj(ref_cemc_etaphi)->Clone("h_ref_emcal_proj");
+        //if (!ref_emcal_proj) {
+	  //std::cerr << "Error: Could not create reference EMCal projection." << std::endl;
+	  //} else {
+          //ref_emcal_proj->SetLineColor(kRed);
+          //ref_emcal_proj->SetLineWidth(2);
+          //ref_emcal_proj->Draw("SAME");
+	  //}
+	//}
+      //refFile->Close();
+      //}
+    //  }
   // ---- End: Overlay hardcoded reference for EMCal #eta Projection ----
 
 
@@ -407,30 +406,6 @@ int CaloDraw::DrawCemc()
       gPad->UseCurrentStyle();
       gPad->SetRightMargin(0.15);
     }
-
-// ---- Begin: Overlay hardcoded reference for EMCal #eta Projection (masked) ----
-  {
-    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-    if (!refFile || refFile->IsZombie()) {
-      std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-    } else {
-      TH2F *ref_cemc_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_cemc_etaphi"));
-      if (!ref_cemc_etaphi) {
-	std::cerr << "Error: Could not find 'h_CaloValid_cemc_etaphi' for masked projection in reference file." << std::endl;
-      } else {
-	TH1F *ref_emcal_proj_masked = (TH1F*) proj(ref_cemc_etaphi)->Clone("h_ref_emcal_proj_masked");
-	if (!ref_emcal_proj_masked) {
-	  std::cerr << "Error: Could not create reference masked EMCal projection." << std::endl;
-	} else {
-	  ref_emcal_proj_masked->SetLineColor(kRed);
-	  ref_emcal_proj_masked->SetLineWidth(2);
-	  ref_emcal_proj_masked->Draw("SAME");
-	}
-      }
-      refFile->Close();
-    }
-  }
- // ---- End: Overlay hardcoded reference for EMCal #eta Projection (masked) ----
 
   if (!gROOT->FindObject("cemc4"))
     {
@@ -609,30 +584,6 @@ int CaloDraw::DrawIhcal()
       gPad->UseCurrentStyle();
     }
 
-  // ---- Begin: Overlay hardcoded reference for IHCal #eta Projection ----
-  {
-    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-    if (!refFile || refFile->IsZombie()) {
-      std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-    } else {
-      TH2F *ref_ihcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ihcal_etaphi"));
-      if (!ref_ihcal_etaphi) {
-	std::cerr << "Error: Could not find 'h_CaloValid_ihcal_etaphi' in reference file." << std::endl;
-      } else {
-        TH1F *ref_ihcal_proj = (TH1F*) proj(ref_ihcal_etaphi)->Clone("h_ref_ihcal_proj");
-        if (!ref_ihcal_proj) {
-	  std::cerr << "Error: Could not create reference IHCal projection." << std::endl;
-        } else {
-          ref_ihcal_proj->SetLineColor(kRed);
-          ref_ihcal_proj->SetLineWidth(2);
-          ref_ihcal_proj->Draw("SAME");
-        }
-      }
-      refFile->Close();
-    }
-  }
-  // ---- End: Overlay hardcoded reference for IHCal #eta Projection ----
-
   // Canvas 2
   // do "summary" canvas before tower masking canvas, so ihcalGoodRun gets called first
   //  if (!gROOT->FindObject("ihcal3")) 
@@ -717,39 +668,6 @@ int CaloDraw::DrawIhcal()
       ihcal_proj_masked->DrawCopy("HIST");
       gPad->UseCurrentStyle();
     }
-
-  // ---- Begin: Overlay hardcoded reference for IHCal #eta Projection (masked) ----
-	  {
-	    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-	    if (!refFile || refFile->IsZombie())
-	      {
-		std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-	      } 
-	    else
-	      {
-		TH2F *ref_ihcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ihcal_etaphi"));
-		if (!ref_ihcal_etaphi)
-		  {
-		    std::cerr << "Error: Could not find 'h_CaloValid_ihcal_etaphi' for masked projection in reference file." << std::endl;
-		  } 
-		else
-		  {
-		    TH1F *ref_ihcal_proj_masked = (TH1F*) proj(ref_ihcal_etaphi)->Clone("h_ref_ihcal_proj_masked");
-		    if (!ref_ihcal_proj_masked)
-		      {
-			std::cerr << "Error: Could not create reference masked IHCal projection." << std::endl;
-		      } 
-		    else
-		      {
-			ref_ihcal_proj_masked->SetLineColor(kRed);
-			ref_ihcal_proj_masked->SetLineWidth(2);
-			ref_ihcal_proj_masked->Draw("SAME");
-		      }
-		  }
-		refFile->Close();
-	      }
-	  }
-  // ---- End: Overlay hardcoded reference for IHCal #eta Projection (masked) ----
 
 	  if (!gROOT->FindObject("ihcal4"))
 	    {
@@ -877,30 +795,6 @@ int CaloDraw::DrawOhcal()
       gPad->UseCurrentStyle();
     }
   
-  // ---- Begin: Overlay hardcoded reference for OHCal #eta Projection ----
-  {
-    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-    if (!refFile || refFile->IsZombie()) {
-      std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-    } else {
-      TH2F *ref_ohcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ohcal_etaphi"));
-      if (!ref_ohcal_etaphi) {
-	std::cerr << "Error: Could not find 'h_CaloValid_ohcal_etaphi' in reference file." << std::endl;
-      } else {
-        TH1F *ref_ohcal_proj = (TH1F*) proj(ref_ohcal_etaphi)->Clone("h_ref_ohcal_proj");
-        if (!ref_ohcal_proj) {
-	  std::cerr << "Error: Could not create reference OHCal projection." << std::endl;
-        } else {
-          ref_ohcal_proj->SetLineColor(kRed);
-          ref_ohcal_proj->SetLineWidth(2);
-          ref_ohcal_proj->Draw("SAME");
-        }
-      }
-      refFile->Close();
-    }
-  }
-  // ---- End: Overlay hardcoded reference for OHCal #eta Projection ----
-
 
   /* db->DBcommit(); */
 
@@ -987,39 +881,6 @@ int CaloDraw::DrawOhcal()
       ohcal_proj_masked->DrawCopy("HIST");
       gPad->UseCurrentStyle();
     }
-
-    // --- Begin: Overlay hardcoded reference for OHCal #eta Projection (masked) ----
-  {
-    TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
-    if (!refFile || refFile->IsZombie())
-      {
-	std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
-      } 
-    else
-      {
-	TH2F *ref_ohcal_etaphi = dynamic_cast<TH2F*>(refFile->Get("h_CaloValid_ohcal_etaphi"));
-	if (!ref_ohcal_etaphi)
-	  {
-	    std::cerr << "Error: Could not find 'h_CaloValid_ohcal_etaphi' for masked projection in reference file." << std::endl;
-	  } 
-	else
-	  {
-	    TH1F *ref_ohcal_proj_masked = (TH1F*) proj(ref_ohcal_etaphi)->Clone("h_ref_ohcal_proj_masked");
-	    if (!ref_ohcal_proj_masked)
-	      {
-		std::cerr << "Error: Could not create reference masked OHCal projection." << std::endl;
-	      }
-	    else
-	      {
-		ref_ohcal_proj_masked->SetLineColor(kRed);
-		ref_ohcal_proj_masked->SetLineWidth(2);
-		ref_ohcal_proj_masked->Draw("SAME");
-	      }
-	  }
-	refFile->Close();
-      }
-  }
-  // ---- End: Overlay hardcoded reference for OHCal #eta Projection (masked) ----
   
   if (!gROOT->FindObject("ohcal4"))
     {
