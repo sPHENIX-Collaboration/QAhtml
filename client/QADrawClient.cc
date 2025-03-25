@@ -147,6 +147,7 @@ int QADrawClient::MakeHtml(const std::string &who, const std::string &what)
   }
   fHtml->runNumber(RunNumber());  // do not forget this !
   fHtml->RunType(RunType());
+  std::cout << "doing something with " << who << ", " << what << std::endl;
   int iret = DoSomething(who, what, "HTML");
   if (!onlprod_real_html)
   {
@@ -159,6 +160,10 @@ int QADrawClient::DoSomething(const std::string &who, const std::string &what, c
 {
   int i = 0;
   std::map<std::string, QADraw *>::iterator iter;
+  if(Verbosity() > 0)
+    {
+      std::cout << "Printing " << who << " and " << what << std::endl;
+    }
   if (who != "ALL")
   {
     iter = DrawerList.find(what);
@@ -180,6 +185,10 @@ int QADrawClient::DoSomething(const std::string &who, const std::string &what, c
           std::cout << "subsystem " << iter->second->Name()
                     << " not in root file, skipping" << std::endl;
         }
+	if(iter->second->MakeHtml(who))
+	  {
+	    std::cout << "subsystem " << iter->second->Name() << " with who = " << who << " not in root file, skipping " << std::endl;
+	  }
       }
       defaultStyle->cd();
       return 0;
