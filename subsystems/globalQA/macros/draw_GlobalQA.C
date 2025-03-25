@@ -2,6 +2,8 @@
 #include <globalqa/GlobalQADraw.h>
 #include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawglobalqa.so)
+R__LOAD_LIBRARY(libRooFit.so)
+R__LOAD_LIBRARY(libRooFitCore.so)
 
 void draw_GlobalQA(const char *rootfile) {
   SetsPhenixStyle();
