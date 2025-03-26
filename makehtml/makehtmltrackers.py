@@ -122,7 +122,7 @@ def main():
                             dbtag = getBuildDbTag(runtype, filename)
                             if(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
                                 fileToDraw = file
-                                dbtagToDraw = dbtag
+                                dbtagToDraw = int(dbtag.split("p")[1])
                                 #Draw that one
                         macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+subsys[s][2]+"(\""+fileToDraw+"\")"
                         cmd = ["root.exe","-q",macro]
