@@ -589,8 +589,6 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_etavsphi->SetXTitle("Jet #eta");
     jetkinematiccheck_etavsphi->SetYTitle("Jet #phi");
     jetkinematiccheck_etavsphi->SetZTitle("Counts");
-    // jetkinematiccheck_etavsphi->GetXaxis()->SetNdivisions(505);
-    // jetkinematiccheck_etavsphi->GetXaxis()->SetRangeUser(-1, 15);
     jetkinematiccheck_etavsphi->DrawCopy("COLZ");  // 2D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
@@ -606,13 +604,13 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   if (jetkinematiccheck_jetmassvseta && jetkinematiccheck_jetmassvseta_pfx)
   {
     jetkinematiccheck_jetmassvseta->SetTitle("Jet Mass vs #eta");
-    jetkinematiccheck_jetmassvseta->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvseta->SetYTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta->SetXTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvseta->SetZTitle("Counts");
     jetkinematiccheck_jetmassvseta->DrawCopy("COLZ");  // 2D Histogram
     jetkinematiccheck_jetmassvseta_pfx->SetTitle("Jet Mass vs #eta");
-    jetkinematiccheck_jetmassvseta_pfx->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvseta_pfx->SetYTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta_pfx->SetXTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta_pfx->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvseta_pfx->SetZTitle("Counts");
     jetkinematiccheck_jetmassvseta_pfx->DrawCopy("SAME");  // Profile
     gPad->UseCurrentStyle();
@@ -629,13 +627,13 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   if (jetkinematiccheck_jetmassvspt && jetkinematiccheck_jetmassvspt_pfx)
   {
     jetkinematiccheck_jetmassvspt->SetTitle("Jet Mass vs p_{T}");
-    jetkinematiccheck_jetmassvspt->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvspt->SetYTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt->SetXTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvspt->SetZTitle("Counts");
     jetkinematiccheck_jetmassvspt->DrawCopy("COLZ");  // 2D Histogram
     jetkinematiccheck_jetmassvspt_pfx->SetTitle("Jet Mass vs p_{T}");
-    jetkinematiccheck_jetmassvspt_pfx->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvspt_pfx->SetYTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt_pfx->SetXTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt_pfx->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvspt_pfx->SetZTitle("Counts");
     jetkinematiccheck_jetmassvspt_pfx->DrawCopy("SAME");  // Profile
     gPad->UseCurrentStyle();
