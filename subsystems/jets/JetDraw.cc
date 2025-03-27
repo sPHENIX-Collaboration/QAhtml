@@ -222,13 +222,9 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     eventwiserho_rhoarea->SetTitle("Rho Area");
     eventwiserho_rhoarea->SetXTitle("#rho*A");
     eventwiserho_rhoarea->SetYTitle("Counts");
-    // eventwiserho_rhoarea->GetXaxis()->SetNdivisions(505);
-    // eventwiserho_rhoarea->GetXaxis()->SetRangeUser(-1, 15);
     eventwiserho_rhoarea->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    gPad->SetLogz();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -244,7 +240,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     eventwiserho_rhomult->SetYTitle("Counts");
     eventwiserho_rhomult->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -258,10 +254,9 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     eventwiserho_sigmaarea->SetTitle("Sigma Area");
     eventwiserho_sigmaarea->SetXTitle("#sigma*A");
     eventwiserho_sigmaarea->SetYTitle("Counts");
-    // eventwiserho_sigmaarea->GetXaxis()->SetNdivisions(505);
     eventwiserho_sigmaarea->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -277,6 +272,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     eventwiserho_sigmamult->SetYTitle("Counts");
     eventwiserho_sigmamult->DrawCopy("COLZ");
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -360,13 +356,9 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncsts_cemc->SetTitle("Jet N Constituents in CEMC");
     constituents_ncsts_cemc->SetXTitle("N Constituents");
     constituents_ncsts_cemc->SetYTitle("Counts");
-    constituents_ncsts_cemc->GetXaxis()->SetNdivisions(505);
-    constituents_ncsts_cemc->GetXaxis()->SetRangeUser(-1, 15);
     constituents_ncsts_cemc->DrawCopy("HIST"); //1D histogram
     gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    //gPad->SetLogz() //No z axis
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -383,7 +375,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncsts_ihcal->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_ihcal->DrawCopy("HIST"); // 1D histogram
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -400,7 +392,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncsts_ohcal->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_ohcal->DrawCopy("HIST"); // 1D Histogram                             
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -417,6 +409,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncsts_total->SetYTitle("Counts");
     constituents_ncsts_total->DrawCopy("HIST"); // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -434,7 +427,8 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncstsvscalolayer->DrawCopy("COLZ"); // 2D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -452,7 +446,8 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjetvscalolayer->DrawCopy("COLZ"); // 2D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -468,8 +463,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_cemc->SetYTitle("Counts");
     constituents_efracjet_cemc->DrawCopy("HIST"); // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -485,8 +479,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_ihcal->SetYTitle("Counts");
     constituents_efracjet_ihcal->DrawCopy("HIST"); // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -503,7 +496,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_ohcal->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -592,7 +585,8 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_etavsphi->DrawCopy("COLZ");  // 2D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -615,7 +609,8 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_jetmassvseta_pfx->DrawCopy("SAME");  // Profile
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -638,7 +633,8 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_jetmassvspt_pfx->DrawCopy("SAME");  // Profile
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -654,6 +650,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_spectra->SetYTitle("Counts");
     jetkinematiccheck_spectra->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -744,6 +741,8 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       // jetseedcount_rawetavsphi->GetXaxis()->SetNdivisions(505);
       jetseedcount_rawetavsphi->DrawCopy("COLZ");  // 2D Histogram
       gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.2);
+      gPad->SetLogz(1);
   }
   else
   {
@@ -759,6 +758,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_rawpt->SetYTitle("Counts");
     jetseedcount_rawpt->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -774,6 +774,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_rawptall->SetYTitle("Counts");
     jetseedcount_rawptall->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -789,6 +790,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_rawseedcount->SetYTitle("Counts");
     jetseedcount_rawseedcount->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -800,14 +802,14 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
   if (jetseedcount_subetavsphi)
   {
     jetseedcount_subetavsphi->SetLineColor(kBlue);
-    // jetseedcount_subetavsphi->GetXaxis()->SetRangeUser(0.0, 12000);
     jetseedcount_subetavsphi->SetTitle("Sub-seed #eta vs #phi");
     jetseedcount_subetavsphi->SetXTitle("Jet #eta_{subseed} [Rads.]");
     jetseedcount_subetavsphi->SetYTitle("Jet #phi_{subseed} [Rads.]");
     jetseedcount_subetavsphi->SetZTitle("Counts");
-    // jetseedcount_subetavsphi->GetXaxis()->SetNdivisions(505);
     jetseedcount_subetavsphi->DrawCopy("COLZ");  // 2D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -822,6 +824,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_subpt->SetYTitle("Counts");
     jetseedcount_subpt->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -836,6 +839,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_subptall->SetYTitle("Counts");
     jetseedcount_subptall->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -850,6 +854,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_subseedcount->SetYTitle("Counts");
     jetseedcount_subseedcount->DrawCopy("");
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
 
   TText PrintRun;
