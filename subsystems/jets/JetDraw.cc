@@ -372,7 +372,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncsts_ihcal->SetTitle("Jet N Constituents in IHCal");
     constituents_ncsts_ihcal->SetXTitle("N Constituents");
     constituents_ncsts_ihcal->SetYTitle("Counts");
-    constituents_ncsts_ihcal->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_ihcal->DrawCopy("HIST"); // 1D histogram
     gPad->UseCurrentStyle();
     gPad->SetLogy(1);
@@ -389,7 +388,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncsts_ohcal->SetTitle("Jet N Constituents in OHCal");
     constituents_ncsts_ohcal->SetXTitle("N Constituents");
     constituents_ncsts_ohcal->SetYTitle("Counts");
-    constituents_ncsts_ohcal->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_ohcal->DrawCopy("HIST"); // 1D Histogram                             
     gPad->UseCurrentStyle();
     gPad->SetLogy(1);
@@ -405,7 +403,6 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   {
     constituents_ncsts_total->SetTitle("Jet N Constituents");
     constituents_ncsts_total->SetXTitle("N Constituents");
-    constituents_ncsts_total->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_total->SetYTitle("Counts");
     constituents_ncsts_total->DrawCopy("HIST"); // 1D Histogram
     gPad->UseCurrentStyle();
@@ -563,7 +560,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_etavsphi_" + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw]));
+  TH1D *jetkinematiccheck_spectra = dynamic_cast<TH1D *>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw]));
 
   TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + kineProfSuffix));
   TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + kineProfSuffix));
@@ -904,8 +901,8 @@ void JetDraw::SetJetSummary(TCanvas* c)
    TText PrintRun;
    PrintRun.SetTextFont(62);
    PrintRun.SetTextSize(0.04);
-   PrintRun.SetNDC();          // set to normalized coordinates                                                                                                                                                                                                                  
-   PrintRun.SetTextAlign(23);  // center/top alignment                                                                                                                                                                                                                           
+   PrintRun.SetNDC();          // set to normalized coordinates
+   PrintRun.SetTextAlign(23);  // center/top alignment
    std::ostringstream runnostream;
    std::string runstring;
    runnostream << Name() << "_jet_summary Run " << cl->RunNumber() << ", build " << cl->build();
