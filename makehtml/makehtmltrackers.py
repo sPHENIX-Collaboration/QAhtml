@@ -9,12 +9,26 @@ import pyodbc
 
 parser = argparse.ArgumentParser(description="Create the HTML files with QA histograms files for all events in a run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
+parser.add_argument("-ht","--histotype",help="histotype to draw, hit, cluster, seed")
 parser.add_argument("-t","--test",help="run a verbose test without actually creating the HTML", action="store_true")
 args = parser.parse_args()
 if args.test and not args.verbose:
     args.verbose = True
+
+histoarg = args.histotype
+
 # subsys dir name : [file prefix, output hist png file prefix, qahtml draw macro]
-subsys = { "mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"], "tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"],"micromegas" : ["HIST_DST_TRKR_CLUSTER","MicromegasQA","draw_micromegas.C"],"mvtxrawhit" : ["HIST_DST_TRKR_CLUSTER","MVTXRAWHITQA","draw_mvtx_rawhit.C"], "inttrawhit" : ["HIST_DST_TRKR_CLUSTER","INTTRAWHITQA","draw_intt_rawhit.C"], "tpcrawhit" : ["HIST_DST_TRKR_CLUSTER","TpcRawHitQA","draw_tpc_rawhit.C"],"tpcsil" : ["HIST_DST_TRKR_SEED","TpcSiliconQA","draw_tpcsil.C"], "siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"]}
+subsys = {}
+if histoarg == "hit":
+    subsys = {"mvtxrawhit" : ["HIST_DST_TRKR_CLUSTER","MVTXRAWHITQA","draw_mvtx_rawhit.C"], "inttrawhit" : ["HIST_DST_TRKR_CLUSTER","INTTRAWHITQA","draw_intt_rawhit.C"], "tpcrawhit" : ["HIST_DST_TRKR_CLUSTER","TpcRawHitQA","draw_tpc_rawhit.C"]}
+else if histoarg == "cluster":
+    subsys = {"mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"], "tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"],"micromegas" : ["HIST_DST_TRKR_CLUSTER","MicromegasQA","draw_micromegas.C"]}
+else if histoarg == "seed":
+    subsys = {"tpcsil" : ["HIST_DST_TRKR_SEED","TpcSiliconQA","draw_tpcsil.C"], "siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"]}
+
+print("subsys list is")
+print(subsys)
+    
 runtypes = ["_run3auau"]
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
