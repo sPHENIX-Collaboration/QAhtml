@@ -46,11 +46,12 @@ class JetDraw : public QADraw
   void SaveCanvasesToFile(TFile* file);
 
  private:
-  int MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& run);
+  int MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& hist, VPad1D& run);
   int DrawRho(uint32_t trigger);
   int DrawConstituents(uint32_t trigToDraw, JetRes resToDraw);
   int DrawJetKinematics(uint32_t trigger, JetRes reso);
   int DrawJetSeed(uint32_t trigger, JetRes reso);
+  int DrawRunAndBuild(TPad* pad, const std::string what, const int trig = -1, const int res = -1);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
 
   TCanvas* jetSummary = nullptr;
@@ -60,6 +61,12 @@ class JetDraw : public QADraw
   VCanvas2D m_vecCstCanvas;
   VCanvas2D m_vecKineCanvas;
   VCanvas2D m_vecSeedCanvas;
+
+  // for adding histograms to canvases
+  VPad1D m_vecRhoHist;
+  VPad2D m_vecCstHist;
+  VPad2D m_vecKineHist;
+  VPad2D m_vecSeedHist;
 
   // for adding run numbers to canvases
   VPad1D m_vecRhoRun;

@@ -112,6 +112,11 @@ int JetDraw::Draw(const std::string &what)
      m_vecKineCanvas.push_back( {} );
      m_vecSeedCanvas.push_back( {} );
 
+     // likewise for the hist pad vectors
+     m_vecCstHist.push_back( {} );
+     m_vecKineHist.push_back( {} );
+     m_vecSeedHist.push_back( {} );
+
      // likewise for the run pad vectors
      m_vecCstRun.push_back( {} );
      m_vecKineRun.push_back( {} );
@@ -161,7 +166,7 @@ int JetDraw::Draw(const std::string &what)
    return iret;
 }
  
-int JetDraw::MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& run)
+int JetDraw::MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& hist, VPad1D& run)
 {
   // instantiate draw client & grab display size
   QADrawClient *cl = QADrawClient::instance();
@@ -169,26 +174,33 @@ int JetDraw::MakeCanvas(const std::string &name, const int nHist, VCanvas1D& can
   int ysize = cl->GetDisplaySizeY();
 
   // create canvas
-  // n.b. xpos (-1) negative means do not draw menu bar
+  //   - n.b. xpos (-1) negative means do not draw menu bar
   canvas.emplace_back( new TCanvas(name.data(), "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)) );
   canvas.back()->UseCurrentStyle();
   gSystem->ProcessEvents();
 
-  // divide canvas into appropriate no. of pads
+  // create pad for histograms
+  const std::string histPadName = name + "_hist";
+  hist.emplace_back( new TPad(histPadName.data(), "for histograms", 0.0, 0.0, 1.0, 0.9) );
+  hist.back()->SetFillStyle(4000);
+  canvas.back()->cd();
+  hist.back()->Draw();
+
+  // divide hist pad into appropriate no. of pads
   const int   nRow = std::min(nHist, 2);
   const int   nCol = (nHist / 2) + (nHist % 2);
   const float bRow = 0.01;
   const float bCol = 0.01;
   if (nHist > 1)
   {
-    canvas.back()->Divide(nRow, nCol, bRow, bCol);
+    hist.back()->Divide(nRow, nCol, bRow, bCol);
   }
-  canvas.back()->cd();
 
   // create pad for run number
   const std::string runPadName = name + "_run";
-  run.emplace_back( new TPad(runPadName.data(), "this does not show", 0, 0, 1, 1) );
+  run.emplace_back( new TPad(runPadName.data(), "for run and build", 0.0, 0.9, 1.0, 1.0) );
   run.back()->SetFillStyle(4000);
+  canvas.back()->cd();
   run.back()->Draw();
 
   // return w/o error
@@ -213,22 +225,18 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
   const std::string rhoCanName = "evtRho_" + m_mapTrigToTag[trigToDraw];
   if (!gROOT->FindObject(rhoCanName.data()))
   {
-    MakeCanvas(rhoCanName, 4, m_vecRhoCanvas, m_vecRhoRun);
+    MakeCanvas(rhoCanName, 4, m_vecRhoCanvas, m_vecRhoHist, m_vecRhoRun);
   }
 
-  m_vecRhoCanvas.back()->cd(1);
+  m_vecRhoHist.back()->cd(1);
   if (eventwiserho_rhoarea)
   {
     eventwiserho_rhoarea->SetTitle("Rho Area");
     eventwiserho_rhoarea->SetXTitle("#rho*A");
     eventwiserho_rhoarea->SetYTitle("Counts");
-    // eventwiserho_rhoarea->GetXaxis()->SetNdivisions(505);
-    // eventwiserho_rhoarea->GetXaxis()->SetRangeUser(-1, 15);
     eventwiserho_rhoarea->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    gPad->SetLogz();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -236,7 +244,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     return -1;
   }
 
-  m_vecRhoCanvas.back()->cd(2);
+  m_vecRhoHist.back()->cd(2);
   if (eventwiserho_rhomult)
   {
     eventwiserho_rhomult->SetTitle("#rho Multiplicity");
@@ -244,7 +252,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     eventwiserho_rhomult->SetYTitle("Counts");
     eventwiserho_rhomult->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -252,16 +260,15 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     return -1;
   }
 
-  m_vecRhoCanvas.back()->cd(3);
+  m_vecRhoHist.back()->cd(3);
   if (eventwiserho_sigmaarea)
   {
     eventwiserho_sigmaarea->SetTitle("Sigma Area");
     eventwiserho_sigmaarea->SetXTitle("#sigma*A");
     eventwiserho_sigmaarea->SetYTitle("Counts");
-    // eventwiserho_sigmaarea->GetXaxis()->SetNdivisions(505);
     eventwiserho_sigmaarea->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -269,7 +276,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     return -1;
   }
 
-  m_vecRhoCanvas.back()->cd(4);
+  m_vecRhoHist.back()->cd(4);
   if (eventwiserho_sigmamult)
   {
     eventwiserho_sigmamult->SetTitle("#sigma Multiplicity");
@@ -277,6 +284,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     eventwiserho_sigmamult->SetYTitle("Counts");
     eventwiserho_sigmamult->DrawCopy("COLZ");
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -284,27 +292,9 @@ int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
     return -1;
   }
 
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_EvtRho_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecRhoRun.back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecRhoCanvas.back()->Update();  // Update the pad
+  // add run/build info to canvas
+  DrawRunAndBuild(m_vecRhoRun.back(), "EvtRho", trigToDraw);
+  m_vecRhoCanvas.back()->Update();
 
   // return w/o error
   return 0;
@@ -351,22 +341,18 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
   const std::string cstCanName = "jetCsts_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
   if (!gROOT->FindObject(cstCanName.data()))
   {
-    MakeCanvas(cstCanName, 9, m_vecCstCanvas.back(), m_vecCstRun.back());
+    MakeCanvas(cstCanName, 9, m_vecCstCanvas.back(), m_vecCstHist.back(), m_vecCstRun.back());
   }
 
-  m_vecCstCanvas.back().back()->cd(1);
+  m_vecCstHist.back().back()->cd(1);
   if (constituents_ncsts_cemc)
   {
     constituents_ncsts_cemc->SetTitle("Jet N Constituents in CEMC");
     constituents_ncsts_cemc->SetXTitle("N Constituents");
     constituents_ncsts_cemc->SetYTitle("Counts");
-    constituents_ncsts_cemc->GetXaxis()->SetNdivisions(505);
-    constituents_ncsts_cemc->GetXaxis()->SetRangeUser(-1, 15);
     constituents_ncsts_cemc->DrawCopy("HIST"); //1D histogram
     gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    //gPad->SetLogz() //No z axis
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -374,16 +360,15 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(2);
+  m_vecCstHist.back().back()->cd(2);
   if (constituents_ncsts_ihcal)
   {
     constituents_ncsts_ihcal->SetTitle("Jet N Constituents in IHCal");
     constituents_ncsts_ihcal->SetXTitle("N Constituents");
     constituents_ncsts_ihcal->SetYTitle("Counts");
-    constituents_ncsts_ihcal->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_ihcal->DrawCopy("HIST"); // 1D histogram
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -391,16 +376,15 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(3);
+  m_vecCstHist.back().back()->cd(3);
   if (constituents_ncsts_ohcal)
   {
     constituents_ncsts_ohcal->SetTitle("Jet N Constituents in OHCal");
     constituents_ncsts_ohcal->SetXTitle("N Constituents");
     constituents_ncsts_ohcal->SetYTitle("Counts");
-    constituents_ncsts_ohcal->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_ohcal->DrawCopy("HIST"); // 1D Histogram                             
     gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -408,15 +392,15 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(4);
+  m_vecCstHist.back().back()->cd(4);
   if (constituents_ncsts_total)
   {
     constituents_ncsts_total->SetTitle("Jet N Constituents");
     constituents_ncsts_total->SetXTitle("N Constituents");
-    constituents_ncsts_total->GetXaxis()->SetNdivisions(505);
     constituents_ncsts_total->SetYTitle("Counts");
     constituents_ncsts_total->DrawCopy("HIST"); // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -424,7 +408,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(5);
+  m_vecCstHist.back().back()->cd(5);
   if (constituents_ncstsvscalolayer)
   {
     constituents_ncstsvscalolayer->SetTitle("Jet N Constituents vs Calo Layer");
@@ -434,7 +418,8 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_ncstsvscalolayer->DrawCopy("COLZ"); // 2D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -442,7 +427,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(6);
+  m_vecCstHist.back().back()->cd(6);
   if (constituents_efracjetvscalolayer)
   {
     constituents_efracjetvscalolayer->SetTitle("Jet E Fraction vs Calo Layer");
@@ -452,7 +437,8 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjetvscalolayer->DrawCopy("COLZ"); // 2D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -460,7 +446,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(7);
+  m_vecCstHist.back().back()->cd(7);
   if (constituents_efracjet_cemc)
   {
     constituents_efracjet_cemc->SetTitle("Jet E Fraction in CEMC");
@@ -468,8 +454,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_cemc->SetYTitle("Counts");
     constituents_efracjet_cemc->DrawCopy("HIST"); // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -477,7 +462,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(8);
+  m_vecCstHist.back().back()->cd(8);
   if (constituents_efracjet_ihcal)
   {
     constituents_efracjet_ihcal->SetTitle("Jet Fraction in IHCal");
@@ -485,8 +470,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_ihcal->SetYTitle("Counts");
     constituents_efracjet_ihcal->DrawCopy("HIST"); // 1D Histogram
     gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -494,7 +478,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecCstCanvas.back().back()->cd(9);
+  m_vecCstHist.back().back()->cd(9);
   if (constituents_efracjet_ohcal)
   {
     constituents_efracjet_ohcal->SetTitle("Jet Fraction in OHCal");
@@ -503,7 +487,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     constituents_efracjet_ohcal->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetLogy(1);
   }
   else
   {
@@ -511,29 +495,9 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_JetCsts_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += "_";
-  runstring += m_mapResToName[resToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecCstRun.back().back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecCstCanvas.back().back()->Update();  // Update the pad
+  // add run/build info to canvas
+  DrawRunAndBuild(m_vecCstRun.back().back(), "JetCsts", trigToDraw, resToDraw);
+  m_vecCstCanvas.back().back()->Update();
 
   // return w/o error
   return 0;
@@ -570,7 +534,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_etavsphi_" + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + m_mapResToTag[resToDraw]));
   TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw]));
+  TH1D *jetkinematiccheck_spectra = dynamic_cast<TH1D *>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw]));
 
   TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + kineProfSuffix));
   TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + kineProfSuffix));
@@ -579,22 +543,21 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   const std::string kineCanName = "jetKinematics_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
   if (!gROOT->FindObject(kineCanName.data()))
   {
-    MakeCanvas(kineCanName, 4, m_vecKineCanvas.back(), m_vecKineRun.back());
+    MakeCanvas(kineCanName, 4, m_vecKineCanvas.back(), m_vecKineHist.back(), m_vecKineRun.back());
   }
 
-  m_vecKineCanvas.back().back()->cd(1);
+  m_vecKineHist.back().back()->cd(1);
   if (jetkinematiccheck_etavsphi)
   {
     jetkinematiccheck_etavsphi->SetTitle("Jet #eta vs #phi");
     jetkinematiccheck_etavsphi->SetXTitle("Jet #eta");
     jetkinematiccheck_etavsphi->SetYTitle("Jet #phi");
     jetkinematiccheck_etavsphi->SetZTitle("Counts");
-    // jetkinematiccheck_etavsphi->GetXaxis()->SetNdivisions(505);
-    // jetkinematiccheck_etavsphi->GetXaxis()->SetRangeUser(-1, 15);
     jetkinematiccheck_etavsphi->DrawCopy("COLZ");  // 2D Histogram
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -602,22 +565,23 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     return -1;
   }
 
-  m_vecKineCanvas.back().back()->cd(2);
+  m_vecKineHist.back().back()->cd(2);
   if (jetkinematiccheck_jetmassvseta && jetkinematiccheck_jetmassvseta_pfx)
   {
     jetkinematiccheck_jetmassvseta->SetTitle("Jet Mass vs #eta");
-    jetkinematiccheck_jetmassvseta->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvseta->SetYTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta->SetXTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvseta->SetZTitle("Counts");
     jetkinematiccheck_jetmassvseta->DrawCopy("COLZ");  // 2D Histogram
     jetkinematiccheck_jetmassvseta_pfx->SetTitle("Jet Mass vs #eta");
-    jetkinematiccheck_jetmassvseta_pfx->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvseta_pfx->SetYTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta_pfx->SetXTitle("Jet #eta");
+    jetkinematiccheck_jetmassvseta_pfx->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvseta_pfx->SetZTitle("Counts");
     jetkinematiccheck_jetmassvseta_pfx->DrawCopy("SAME");  // Profile
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -625,22 +589,23 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     return -1;
   }
 
-  m_vecKineCanvas.back().back()->cd(3);
+  m_vecKineHist.back().back()->cd(3);
   if (jetkinematiccheck_jetmassvspt && jetkinematiccheck_jetmassvspt_pfx)
   {
     jetkinematiccheck_jetmassvspt->SetTitle("Jet Mass vs p_{T}");
-    jetkinematiccheck_jetmassvspt->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvspt->SetYTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt->SetXTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvspt->SetZTitle("Counts");
     jetkinematiccheck_jetmassvspt->DrawCopy("COLZ");  // 2D Histogram
     jetkinematiccheck_jetmassvspt_pfx->SetTitle("Jet Mass vs p_{T}");
-    jetkinematiccheck_jetmassvspt_pfx->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvspt_pfx->SetYTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt_pfx->SetXTitle("Jet p_{T} [GeV/c]");
+    jetkinematiccheck_jetmassvspt_pfx->SetYTitle("Jet Mass [GeV/c^{2}]");
     jetkinematiccheck_jetmassvspt_pfx->SetZTitle("Counts");
     jetkinematiccheck_jetmassvspt_pfx->DrawCopy("SAME");  // Profile
     gPad->UseCurrentStyle();
     gPad->Update();
-    gPad->SetRightMargin(0.15);
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
@@ -648,7 +613,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     return -1;
   }
 
-  m_vecKineCanvas.back().back()->cd(4);
+  m_vecKineHist.back().back()->cd(4);
   if (jetkinematiccheck_spectra)
   {
     jetkinematiccheck_spectra->SetTitle("Jet Spectra");
@@ -656,6 +621,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     jetkinematiccheck_spectra->SetYTitle("Counts");
     jetkinematiccheck_spectra->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -663,29 +629,9 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
     return -1;
   }
 
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();  // set to normalized 
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_JetKinematics_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += "_";
-  runstring += m_mapResToName[resToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecKineRun.back().back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecKineCanvas.back().back()->Update();  // Update the pad
+  // add run/build info to canvas
+  DrawRunAndBuild(m_vecKineRun.back().back(), "JetKinematics", trigToDraw, resToDraw);
+  m_vecKineCanvas.back().back()->Update();
 
   // return w/o error
   return 0;
@@ -731,10 +677,10 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
   const std::string seedCanName = "jetSeeds_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
   if (!gROOT->FindObject(seedCanName.data()))
   {
-    MakeCanvas(seedCanName, 8, m_vecSeedCanvas.back(), m_vecSeedRun.back());
+    MakeCanvas(seedCanName, 8, m_vecSeedCanvas.back(), m_vecSeedHist.back(), m_vecSeedRun.back());
   }
 
-  m_vecSeedCanvas.back().back()->cd(1);
+  m_vecSeedHist.back().back()->cd(1);
   if (jetseedcount_rawetavsphi)
   {
       jetseedcount_rawetavsphi->SetLineColor(kBlue);
@@ -743,9 +689,10 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       jetseedcount_rawetavsphi->SetXTitle("Jet #eta_{raw} [Rads.]");
       jetseedcount_rawetavsphi->SetYTitle("Jet #phi_{raw} [Rads.]");
       jetseedcount_rawetavsphi->SetZTitle("Counts");
-      // jetseedcount_rawetavsphi->GetXaxis()->SetNdivisions(505);
       jetseedcount_rawetavsphi->DrawCopy("COLZ");  // 2D Histogram
       gPad->UseCurrentStyle();
+      gPad->SetRightMargin(0.2);
+      gPad->SetLogz(1);
   }
   else
   {
@@ -753,7 +700,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecSeedCanvas.back().back()->cd(2);
+  m_vecSeedHist.back().back()->cd(2);
   if (jetseedcount_rawpt)
   {
     jetseedcount_rawpt->SetTitle("Raw p_{T}");
@@ -761,6 +708,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_rawpt->SetYTitle("Counts");
     jetseedcount_rawpt->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -768,7 +716,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecSeedCanvas.back().back()->cd(3);
+  m_vecSeedHist.back().back()->cd(3);
   if (jetseedcount_rawptall)
   {
     jetseedcount_rawptall->SetTitle("Raw p_{T} (all jet seeds)");
@@ -776,6 +724,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_rawptall->SetYTitle("Counts");
     jetseedcount_rawptall->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -783,7 +732,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecSeedCanvas.back().back()->cd(4);
+  m_vecSeedHist.back().back()->cd(4);
   if (jetseedcount_rawseedcount)
   {
     jetseedcount_rawseedcount->SetTitle("Raw Seed Count per Event");
@@ -791,6 +740,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_rawseedcount->SetYTitle("Counts");
     jetseedcount_rawseedcount->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
@@ -798,25 +748,25 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     return -1;
   }
 
-  m_vecSeedCanvas.back().back()->cd(5);
+  m_vecSeedHist.back().back()->cd(5);
   if (jetseedcount_subetavsphi)
   {
     jetseedcount_subetavsphi->SetLineColor(kBlue);
-    // jetseedcount_subetavsphi->GetXaxis()->SetRangeUser(0.0, 12000);
     jetseedcount_subetavsphi->SetTitle("Sub-seed #eta vs #phi");
     jetseedcount_subetavsphi->SetXTitle("Jet #eta_{subseed} [Rads.]");
     jetseedcount_subetavsphi->SetYTitle("Jet #phi_{subseed} [Rads.]");
     jetseedcount_subetavsphi->SetZTitle("Counts");
-    // jetseedcount_subetavsphi->GetXaxis()->SetNdivisions(505);
     jetseedcount_subetavsphi->DrawCopy("COLZ");  // 2D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetRightMargin(0.2);
+    gPad->SetLogz(1);
   }
   else
   {
     return -1;
   }
 
-  m_vecSeedCanvas.back().back()->cd(6);
+  m_vecSeedHist.back().back()->cd(6);
   if (jetseedcount_subpt)
   {
     jetseedcount_subpt->SetTitle("Sub. p_{T}");
@@ -824,13 +774,14 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_subpt->SetYTitle("Counts");
     jetseedcount_subpt->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
     return -1;
   }
 
-  m_vecSeedCanvas.back().back()->cd(7);
+  m_vecSeedHist.back().back()->cd(7);
   if (jetseedcount_subptall)
   {
     jetseedcount_subptall->SetTitle("Sub. p_{T} (all jet seeds)");
@@ -838,13 +789,14 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_subptall->SetYTitle("Counts");
     jetseedcount_subptall->DrawCopy("HIST");  // 1D Histogram
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
   else
   {
     return -1;
   }
 
-  m_vecSeedCanvas.back().back()->cd(8);
+  m_vecSeedHist.back().back()->cd(8);
   if (jetseedcount_subseedcount)
   {
     jetseedcount_subseedcount->SetTitle("Sub Seed Count per Event");
@@ -852,31 +804,12 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
     jetseedcount_subseedcount->SetYTitle("Counts");
     jetseedcount_subseedcount->DrawCopy("");
     gPad->UseCurrentStyle();
+    gPad->SetLogy(1);
   }
 
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();  // set to normalized
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_JetSeeds_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += "_";
-  runstring += m_mapResToName[resToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecSeedRun.back().back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecSeedCanvas.back().back()->Update();  // Update the pad
+  // add run/build info to canvas
+  DrawRunAndBuild(m_vecSeedRun.back().back(), "JetSeeds", trigToDraw, resToDraw);
+  m_vecSeedCanvas.back().back()->Update();
 
   // return w/o error
   return 0;
@@ -901,8 +834,8 @@ void JetDraw::SetJetSummary(TCanvas* c)
    TText PrintRun;
    PrintRun.SetTextFont(62);
    PrintRun.SetTextSize(0.04);
-   PrintRun.SetNDC();          // set to normalized coordinates                                                                                                                                                                                                                  
-   PrintRun.SetTextAlign(23);  // center/top alignment                                                                                                                                                                                                                           
+   PrintRun.SetNDC();          // set to normalized coordinates
+   PrintRun.SetTextAlign(23);  // center/top alignment
    std::ostringstream runnostream;
    std::string runstring;
    runnostream << Name() << "_jet_summary Run " << cl->RunNumber() << ", build " << cl->build();
@@ -1004,6 +937,60 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   return;
 
 }  // end 'SaveCanvasesToFile(TFile*)'
+
+// ----------------------------------------------------------------------------
+//! Draw run and build info on a TPad
+// ----------------------------------------------------------------------------
+/*! By default, trigger and resolution aren't added to the
+ *  text.  However, if nonnegative trigger or resolution
+ *  indices are provided, then that info will be added.
+ *
+ *  \param[in]  pad  the pad to draw text on
+ *  \param      what the pad's associated QA component (e.g. JetKinematics)
+ *  \param      trig trigger index (optional)
+ *  \param      res  jet resolution index (optional)
+ */
+int JetDraw::DrawRunAndBuild(TPad* pad, const std::string what, const int trig, const int res)
+{
+
+  // connect to draw client
+  QADrawClient *cl = QADrawClient::instance();
+
+  // Generate run string from client
+  std::ostringstream runnostream;
+  runnostream << cl->RunNumber() << ", build " << cl->build();
+
+  // prepend module name, component, and other info as needed
+  std::string runstring = Name();
+  runstring.append("_" + what);
+  if (trig > -1)
+  {
+    runstring.append("_" + m_mapTrigToName.at(trig));
+  }
+  if (res > -1)
+  {
+    runstring.append("_" + m_mapResToName.at(res));
+  }
+
+  // now add run
+  runstring += " Run ";
+  runstring += runnostream.str();
+
+  // create TText for info
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(12);  // center/center alignment
+
+  // and finally draw on pad
+  pad -> cd();
+  PrintRun.DrawText(0.50, 0.70, runstring.data());
+
+  // return w/o error
+  return 0;
+
+}  // end 'DrawRunAndBuild(TPad*, std::string, int, int)'
 
 void JetDraw::myText(double x, double y, int color, const char *text, double tsize)
 {
