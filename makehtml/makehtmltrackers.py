@@ -22,10 +22,12 @@ subsys = {}
 if histoarg == "hit":
     subsys = {"mvtxrawhit" : ["HIST_DST_TRKR_CLUSTER","MVTXRAWHITQA","draw_mvtx_rawhit.C"], "inttrawhit" : ["HIST_DST_TRKR_CLUSTER","INTTRAWHITQA","draw_intt_rawhit.C"], "tpcrawhit" : ["HIST_DST_TRKR_CLUSTER","TpcRawHitQA","draw_tpc_rawhit.C"]}
 elif histoarg == "cluster":
-    subsys = {"mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"], "tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"],"micromegas" : ["HIST_DST_TRKR_CLUSTER","MicromegasQA","draw_micromegas.C"]}
+    subsys = {"mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"], "tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"],"micromegas" : ["HIST_DST_TRKR_CLUSTER","TPOTQA","draw_micromegas.C"]}
 elif histoarg == "seed":
-    subsys = {"tpcsil" : ["HIST_DST_TRKR_SEED","TpcSiliconQA","draw_tpcsil.C"], "siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"]}
-
+    subsys = {"tpcsil" : ["HIST_DST_TRKR_SEED","TPCSILICONQA","draw_tpcsil.C"], "siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"]}
+elif histoarg == "bco":
+    subsys = {"bco" : ["HIST_DST_STREAMING_EVENT_MVTX","MVTXBCO","draw_packets.C"], "bco" : ["HIST_DST_STREAMING_EVENT_INTT","INTTBCO","draw_packets.C"],"bco" : ["HIST_DST_STREAMING_EVENT_TPOT","TPOTBCO","draw_packets.C"]}
+    
 print("subsys list is")
 print(subsys)
     
@@ -119,6 +121,8 @@ def main():
                         continue
                     if len(aggFile) == 1 : 
                         macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+subsys[s][2]+"(\""+aggFile[0]+"\")"
+                        if histoarg == "bco":
+                            macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+subsys[s][2]+"(\""+aggFile[0]+","+"\""+subsys[s][0].split("_")[4]+"\")"
                         cmd = ["root.exe","-q",macro]
 
                         if args.verbose :
