@@ -146,10 +146,10 @@ def main():
                             subprocess.run(cmd)
                             updatedRuns.append(run)
 
-
-                        print("There are multiple matching files.")
-                        print(aggFile)
-                        print("Drawing file with latest db tag: " + fileToDraw)
+                        if args.verbose:
+                            print("There are multiple matching files.")
+                            print(aggFile)
+                            print("Drawing file with latest db tag: " + fileToDraw)
             if args.verbose :
                 print("run numbers updated")
                 print(updatedRuns)
