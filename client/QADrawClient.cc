@@ -147,7 +147,10 @@ int QADrawClient::MakeHtml(const std::string &who, const std::string &what)
   }
   fHtml->runNumber(RunNumber());  // do not forget this !
   fHtml->RunType(RunType());
-  std::cout << "doing something with " << who << ", " << what << std::endl;
+  if(Verbosity() > 0)
+    {
+      std::cout << "doing something with " << who << ", " << what << std::endl;
+    }
   int iret = DoSomething(who, what, "HTML");
   if (!onlprod_real_html)
   {
