@@ -35,9 +35,9 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
 
 
 def get_aggregated_file(cursor, dsttype, runnumber):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and runnumber='{}')".format(dsttype,runnumber)
-    #if args.verbose:
-        #print(query)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=0 and runnumber='{}')".format(dsttype,runnumber)
+    if args.verbose:
+        print(query)
     cursor.execute(query)
     returnfile = ""
     # there is only ever one return for this query
@@ -58,23 +58,31 @@ def main():
             hist = hist_types[subsystemID]
             # just use the 0th one to get the run/db range once per subsystem instead of for each ROC
             dummyhisttype = hist+"0"
+            
             if hist.find("TPC") != -1:
                 dummyhisttype = hist+"00"
-            for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype): 
+            for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype):
+                
+                if run < 59000:
+                    continue
+                if args.verbose:
+                    print("Checking run " + str(run))
                 filesToAdd = []
                 for ROC in range(nrocs):
                     histtype = hist+str(ROC)
                     if hist.find("TPC") != -1:
                         histtype = hist+"{:02d}".format(ROC)
+                    histtype += runtype
                     thisfile = get_aggregated_file(FCReadCursor, histtype, run)
                     if len(thisfile) > 0:
                         filesToAdd.append(thisfile)
                 if args.verbose :
+                    print("files to add is:")
                     print(filesToAdd)
                 if len(filesToAdd) == 0:
                     # nothing to add, move on
                     continue
-                print(filesToAdd[0])
+                
                 tags = (filesToAdd[0]).split(os.sep)
                 index = tags.index(runtype[1:])
                 collisiontag = tags[index]
@@ -108,6 +116,7 @@ def main():
                 if len(path) == 0:
                     reagg=True
                 newFileTime = 0
+            
                 for rocpath in filesToAdd:
                     if os.path.getmtime(rocpath) > newFileTime:
                         newFileTime = os.path.getmtime(rocpath)
@@ -129,9 +138,16 @@ def main():
                     print ("lfn is " + lfn)
                     print("agg file path is " + path)
                 command = ["hadd","-ff",path]
-            
+                nRocsToAdd = 0
                 for rocpath in filesToAdd:
                     command.append(str(rocpath))
+                    nRocsToAdd+=1
+                    
+                if nRocsToAdd != nrocs:
+                    print("One of the ROCS failed! There is a missing histogram file")
+                    print("for lfn: " + lfn)
+                    print("ROCs available: ")
+                    print(filesToAdd)
                 if args.verbose:
                     print("executing command for "+str(len(filesToAdd)) + " files")
                     print(command)
