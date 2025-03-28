@@ -12,6 +12,9 @@ elif [ $histtype = "cluster" ]; then
 elif [ $histtype = "seed" ]; then
     Xvfb :5 -nolisten tcp &
     export DISPLAY=unix:5
+elif [ $histtype = "bco" ]; then
+    Xvfb :6 -nolisten tcp &
+    export DISPLAY=unix:6
 else
     echo "makehtmltrackers.sh called with bad argument: ${histtype}"
     rm htmlrunningtrk$histtype
