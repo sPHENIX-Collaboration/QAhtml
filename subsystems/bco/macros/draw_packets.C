@@ -1,6 +1,6 @@
 #include <qahtml/QADrawClient.h>
 #include <bco/BCODraw.h>
-//#include <sPhenixStyle.C>
+#include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawbco.so)
 
 void draw_packets(const std::string &rootfile, const std::string& what) {
