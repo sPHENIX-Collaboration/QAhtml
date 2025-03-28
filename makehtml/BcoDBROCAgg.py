@@ -8,9 +8,9 @@ import time
 import argparse
 import hashlib
 
-NROCS = [6,8,24]
-
-hist_types = ["HIST_DST_STREAMING_EVENT_MVTX", "HIST_DST_STREAMING_EVENT_INTT","HIST_DST_STREAMING_EVENT_TPC"]
+NROCS = [1,6,8,24]
+nsubsys = 4
+hist_types = ["HIST_DST_STREAMING_EVENT_TPOT","HIST_DST_STREAMING_EVENT_MVTX", "HIST_DST_STREAMING_EVENT_INTT","HIST_DST_STREAMING_EVENT_TPC"]
 
 runtypes = ["_run3auau"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
@@ -28,7 +28,8 @@ print("Test is " + str(args.test))
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type + runtype
     query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset;".format(dsttype)
-   
+    if args.verbose:
+        print(query)
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
     return runnumbers
@@ -53,14 +54,15 @@ def main():
     FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
     FCWriteCursor = FCWrite.cursor()
     for runtype in runtypes:
-        for subsystemID in range(3):
+        for subsystemID in range(nsubsys):
             nrocs = NROCS[subsystemID]
             hist = hist_types[subsystemID]
             # just use the 0th one to get the run/db range once per subsystem instead of for each ROC
             dummyhisttype = hist+"0"
-            
             if hist.find("TPC") != -1:
                 dummyhisttype = hist+"00"
+            if hist.find("TPOT") != -1:
+                dummyhisttype = hist
             for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype):
                 
                 if run < 59000:
@@ -69,7 +71,9 @@ def main():
                     print("Checking run " + str(run))
                 filesToAdd = []
                 for ROC in range(nrocs):
-                    histtype = hist+str(ROC)
+                    histtype = hist
+                    if hist.find("TPOT") == -1:
+                        histtype = hist+str(ROC)
                     if hist.find("TPC") != -1:
                         histtype = hist+"{:02d}".format(ROC)
                     histtype += runtype
