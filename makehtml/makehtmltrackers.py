@@ -123,7 +123,7 @@ def main():
                         if len(aggFile) == 1 : 
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\")"
                             if histoarg == "bco":
-                                macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+","+"\""+dictionary[s][0].split("_")[4]+"\")"
+                                macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\","+"\""+dictionary[s][0].split("_")[4]+"\")"
                             cmd = ["root.exe","-q",macro]
 
                             if args.verbose :

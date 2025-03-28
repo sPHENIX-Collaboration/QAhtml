@@ -20,7 +20,7 @@ else
     rm htmlrunningtrk$histtype
     exit 1
 fi
-python3 makehtmltrackers.py -ht $histtype -v -t >& /sphenix/u/sphnxpro/qahtml/QAhtml/makehtml/makehtmltrack$histtype.log
+python3 makehtmltrackers.py -ht $histtype >& /sphenix/u/sphnxpro/qahtml/QAhtml/makehtml/makehtmltrack$histtype.log
 kill $!
 rm htmlrunningtrk$histtype
 # no echos - this will force an email from cron
