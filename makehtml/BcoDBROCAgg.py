@@ -122,6 +122,8 @@ def main():
                 newFileTime = 0
             
                 for rocpath in filesToAdd:
+                    if not os.path.exists(rocpath):
+                        continue
                     if os.path.getmtime(rocpath) > newFileTime:
                         newFileTime = os.path.getmtime(rocpath)
                     if os.path.getmtime(rocpath) > aggFileTime:

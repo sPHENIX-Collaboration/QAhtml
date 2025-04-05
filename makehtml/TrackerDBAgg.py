@@ -48,7 +48,7 @@ def main():
     import time
     FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
     FCWritecursor = FCWrite.cursor()
-    conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
+    conn = pyodbc.connect("DSN=FileCatalog;UID=phnxrc;READONLY=True")
     cursor = conn.cursor()
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     for runtype in runtypes:
@@ -113,6 +113,8 @@ def main():
                 newFileTime = 0
                 if reagg == False:
                     for newpath in filepaths:
+                        if not os.path.exists(newpath):
+                            continue
                         if newpath.find(latestdbtag) == -1:
                             continue
                         if os.path.getmtime(newpath) > newFileTime:

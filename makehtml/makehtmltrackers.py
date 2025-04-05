@@ -94,7 +94,7 @@ def main():
                         if args.verbose:
                             print("checking rundir "+rundir)
                         runnum = int(rundir.split("/")[-1])
-                        if runnum < 57000:
+                        if runnum < 59000:
                             continue
                         qafiles = glob.glob(qapath+"/"+d+"/"+rundir+"/"+dictionary[s][1]+"*")
 
@@ -112,7 +112,7 @@ def main():
                 updatedRuns = []
                 for run in subsysAggRuns:
                     if (not run in qaFilesModified) or (qaFilesModified[run] < subsysAggRuns[run]) :
-                        if run < 57000:
+                        if run < 59000:
                             continue
                         aggFile= get_file(cursor, dictionary[s][0], run)
 
