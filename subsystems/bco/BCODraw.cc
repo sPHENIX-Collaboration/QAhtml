@@ -158,7 +158,10 @@ int BCODraw::DrawMVTX()
     
   if (h_mvtxrefgl1 && h_mvtxallpackets && h_mvtxallpacketsallfees)
   {
-    const int nMvtxGL1BCOs = h_mvtxrefgl1->GetEntries();
+    // when aggregating all single felixs together, need to divide them by
+    // the total number of felixs added together
+    const int nMvtxGL1BCOs = h_mvtxrefgl1->GetEntries() / (nmvtxfelix / 2.);
+    
     //TH1* mvtxTagFelix[nmvtxfelix][nmvtxfees];
     //int nMvtxTagFelix[nmvtxfelix][nmvtxfees];
     //float mvtxTagFelixFrac[nmvtxfelix][nmvtxfees];
@@ -197,7 +200,7 @@ int BCODraw::DrawMVTX()
       mvtxAllFelixSummary->SetBinContent(i+1, mvtxTagAllFelixFrac[i]);
     }
     mvtxAllFelixSummary->SetBinContent(13, h_mvtxallpacketsallfees->GetEntries() / nMvtxGL1BCOs);
-
+    
     if (! gROOT->FindObject("mvtx_evt_building_1"))
     {
       MakeCanvas("mvtx_evt_building_1", 0);
@@ -205,6 +208,7 @@ int BCODraw::DrawMVTX()
     TC[0]->Clear("D");
     Pad[0][0]->cd();
     gStyle->SetOptStat(0);
+    mvtxAllFelixSummary->GetYaxis()->SetRangeUser(0,1.5);
     mvtxAllFelixSummary->GetXaxis()->SetBinLabel(1,"0.0");
     mvtxAllFelixSummary->GetXaxis()->SetBinLabel(2,"0.1");
     mvtxAllFelixSummary->GetXaxis()->SetBinLabel(3,"1.0");
@@ -223,7 +227,7 @@ int BCODraw::DrawMVTX()
 
     Pad[0][1]->cd();
     gStyle->SetOptStat(0);
-    mvtxsummaryhisto->GetYaxis()->SetRangeUser(0,1);
+    mvtxsummaryhisto->GetYaxis()->SetRangeUser(0,1.5);
     mvtxsummaryhisto->GetXaxis()->SetBinLabel(1,"0.0");
     mvtxsummaryhisto->GetXaxis()->SetBinLabel(2,"0.1");
     mvtxsummaryhisto->GetXaxis()->SetBinLabel(3,"1.0");
@@ -297,7 +301,8 @@ int BCODraw::DrawINTT()
 
   if (h_inttrefgl1 && h_inttallpackets)
   {
-    const int nInttGL1BCOs = h_inttrefgl1->GetEntries(); 
+    // when adding all felixs together, need to divide by total number of felixs
+    const int nInttGL1BCOs = h_inttrefgl1->GetEntries() / ninttebdcs; 
     TH1* inttTagEbdc[ninttebdcs+1];
     TH1* inttTagEbdcFee[ninttebdcs][ninttfees];
     int nInttTaggedBCOs[ninttebdcs+1];
@@ -356,7 +361,7 @@ int BCODraw::DrawINTT()
     TC[2]->Clear("D");
     Pad[2][0]->cd();
     gStyle->SetOptStat(0);
-    histoversion->GetYaxis()->SetRangeUser(0,1);
+    histoversion->GetYaxis()->SetRangeUser(0,1.5);
     histoversion->GetXaxis()->SetBinLabel(1,"0");
     histoversion->GetXaxis()->SetBinLabel(2,"1");
     histoversion->GetXaxis()->SetBinLabel(3,"2");
@@ -375,7 +380,7 @@ int BCODraw::DrawINTT()
 
     Pad[2][1]->cd();
     gStyle->SetOptStat(0);
-    histoversionfees->GetYaxis()->SetRangeUser(0,1);
+    histoversionfees->GetYaxis()->SetRangeUser(0,1.5);
     histoversionfees->GetXaxis()->SetBinLabel(1,"0");
     histoversionfees->GetXaxis()->SetBinLabel(2,"1");
     histoversionfees->GetXaxis()->SetBinLabel(3,"2");

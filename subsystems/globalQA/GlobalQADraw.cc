@@ -30,6 +30,16 @@
 #include <sstream>
 #include <string>
 
+#include <RooRealVar.h>
+#include <RooDataHist.h>
+#include <RooLandau.h>
+#include <RooGaussian.h>
+#include <RooFFTConvPdf.h>
+#include <RooFitResult.h>
+#include <RooPlot.h>
+#include <TPaveText.h>
+
+
 void get_scaledowns(int runnumber, int scaledowns[])
 {
 
@@ -111,6 +121,11 @@ int GlobalQADraw::Draw(const std::string &what)
   if (what == "ALL" || what == "sEPD")
   {
     iret += DrawsEPD(what);
+    idraw++;
+  }
+  if (what == "ALL" || what == "sEPD")
+  {
+    iret += DrawsEPD_fits(what);
     idraw++;
   }
   if (!idraw)
@@ -921,6 +936,11 @@ int GlobalQADraw::MakeHtml(const std::string &what)
   pngfile = cl->htmlRegisterPage(*this, "sEPD", "global3", "png");
   cl->CanvasToPng(TC[2], pngfile);
 
+  for (size_t i = 0; i < m_epdFitCanvases.size(); i++) {
+    pngfile = cl->htmlRegisterPage(*this, "sEPD_Fits", Form("sEPD_Fits_%zu", i), "png");
+    cl->CanvasToPng(m_epdFitCanvases[i], pngfile);
+  }
+
 
 
   return 0;
@@ -933,4 +953,275 @@ int GlobalQADraw::DBVarInit()
   //db->registerVar("rms");
   //db->DBInit();
   return 0;
+}
+
+
+int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
+  QADrawClient *cl = QADrawClient::instance();
+  const int nChannels = 744;
+  const int hist_per_canvas = 48;
+  const int nPages = (nChannels + hist_per_canvas - 1) / hist_per_canvas;
+
+
+  int xsize = cl->GetDisplaySizeX();
+  int ysize = cl->GetDisplaySizeY();
+
+  const double canvasScale = 0.9;
+  int canvasWidth = static_cast<int>(xsize * canvasScale);
+  int canvasHeight = static_cast<int>(ysize * canvasScale);
+
+  for (auto* c : m_epdFitCanvases) { delete c; }
+  m_epdFitCanvases.clear();
+  for (auto* d : m_epdFitData) { delete d; }
+  m_epdFitData.clear();
+
+  gSystem->ProcessEvents();
+  for (int cIdx = 0; cIdx < nPages; cIdx++) {
+    TCanvas* c = new TCanvas(Form("sEPD_fits_page%d", cIdx), 
+                          Form("sEPD Fits Page %d", cIdx), 
+                          -1, 0, canvasWidth, canvasHeight);
+    c->SetBit(kCanDelete);
+    c->Divide(8, 6); // 8 columns, 6 rows
+    m_epdFitCanvases.push_back(c);
+  }
+
+  int channelCount = 0;
+  for (int ch = 0; ch < nChannels; ch++) {
+      TH1* hist = dynamic_cast<TH1*>(QADrawClient::instance()->getHisto(Form("h_GlobalQA_sEPD_tile%d", ch)));
+      if (!hist || hist->GetEntries() < 50) continue;
+
+      
+
+      double peak_pos = FindHistogramPeak(hist,40.);
+      double fit_lo, fit_hi;
+      DetermineFitRange(hist, fit_lo, fit_hi);
+
+      ChannelFitData* cf = new ChannelFitData();
+      
+
+      cf->x = new RooRealVar(Form("x_ch%d", ch), "ADC", fit_lo, fit_hi);
+      cf->ml = new RooRealVar(Form("ml_ch%d", ch), "Landau MPV", peak_pos, 
+                            std::max(peak_pos*0.5, 10.0), peak_pos*2.0);
+      cf->sl = new RooRealVar(Form("sl_ch%d", ch), "Landau sigma", 15, 1, 50);
+      cf->sg = new RooRealVar(Form("sg_ch%d", ch), "Gauss sigma", 10, 1, 30);
+
+      cf->ml->setMin(fit_lo + 5);
+      cf->ml->setMax(fit_hi - 5);
+      cf->sl->setMin(1.0);
+      cf->sl->setMax(50.0);
+      cf->sg->setMin(1.0);
+      cf->sg->setMax(30.0);
+
+      //cf->x->setBins(4000, "cache");
+      int nBins = static_cast<int>((fit_hi - fit_lo)/5); // 5 ADC/bin
+      cf->x->setBins(nBins, "cache");
+
+
+      cf->landau = new RooLandau(Form("landau_ch%d", ch), "", *cf->x, *cf->ml, *cf->sl);
+      RooConstVar zero(Form("zero_ch%d", ch), "Zero", 0.0);
+      cf->gauss = new RooGaussian(Form("gauss_ch%d", ch), "", *cf->x, zero, *cf->sg);
+      cf->convPDF = new RooFFTConvPdf(Form("pdf_ch%d", ch), "Landau⊗Gauss", *cf->x, *cf->landau, *cf->gauss);
+
+  
+      cf->data = new RooDataHist(Form("data_ch%d", ch), "Data", *cf->x, hist);
+
+      RooFitResult* fitResult = nullptr;
+        try {
+            fitResult = cf->convPDF->fitTo(*(cf->data),
+                RooFit::Save(true),
+                RooFit::PrintLevel(-1),
+                RooFit::Range(fit_lo, fit_hi),
+                RooFit::Strategy(2),
+                RooFit::Optimize(1),
+                RooFit::NumCPU(4));
+        } catch (const std::exception& e) {
+          std::cerr << "Fit failed for channel " << ch << ": " << e.what() << std::endl;
+          delete cf;
+          continue;
+        }
+
+      if(!fitResult || fitResult->status() != 0) {
+        delete cf;
+        delete fitResult;
+        continue;
+    }
+
+    if (fitResult && fitResult->status() == 0) {
+      if (cf->ml->getVal() < fit_lo || cf->ml->getVal() > fit_hi) {
+          delete cf;
+          delete fitResult;
+          continue;
+      }
+    }
+
+      cf->frame = cf->x->frame();
+
+      cf->frame->SetTitle(Form("Channel %d Fit", ch));
+
+      cf->frame->GetXaxis()->SetLabelSize(0.06);
+      cf->frame->GetYaxis()->SetLabelSize(0.06);
+      cf->frame->GetXaxis()->SetTitleSize(0.07);
+      cf->frame->GetYaxis()->SetTitleSize(0.07);
+      cf->frame->GetXaxis()->SetTitleOffset(0.9);
+      cf->frame->GetYaxis()->SetTitleOffset(1.2);
+      
+      cf->data->plotOn(cf->frame);
+      cf->convPDF->plotOn(cf->frame);
+
+  
+      TLatex *chlabel = new TLatex();
+      chlabel->SetNDC();
+      chlabel->SetTextSize(0.07);
+      chlabel->SetTextAlign(11);  
+
+      // Parameter box with adjusted size and text
+      TPaveText *pt = new TPaveText(0.5, 0.15, 0.88, 0.45, "NDC");
+      pt->SetFillColorAlpha(0, 0.7);
+      pt->SetBorderSize(1);
+      pt->SetTextSize(0.06);
+      pt->SetTextAlign(12); 
+      pt->SetMargin(0.05);
+      
+      pt->AddText(Form("Ch %d", ch)); 
+      pt->AddLine(0, 0.8, 1, 0.8);   
+      pt->AddText(Form("MPV: %.1f#pm%.1f", 
+                    cf->ml->getVal(), cf->ml->getError()));
+      pt->AddText(Form("L#sigma: %.1f#pm%.1f",
+                    cf->sl->getVal(), cf->sl->getError()));
+      pt->AddText(Form("G#sigma: %.1f#pm%.1f",
+                    cf->sg->getVal(), cf->sg->getError()));
+
+
+
+      
+      int pageIdx = channelCount / hist_per_canvas;
+      int padIdx = (channelCount % hist_per_canvas) + 1; // 1-12
+
+      if (pageIdx >= int(m_epdFitCanvases.size())) {
+          std::cerr << "Exceeded canvas count at channel " << ch << std::endl;
+          delete cf;
+          continue;
+      }
+
+      if (!m_epdFitCanvases[pageIdx]) {
+        std::cerr << "Missing canvas for page " << pageIdx << std::endl;
+        continue;
+      }
+
+      std::cout << "Processing channel " << ch 
+          << " -> page " << pageIdx 
+          << " pad " << padIdx 
+          << std::endl;
+
+
+      TCanvas* c = m_epdFitCanvases[pageIdx];
+      c->cd(padIdx);
+      cf->frame->Draw();
+      pt->Draw();
+
+      m_epdFitData.push_back(cf); // Store fit data for later cleanup
+      channelCount++;
+  }
+
+  return 0;
+}
+
+double GlobalQADraw::FindHistogramPeak(TH1* hist, double min_adc=40.0) {
+  int max_bin = hist->GetMaximumBin();
+  double max_center = hist->GetXaxis()->GetBinCenter(max_bin);
+  if(max_center >= min_adc) return max_center;
+
+  // Fallback: search above min_adc
+  double max_val = -1;
+  for(int bin=1; bin<=hist->GetNbinsX(); bin++) {
+      double center = hist->GetXaxis()->GetBinCenter(bin);
+      if(center >= min_adc && hist->GetBinContent(bin) > max_val) {
+          max_val = hist->GetBinContent(bin);
+          max_center = center;
+      }
+  }
+
+  std::cout << "Histogram peak at " << max_center << std::endl;
+  return max_center;
+}
+
+void GlobalQADraw::DetermineFitRange(TH1* hist, double& fit_lo, double& fit_hi) {
+  int max_bin = -1;
+  double max_content = -1;
+  const double ADC_MIN = 40.0;
+  double x_peak;
+
+  for(int bin = 1; bin <= hist->GetNbinsX(); bin++) {
+      double center = hist->GetXaxis()->GetBinCenter(bin);
+      double content = hist->GetBinContent(bin);
+      if(center >= ADC_MIN && content > max_content) {
+          max_content = content;
+          max_bin = bin;
+      }
+  }
+
+  
+
+  x_peak = hist->GetXaxis()->GetBinCenter(max_bin);
+  double y_peak = hist->GetBinContent(max_bin);
+
+  if(max_bin == -1) {
+    x_peak = 80.;
+    std::cerr << "No valid peak found, using fallback position" << std::endl;
+  };
+  
+  // Calculate FWHM to estimate sigma
+  double half_max = y_peak/2.0;
+  double x_left = x_peak, x_right = x_peak;
+
+  // Find left half-max point
+  for(int bin = max_bin; bin >= 1; bin--) {
+    double center = hist->GetXaxis()->GetBinCenter(bin);
+    if(center < ADC_MIN) break;
+    
+    if(hist->GetBinContent(bin) < half_max) {
+        x_left = center;
+        break;
+    }
+  }
+
+
+  // Find right half-max point
+  for(int bin = max_bin; bin <= hist->GetNbinsX(); bin++) {
+      if(hist->GetBinContent(bin) < half_max) {
+          x_right = hist->GetXaxis()->GetBinCenter(bin);
+          break;
+      }
+  }
+
+  // Calculate initial sigma estimate
+  double fwhm = x_right - x_left;
+  double sigma_est = fwhm/2.355;  // Convert FWHM to sigma
+
+
+  fit_lo = x_peak - 2*sigma_est;
+  fit_hi = x_peak + 4*sigma_est;
+
+  fit_lo = std::max(fit_lo, ADC_MIN);
+
+  // Clamp to histogram limits
+  double h_min = hist->GetXaxis()->GetXmin();
+  double h_max = hist->GetXaxis()->GetXmax();
+  fit_lo = std::max(fit_lo, h_min);
+  fit_hi = std::min(fit_hi, h_max);
+
+  // Fallback for bad FWHM estimates
+  if((fit_hi - fit_lo) < 20) {
+      fit_lo = x_peak - 40;
+      fit_hi = x_peak + 40;
+      fit_lo = std::max(fit_lo, ADC_MIN);
+      fit_lo = std::max(fit_lo, h_min);
+      fit_hi = std::min(fit_hi, h_max);
+  }
+  
+  // Clamp to histogram limits
+  fit_lo = std::max(fit_lo, hist->GetXaxis()->GetXmin());
+  fit_hi = std::min(fit_hi, hist->GetXaxis()->GetXmax());
+
+  std::cout << "Fit lo = " << fit_lo << ", Fit hi  = " << fit_hi << std::endl;
 }
