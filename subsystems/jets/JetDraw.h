@@ -87,6 +87,7 @@ class JetDraw : public QADraw
     void MakeCanvas(const std::string &name, const int nHist, VPlotPads1D& plots);
     void DrawRunAndBuild(const std::string& what, TPad* pad, const int trig = -1, const int res = -1);
     void DrawHists(const std::string& what, const std::vector<std::size_t>& indices, const VHistAndOpts1D& hists, VPlotPads1D& plots, const int trig = -1, const int res = -1);
+    void DrawEmptyHistogram(const std::string& what);
     void UpdatePadStyle(const HistAndOpts& hist);
     void myText(double x, double y, int color, const char *text, double tsize = 0.04);
 

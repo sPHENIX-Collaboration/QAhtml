@@ -890,7 +890,7 @@ void JetDraw::DrawHists(
     }
     else
     {
-      /* TODO draw empty hist here */
+      DrawEmptyHistogram(hists.at(indices[iPad]).title);
     }
   }
 
@@ -899,6 +899,30 @@ void JetDraw::DrawHists(
   plots.back().canvas->Update();
 
 }  // end 'DrawHists(std::string&, std::vector<std:size_t>&, VHistAndOpts1D&, VPlotPads1D&, int x 2)'
+
+// ----------------------------------------------------------------------------
+//! Draw empty histogram on current pad
+// ----------------------------------------------------------------------------
+/*! Helper function to draw an empty histogram on the current
+ *  pad. Used when a histogram is missing.
+ *
+ *  \param[in] what what's missing (e.g. a histogram)
+ */
+void JetDraw::DrawEmptyHistogram(const std::string& what = "histogram")
+{
+
+  // set up hist/text
+  TH1D*   hEmpty = new TH1D("hEmpty", "", 10, 0, 10);
+  TLatex* lEmpty = new TLatex();
+
+  // set up message
+  const std::string message = what + " is missing";
+
+  // and draw them on current pad
+  hEmpty->DrawCopy();
+  lEmpty->DrawLatex(0.3, 0.5, message.data());
+
+}  // end 'DrawEmptyHistogram()'
 
 // ----------------------------------------------------------------------------
 //! Update style of current pad based on options
