@@ -17,6 +17,7 @@ SUBDIRS = \
   mvtxrawhit \
   siliconseeds \
   tpc \
+  tpclasers \
   tpcrawhit \
   tpcseeds \
   tpcsil \
