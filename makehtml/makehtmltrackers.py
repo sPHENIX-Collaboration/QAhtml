@@ -135,15 +135,24 @@ def main():
                             dbtagToDraw = "001"
                             fileToDraw = ""
                             # find the file with the most recent db tag
+                       
                             for file in aggFile:
                                 # find the db string
                                 filename = file.split("/")[-1]
                                 dbtag = getBuildDbTag(runtype, filename)
-                                if(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
+                                if dbtag.find("nocdbtag") != -1:
                                     fileToDraw = file
-                                    dbtagToDraw = int(dbtag.split("p")[1])
-                                    #Draw that one
+                                    dbtagToDraw = "nocdbtag"
+                                    break
+                                else:
+                                    if int(dbtag.split("p")[1]) > int(dbtagToDraw):
+                                        fileToDraw = file
+                                        dbtagToDraw = int(dbtag.split("p")[1])
+                                        #Draw that one
+                                
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+fileToDraw+"\")"
+                            if histoarg == "bco":
+                                macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\","+"\""+dictionary[s][0].split("_")[4]+"\")"
                             cmd = ["root.exe","-q",macro]
                             if args.verbose :
                                 print(cmd)
