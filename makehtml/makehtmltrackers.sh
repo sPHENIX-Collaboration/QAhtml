@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 histtype=$1
 [[ -e htmlrunningtrk${histtype} ]] && exit 0
 echo $$ > htmlrunningtrk${histtype}
