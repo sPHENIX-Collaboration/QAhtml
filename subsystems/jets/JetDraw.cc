@@ -62,7 +62,8 @@ int JetDraw::MakeHtml(const std::string &what)
     const std::string nameTrig = m_mapTrigToName[idTrig];
 
     // draw rho plots
-    const std::string pngRho = cl->htmlRegisterPage(*this, nameTrig, nameTrig, "png");
+    const std::string nameRho = nameTrig + "_rho";
+    const std::string pngRho  = cl->htmlRegisterPage(*this, nameRho, nameRho, "png");
     cl->CanvasToPng(m_vecRhoCanvas[iTrigToDraw], pngRho);
 
     // loop over jet resolutions to draw
@@ -75,15 +76,21 @@ int JetDraw::MakeHtml(const std::string &what)
       const std::string fileRes = nameTrig + "_" + nameRes;
 
       // draw constituent plots 
-      const std::string pngCst = cl->htmlRegisterPage(*this, dirRes, fileRes + "_cst", "png");
+      const std::string dirCst  = dirRes + "_constituents";
+      const std::string fileCst = fileRes + "_constituents";
+      const std::string pngCst  = cl->htmlRegisterPage(*this, dirCst, fileCst, "png");
       cl->CanvasToPng(m_vecCstCanvas[iTrigToDraw][iResToDraw], pngCst);
 
       // draw kinematic plots 
-      const std::string pngKine = cl->htmlRegisterPage(*this, dirRes, fileRes + "_kine", "png");
+      const std::string dirKine  = dirRes + "_kinematics";
+      const std::string fileKine = fileRes + "_kinematics";
+      const std::string pngKine  = cl->htmlRegisterPage(*this, dirKine, fileKine, "png");
       cl->CanvasToPng(m_vecKineCanvas[iTrigToDraw][iResToDraw], pngKine);
 
       // draw seed plots 
-      const std::string pngSeed = cl->htmlRegisterPage(*this, dirRes, fileRes + "_seed", "png");
+      const std::string dirSeed  = dirRes + "_seeds";
+      const std::string fileSeed = fileRes + "_seeds";
+      const std::string pngSeed  = cl->htmlRegisterPage(*this, dirSeed, fileRes, "png");
       cl->CanvasToPng(m_vecSeedCanvas[iTrigToDraw][iResToDraw], pngSeed);
     }
   }
