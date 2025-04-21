@@ -3,8 +3,8 @@
 
 #include <qahtml/QADraw.h>
 #include <Rtypes.h>         // For ClassDef/ClassImp
-#include <TObject.h>        // For TObject inheritance
-#include <RooRealVar.h>     // Full declarations for RooFit classes
+#include <TObject.h> 
+#include <RooRealVar.h> 
 #include <RooLandau.h>
 #include <RooGaussian.h>
 #include <RooFFTConvPdf.h>
@@ -58,14 +58,24 @@ class GlobalQADraw : public QADraw {
   int DrawsEPD_fits(const std::string &what = "ALL");
   double FindHistogramPeak(TH1* hist, double min_adc);
   void DetermineFitRange(TH1* hist, double& fit_lo, double& fit_hi);
+  //bool LoadEPDChannelMap();
+  void InitializeFailureMap();
 
   QADrawDB *db{nullptr};
-  TCanvas *TC[3]{};
-  TPad *transparent[3]{};
+  TCanvas *TC[4]{};
+  TPad *transparent[4]{};
   TPad *Pad[3][7]{};
 
   std::vector<TCanvas*> m_epdFitCanvases;
   std::vector<ChannelFitData*> m_epdFitData;
+  //TH2F* m_failureMap;
+  TH2F* m_failureMapPolarS = nullptr;  // South
+  TH2F* m_failureMapPolarS01 = nullptr; // tile 0
+  TH2F* m_failureMapPolarN = nullptr;  // North
+  TH2F* m_failureMapPolarN01 = nullptr; // tile 0
+  std::vector<std::pair<int, int>> m_channelPositions;
+  std::vector<int> m_channelArm;
+  //CDBTTree* m_cdbttreeEPD{nullptr};
   int run_type = 0; // AuAu=0, pp=1
 };
 
