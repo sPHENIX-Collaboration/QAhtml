@@ -1020,9 +1020,7 @@ int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
         double fit_lo, fit_hi;
         DetermineFitRange(hist, fit_lo, fit_hi);
 
-        //double mean = hist->GetMean();
         double rms  = hist->GetRMS();
-        //double entries = hist->GetEntries();
 
         double landau_width_guess = std::clamp(rms * 0.5, 3.0, 50.0);
         double gauss_sigma_guess  = std::clamp(rms * 0.4, 2.0, 30.0);
@@ -1036,8 +1034,6 @@ int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
         cf->sl = new RooRealVar(Form("sl_ch%d", channel), "Landau sigma", landau_width_guess, 1, 50);
         cf->sg = new RooRealVar(Form("sg_ch%d", channel), "Gauss sigma", gauss_sigma_guess, 1, 30);
         cf->x->setBins(static_cast<int>((fit_hi - fit_lo)/5), "cache");
-        //int nBins = 1000;
-        //cf->x->setBins(nBins, "cache");
 
         cf->landau = new RooLandau(Form("landau_ch%d", channel), "", *cf->x, *cf->ml, *cf->sl);
         RooConstVar zero(Form("zero_ch%d", channel), "Zero", 0.0);
@@ -1115,7 +1111,8 @@ int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
           pt->Draw();
         }
 
-        m_epdFitData.push_back(cf);
+
+
         channelCount++;
       }
     }
@@ -1270,59 +1267,11 @@ void GlobalQADraw::DetermineFitRange(TH1* hist, double& fit_lo, double& fit_hi) 
   std::cout << "Fit lo = " << fit_lo << ", Fit hi  = " << fit_hi << std::endl;
 }
 
-/*
-bool GlobalQADraw::LoadEPDChannelMap()
-{
-  if (!m_channelPositions.empty()) return true;
-
-  std::string calibdir = CDBInterface::instance()->getUrl("SEPD_CHANNELMAP");
-  if (calibdir.empty())
-  {
-    std::cerr << "GlobalQADraw::LoadEPDChannelMap - Failed to get CDB URL for SEPD channel map"
-              << std::endl;
-    return false;
-  }
-
-  CDBTTree cdbttree(calibdir);
-  m_channelPositions.resize(768, {-1, -1}); 
-  m_channelArm.reserve(768);
-
-  for (int ch = 0; ch < 768; ch++)
-  {
-    int keymap = cdbttree.GetIntValue(ch, "epd_channel_map");
-    std::cout << "channel number " << ch << "=> " << keymap << std::endl;
-    if (keymap == 999) continue;  // Skip invalid channels
-
-    try {
-      int rbin = TowerInfoDefs::get_epd_rbin(keymap);
-      int phibin = TowerInfoDefs::get_epd_phibin(keymap);
-      int arm = TowerInfoDefs::get_epd_arm(keymap);
-      m_channelPositions[ch] = std::make_pair(rbin, phibin);
-      m_channelArm[ch] = arm;
-    }
-    catch (const std::exception& e)
-    {
-      std::cerr << "GlobalQADraw::LoadEPDChannelMap - Error processing channel "
-                << ch << ": " << e.what() << std::endl;
-    }
-  }
-
-  return true;
-}*/
-
 void GlobalQADraw::InitializeFailureMap()
 {
   if (!m_failureMapPolarN)
   {
-    /*
-    m_failureMap = new TH2F("h_sEPD_fit_failures", "sEPD Fit Failure Map",
-                           31, -0.5, 30.5, 24, -0.5, 23.5);
-    m_failureMap->SetXTitle("Sector");
-    m_failureMap->SetYTitle("Tile");
-    m_failureMap->SetZTitle("Failure Rate [0=OK, 1=Failed]");
-    m_failureMap->SetStats(0);
-    m_failureMap->SetMinimum(0);
-    m_failureMap->SetMaximum(1);*/
+    
     m_failureMapPolarN = new TH2F("h_sEPD_fit_failures_north", 
       "Failure Map (North)",
       24, 0, 2*M_PI,
@@ -1331,10 +1280,7 @@ void GlobalQADraw::InitializeFailureMap()
 
     m_failureMapPolarN->SetStats(0);
     
-    // Set the Z-range for 0=good, 1=fail
 
-    //m_failureMapPolarN->SetMinimum(0);
-    //m_failureMapPolarN->SetMaximum(1.1);
   }
 
   if (!m_failureMapPolarS) {
