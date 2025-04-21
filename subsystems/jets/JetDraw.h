@@ -79,7 +79,8 @@ class JetDraw : public QADraw
     int DrawJetSeed(uint32_t trigger, JetRes reso);
     void DrawRunAndBuild(const std::string& what, TPad* pad, const int trig = -1, const int res = -1);
     void DrawHists(const std::string& what, const std::vector<std::size_t>& indices, const JetDrawDefs::VHistAndOpts1D& hists, JetDrawDefs::VPlotPads1D& plots, const int trig = -1, const int res = -1);
-    void DrawEmptyHistogram(const std::string& what);
+    void DrawHistOnPad(const std::size_t iHist, const std::size_t iPad, const JetDrawDefs::VHistAndOpts1D& hists, JetDrawDefs::PlotPads& plot);
+    void DrawEmptyHistogram(const std::string& what = "histogram");
     void MakeCanvas(const std::string& name, const int nHist, JetDrawDefs::VPlotPads1D& plots);
     void UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist);
     void myText(double x, double y, int color, const char* text, double tsize = 0.04);

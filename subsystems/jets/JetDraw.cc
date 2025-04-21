@@ -67,6 +67,12 @@ JetDraw::~JetDraw()
  */
 int JetDraw::Draw(const std::string& what)
 {
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing component " << what << std::endl;
+  }
+
   // reserve enough space in relevant vectors
   m_rhoPlots.resize( m_vecTrigToDraw.size() );
   m_cstPlots.resize( m_vecTrigToDraw.size(), JetDrawDefs::VPlotPads2D(m_vecResToDraw.size()) );
@@ -144,6 +150,13 @@ int JetDraw::Draw(const std::string& what)
  */
 int JetDraw::MakeHtml(const std::string& what)
 {
+  // emit debugging messages
+  if (m_do_debug)
+  {
+    std::cout << "Creating HTML pages for " << what << std::endl;
+  }
+
+  // draw relevant plots
   const int drawError = Draw(what);  // Call to Draw
   if (drawError) {
     return drawError;  // Return if there is an error in Draw
@@ -675,7 +688,9 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
   // draw all kinematic hists on 1 page
   DrawHists("JetKinematics", {0, 1, 3, 5}, kineHists, m_kinePlots.back().back(), trigToDraw, resToDraw);
 
-  /* TODO draw profiles on pads 2, 3 */
+  // draw profiles on relevant pads
+  DrawHistOnPad(2, 2, kineHists, m_kinePlots.back().back().back());
+  DrawHistOnPad(4, 3, kineHists, m_kinePlots.back().back().back());
 
   // return w/o error
   return 0;
@@ -831,6 +846,12 @@ void JetDraw::DrawRunAndBuild(const std::string& what,
                               const int trig,
                               const int res)
 {
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing run and build info for " << what << std::endl;
+  }
+
   // connect to draw client
   QADrawClient *cl = QADrawClient::instance();
 
@@ -888,6 +909,12 @@ void JetDraw::DrawHists(const std::string& what,
                         const int trig,
                         const int res)
 {
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing histograms for " << what << std::endl;
+  }
+
   // form canvas name
   std::string canName = what;
   if (trig > -1)
@@ -927,6 +954,45 @@ void JetDraw::DrawHists(const std::string& what,
 }
 
 // ----------------------------------------------------------------------------
+//! Draw a histogram on a pad
+// ----------------------------------------------------------------------------
+/*! Draw a particular histogram (entry iHist in provided hist vector)
+ *  on a particular pad (pad iPad in canvas). Note that
+ *    1. the indices of pads in a TCanvas from 1 (not 0!) on up, and
+ *    2. that this function assumes something has already been drawn
+ *        on the pad.
+ *
+ *  \param iHist index of histogram in vector `hists` to draw
+ *  \param iPad  index of pad to draw histogram on
+ *  \param hists vector histograms containing histogram to be drawn
+ *  \param plot  canvas containing pad to be drawn on
+ */
+void JetDraw::DrawHistOnPad(const std::size_t iHist,
+                            const std::size_t iPad,
+                            const JetDrawDefs::VHistAndOpts1D& hists,
+                            JetDrawDefs::PlotPads& plot)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing histogram " << iHist << " on pad " << iPad << std::endl;
+  }
+
+  // draw histogram
+  plot.histPad->cd(iPad);
+  if (hists.at(iHist).hist)
+  {
+    UpdatePadStyle(hists.at(iHist));
+    hists.at(iHist).hist->DrawCopy("SAME");
+  }
+  else
+  {
+    std::cerr << "Warning: trying to draw missing histogram " << iHist << " on pad " << iPad << std::endl;
+  }
+  plot.canvas->Update();
+}
+
+// ----------------------------------------------------------------------------
 //! Draw empty histogram on current pad
 // ----------------------------------------------------------------------------
 /*! Helper function to draw an empty histogram on the current
@@ -934,8 +1000,14 @@ void JetDraw::DrawHists(const std::string& what,
  *
  *  \param[in] what what's missing (e.g. a histogram)
  */
-void JetDraw::DrawEmptyHistogram(const std::string& what = "histogram")
+void JetDraw::DrawEmptyHistogram(const std::string& what)
 {
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Printing message '" << what << "'" << std::endl;
+  }
+
   // set up hist/text
   TH1D*   hEmpty = new TH1D("hEmpty", "", 10, 0, 10);
   TLatex* lEmpty = new TLatex();
