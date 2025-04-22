@@ -114,6 +114,8 @@ def main():
                     if (not run in qaFilesModified) or (qaFilesModified[run] < subsysAggRuns[run]) :
                         if run < 59000:
                             continue
+                        if histoarg == "bco" and run < 61900:
+                            continue
                         aggFile= get_file(cursor, dictionary[s][0], run)
 
                         if len(aggFile) == 0:
