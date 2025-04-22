@@ -27,7 +27,7 @@ print("Test is " + str(args.test))
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type + runtype
-    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset;".format(dsttype)
+    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset order by runnumber desc;".format(dsttype)
     if args.verbose:
         print(query)
     cursor.execute(query)
@@ -122,6 +122,8 @@ def main():
                 newFileTime = 0
             
                 for rocpath in filesToAdd:
+                    if not os.path.exists(rocpath):
+                        continue
                     if os.path.getmtime(rocpath) > newFileTime:
                         newFileTime = os.path.getmtime(rocpath)
                     if os.path.getmtime(rocpath) > aggFileTime:
