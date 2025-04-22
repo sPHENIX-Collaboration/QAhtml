@@ -316,17 +316,19 @@ std::string QADrawClient::ExtractBuild(const std::string& filename)
 {
   std::string build = "";
   std::vector<std::string> tokens = tokenize(filename, '_');
-  for (auto token : tokens)
+  for (size_t i = 0; i<tokens.size(); i++)
     {
+      std::string token = tokens[i];
       if(token.find("new") != std::string::npos)
 	{
-	  build = "new";
+	  build = "new " + tokens[i+1];
 	}
       else if (token.find("ana") != std::string::npos)
 	{
-	  build = token; 
+	  build = token + " " + tokens[i+1];; 
 	}
     }
+ 
 
   return build;
 }
