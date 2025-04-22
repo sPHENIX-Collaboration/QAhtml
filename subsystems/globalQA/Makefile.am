@@ -24,7 +24,11 @@ libqadrawglobalqa_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb
+  -lqadrawdb \
+  -lphool \
+  -lffamodules \
+  -lfun4all \
+  -lcalo_io
 
 globalqaincludedir=$(pkgincludedir)/globalqa
 
