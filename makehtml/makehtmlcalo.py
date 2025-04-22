@@ -21,7 +21,7 @@ qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
 
 def get_aggregated_files(cursor, dsttype):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999)".format(dsttype)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999) order by full_file_path desc".format(dsttype)
     if args.verbose :
         print(query)
     cursor.execute(query)
@@ -68,8 +68,8 @@ def main():
                 print(subsys[s][0]+" all aggregated runs: ")
                 print(subsysAggRuns)
 
-
-        #check all current qa files for a subsystem in the QA_HTMLDIR  and get the latest modify time for each run
+            subsysAggRuns = dict(sorted(subsysAggRuns.items(), key=lambda item: item[0], reverse=True))
+            #check all current qa files for a subsystem in the QA_HTMLDIR  and get the latest modify time for each run
             #this asssums the path is in $QA_HTMLDIR/physics/(run range directory)/runnumber/QAfiles
             qaFilesModified = {}
             for d in next(os.walk(qapath))[1] :
