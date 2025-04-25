@@ -666,15 +666,12 @@ int BCODraw::MakeHtml(const std::string &what)
   {
     pngfile = cl->htmlRegisterPage(*this, "mvtx_evt_building_1", "1", "png");
     cl->CanvasToPng(TC[0], pngfile);
-    pngfile = cl->htmlRegisterPage(*this, "mvtx_evt_building_2", "2", "png");
-    cl->CanvasToPng(TC[1], pngfile);
   }
   if (what == "ALL" || what == "INTT")
   {
     pngfile = cl->htmlRegisterPage(*this, "intt_evt_building_1", "3", "png");
     cl->CanvasToPng(TC[2], pngfile);
-    pngfile = cl->htmlRegisterPage(*this, "intt_evt_building_2", "4", "png");
-    cl->CanvasToPng(TC[3], pngfile);
+
   }
   if (what == "ALL" || what == "TPC")
   {
