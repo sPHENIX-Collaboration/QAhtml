@@ -154,6 +154,7 @@ def main():
                     print("for lfn: " + lfn)
                     print("ROCs available: ")
                     print(filesToAdd)
+                    continue
                 if args.verbose:
                     print("executing command for "+str(len(filesToAdd)) + " files")
                     print(command)
