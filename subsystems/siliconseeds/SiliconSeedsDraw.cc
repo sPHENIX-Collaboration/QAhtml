@@ -670,8 +670,8 @@ int SiliconSeedsDraw::MakeHtml(const std::string &what)
         cl->CanvasToPng(TC[5], pngfile);
     }
 
-    pngfile = cl->htmlRegisterPage(*this, "SiliconSeeds_Summary", "7", "png");
-    cl->CanvasToPng(siseedsSummary, pngfile);
+    //pngfile = cl->htmlRegisterPage(*this, "SiliconSeeds_Summary", "7", "png");
+    //cl->CanvasToPng(siseedsSummary, pngfile);
 
     return 0;
 }
