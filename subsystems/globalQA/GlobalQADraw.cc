@@ -39,6 +39,16 @@
 #include <RooPlot.h>
 #include <TPaveText.h>
 
+//#include <cdbobjects/CDBTTree.h>  // for CDBTTree
+
+//#include <ffamodules/CDBInterface.h>
+
+#include <calobase/TowerInfo.h>
+#include <calobase/TowerInfoContainer.h>
+#include <calobase/TowerInfoContainerv4.h>
+#include <calobase/TowerInfoDefs.h>
+
+
 
 void get_scaledowns(int runnumber, int scaledowns[])
 {
@@ -215,6 +225,13 @@ int GlobalQADraw::MakeCanvas(const std::string &name,int num)
     Pad[num][2]->Draw();
     Pad[num][3]->Draw();
   }
+
+  if (num == 3) {
+    TC[num] = new TCanvas(name.c_str(), "sEPD Fit Failure Map", -1, 0, 
+                         static_cast<int>(xsize * 0.8), 
+                         static_cast<int>(ysize * 0.8));
+    TC[num]->SetRightMargin(0.15);
+}
 
 
   // this one is used to plot the run number on the canvas
@@ -935,6 +952,8 @@ int GlobalQADraw::MakeHtml(const std::string &what)
   cl->CanvasToPng(TC[1], pngfile);
   pngfile = cl->htmlRegisterPage(*this, "sEPD", "global3", "png");
   cl->CanvasToPng(TC[2], pngfile);
+  pngfile = cl->htmlRegisterPage(*this, "sEPD_Fits", "FitFailureMap", "png");
+  if(TC[3]) cl->CanvasToPng(TC[3], pngfile);
 
   for (size_t i = 0; i < m_epdFitCanvases.size(); i++) {
     pngfile = cl->htmlRegisterPage(*this, "sEPD_Fits", Form("sEPD_Fits_%zu", i), "png");
@@ -958,173 +977,195 @@ int GlobalQADraw::DBVarInit()
 
 int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
   QADrawClient *cl = QADrawClient::instance();
-  const int nChannels = 744;
-  const int hist_per_canvas = 48;
-  const int nPages = (nChannels + hist_per_canvas - 1) / hist_per_canvas;
 
+  InitializeFailureMap();
+
+  const int hist_per_canvas = 48;
+  const int maxChannels = 744;
 
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
+  int canvasWidth = static_cast<int>(xsize * 0.9);
+  int canvasHeight = static_cast<int>(ysize * 0.9);
 
-  const double canvasScale = 0.9;
-  int canvasWidth = static_cast<int>(xsize * canvasScale);
-  int canvasHeight = static_cast<int>(ysize * canvasScale);
-
-  for (auto* c : m_epdFitCanvases) { delete c; }
+  for (auto* c : m_epdFitCanvases) delete c;
   m_epdFitCanvases.clear();
-  for (auto* d : m_epdFitData) { delete d; }
+  for (auto* d : m_epdFitData) delete d;
   m_epdFitData.clear();
 
-  gSystem->ProcessEvents();
-  for (int cIdx = 0; cIdx < nPages; cIdx++) {
-    TCanvas* c = new TCanvas(Form("sEPD_fits_page%d", cIdx), 
-                          Form("sEPD Fits Page %d", cIdx), 
-                          -1, 0, canvasWidth, canvasHeight);
-    c->SetBit(kCanDelete);
-    c->Divide(8, 6); // 8 columns, 6 rows
+  const int nPages = (maxChannels + hist_per_canvas - 1) / hist_per_canvas;
+  for (int i = 0; i < nPages; ++i) {
+    TCanvas* c = new TCanvas(Form("sEPD_fits_page%d", i),
+                             Form("sEPD Fits Page %d", i),
+                             -1, 0, canvasWidth, canvasHeight);
+    c->Divide(8, 6);
     m_epdFitCanvases.push_back(c);
   }
 
   int channelCount = 0;
-  for (int ch = 0; ch < nChannels; ch++) {
-      TH1* hist = dynamic_cast<TH1*>(QADrawClient::instance()->getHisto(Form("h_GlobalQA_sEPD_tile%d", ch)));
-      if (!hist || hist->GetEntries() < 50) continue;
+  int failedCount = 0;
 
-      
+  for (int arm = 0; arm <= 1; ++arm) {
+    for (int rbin = 0; rbin < 16; ++rbin) {
+      int max_phi = (rbin == 0) ? 12 : 24;
+      for (int phibin = 0; phibin < max_phi; ++phibin) {
+        uint32_t key = TowerInfoDefs::encode_epd(arm, rbin, phibin);
+        int channel = TowerInfoDefs::decode_epd(key);
+        if (channel < 0 || channel >= 744) continue;
 
-      double peak_pos = FindHistogramPeak(hist,40.);
-      double fit_lo, fit_hi;
-      DetermineFitRange(hist, fit_lo, fit_hi);
+        TH1* hist = dynamic_cast<TH1*>(cl->getHisto(Form("h_GlobalQA_sEPD_tile%d", channel)));
+        if (!hist || hist->GetEntries() < 50) continue;
 
-      ChannelFitData* cf = new ChannelFitData();
-      
+        double peak_pos = FindHistogramPeak(hist, 40.);
+        double fit_lo, fit_hi;
+        DetermineFitRange(hist, fit_lo, fit_hi);
 
-      cf->x = new RooRealVar(Form("x_ch%d", ch), "ADC", fit_lo, fit_hi);
-      cf->ml = new RooRealVar(Form("ml_ch%d", ch), "Landau MPV", peak_pos, 
-                            std::max(peak_pos*0.5, 10.0), peak_pos*2.0);
-      cf->sl = new RooRealVar(Form("sl_ch%d", ch), "Landau sigma", 15, 1, 50);
-      cf->sg = new RooRealVar(Form("sg_ch%d", ch), "Gauss sigma", 10, 1, 30);
+        double rms  = hist->GetRMS();
 
-      cf->ml->setMin(fit_lo + 5);
-      cf->ml->setMax(fit_hi - 5);
-      cf->sl->setMin(1.0);
-      cf->sl->setMax(50.0);
-      cf->sg->setMin(1.0);
-      cf->sg->setMax(30.0);
+        double landau_width_guess = std::clamp(rms * 0.5, 3.0, 50.0);
+        double gauss_sigma_guess  = std::clamp(rms * 0.4, 2.0, 30.0);
 
-      //cf->x->setBins(4000, "cache");
-      int nBins = static_cast<int>((fit_hi - fit_lo)/5); // 5 ADC/bin
-      cf->x->setBins(nBins, "cache");
+        ChannelFitData* cf = new ChannelFitData();
+        bool fitFailed = false;
 
+        cf->x = new RooRealVar(Form("x_ch%d", channel), "ADC", fit_lo, fit_hi);
+        cf->ml = new RooRealVar(Form("ml_ch%d", channel), "Landau MPV", peak_pos,
+                                std::max(peak_pos * 0.5, 10.0), peak_pos * 2.0);
+        cf->sl = new RooRealVar(Form("sl_ch%d", channel), "Landau sigma", landau_width_guess, 1, 50);
+        cf->sg = new RooRealVar(Form("sg_ch%d", channel), "Gauss sigma", gauss_sigma_guess, 1, 30);
+        cf->x->setBins(static_cast<int>((fit_hi - fit_lo)/5), "cache");
 
-      cf->landau = new RooLandau(Form("landau_ch%d", ch), "", *cf->x, *cf->ml, *cf->sl);
-      RooConstVar zero(Form("zero_ch%d", ch), "Zero", 0.0);
-      cf->gauss = new RooGaussian(Form("gauss_ch%d", ch), "", *cf->x, zero, *cf->sg);
-      cf->convPDF = new RooFFTConvPdf(Form("pdf_ch%d", ch), "Landau⊗Gauss", *cf->x, *cf->landau, *cf->gauss);
+        cf->landau = new RooLandau(Form("landau_ch%d", channel), "", *cf->x, *cf->ml, *cf->sl);
+        RooConstVar zero(Form("zero_ch%d", channel), "Zero", 0.0);
+        cf->gauss = new RooGaussian(Form("gauss_ch%d", channel), "", *cf->x, zero, *cf->sg);
+        cf->convPDF = new RooFFTConvPdf(Form("pdf_ch%d", channel), "Landau⊗Gauss",
+                                        *cf->x, *cf->landau, *cf->gauss);
+        cf->data = new RooDataHist(Form("data_ch%d", channel), "Data", *cf->x, hist);
 
-  
-      cf->data = new RooDataHist(Form("data_ch%d", ch), "Data", *cf->x, hist);
-
-      RooFitResult* fitResult = nullptr;
+        RooFitResult* fitResult = nullptr;
         try {
-            fitResult = cf->convPDF->fitTo(*(cf->data),
-                RooFit::Save(true),
-                RooFit::PrintLevel(-1),
-                RooFit::Range(fit_lo, fit_hi),
-                RooFit::Strategy(2),
-                RooFit::Optimize(1),
-                RooFit::NumCPU(4));
-        } catch (const std::exception& e) {
-          std::cerr << "Fit failed for channel " << ch << ": " << e.what() << std::endl;
-          delete cf;
-          continue;
+          fitResult = cf->convPDF->fitTo(*cf->data,
+                      RooFit::Save(true),
+                      RooFit::PrintLevel(-1),
+                      RooFit::Range(fit_lo, fit_hi),
+                      RooFit::Strategy(2),
+                      RooFit::Optimize(1),
+                      RooFit::NumCPU(4));
+        } catch (...) {
+          fitFailed = true;
         }
 
-      if(!fitResult || fitResult->status() != 0) {
-        delete cf;
-        delete fitResult;
-        continue;
-    }
+        if (!fitResult || fitResult->status() != 0 ||
+            cf->ml->getVal() < fit_lo || cf->ml->getVal() > fit_hi) {
+          fitFailed = true;
+        }
 
-    if (fitResult && fitResult->status() == 0) {
-      if (cf->ml->getVal() < fit_lo || cf->ml->getVal() > fit_hi) {
-          delete cf;
-          delete fitResult;
-          continue;
+        cf->frame = cf->x->frame();
+        cf->data->plotOn(cf->frame);
+        cf->frame->SetTitle(Form("Channel %d Fit", channel));
+
+        TPaveText* pt = new TPaveText(0.55, 0.75, 0.95, 0.89, "NDC");
+        pt->SetFillColorAlpha(0, 0.6);
+        pt->SetTextSize(0.035);
+        pt->SetMargin(0.02);
+
+        if (!fitFailed) {
+          cf->convPDF->plotOn(cf->frame);
+          pt->AddText(Form("Ch %d", channel));
+          pt->AddLine(0, 0.8, 1, 0.8);
+          pt->AddText(Form("MPV: %.1f ± %.1f", cf->ml->getVal(), cf->ml->getError()));
+          pt->AddText(Form("Lσ: %.1f ± %.1f", cf->sl->getVal(), cf->sl->getError()));
+          pt->AddText(Form("Gσ: %.1f ± %.1f", cf->sg->getVal(), cf->sg->getError()));
+        } else {
+          failedCount++;
+          pt->AddText(Form("Ch %d", channel))->SetTextColor(kRed);
+          pt->AddText("Fit Failed");
+
+          TLine* line1 = new TLine(fit_lo, hist->GetMaximum(), fit_hi, 0);
+          TLine* line2 = new TLine(fit_lo, 0, fit_hi, hist->GetMaximum());
+          line1->SetLineColor(kRed); line2->SetLineColor(kRed);
+          cf->frame->addObject(line1); cf->frame->addObject(line2);
+        }
+
+        float fillVal = (fitFailed ? 1.0 : 0.1);
+        int bin_phi = phibin + 1;
+        int bin_r = rbin + 1;
+        if (rbin == 0) {
+          int phi12 = (phibin % 12) + 1;
+          if (arm == 0)
+            m_failureMapPolarS01->SetBinContent(phi12, bin_r, fillVal);
+          else
+            m_failureMapPolarN01->SetBinContent(phi12, bin_r, fillVal);
+        } else {
+          if (arm == 0)
+            m_failureMapPolarS->SetBinContent(bin_phi, bin_r, fillVal);
+          else
+            m_failureMapPolarN->SetBinContent(bin_phi, bin_r, fillVal);
+        }
+
+        int pageIdx = channelCount / hist_per_canvas;
+        int padIdx = (channelCount % hist_per_canvas) + 1;
+        if (pageIdx < (int)m_epdFitCanvases.size()) {
+          m_epdFitCanvases[pageIdx]->cd(padIdx);
+          cf->frame->Draw();
+          pt->Draw();
+        }
+
+
+
+        channelCount++;
       }
     }
-
-      cf->frame = cf->x->frame();
-
-      cf->frame->SetTitle(Form("Channel %d Fit", ch));
-
-      cf->frame->GetXaxis()->SetLabelSize(0.06);
-      cf->frame->GetYaxis()->SetLabelSize(0.06);
-      cf->frame->GetXaxis()->SetTitleSize(0.07);
-      cf->frame->GetYaxis()->SetTitleSize(0.07);
-      cf->frame->GetXaxis()->SetTitleOffset(0.9);
-      cf->frame->GetYaxis()->SetTitleOffset(1.2);
-      
-      cf->data->plotOn(cf->frame);
-      cf->convPDF->plotOn(cf->frame);
-
-  
-      TLatex *chlabel = new TLatex();
-      chlabel->SetNDC();
-      chlabel->SetTextSize(0.07);
-      chlabel->SetTextAlign(11);  
-
-      // Parameter box with adjusted size and text
-      TPaveText *pt = new TPaveText(0.5, 0.15, 0.88, 0.45, "NDC");
-      pt->SetFillColorAlpha(0, 0.7);
-      pt->SetBorderSize(1);
-      pt->SetTextSize(0.06);
-      pt->SetTextAlign(12); 
-      pt->SetMargin(0.05);
-      
-      pt->AddText(Form("Ch %d", ch)); 
-      pt->AddLine(0, 0.8, 1, 0.8);   
-      pt->AddText(Form("MPV: %.1f#pm%.1f", 
-                    cf->ml->getVal(), cf->ml->getError()));
-      pt->AddText(Form("L#sigma: %.1f#pm%.1f",
-                    cf->sl->getVal(), cf->sl->getError()));
-      pt->AddText(Form("G#sigma: %.1f#pm%.1f",
-                    cf->sg->getVal(), cf->sg->getError()));
-
-
-
-      
-      int pageIdx = channelCount / hist_per_canvas;
-      int padIdx = (channelCount % hist_per_canvas) + 1; // 1-12
-
-      if (pageIdx >= int(m_epdFitCanvases.size())) {
-          std::cerr << "Exceeded canvas count at channel " << ch << std::endl;
-          delete cf;
-          continue;
-      }
-
-      if (!m_epdFitCanvases[pageIdx]) {
-        std::cerr << "Missing canvas for page " << pageIdx << std::endl;
-        continue;
-      }
-
-      std::cout << "Processing channel " << ch 
-          << " -> page " << pageIdx 
-          << " pad " << padIdx 
-          << std::endl;
-
-
-      TCanvas* c = m_epdFitCanvases[pageIdx];
-      c->cd(padIdx);
-      cf->frame->Draw();
-      pt->Draw();
-
-      m_epdFitData.push_back(cf); // Store fit data for later cleanup
-      channelCount++;
   }
 
+  if (!gROOT->FindObject("Global4")) {
+    MakeCanvas("Global4", 3);
+  }
+  TC[3]->cd();
+  TC[3]->Clear();
+  TC[3]->Divide(2, 1);
+
+  double zmin = 0.0, zmax = 1.0;
+  Int_t colors[2] = {kGreen, kRed};
+  gStyle->SetPalette(2, colors);
+
+  // South
+  TC[3]->cd(1);
+  gPad->SetTicks(1, 1);
+  gPad->DrawFrame(-3.8, -3.8, 3.8, 3.8);
+  m_failureMapPolarS->GetZaxis()->SetRangeUser(zmin, zmax);
+  m_failureMapPolarS01->GetZaxis()->SetRangeUser(zmin, zmax);
+  m_failureMapPolarS->Draw("same COLZ pol AH");
+  m_failureMapPolarS01->Draw("same COLZ pol AH");
+  TText ts;
+  ts.SetNDC(); ts.SetTextSize(0.05);
+  ts.DrawText(0.3, 0.92, "South");
+
+  TLatex* statText = new TLatex();
+  statText->SetNDC();
+  statText->SetTextSize(0.045);
+  statText->SetTextColor(kRed);
+  statText->DrawLatex(0.15, 0.88,
+      Form("Fits failed: %d/%d (%.1f%%)",
+           failedCount, channelCount,
+           100.0 * failedCount / std::max(channelCount, 1)));
+
+  // North
+  TC[3]->cd(2);
+  gPad->SetTicks(1, 1);
+  gPad->DrawFrame(-3.8, -3.8, 3.8, 3.8);
+  m_failureMapPolarN->GetZaxis()->SetRangeUser(zmin, zmax);
+  m_failureMapPolarN01->GetZaxis()->SetRangeUser(zmin, zmax);
+  m_failureMapPolarN->Draw("same COLZ pol AH");
+  m_failureMapPolarN01->Draw("same COLZ pol AH");
+  TText tn;
+  tn.SetNDC(); tn.SetTextSize(0.05);
+  tn.DrawText(0.3, 0.92, "North");
+
+  TC[3]->Update();
   return 0;
 }
+
 
 double GlobalQADraw::FindHistogramPeak(TH1* hist, double min_adc=40.0) {
   int max_bin = hist->GetMaximumBin();
@@ -1224,4 +1265,56 @@ void GlobalQADraw::DetermineFitRange(TH1* hist, double& fit_lo, double& fit_hi) 
   fit_hi = std::min(fit_hi, hist->GetXaxis()->GetXmax());
 
   std::cout << "Fit lo = " << fit_lo << ", Fit hi  = " << fit_hi << std::endl;
+}
+
+void GlobalQADraw::InitializeFailureMap()
+{
+  if (!m_failureMapPolarN)
+  {
+    
+    m_failureMapPolarN = new TH2F("h_sEPD_fit_failures_north", 
+      "Failure Map (North)",
+      24, 0, 2*M_PI,
+      16, 0.15, 3.5);
+
+
+    m_failureMapPolarN->SetStats(0);
+    
+
+  }
+
+  if (!m_failureMapPolarS) {
+    m_failureMapPolarS = new TH2F("h_sEPD_fit_failures_south", 
+      "Failure Map (South)",
+      24, 0, 2*M_PI,
+      16, 0.15, 3.5);
+
+    m_failureMapPolarS->SetStats(0);
+
+    //m_failureMapPolarS->SetMinimum(0);
+    //m_failureMapPolarS->SetMaximum(1.1);
+  }
+
+  //tile 0 is 2x the angular size of the rest of the tiles and needs a separate histogram
+  if (!m_failureMapPolarN01) {
+    m_failureMapPolarN01 = new TH2F("polar_histN01","polar_hist",
+      12, 0, 2*M_PI,
+      16, 0.15, 3.5);
+  }
+
+  if (!m_failureMapPolarS01) {
+    m_failureMapPolarS01 = new TH2F("polar_histS01","polar_hist",
+      12, 0, 2*M_PI,
+      16, 0.15, 3.5);
+  }
+
+  m_failureMapPolarN->SetMinimum(0);
+  m_failureMapPolarN->SetMaximum(1.0);
+  m_failureMapPolarS->SetMinimum(0);
+  m_failureMapPolarS->SetMaximum(1.0);
+  m_failureMapPolarN01->SetMinimum(0);
+  m_failureMapPolarN01->SetMaximum(1.0);
+  m_failureMapPolarS01->SetMinimum(0);
+  m_failureMapPolarS01->SetMaximum(1.0);
+    
 }
