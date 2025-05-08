@@ -1,11 +1,6 @@
 #include "BCODraw.h"
-
 #include <sPhenixStyle.C>
-
-//#include <qahtml/QADrawClient.h>
-
-#include "../../client/QADrawClient.h"
-
+#include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
 
 #include <TCanvas.h>
