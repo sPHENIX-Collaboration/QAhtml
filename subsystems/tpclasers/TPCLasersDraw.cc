@@ -122,7 +122,7 @@ int TPCLasersDraw::DrawLaserInfo()
       maxZ = h_TPCWheel[side]->GetMaximum();
     }
 
-    h_saturation[side] = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("aturation_") + (side == 1 ? "North" : "South")));
+    h_saturation[side] = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("saturation_") + (side == 1 ? "North" : "South")));
     h_saturation[side]->Scale(1.0/h_nLaserEvents->GetEntries());
     if(h_saturation[side]->GetMaximum() > maxZ_sat)
     {
