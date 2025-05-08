@@ -30,7 +30,7 @@ class CaloDraw : public QADraw
   void SetCaloChecker(CaloGoodRunChecker* ch) {calo_checker = ch;}
 
   // New function to set reference file path
-  //  void SetReferenceFile(const std::string &filepath) { refFilePath = filepath; }
+  void SetReferenceFile(const std::string &filepath) { refFilePath = filepath; }
 
  private:
   int MakeCanvas(const std::string &name, int num);
@@ -61,7 +61,7 @@ class CaloDraw : public QADraw
   CaloGoodRunChecker* calo_checker = nullptr;
 
   // New member variable to store reference file path
-  //std::string refFilePath = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/HIST_CALO_run2pp_new_2024p006-00049125-9000.root";
+  std::string refFilePath = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/HIST_CALOQA_run2auau_ana462_2024p010_v001-00054909-9000.root";
 
 };
 

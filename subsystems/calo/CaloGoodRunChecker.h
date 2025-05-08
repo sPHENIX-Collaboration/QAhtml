@@ -30,6 +30,7 @@ class CaloGoodRunChecker
   void CaloWriteDB(std::string subsystem);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
 
+
   std::string histfile = "";
   std::string histprefix = "h_CaloValid_";
   std::string mapsfile_prefix = "HotColdDeadMaps_";
@@ -37,6 +38,16 @@ class CaloGoodRunChecker
   TH2* cemc_hcdmap = nullptr;
   TH2* ihcal_hcdmap = nullptr;
   TH2* ohcal_hcdmap = nullptr;
+
+  void SetRefHistfile(std::string ref_hfile) {ref_histfile = ref_hfile;}
+  std::string MakeHotColdDeadMapsRef();
+  std::string ref_histfile = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/HIST_CALOQA_run2auau_ana462_2024p010_v001-00054909-9000.root";
+  std::string ref_histprefix = "h_CaloValid_";
+  std::string ref_mapsfile_prefix = "HotColdDeadMaps_";
+  std::string ref_mapsfile = "";
+  TH2* ref_cemc_hcdmap = nullptr;
+  TH2* ref_ihcal_hcdmap = nullptr;
+  TH2* ref_ohcal_hcdmap = nullptr;
 
   int canvas_xsize = 1600;
   int canvas_ysize = 800;
@@ -74,6 +85,17 @@ class CaloGoodRunChecker
   float ohcal_time_sigma = 999.9;
   float vtxz_mean = 999.9;
   float vtxz_sigma = 999.9;
+
+  // Reference tower information for each subsystem
+  int ref_cemc_hot_towers = 999999;
+  int ref_cemc_cold_towers = 999999;
+  int ref_cemc_dead_towers = 999999;
+  int ref_ihcal_hot_towers = 999999;
+  int ref_ihcal_cold_towers = 999999;
+  int ref_ihcal_dead_towers = 999999;
+  int ref_ohcal_hot_towers = 999999;
+  int ref_ohcal_cold_towers = 999999;
+  int ref_ohcal_dead_towers = 999999;
 };
 
 #endif
