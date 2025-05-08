@@ -8,11 +8,27 @@ AM_CPPFLAGS = \
 lib_LTLIBRARIES = \
   libqadrawglobalqa.la
 
+# Tell the linker where to find RooFit libs
+AM_LDFLAGS = \
+  -L$(libdir) \
+  -L$(OFFLINE_MAIN)/lib \
+  -L$(OFFLINE_MAIN)/lib64 \
+  -L$(ROOTSYS)/lib
+
+AM_CPPFLAGS = \
+  -I$(includedir) \
+  -isystem$(OFFLINE_MAIN)/include \
+  -isystem$(ROOTSYS)/include
+
 libqadrawglobalqa_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb
+  -lqadrawdb \
+  -lphool \
+  -lffamodules \
+  -lfun4all \
+  -lcalo_io
 
 globalqaincludedir=$(pkgincludedir)/globalqa
 
@@ -29,7 +45,11 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libqadrawglobalqa.la
+  libqadrawglobalqa.la \
+  -lRooFit \
+  -lRooFitCore \
+  -lMinuit2
+
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@
@@ -40,3 +60,4 @@ testexternals.cc:
 
 clean-local:
 	rm -f $(BUILT_SOURCES)
+

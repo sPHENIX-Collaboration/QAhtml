@@ -15,13 +15,13 @@ if args.test and not args.verbose:
     args.verbose = True
     
 runtypes = ["_run3auau"]
-subsys = { "calo" : ["HIST_CALO","CaloQA","draw_calo.C"], "globalQA" : ["HIST_CALO","GlobalQA","draw_GlobalQA.C"], "jets" : ["HIST_JETS","JetsQA","draw_jet.C"] }
+subsys = { "calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"], "globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"], "jets" : ["HIST_JETS","JETSQA","draw_jet.C"] }
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
 
 def get_aggregated_files(cursor, dsttype):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999)".format(dsttype)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999) order by full_file_path desc".format(dsttype)
     if args.verbose :
         print(query)
     cursor.execute(query)
@@ -68,74 +68,75 @@ def main():
                 print(subsys[s][0]+" all aggregated runs: ")
                 print(subsysAggRuns)
 
+            subsysAggRuns = dict(sorted(subsysAggRuns.items(), key=lambda item: item[0], reverse=True))
+            #check all current qa files for a subsystem in the QA_HTMLDIR  and get the latest modify time for each run
+            #this asssums the path is in $QA_HTMLDIR/physics/(run range directory)/runnumber/QAfiles
+            qaFilesModified = {}
+            for d in next(os.walk(qapath))[1] :
+                for rundir in next(os.walk(qapath+"/"+d))[1] :
+                    if args.verbose:
+                        print("checking rundir "+rundir)
+                    runnum = int(rundir.split("/")[-1])
+                    if runnum < 57000:
+                        continue
+                    qafiles = glob.glob(qapath+"/"+d+"/"+rundir+"/"+subsys[s][1]+"*")
+                    maxmodtime = 0
+                    for f in qafiles :
+                        modtime = os.path.getmtime(f)
+                        if modtime > maxmodtime :
+                            maxmodtime = modtime
+                            qaFilesModified[runnum] = maxmodtime
+            if args.verbose :
+                print(s + " modification time of all QA files:")
+                print(qaFilesModified)
 
-        #check all current qa files for a subsystem in the QA_HTMLDIR  and get the latest modify time for each run
-        #this asssums the path is in $QA_HTMLDIR/physics/(run range directory)/runnumber/QAfiles
-        qaFilesModified = {}
-        for d in next(os.walk(qapath))[1] :
-            for rundir in next(os.walk(qapath+"/"+d))[1] :
-                if args.verbose:
-                    print("checking rundir "+rundir)
-                runnum = int(rundir.split("/")[-1])
-                if runnum < 57000:
-                    continue
-                qafiles = glob.glob(qapath+"/"+d+"/"+rundir+"/"+subsys[s][1]+"*")
-                maxmodtime = 0
-                for f in qafiles :
-                    modtime = os.path.getmtime(f)
-                    if modtime > maxmodtime :
-                        maxmodtime = modtime
-                        qaFilesModified[runnum] = maxmodtime
-        if args.verbose :
-            print(s + " modification time of all QA files:")
-            print(qaFilesModified)
-
-        #now run the HTML piece for all of those runs that don't exist or for those that have been modified
-        updatedRuns = []
-        for run in subsysAggRuns:
-            if (not run in qaFilesModified) or (qaFilesModified[run] < subsysAggRuns[run]) :
-                if run < 57000:
-                    continue
-                aggFile=get_file(cursor, subsys[s][0], run)
-                if len(aggFile) == 0:
-                    print("There is no aggregated histos file for run " + str(run))
-                    print("Doing nothing.")
-                    continue
-                if len(aggFile) == 1 : 
-                    macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+subsys[s][2]+"(\""+aggFile[0]+"\")"
-                    cmd = ["root.exe","-q",macro]
-                    if args.verbose :
-                        print(cmd)
-                    if not args.test :
-                        subprocess.run(cmd)
-                        updatedRuns.append(run)
-                else :
-                    dbtagToDraw = "001"
-                    fileToDraw = ""
-                    # find the file with the most recent db tag
-                    for file in aggFile:
-                        # find the db string
-                        filename = file.split("/")[-1]
-                        dbtag = getBuildDbTag(runtype, filename)
-                        if(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
-                            fileToDraw = file
-                            dbtagToDraw = dbtag
-                    #Draw that one
-                    macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+subsys[s][2]+"(\""+fileToDraw+"\")"
-                    cmd = ["root.exe","-q",macro]
-                    if args.verbose :
-                        print(cmd)
-                    if not args.test :
-                        subprocess.run(cmd)
-                        updatedRuns.append(run)
+            #now run the HTML piece for all of those runs that don't exist or for those that have been modified
+            updatedRuns = []
+            for run in subsysAggRuns:
+                if (not run in qaFilesModified) or (qaFilesModified[run] < subsysAggRuns[run]) :
+                    if run < 57000:
+                        continue
+                    aggFile=get_file(cursor, subsys[s][0], run)
+                    if len(aggFile) == 0:
+                        print("There is no aggregated histos file for run " + str(run))
+                        print("Doing nothing.")
+                        continue
+                    if len(aggFile) == 1 : 
+                        macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+subsys[s][2]+"(\""+aggFile[0]+"\")"
+                        cmd = ["root.exe","-q",macro]
+                        if args.verbose :
+                            print(cmd)
+                        if not args.test :
+                            subprocess.run(cmd)
+                            updatedRuns.append(run)
+                    else :
+                        dbtagToDraw = "001"
+                        fileToDraw = ""
+                        # find the file with the most recent db tag
+                        for file in aggFile:
+                            # find the db string
+                            filename = file.split("/")[-1]
+                            dbtag = getBuildDbTag(runtype, filename)
+                            if(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
+                                fileToDraw = file
+                                dbtagToDraw = int(dbtag.split("p")[1])
+                        #Draw that one
+                        macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+subsys[s][2]+"(\""+fileToDraw+"\")"
+                        cmd = ["root.exe","-q",macro]
+                        if args.verbose :
+                            print(cmd)
+                        if not args.test :
+                            subprocess.run(cmd)
+                            updatedRuns.append(run)
 
 
-                    print("There are multiple matching files.")
-                    print(aggFile)
-                    print("Drawing file with latest db tag: " + fileToDraw)
-        if args.verbose :
-            print("run numbers updated")
-            print(updatedRuns)
-
+                        print("There are multiple matching files.")
+                        print(aggFile)
+                        print("Drawing file with latest db tag: " + fileToDraw)
+            if args.verbose :
+                print("run numbers updated")
+                print(updatedRuns)
+    conn.close()
+    
 if __name__ == "__main__":
     main()

@@ -13,9 +13,11 @@ for i in range(6):
     track_hist_types.append("HIST_DST_STREAMING_EVENT_MVTX"+str(i))
 for j in range(8):
     track_hist_types.append("HIST_DST_STREAMING_EVENT_INTT"+str(j))
+track_hist_types.append("HIST_DST_STREAMING_EVENT_TPOT")
+# prioritize the silicon and TPOT above TPC, since we need to run the TPC separately anyway
 for k in range(24):
     track_hist_types.append(("HIST_DST_STREAMING_EVENT_TPC{:02d}").format(k))
-track_hist_types.append("HIST_DST_STREAMING_EVENT_TPOT")
+
 
 print(track_hist_types)
 runtypes = ["_run3auau"]

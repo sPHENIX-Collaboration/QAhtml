@@ -8,23 +8,27 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = ["HIST_DST_TRKR_CLUSTER","HIST_DST_TRKR_SEED"]
-
 runtypes = ["_run3auau"]
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
 parser.add_argument("-t","--test",help="run a verbose test without actually aggregating", action="store_true")
+parser.add_argument("-ht","--histotype",help="histotype to draw, hit, cluster, seed")
 args = parser.parse_args()
 if args.test and not args.verbose:
     args.verbose = True
 print("Verbose is " + str(args.verbose))
 print("Test is " + str(args.test))
 
+track_hist_types = []
+if args.histotype == "cluster":
+    track_hist_types = ["HIST_DST_TRKR_CLUSTER"]
+elif args.histotype == "seed":
+    track_hist_types = ["HIST_DST_TRKR_SEED"]
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type + runtype
-    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset;".format(dsttype)
+    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset order by runnumber desc;".format(dsttype)
    
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
@@ -48,7 +52,7 @@ def main():
     import time
     FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
     FCWritecursor = FCWrite.cursor()
-    conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
+    conn = pyodbc.connect("DSN=FileCatalog;UID=phnxrc;READONLY=True")
     cursor = conn.cursor()
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     for runtype in runtypes:
@@ -113,6 +117,8 @@ def main():
                 newFileTime = 0
                 if reagg == False:
                     for newpath in filepaths:
+                        if not os.path.exists(newpath):
+                            continue
                         if newpath.find(latestdbtag) == -1:
                             continue
                         if os.path.getmtime(newpath) > newFileTime:

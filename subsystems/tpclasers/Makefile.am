@@ -4,28 +4,24 @@ AM_CPPFLAGS = \
   -I$(includedir) \
   -isystem$(OFFLINE_MAIN)/include \
   -isystem$(OFFLINE_MAIN)/rootmacros \
-  -isystem$(ROOTSYS)/include \
-  -isystem$(OPT_SPHENIX)/include
+  -isystem$(ROOTSYS)/include 
 
 lib_LTLIBRARIES = \
-  libqadrawjet.la
+  libqadrawtpclasers.la
 
-libqadrawjet_la_LIBADD = \
+libqadrawtpclasers_la_LIBADD = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
   -lqadrawclient \
-  -lqadrawdb \
-  -lemcNoisyTowerFinder \
-  -lodbc++
+  -lqadrawdb
 
-jetincludedir=$(pkgincludedir)/jet
+tpclasersincludedir=$(pkgincludedir)/tpclasers
 
-jetinclude_HEADERS = \
-  JetDraw.h \
-  JetDrawDefs.h
+tpclasersinclude_HEADERS = \
+  TPCLasersDraw.h
 
-libqadrawjet_la_SOURCES = \
-  JetDraw.cc 
+libqadrawtpclasers_la_SOURCES = \
+  TPCLasersDraw.cc
 
 noinst_PROGRAMS = \
   testexternals
@@ -34,7 +30,7 @@ testexternals_SOURCES = \
   testexternals.cc
 
 testexternals_LDADD = \
-  libqadrawjet.la
+  libqadrawtpclasers.la
 
 testexternals.cc:
 	echo "//*** this is a generated file. Do not commit, do not edit" > $@

@@ -1,20 +1,21 @@
 #include <qahtml/QADrawClient.h>
-#include <globalqa/GlobalQADraw.h>
+#include <qahtml/tpclasers/TPCLasersDraw.h>
 #include <sPhenixStyle.C>
-R__LOAD_LIBRARY(libqadrawglobalqa.so)
-R__LOAD_LIBRARY(libRooFit.so)
-R__LOAD_LIBRARY(libRooFitCore.so)
 
-void draw_GlobalQA(const char *rootfile) {
+R__LOAD_LIBRARY(libqadrawtpclasers.so)
+
+void draw_tpclasers(const std::string &rootfile) {
   SetsPhenixStyle();
   QADrawClient *cl = QADrawClient::instance();
-  GlobalQADraw *ex = new GlobalQADraw();
+  /* cl->Verbosity(1); */
+  QADraw *ex = new TPCLasersDraw();
   cl->registerDrawer(ex);
 
   cl->ReadHistogramsFromFile(rootfile);
-  cl->Verbosity(1);
+  /* cl->Print("ALL"); */
   cl->MakeHtml();
   delete cl;
+  std::cout << "Done" << std::endl;
   gSystem->Exit(0);
   return ;
 }

@@ -1,4 +1,5 @@
-//Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, and Derek Anderson
+//Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
+
 #include "JetDraw.h"
 #include <sPhenixStyle.C>
 #include <qahtml/QADrawClient.h>
@@ -25,27 +26,137 @@
 #include <iostream>
 #include <sstream>
 
+// ctor/dtor ==================================================================
+
+// ----------------------------------------------------------------------------
+//! Subsystem constructor
+// ----------------------------------------------------------------------------
 JetDraw::JetDraw(const std::string &name)
-: QADraw(name)
+  : QADraw(name)
+  , m_do_debug(false)
+  , m_jet_type("towersub1_antikt")
+  , m_rho_prefix("h_eventwiserho")
+  , m_constituent_prefix("h_constituentsinjets")
+  , m_kinematic_prefix("h_jetkinematiccheck")
+  , m_seed_prefix("h_jetseedcount")
 {
   DBVarInit();
-  m_do_debug = false;
-  m_constituent_prefix = "h_constituentsinjets";
-  m_rho_prefix = "h_eventwiserho";
-  m_kinematic_prefix = "h_jetkinematiccheck";
-  m_seed_prefix = "h_jetseedcount";
-  m_jet_type = "towersub1_antikt";
-  return;
 }
 
+// ----------------------------------------------------------------------------
+//! Subsystem destructor
+// ----------------------------------------------------------------------------
 JetDraw::~JetDraw()
 {
   /* delete db; */
-  return;
 }
 
-int JetDraw::MakeHtml(const std::string &what)
+// inherited public methods ===================================================
+
+// ----------------------------------------------------------------------------
+//! Draw plots
+// ----------------------------------------------------------------------------
+/*! Draws plots based on options. Implemented options:
+ *    - `"RHO"` = draw event-wise rho plots,
+ *    - `"CONSTITUENTS"` = draw jet calorimeter constituent plots,
+ *    - `"KINEMATIC"` = draw jet kinematic plots,
+ *    - `"SEED"` = draw jet seed plots,
+ *    - `"ALL"` = draw all of the above.
+ *
+ *  \param what drawing option
+ */
+int JetDraw::Draw(const std::string& what)
 {
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing component " << what << std::endl;
+  }
+
+  // reserve enough space in relevant vectors
+  m_rhoPlots.resize( m_vecTrigToDraw.size() );
+  m_cstPlots.resize( m_vecTrigToDraw.size(), JetDrawDefs::VPlotPads2D(m_vecResToDraw.size()) );
+  m_kinePlots.resize( m_vecTrigToDraw.size(), JetDrawDefs::VPlotPads2D(m_vecResToDraw.size()) );
+  m_seedPlots.resize( m_vecTrigToDraw.size(), JetDrawDefs::VPlotPads2D(m_vecResToDraw.size()) );
+
+  // loop over triggers
+  int iret = 0;
+  int idraw = 0;
+  for (uint32_t trigToDraw : m_vecTrigToDraw)
+  {
+    // add rows to reso-dependent vectors
+    m_cstPlots.push_back( {} );
+    m_kinePlots.push_back( {} );
+    m_seedPlots.push_back( {} );
+
+    // add row for rho pages
+    m_rhoPlots.push_back( {} );
+
+    // draw rho plots
+    if  (what == "ALL" || what == "RHO")
+    {
+      iret = DrawRho(trigToDraw);
+      ++idraw;
+    }
+
+    // now loop over resolutions to draw
+    for (uint32_t resToDraw : m_vecResToDraw)
+    {
+      // add columns for rho-dependent vectors
+      m_cstPlots.back().push_back( {} );
+      m_kinePlots.back().push_back( {} );
+      m_seedPlots.back().push_back( {} );
+
+      // draw constituent plots
+      if (what == "ALL" || what == "CONTSTITUENTS")
+      {
+        iret = DrawConstituents(trigToDraw, static_cast<JetRes>(resToDraw));
+        ++idraw;
+      }
+
+      // draw kinematic plots
+      if (what == "ALL" || what == "KINEMATIC")
+      {
+        iret = DrawJetKinematics(trigToDraw, static_cast<JetRes>(resToDraw));
+        ++idraw;
+      }
+
+      // draw seed plots
+      if (what == "ALL" || what == "SEED")
+      {
+        iret = DrawJetSeed(trigToDraw, static_cast<JetRes>(resToDraw));
+        ++idraw;
+      }
+    }
+  }
+
+  if (!idraw)
+  {
+    std::cout << " Unimplemented Drawing option: " << what << std::endl;
+    return -1;
+  }
+
+  // should return -1 if error, 0 otherwise
+  return iret;
+}
+
+// ----------------------------------------------------------------------------
+//! Draw plots and generate HTML pages
+// ----------------------------------------------------------------------------
+/*! Draws plots based on provided option (see `JetDraw::Draw(std::string&)`)
+ *  and generates html pages for each.
+ *
+ *  \param what drawing option
+ */
+int JetDraw::MakeHtml(const std::string& what)
+{
+  // emit debugging messages
+  if (m_do_debug)
+  {
+    std::cout << "Creating HTML pages for " << what << std::endl;
+  }
+
+  // draw relevant plots
   const int drawError = Draw(what);  // Call to Draw
   if (drawError) {
     return drawError;  // Return if there is an error in Draw
@@ -62,9 +173,13 @@ int JetDraw::MakeHtml(const std::string &what)
     const std::string nameTrig = m_mapTrigToName[idTrig];
 
     // draw rho plots
-    const std::string nameRho = nameTrig + "_rho";
-    const std::string pngRho  = cl->htmlRegisterPage(*this, nameRho, nameRho, "png");
-    cl->CanvasToPng(m_vecRhoCanvas[iTrigToDraw], pngRho);
+    for (const auto& rho : m_rhoPlots[iTrigToDraw])
+    {
+      const std::string nameRho = rho.canvas->GetName();
+      const std::string dirRho  = nameTrig + "/" + nameRho;
+      const std::string pngRho  = cl->htmlRegisterPage(*this, dirRho, nameRho, "png");
+      cl->CanvasToPng(rho.canvas, pngRho);
+    }
 
     // loop over jet resolutions to draw
     for (std::size_t iResToDraw = 0; iResToDraw < m_vecResToDraw.size(); ++iResToDraw)
@@ -76,22 +191,31 @@ int JetDraw::MakeHtml(const std::string &what)
       const std::string fileRes = nameTrig + "_" + nameRes;
 
       // draw constituent plots 
-      const std::string dirCst  = dirRes + "_constituents";
-      const std::string fileCst = fileRes + "_constituents";
-      const std::string pngCst  = cl->htmlRegisterPage(*this, dirCst, fileCst, "png");
-      cl->CanvasToPng(m_vecCstCanvas[iTrigToDraw][iResToDraw], pngCst);
+      for (const auto& cst : m_cstPlots[iTrigToDraw][iResToDraw])
+      {
+        const std::string nameCst = cst.canvas->GetName();
+        const std::string dirCst  = dirRes + "/Constituents/" + nameCst;
+        const std::string pngCst  = cl->htmlRegisterPage(*this, dirCst, nameCst, "png");
+        cl->CanvasToPng(cst.canvas, pngCst);
+      }
 
       // draw kinematic plots 
-      const std::string dirKine  = dirRes + "_kinematics";
-      const std::string fileKine = fileRes + "_kinematics";
-      const std::string pngKine  = cl->htmlRegisterPage(*this, dirKine, fileKine, "png");
-      cl->CanvasToPng(m_vecKineCanvas[iTrigToDraw][iResToDraw], pngKine);
+      for (const auto& kine : m_kinePlots[iTrigToDraw][iResToDraw])
+      {
+        const std::string nameKine = kine.canvas->GetName();
+        const std::string dirKine  = dirRes + "JetKinematics/" + nameKine;
+        const std::string pngKine  = cl->htmlRegisterPage(*this, dirKine, nameKine, "png");
+        cl->CanvasToPng(kine.canvas, pngKine);
+      }
 
-      // draw seed plots 
-      const std::string dirSeed  = dirRes + "_seeds";
-      const std::string fileSeed = fileRes + "_seeds";
-      const std::string pngSeed  = cl->htmlRegisterPage(*this, dirSeed, fileRes, "png");
-      cl->CanvasToPng(m_vecSeedCanvas[iTrigToDraw][iResToDraw], pngSeed);
+      // draw seed plots
+      for (const auto& seed : m_seedPlots[iTrigToDraw][iResToDraw])
+      {
+        const std::string nameSeed = seed.canvas->GetName();
+        const std::string dirSeed  = dirRes + "JetSeeds/" + nameSeed;
+        const std::string pngSeed  = cl->htmlRegisterPage(*this, dirSeed, nameSeed, "png");
+        cl->CanvasToPng(seed.canvas, pngSeed);
+      }
     }
   }
 
@@ -99,789 +223,12 @@ int JetDraw::MakeHtml(const std::string &what)
   return 0;
 }
 
-int JetDraw::Draw(const std::string &what)
-{
-   // loop over triggers
-   int iret = 0;
-   int idraw = 0;
-   for (uint32_t trigToDraw : m_vecTrigToDraw)
-   {
-
-     // add new rows for reso.-dependent canvases
-     m_vecCstCanvas.push_back( {} );
-     m_vecKineCanvas.push_back( {} );
-     m_vecSeedCanvas.push_back( {} );
-
-     // likewise for the run pad vectors
-     m_vecCstRun.push_back( {} );
-     m_vecKineRun.push_back( {} );
-     m_vecSeedRun.push_back( {} );
-
-     // draw rho plots
-     if  (what == "ALL" || what == "RHO")
-     {
-       iret = DrawRho(trigToDraw);
-       ++idraw;
-     }
-
-     // now loop over resolutions to draw
-     for (uint32_t resToDraw : m_vecResToDraw)
-     {
-
-       // draw constituent plots
-       if (what == "ALL" || what == "CONTSTITUENTS")
-       {
-	 iret = DrawConstituents(trigToDraw, static_cast<JetRes>(resToDraw));
-	 ++idraw;
-       }
-
-       // draw kinematic plots
-       if (what == "ALL" || what == "KINEMATICCHECK")
-       {
-         iret = DrawJetKinematics(trigToDraw, static_cast<JetRes>(resToDraw));
-         ++idraw;
-       }
-
-       // draw seed plots
-       if (what == "ALL" || what == "SEEDCOUNT")
-       {
-         iret = DrawJetSeed(trigToDraw, static_cast<JetRes>(resToDraw));
-         ++idraw;
-       }
-     }
-   }
-
-   if (!idraw)
-   {
-     std::cout << " Unimplemented Drawing option: " << what << std::endl;
-     return -1;
-   }
-
-   // should return -1 if error, 0 otherwise
-   return iret;
-}
- 
-int JetDraw::MakeCanvas(const std::string &name, const int nHist, VCanvas1D& canvas, VPad1D& run)
-{
-  // instantiate draw client & grab display size
-  QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
-
-  // create canvas
-  // n.b. xpos (-1) negative means do not draw menu bar
-  canvas.emplace_back( new TCanvas(name.data(), "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2)) );
-  canvas.back()->UseCurrentStyle();
-  gSystem->ProcessEvents();
-
-  // divide canvas into appropriate no. of pads
-  const int   nRow = std::min(nHist, 2);
-  const int   nCol = (nHist / 2) + (nHist % 2);
-  const float bRow = 0.01;
-  const float bCol = 0.01;
-  if (nHist > 1)
-  {
-    canvas.back()->Divide(nRow, nCol, bRow, bCol);
-  }
-  canvas.back()->cd();
-
-  // create pad for run number
-  const std::string runPadName = name + "_run";
-  run.emplace_back( new TPad(runPadName.data(), "this does not show", 0, 0, 1, 1) );
-  run.back()->SetFillStyle(4000);
-  run.back()->Draw();
-
-  // return w/o error
-  return 0;
-}
-
-int JetDraw::DrawRho(const uint32_t trigToDraw /*const JetRes resToDraw*/)
-{
-
-  // for rho histogram names
-  const std::string rhoHistName = std::string(m_rho_prefix) + "_" + m_mapTrigToTag[trigToDraw];
-
-  // grab relevant histograms from draw client
-  QADrawClient *cl = QADrawClient::instance();
-
-  TH1D *eventwiserho_rhoarea = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_rhoarea"));
-  TH1D *eventwiserho_rhomult = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_rhomult"));
-  TH1D *eventwiserho_sigmaarea = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_sigmaarea"));
-  TH1D *eventwiserho_sigmamult = dynamic_cast<TH1D *>(cl->getHisto(rhoHistName + "_sigmamult"));
-
-  // form canvas name & if it doesn't exist yet, create it
-  const std::string rhoCanName = "evtRho_" + m_mapTrigToTag[trigToDraw];
-  if (!gROOT->FindObject(rhoCanName.data()))
-  {
-    MakeCanvas(rhoCanName, 4, m_vecRhoCanvas, m_vecRhoRun);
-  }
-
-  m_vecRhoCanvas.back()->cd(1);
-  if (eventwiserho_rhoarea)
-  {
-    eventwiserho_rhoarea->SetTitle("Rho Area");
-    eventwiserho_rhoarea->SetXTitle("#rho*A");
-    eventwiserho_rhoarea->SetYTitle("Counts");
-    // eventwiserho_rhoarea->GetXaxis()->SetNdivisions(505);
-    // eventwiserho_rhoarea->GetXaxis()->SetRangeUser(-1, 15);
-    eventwiserho_rhoarea->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    gPad->SetLogz();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecRhoCanvas.back()->cd(2);
-  if (eventwiserho_rhomult)
-  {
-    eventwiserho_rhomult->SetTitle("#rho Multiplicity");
-    eventwiserho_rhomult->SetXTitle("#rho_{mult}");
-    eventwiserho_rhomult->SetYTitle("Counts");
-    eventwiserho_rhomult->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecRhoCanvas.back()->cd(3);
-  if (eventwiserho_sigmaarea)
-  {
-    eventwiserho_sigmaarea->SetTitle("Sigma Area");
-    eventwiserho_sigmaarea->SetXTitle("#sigma*A");
-    eventwiserho_sigmaarea->SetYTitle("Counts");
-    // eventwiserho_sigmaarea->GetXaxis()->SetNdivisions(505);
-    eventwiserho_sigmaarea->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecRhoCanvas.back()->cd(4);
-  if (eventwiserho_sigmamult)
-  {
-    eventwiserho_sigmamult->SetTitle("#sigma Multiplicity");
-    eventwiserho_sigmamult->SetXTitle("#sigma_{mult}");
-    eventwiserho_sigmamult->SetYTitle("Counts");
-    eventwiserho_sigmamult->DrawCopy("COLZ");
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_EvtRho_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecRhoRun.back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecRhoCanvas.back()->Update();  // Update the pad
-
-  // return w/o error
-  return 0;
-}
-
-int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
-{
-  // Use resToDraw to select histograms or adjust drawing logic
-  switch (resToDraw) {
-  case R02:
-    if (m_do_debug) std::cout << "Resolution R02" << std::endl;
-    break;
-  case R03:
-    if (m_do_debug) std::cout << "Resolution R03" << std::endl;
-    break;
-  case R04:
-    if (m_do_debug) std::cout << "Resolution R04" << std::endl;
-    break;
-  case R05:
-    if (m_do_debug) std::cout << "Resolution R05" << std::endl;
-    break;
-  default:
-    std::cerr << "Unknown resolution" << std::endl;
-    return -1;
-  }
-
-  // for constituent hist names
-  const std::string cstHistName = std::string(m_constituent_prefix) + "_" + m_mapTrigToTag[trigToDraw] + "_" + std::string(m_jet_type) + "_" + m_mapResToTag[resToDraw];
-
-  // grab relevant histograms from draw client
-  QADrawClient *cl = QADrawClient::instance();
-
-  TH1D *constituents_ncsts_cemc = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_cemc"));
-  TH1D *constituents_ncsts_ihcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_ihcal"));
-  TH1D *constituents_ncsts_ohcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_ohcal"));
-  TH1D *constituents_ncsts_total = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_ncsts_total"));
-  TH2D *constituents_ncstsvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(cstHistName + "_ncstsvscalolayer"));
-  TH1D *constituents_efracjet_cemc = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_cemc"));
-  TH1D *constituents_efracjet_ihcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_ihcal"));
-  TH1D *constituents_efracjet_ohcal = dynamic_cast<TH1D *>(cl->getHisto(cstHistName + "_efracjet_ohcal"));
-  TH2D *constituents_efracjetvscalolayer = dynamic_cast<TH2D *>(cl->getHisto(cstHistName + "_efracjetvscalolayer"));
-
-  // form canvas name & if it doesn't exist yet, create it
-  const std::string cstCanName = "jetCsts_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
-  if (!gROOT->FindObject(cstCanName.data()))
-  {
-    MakeCanvas(cstCanName, 9, m_vecCstCanvas.back(), m_vecCstRun.back());
-  }
-
-  m_vecCstCanvas.back().back()->cd(1);
-  if (constituents_ncsts_cemc)
-  {
-    constituents_ncsts_cemc->SetTitle("Jet N Constituents in CEMC");
-    constituents_ncsts_cemc->SetXTitle("N Constituents");
-    constituents_ncsts_cemc->SetYTitle("Counts");
-    constituents_ncsts_cemc->GetXaxis()->SetNdivisions(505);
-    constituents_ncsts_cemc->GetXaxis()->SetRangeUser(-1, 15);
-    constituents_ncsts_cemc->DrawCopy("HIST"); //1D histogram
-    gPad->UseCurrentStyle();
-    gPad->SetLogy();
-    //gPad->SetLogz() //No z axis
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(2);
-  if (constituents_ncsts_ihcal)
-  {
-    constituents_ncsts_ihcal->SetTitle("Jet N Constituents in IHCal");
-    constituents_ncsts_ihcal->SetXTitle("N Constituents");
-    constituents_ncsts_ihcal->SetYTitle("Counts");
-    constituents_ncsts_ihcal->GetXaxis()->SetNdivisions(505);
-    constituents_ncsts_ihcal->DrawCopy("HIST"); // 1D histogram
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(3);
-  if (constituents_ncsts_ohcal)
-  {
-    constituents_ncsts_ohcal->SetTitle("Jet N Constituents in OHCal");
-    constituents_ncsts_ohcal->SetXTitle("N Constituents");
-    constituents_ncsts_ohcal->SetYTitle("Counts");
-    constituents_ncsts_ohcal->GetXaxis()->SetNdivisions(505);
-    constituents_ncsts_ohcal->DrawCopy("HIST"); // 1D Histogram                             
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(4);
-  if (constituents_ncsts_total)
-  {
-    constituents_ncsts_total->SetTitle("Jet N Constituents");
-    constituents_ncsts_total->SetXTitle("N Constituents");
-    constituents_ncsts_total->GetXaxis()->SetNdivisions(505);
-    constituents_ncsts_total->SetYTitle("Counts");
-    constituents_ncsts_total->DrawCopy("HIST"); // 1D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(5);
-  if (constituents_ncstsvscalolayer)
-  {
-    constituents_ncstsvscalolayer->SetTitle("Jet N Constituents vs Calo Layer");
-    constituents_ncstsvscalolayer->SetXTitle("N Constituents");
-    constituents_ncstsvscalolayer->SetYTitle("Calo Layer");
-    constituents_ncstsvscalolayer->SetZTitle("Counts");
-    constituents_ncstsvscalolayer->DrawCopy("COLZ"); // 2D Histogram
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(6);
-  if (constituents_efracjetvscalolayer)
-  {
-    constituents_efracjetvscalolayer->SetTitle("Jet E Fraction vs Calo Layer");
-    constituents_efracjetvscalolayer->SetXTitle("Jet E Fraction");
-    constituents_efracjetvscalolayer->SetYTitle("Calo Layer");
-    constituents_efracjetvscalolayer->SetZTitle("Counts");
-    constituents_efracjetvscalolayer->DrawCopy("COLZ"); // 2D Histogram
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(7);
-  if (constituents_efracjet_cemc)
-  {
-    constituents_efracjet_cemc->SetTitle("Jet E Fraction in CEMC");
-    constituents_efracjet_cemc->SetXTitle("Jet E fraction");
-    constituents_efracjet_cemc->SetYTitle("Counts");
-    constituents_efracjet_cemc->DrawCopy("HIST"); // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(8);
-  if (constituents_efracjet_ihcal)
-  {
-    constituents_efracjet_ihcal->SetTitle("Jet Fraction in IHCal");
-    constituents_efracjet_ihcal->SetXTitle("Jet E Fraction");
-    constituents_efracjet_ihcal->SetYTitle("Counts");
-    constituents_efracjet_ihcal->DrawCopy("HIST"); // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecCstCanvas.back().back()->cd(9);
-  if (constituents_efracjet_ohcal)
-  {
-    constituents_efracjet_ohcal->SetTitle("Jet Fraction in OHCal");
-    constituents_efracjet_ohcal->SetXTitle("Jet E Fraction");
-    constituents_efracjet_ohcal->SetYTitle("Counts");
-    constituents_efracjet_ohcal->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_JetCsts_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += "_";
-  runstring += m_mapResToName[resToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecCstRun.back().back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecCstCanvas.back().back()->Update();  // Update the pad
-
-  // return w/o error
-  return 0;
-}
-
-int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw)
-{
-  // Use resToDraw to select histograms or adjust drawing logic
-  switch (resToDraw) {
-  case R02:
-    if (m_do_debug) std::cout << "Resolution R02" << std::endl;
-    break;
-  case R03:
-    if (m_do_debug) std::cout << "Resolution R03" << std::endl;
-    break;
-  case R04:
-    if (m_do_debug) std::cout << "Resolution R04" << std::endl;
-    break;
-  case R05:
-    if (m_do_debug) std::cout << "Resolution R05" << std::endl;
-    break;
-  default:
-    std::cerr << "Unknown resolution" << std::endl;
-    return -1;
-  }
-
-  // for kinematic hist names
-  const std::string kineHistPrefix = std::string(m_kinematic_prefix) + "_" + m_mapTrigToTag[trigToDraw] + "_" + std::string(m_jet_type);
-  const std::string kineProfSuffix = m_mapResToTag[resToDraw] + "_pfx";
-
-  // grab relevant histograms from draw client
-  QADrawClient *cl = QADrawClient::instance();
-
-  TH2D *jetkinematiccheck_etavsphi = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_etavsphi_" + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_jetmassvseta = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_jetmassvspt = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + m_mapResToTag[resToDraw]));
-  TH2D *jetkinematiccheck_spectra = dynamic_cast<TH2D *>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw]));
-
-  TProfile *jetkinematiccheck_jetmassvseta_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + kineProfSuffix));
-  TProfile *jetkinematiccheck_jetmassvspt_pfx = dynamic_cast<TProfile *>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + kineProfSuffix));
-
-  // form canvas name & if it doesn't exist yet, create it
-  const std::string kineCanName = "jetKinematics_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
-  if (!gROOT->FindObject(kineCanName.data()))
-  {
-    MakeCanvas(kineCanName, 4, m_vecKineCanvas.back(), m_vecKineRun.back());
-  }
-
-  m_vecKineCanvas.back().back()->cd(1);
-  if (jetkinematiccheck_etavsphi)
-  {
-    jetkinematiccheck_etavsphi->SetTitle("Jet #eta vs #phi");
-    jetkinematiccheck_etavsphi->SetXTitle("Jet #eta");
-    jetkinematiccheck_etavsphi->SetYTitle("Jet #phi");
-    jetkinematiccheck_etavsphi->SetZTitle("Counts");
-    // jetkinematiccheck_etavsphi->GetXaxis()->SetNdivisions(505);
-    // jetkinematiccheck_etavsphi->GetXaxis()->SetRangeUser(-1, 15);
-    jetkinematiccheck_etavsphi->DrawCopy("COLZ");  // 2D Histogram
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecKineCanvas.back().back()->cd(2);
-  if (jetkinematiccheck_jetmassvseta && jetkinematiccheck_jetmassvseta_pfx)
-  {
-    jetkinematiccheck_jetmassvseta->SetTitle("Jet Mass vs #eta");
-    jetkinematiccheck_jetmassvseta->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvseta->SetYTitle("Jet #eta");
-    jetkinematiccheck_jetmassvseta->SetZTitle("Counts");
-    jetkinematiccheck_jetmassvseta->DrawCopy("COLZ");  // 2D Histogram
-    jetkinematiccheck_jetmassvseta_pfx->SetTitle("Jet Mass vs #eta");
-    jetkinematiccheck_jetmassvseta_pfx->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvseta_pfx->SetYTitle("Jet #eta");
-    jetkinematiccheck_jetmassvseta_pfx->SetZTitle("Counts");
-    jetkinematiccheck_jetmassvseta_pfx->DrawCopy("SAME");  // Profile
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecKineCanvas.back().back()->cd(3);
-  if (jetkinematiccheck_jetmassvspt && jetkinematiccheck_jetmassvspt_pfx)
-  {
-    jetkinematiccheck_jetmassvspt->SetTitle("Jet Mass vs p_{T}");
-    jetkinematiccheck_jetmassvspt->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvspt->SetYTitle("Jet p_{T} [GeV/c]");
-    jetkinematiccheck_jetmassvspt->SetZTitle("Counts");
-    jetkinematiccheck_jetmassvspt->DrawCopy("COLZ");  // 2D Histogram
-    jetkinematiccheck_jetmassvspt_pfx->SetTitle("Jet Mass vs p_{T}");
-    jetkinematiccheck_jetmassvspt_pfx->SetXTitle("Jet Mass [GeV/c^{2}]");
-    jetkinematiccheck_jetmassvspt_pfx->SetYTitle("Jet p_{T} [GeV/c]");
-    jetkinematiccheck_jetmassvspt_pfx->SetZTitle("Counts");
-    jetkinematiccheck_jetmassvspt_pfx->DrawCopy("SAME");  // Profile
-    gPad->UseCurrentStyle();
-    gPad->Update();
-    gPad->SetRightMargin(0.15);
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  m_vecKineCanvas.back().back()->cd(4);
-  if (jetkinematiccheck_spectra)
-  {
-    jetkinematiccheck_spectra->SetTitle("Jet Spectra");
-    jetkinematiccheck_spectra->SetXTitle("p_{T,Jet} [GeV/c]");
-    jetkinematiccheck_spectra->SetYTitle("Counts");
-    jetkinematiccheck_spectra->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram is missing
-    return -1;
-  }
-
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();  // set to normalized 
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_JetKinematics_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += "_";
-  runstring += m_mapResToName[resToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecKineRun.back().back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecKineCanvas.back().back()->Update();  // Update the pad
-
-  // return w/o error
-  return 0;
-}
-
-int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
-{
-  // Use resToDraw to select histograms or adjust drawing logic                                                                           
-  switch (resToDraw) {
-  case R02:
-    if (m_do_debug) std::cout << "Resolution R02" << std::endl;
-    break;
-  case R03:
-    if (m_do_debug) std::cout << "Resolution R03" << std::endl;
-    break;
-  case R04:
-    if (m_do_debug) std::cout << "Resolution R04" << std::endl;
-    break;
-  case R05:
-    if (m_do_debug) std::cout << "Resolution R05" << std::endl;
-    break;
-  default:
-    std::cerr << "Unknown resolution" << std::endl;
-    return -1;
-  }
-
-  // for seed hist names
-  const std::string seedHistName = std::string(m_seed_prefix) + "_" + m_mapTrigToTag[trigToDraw] + "_" + std::string(m_jet_type) + "_" + m_mapResToTag[resToDraw];
-
-  // grab relevant histograms from draw client
-  QADrawClient *cl = QADrawClient::instance();
-
-  TH2F *jetseedcount_rawetavsphi = dynamic_cast<TH2F *>(cl->getHisto(seedHistName + "_rawetavsphi"));
-  TH1F *jetseedcount_rawpt = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_rawpt"));
-  TH1F *jetseedcount_rawptall = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_rawptall"));
-  TH1F *jetseedcount_rawseedcount = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_rawseedcount"));
-  TH2F *jetseedcount_subetavsphi = dynamic_cast<TH2F *>(cl->getHisto(seedHistName + "_subetavsphi"));
-  TH1F *jetseedcount_subpt = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_subpt"));
-  TH1F *jetseedcount_subptall = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_subptall"));
-  TH1F *jetseedcount_subseedcount = dynamic_cast<TH1F *>(cl->getHisto(seedHistName + "_subseedcount"));
-
-  // form canvas name & if it doesn't exist yet, create it
-  const std::string seedCanName = "jetSeeds_" + m_mapTrigToTag[trigToDraw] + "_" + m_mapResToTag[resToDraw];
-  if (!gROOT->FindObject(seedCanName.data()))
-  {
-    MakeCanvas(seedCanName, 8, m_vecSeedCanvas.back(), m_vecSeedRun.back());
-  }
-
-  m_vecSeedCanvas.back().back()->cd(1);
-  if (jetseedcount_rawetavsphi)
-  {
-      jetseedcount_rawetavsphi->SetLineColor(kBlue);
-      jetseedcount_rawetavsphi->GetXaxis()->SetRangeUser(0.0, 12000);
-      jetseedcount_rawetavsphi->SetTitle("Raw Seed #eta vs #phi");
-      jetseedcount_rawetavsphi->SetXTitle("Jet #eta_{raw} [Rads.]");
-      jetseedcount_rawetavsphi->SetYTitle("Jet #phi_{raw} [Rads.]");
-      jetseedcount_rawetavsphi->SetZTitle("Counts");
-      // jetseedcount_rawetavsphi->GetXaxis()->SetNdivisions(505);
-      jetseedcount_rawetavsphi->DrawCopy("COLZ");  // 2D Histogram
-      gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram missing
-    return -1;
-  }
-
-  m_vecSeedCanvas.back().back()->cd(2);
-  if (jetseedcount_rawpt)
-  {
-    jetseedcount_rawpt->SetTitle("Raw p_{T}");
-    jetseedcount_rawpt->SetXTitle("Jet p_{T,Raw} [GeV]");
-    jetseedcount_rawpt->SetYTitle("Counts");
-    jetseedcount_rawpt->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram missing
-    return -1;
-  }
-
-  m_vecSeedCanvas.back().back()->cd(3);
-  if (jetseedcount_rawptall)
-  {
-    jetseedcount_rawptall->SetTitle("Raw p_{T} (all jet seeds)");
-    jetseedcount_rawptall->SetXTitle("Jet p_{T,all seed} [GeV]");
-    jetseedcount_rawptall->SetYTitle("Counts");
-    jetseedcount_rawptall->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram missing
-    return -1;
-  }
-
-  m_vecSeedCanvas.back().back()->cd(4);
-  if (jetseedcount_rawseedcount)
-  {
-    jetseedcount_rawseedcount->SetTitle("Raw Seed Count per Event");
-    jetseedcount_rawseedcount->SetXTitle("Raw Seed Count per Event");
-    jetseedcount_rawseedcount->SetYTitle("Counts");
-    jetseedcount_rawseedcount->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    // histogram missing
-    return -1;
-  }
-
-  m_vecSeedCanvas.back().back()->cd(5);
-  if (jetseedcount_subetavsphi)
-  {
-    jetseedcount_subetavsphi->SetLineColor(kBlue);
-    // jetseedcount_subetavsphi->GetXaxis()->SetRangeUser(0.0, 12000);
-    jetseedcount_subetavsphi->SetTitle("Sub-seed #eta vs #phi");
-    jetseedcount_subetavsphi->SetXTitle("Jet #eta_{subseed} [Rads.]");
-    jetseedcount_subetavsphi->SetYTitle("Jet #phi_{subseed} [Rads.]");
-    jetseedcount_subetavsphi->SetZTitle("Counts");
-    // jetseedcount_subetavsphi->GetXaxis()->SetNdivisions(505);
-    jetseedcount_subetavsphi->DrawCopy("COLZ");  // 2D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    return -1;
-  }
-
-  m_vecSeedCanvas.back().back()->cd(6);
-  if (jetseedcount_subpt)
-  {
-    jetseedcount_subpt->SetTitle("Sub. p_{T}");
-    jetseedcount_subpt->SetXTitle("Jet p_{T,sub.} [GeV]");
-    jetseedcount_subpt->SetYTitle("Counts");
-    jetseedcount_subpt->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    return -1;
-  }
-
-  m_vecSeedCanvas.back().back()->cd(7);
-  if (jetseedcount_subptall)
-  {
-    jetseedcount_subptall->SetTitle("Sub. p_{T} (all jet seeds)");
-    jetseedcount_subptall->SetXTitle("Jet p_{T, all-sub.} [GeV]");
-    jetseedcount_subptall->SetYTitle("Counts");
-    jetseedcount_subptall->DrawCopy("HIST");  // 1D Histogram
-    gPad->UseCurrentStyle();
-  }
-  else
-  {
-    return -1;
-  }
-
-  m_vecSeedCanvas.back().back()->cd(8);
-  if (jetseedcount_subseedcount)
-  {
-    jetseedcount_subseedcount->SetTitle("Sub Seed Count per Event");
-    jetseedcount_subseedcount->SetXTitle("Sub Seed Count per Event");
-    jetseedcount_subseedcount->SetYTitle("Counts");
-    jetseedcount_subseedcount->DrawCopy("");
-    gPad->UseCurrentStyle();
-  }
-
-  TText PrintRun;
-  PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
-  PrintRun.SetNDC();  // set to normalized
-  PrintRun.SetTextAlign(23);  // center/top alignment
-
-  // Generate run string from client
-  std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
-
-  // prepend module name, component, trigger, and resolution
-  std::string runstring = Name();
-  runstring += "_JetSeeds_";
-  runstring += m_mapTrigToName[trigToDraw];
-  runstring += "_";
-  runstring += m_mapResToName[resToDraw];
-  runstring += " Run ";
-  runstring += runnostream.str();
-
-  // add runstring to relevant pad
-  m_vecSeedRun.back().back()->cd();
-  PrintRun.DrawText(0.5, 0.95, runstring.data());  // Adjust coordinates as needed
-  m_vecSeedCanvas.back().back()->Update();  // Update the pad
-
-  // return w/o error
-  return 0;
-}
-
+// other public methods =======================================================
+
+// ----------------------------------------------------------------------------
+//! Initialize QADraw Database
+// ----------------------------------------------------------------------------
+/*! Currently unused. */
 int JetDraw::DBVarInit()
 {
   /* db = new QADrawDB(this); */
@@ -889,56 +236,55 @@ int JetDraw::DBVarInit()
   return 0;
 }
 
+// ----------------------------------------------------------------------------
+//! Set summary of overall jet QA goodness
+// ----------------------------------------------------------------------------
+/*! Currently unused. */
 void JetDraw::SetJetSummary(TCanvas* c)
 {
-   jetSummary = c;
-   jetSummary->cd();
+  m_jetSummary = c;
+  m_jetSummary->cd();
 
-   QADrawClient *cl = QADrawClient::instance();
-   TPad* tr = new TPad("transparent_jet", "", 0, 0, 1, 1);
-   tr->SetFillStyle(4000);
-   tr->Draw();
-   TText PrintRun;
-   PrintRun.SetTextFont(62);
-   PrintRun.SetTextSize(0.04);
-   PrintRun.SetNDC();          // set to normalized coordinates                                                                                                                                                                                                                  
-   PrintRun.SetTextAlign(23);  // center/top alignment                                                                                                                                                                                                                           
-   std::ostringstream runnostream;
-   std::string runstring;
-   runnostream << Name() << "_jet_summary Run " << cl->RunNumber() << ", build " << cl->build();
-   runstring = runnostream.str();
-   tr->cd();
-   PrintRun.DrawText(0.5, 1., runstring.c_str());
-   jetSummary->Update();
-}
-
-void JetDraw::SetDoDebug(const bool debug)
-{
-  m_do_debug = debug;
+  QADrawClient *cl = QADrawClient::instance();
+  TPad* tr = new TPad("transparent_jet", "", 0, 0, 1, 1);
+  tr->SetFillStyle(4000);
+  tr->Draw();
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+  std::ostringstream runnostream;
+  std::string runstring;
+  runnostream << Name() << "_jet_summary Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring = runnostream.str();
+  tr->cd();
+  PrintRun.DrawText(0.5, 1., runstring.c_str());
+  m_jetSummary->Update();
 }
 
 // ----------------------------------------------------------------------------
 //! Save canvases to file
 // ----------------------------------------------------------------------------
-/*! Helper method to save all canvases to
- *  a specified file. This is useful for
- *  debugging and quick testing when
+/*! Helper method to save all canvases to a specified file.
+ *  This is useful for debugging and quick testing when
  *  adjusting plotting details/etc.
+ *
+ *  \param[out] file file to write canvases to
  */
 void JetDraw::SaveCanvasesToFile(TFile* file)
 {
-
   // emit debugging message
   if (m_do_debug)
   {
     std::cout << "Saving plots to file:\n"
-              << "  " << file -> GetName()
+              << "  " << file->GetName()
               << std::endl;
   }
 
   // check if you can cd into file
   //   - if not, exit
-  const bool isGoodCD = file -> cd();
+  const bool isGoodCD = file->cd();
   if (!isGoodCD)
   {
     if (m_do_debug)
@@ -952,46 +298,58 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   std::size_t nWrite = 0;
 
   // save rho canvases
-  for (auto rho : m_vecRhoCanvas)
+  for (auto rhoRow : m_rhoPlots)
   {
-    rho -> Draw();
-    rho -> Write();
-    ++nWrite;
+    for (auto rho : rhoRow)
+    {
+      rho.canvas->Draw();
+      rho.canvas->Write();
+      ++nWrite;
+    }
   }
   if (m_do_debug) std::cout << "  -- Saved rho plots." << std::endl;
 
   // save constituent canvases
-  for (auto cstRow : m_vecCstCanvas)
+  for (auto cstRow : m_cstPlots)
   {
-    for (auto cst : cstRow)
+    for (auto cstCol : cstRow)
     {
-      cst -> Draw();
-      cst -> Write();
-      ++nWrite;
+      for (auto cst : cstCol)
+      {
+        cst.canvas->Draw();
+        cst.canvas->Write();
+        ++nWrite;
+      }
     }
   }
   if (m_do_debug) std::cout << "  -- Saved constituent plots." << std::endl;
 
   // save kinematics canvases
-  for (auto kinRow : m_vecKineCanvas)
+  for (auto kinRow : m_kinePlots)
   {
-    for (auto kin : kinRow)
+    for (auto kinCol : kinRow)
     {
-      kin -> Draw();
-      kin -> Write();
-      ++nWrite;
+      for (auto kin : kinCol)
+      {
+        kin.canvas->Draw();
+        kin.canvas->Write();
+        ++nWrite;
+      }
     }
   }
   if (m_do_debug) std::cout << "  -- Saved kinematic plots." << std::endl;
 
   // save seed canvases
-  for (auto sedRow : m_vecSeedCanvas)
+  for (auto sedRow : m_seedPlots)
   {
-    for (auto sed : sedRow)
+    for (auto sedCol : sedRow)
     {
-      sed -> Draw();
-      sed -> Write();
-      ++nWrite;
+      for (auto sed : sedCol)
+      {
+        sed.canvas->Draw();
+        sed.canvas->Write();
+        ++nWrite;
+      }
     }
   }
   if (m_do_debug) std::cout << "  -- Saved seed plots." << std::endl;
@@ -1001,11 +359,745 @@ void JetDraw::SaveCanvasesToFile(TFile* file)
   {
     std::cout << "Finished saving plots: " << nWrite << " plots written." << std::endl;
   }
+}
+
+// private methods ============================================================
+
+// ----------------------------------------------------------------------------
+//! Draw rho histograms
+// ----------------------------------------------------------------------------
+/*! Draws histograms from the `RhosInEvent` module.
+ *
+ *  \param trigToDraw index of trigger of histograms being drawn
+ */
+int JetDraw::DrawRho(const uint32_t trigToDraw)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing rho histograms (trig = " << trigToDraw << ")" << std::endl;
+  }
+
+  // for rho histogram names
+  const std::string rhoHistName = m_rho_prefix + "_" + m_mapTrigToTag[trigToDraw];
+
+  // connect to draw client
+  QADrawClient *cl = QADrawClient::instance();
+
+  // grab histograms to draw and set options
+  JetDrawDefs::VHistAndOpts1D rhoHists = {
+    {
+      dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_rhoarea")),
+      "Rho, Area Method",
+      "#rho_{area}",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_rhomult")),
+      "Rho, Multiplicity Method",
+      "#rho_{mult}",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_sigmaarea")),
+      "Sigma, Area Method",
+      "#sigma_{area}",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_sigmamult")),
+      "Sigma, Multiplicity Method",
+      "#sigma_{mult}",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    }
+  };
+
+  // draw rho plots on one page
+  DrawHists("EvtRho", {0, 1, 2, 3}, rhoHists, m_rhoPlots.back(), trigToDraw);
+
+  // return w/o error
+  return 0;
+}
+
+// ----------------------------------------------------------------------------
+//! Draw constituent histograms
+// ----------------------------------------------------------------------------
+/*! Draws histograms from the `ConstituentsinJets` module.
+ *
+ *  \param trigToDraw index of trigger of histograms being drawn
+ *  \param resToDraw  index of jet resolution of histograms being drawn
+ */
+int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    switch (resToDraw)
+    {
+      case R02:
+        std::cout << "Drawing constituent histograms (trig = " << trigToDraw << ", R = 0.2)" << std::endl;
+        break;
+      case R03:
+        std::cout << "Drawing constituent histograms (trig = " << trigToDraw << ", R = 0.3)" << std::endl;
+        break;
+      case R04:
+        std::cout << "Drawing constituent histograms (trig = " << trigToDraw << ", R = 0.4)" << std::endl;
+        break;
+      case R05:
+        std::cout << "Drawing constituent histograms (trig = " << trigToDraw << ", R = 0.5)" << std::endl;
+        break;
+      default:
+        std::cerr << "Warning: trying to constituent histograms for unknown resolution" << std::endl;
+        return -1;
+    }
+  }
+
+  // for constituent hist names
+  const std::string cstHistName = m_constituent_prefix + "_" + m_mapTrigToTag[trigToDraw] + "_" + m_jet_type + "_" + m_mapResToTag[resToDraw];
+
+  // connect to draw client
+  QADrawClient* cl = QADrawClient::instance();
+
+  // grab histograms to draw and set options
+  JetDrawDefs::VHistAndOpts1D cstHists = {
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_cemc")),
+      "Jet N Constituents in CEMC",
+      "N Constituents",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_ihcal")),
+      "Jet N Constituents in IHCal",
+      "N Constituents",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_ohcal")),
+      "Jet N Constituents in OHCal",
+      "N Constituents",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_total")),
+      "Jet N Constituents",
+      "N Constituents",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncstsvscalolayer")),
+      "Jet N Constituents vs Calo Layer",
+      "Calo Layer",
+      "N Constituents",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjet_cemc")),
+      "Jet E Fraction in CEMC",
+      "Jet E Fraction",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjet_ihcal")),
+      "Jet E Fraction in IHCal",
+      "Jet E Fraction",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjet_ohcal")),
+      "Jet E Fraction in OHCal",
+      "Jet E Fraction",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjetvscalolayer")),
+      "Jet E Fraction vs Calo Layer",
+      "Calo Layer",
+      "Jet E Fraction",
+      "Counts",
+      0.25,
+      false,
+      true
+    }
+  };
+
+  // draw 1d ncst hists on a page
+  DrawHists("JetCsts_NCsts", {0, 1, 2, 3}, cstHists, m_cstPlots.back().back(), trigToDraw, resToDraw);
+
+  // draw e fraction on a page
+  DrawHists("JetCsts_EFrac", {5, 6, 7}, cstHists, m_cstPlots.back().back(), trigToDraw, resToDraw);
+
+  // draw ncst and e faction vs. calo layer on a page
+  DrawHists("JetCsts_VsCaloLayer", {4, 8}, cstHists, m_cstPlots.back().back(), trigToDraw, resToDraw);
+
+  // return w/o error
+  return 0;
+}
+
+// ----------------------------------------------------------------------------
+//! Draw jet kinematic histograms
+// ----------------------------------------------------------------------------
+/*! Draw histograms from the `JetKinematicCheck` module.
+ *
+ *  \param trigToDraw index of trigger of histograms being drawn
+ *  \param resToDraw  index of jet resolution of histograms being drawn
+ */
+int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    switch (resToDraw)
+    {
+      case R02:
+        std::cout << "Drawing jet kinematic histograms (trig = " << trigToDraw << ", R = 0.2)" << std::endl;
+        break;
+      case R03:
+        std::cout << "Drawing jet kinematic histograms (trig = " << trigToDraw << ", R = 0.3)" << std::endl;
+        break;
+      case R04:
+        std::cout << "Drawing jet kinematic histograms (trig = " << trigToDraw << ", R = 0.4)" << std::endl;
+        break;
+      case R05:
+        std::cout << "Drawing jet kinematic histograms (trig = " << trigToDraw << ", R = 0.5)" << std::endl;
+        break;
+      default:
+        std::cerr << "Warning: trying to draw jet kinemtic histograms for Unknown resolution" << std::endl;
+        return -1;
+    }
+  }
+
+  // for kinematic hist names
+  const std::string kineHistPrefix = m_kinematic_prefix + "_" + m_mapTrigToTag[trigToDraw] + "_" + m_jet_type;
+  const std::string kineProfSuffix = m_mapResToTag[resToDraw] + "_pfx";
+
+  // connect to draw client
+  QADrawClient *cl = QADrawClient::instance();
+
+  // grab histograms to draw and set options
+  JetDrawDefs::VHistAndOpts1D kineHists = {
+    {
+      dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_etavsphi_" + m_mapResToTag[resToDraw])),
+      "Jet #eta vs. #phi",
+      "Jet #eta",
+      "Jet #phi",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + m_mapResToTag[resToDraw])),
+      "Jet Mass vs #eta",
+      "Jet #eta",
+      "Jet Mass [GeV/c^{2}]",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + kineProfSuffix)),
+      "Jet Mass vs #eta",
+      "Jet #eta",
+      "Jet Mass [GeV/c^{2}]",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + m_mapResToTag[resToDraw])),
+      "Jet Mass vs p_{T}",
+      "Jet p_{T} [GeV/c]",
+      "Jet Mass [GeV/c^{2}]",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + kineProfSuffix)),
+      "Jet Mass vs p_{T}",
+      "Jet p_{T} [GeV/c]",
+      "Jet Mass [GeV/c^{2}]",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[resToDraw])),
+      "Jet Spectra",
+      "Jet p_{T} [GeV/c]",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    }
+  };
+
+  // draw all kinematic hists on 1 page
+  DrawHists("JetKinematics", {0, 1, 3, 5}, kineHists, m_kinePlots.back().back(), trigToDraw, resToDraw);
+
+  // draw profiles on relevant pads
+  DrawHistOnPad(2, 2, kineHists, m_kinePlots.back().back().back());
+  DrawHistOnPad(4, 3, kineHists, m_kinePlots.back().back().back());
+
+  // return w/o error
+  return 0;
+}
+
+// ----------------------------------------------------------------------------
+//! Draw jet seed histograms
+// ----------------------------------------------------------------------------
+/*! Draw histograms from the `JetSeedCount` module.
+ *
+ *  \param trigToDraw index of trigger of histograms being drawn
+ *  \param resToDraw  index of jet resolution of histograms being drawn
+ */
+int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    switch (resToDraw)
+    {
+      case R02:
+        std::cout << "Drawing jet seed histograms (trig = " << trigToDraw << ", R = 0.2)" << std::endl;
+        break;
+      case R03:
+        std::cout << "Drawing jet seed histograms (trig = " << trigToDraw << ", R = 0.3)" << std::endl;
+        break;
+      case R04:
+        std::cout << "Drawing jet seed histograms (trig = " << trigToDraw << ", R = 0.4)" << std::endl;
+        break;
+      case R05:
+        std::cout << "Drawing jet seed histograms (trig = " << trigToDraw << ", R = 0.5)" << std::endl;
+        break;
+      default:
+        std::cerr << "Warning: trying to draw jet seed histograms with Unknown resolution" << std::endl;
+        return -1;
+    }
+  }
+
+  // for seed hist names
+  const std::string seedHistName = m_seed_prefix + "_" + m_mapTrigToTag[trigToDraw] + "_" + m_jet_type + "_" + m_mapResToTag[resToDraw];
+
+  // connect to draw client
+  QADrawClient *cl = QADrawClient::instance();
+
+  // grab histograms to draw and set options
+  JetDrawDefs::VHistAndOpts1D seedHists = {
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawetavsphi")),
+      "Raw Seed #eta vs #phi",
+      "Seed #eta_{raw} [Rads.]",
+      "Seed #phi_{raw} [Rads.]",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawpt")),
+      "Raw Seed p_{T}",
+      "Seed p_{T,raw} [GeV/c]",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawptall")),
+      "Raw Seed p_{T} (all jet seeds)",
+      "Seed p_{T,raw} [GeV/c]",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawseedcount")),
+      "Raw Seed Count per Event",
+      "N Seed per Event",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subetavsphi")),
+      "Subtracted Seed #eta vs #phi",
+      "Seed #eta_{sub} [Rads.]",
+      "Seed #phi_{sub} [Rads.]",
+      "Counts",
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subpt")),
+      "Subtracted Seed p_{T}",
+      "Seed p_{T,sub} [GeV/c]",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subptall")),
+      "Subtracted Seed p_{T} (all jet seeds)",
+      "Seed p_{T,sub} [GeV/c]",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subseedcount")),
+      "Subtracted Seed Count per Event",
+      "N Seed per Event",
+      "Counts",
+      "",
+      0.25,
+      true,
+      false
+    }
+  };
+
+  // draw raw seed hists
+  DrawHists("JetSeeds_Raw", {0, 1, 2, 3}, seedHists, m_seedPlots.back().back(), trigToDraw, resToDraw);
+
+  // draw subtracted seed hists
+  DrawHists("JetSeeds_Sub", {4, 5, 6, 7}, seedHists, m_seedPlots.back().back(), trigToDraw, resToDraw);
+
+  // return w/o error
+  return 0;
+}
+
+// ----------------------------------------------------------------------------
+//! Draw run and build info on a TPad
+// ----------------------------------------------------------------------------
+/*! By default, trigger and resolution aren't added to the
+ *  text.  However, if trigger or resolution indices are
+ *  provided, then that info will be added.
+ *
+ *  \param[in]  what the pad's associated QA component (e.g. JetKinematics)
+ *  \param[out] pad  the pad to draw text on
+ *  \param      trig trigger index (optional)
+ *  \param      res  jet resolution index (optional)
+ */
+void JetDraw::DrawRunAndBuild(const std::string& what,
+                              TPad* pad,
+                              const int trig,
+                              const int res)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing run and build info for " << what << std::endl;
+  }
+
+  // connect to draw client
+  QADrawClient *cl = QADrawClient::instance();
+
+  // Generate run string from client
+  std::ostringstream runnostream;
+  runnostream << cl->RunNumber() << ", build " << cl->build();
+
+  // prepend module name, component, and other info as needed
+  std::string runstring = Name();
+  runstring.append("_" + what);
+  if (trig > -1)
+  {
+    runstring.append("_" + m_mapTrigToName.at(trig));
+  }
+  if (res > -1)
+  {
+    runstring.append("_" + m_mapResToName.at(res));
+  }
+
+  // now add run
+  runstring += " Run ";
+  runstring += runnostream.str();
+
+  // create TText for info
+  TText PrintRun;
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(12);  // center/center alignment
+
+  // and finally draw on pad
+  pad -> cd();
+  PrintRun.DrawText(0.50, 0.70, runstring.data());
+}
+
+// ----------------------------------------------------------------------------
+//! Draw histograms on canvas
+// ----------------------------------------------------------------------------
+/*! By default, trigger and resolution aren't added to the
+ *  canvas names or run/build text. However, if trigger or
+ *  resolution indices are provided, then that info will
+ *  be added.
+ *
+ *  \param[in]  what    the histograms' associated QA component (e.g. JetSeed)
+ *  \param[in]  indices the indices of the histograms to draw
+ *  \param[in]  hists   the histograms to select from
+ *  \param[out] plots   the canvas+pads to draw on 
+ *  \param      trig    trigger index (optional)
+ *  \param      res     jet resolution index (optional)
+ */
+void JetDraw::DrawHists(const std::string& what,
+                        const std::vector<std::size_t>& indices,
+                        const JetDrawDefs::VHistAndOpts1D& hists,
+                        JetDrawDefs::VPlotPads1D& plots,
+                        const int trig,
+                        const int res)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing histograms for " << what << std::endl;
+  }
+
+  // form canvas name
+  std::string canName = what;
+  if (trig > -1)
+  {
+    canName.append("_" + m_mapTrigToTag.at(trig));
+  }
+  if (res > -1)
+  {
+    canName.append("_" + m_mapResToTag.at(res));
+  }
+
+  // if canvas doesn't exist yet, create it
+  if (!gROOT->FindObject(canName.data()))
+  {
+    MakeCanvas(canName, indices.size(), plots);
+  }
+
+  // draw selected histograms
+  //   - n.b. COLZ does nothing for 1D histograms
+  for (std::size_t iPad = 0; iPad < indices.size(); ++iPad)
+  {
+    plots.back().histPad->cd(iPad + 1);
+    if (hists.at(indices[iPad]).hist)
+    {
+      UpdatePadStyle(hists.at(indices[iPad]));
+      hists.at(indices[iPad]).hist->DrawCopy("COLZ");
+    }
+    else
+    {
+      DrawEmptyHistogram(hists.at(indices[iPad]).title);
+    }
+  }
+
+  // add run/build info to canvas
+  DrawRunAndBuild(what, plots.back().runPad, trig, res);
+  plots.back().canvas->Update();
+}
+
+// ----------------------------------------------------------------------------
+//! Draw a histogram on a pad
+// ----------------------------------------------------------------------------
+/*! Draw a particular histogram (entry iHist in provided hist vector)
+ *  on a particular pad (pad iPad in canvas). Note that
+ *    1. the indices of pads in a TCanvas from 1 (not 0!) on up, and
+ *    2. that this function assumes something has already been drawn
+ *        on the pad.
+ *
+ *  \param iHist index of histogram in vector `hists` to draw
+ *  \param iPad  index of pad to draw histogram on
+ *  \param hists vector histograms containing histogram to be drawn
+ *  \param plot  canvas containing pad to be drawn on
+ */
+void JetDraw::DrawHistOnPad(const std::size_t iHist,
+                            const std::size_t iPad,
+                            const JetDrawDefs::VHistAndOpts1D& hists,
+                            JetDrawDefs::PlotPads& plot)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Drawing histogram " << iHist << " on pad " << iPad << std::endl;
+  }
+
+  // draw histogram
+  plot.histPad->cd(iPad);
+  if (hists.at(iHist).hist)
+  {
+    UpdatePadStyle(hists.at(iHist));
+    hists.at(iHist).hist->DrawCopy("SAME");
+  }
+  else
+  {
+    std::cerr << "Warning: trying to draw missing histogram " << iHist << " on pad " << iPad << std::endl;
+  }
+  plot.canvas->Update();
+}
+
+// ----------------------------------------------------------------------------
+//! Draw empty histogram on current pad
+// ----------------------------------------------------------------------------
+/*! Helper function to draw an empty histogram on the current
+ *  pad. Used when a histogram is missing.
+ *
+ *  \param[in] what what's missing (e.g. a histogram)
+ */
+void JetDraw::DrawEmptyHistogram(const std::string& what)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Printing message '" << what << "'" << std::endl;
+  }
+
+  // set up hist/text
+  TH1D*   hEmpty = new TH1D("hEmpty", "", 10, 0, 10);
+  TLatex* lEmpty = new TLatex();
+
+  // set up message
+  const std::string message = what + " is missing";
+
+  // and draw them on current pad
+  hEmpty->DrawCopy();
+  lEmpty->DrawLatex(0.3, 0.5, message.data());
+}
+
+// ----------------------------------------------------------------------------
+//! Create canvas to draw on
+// ----------------------------------------------------------------------------
+/*! Creates a TCanvas to hold QA histograms and run info.
+ *
+ *  \param name  name of canvas
+ *  \param nhist number of histograms to draw
+ *  \param plots vector of canvases to add canvas to
+ */ 
+void JetDraw::MakeCanvas(const std::string& name,
+                         const int nHist,
+                         JetDrawDefs::VPlotPads1D& plots)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "Making canvas " << name << std::endl;
+  }
+
+  // instantiate draw client & grab display size
+  QADrawClient *cl = QADrawClient::instance();
+  int xsize = cl->GetDisplaySizeX();
+  int ysize = cl->GetDisplaySizeY();
+
+  // create canvas
+  //   - n.b. xpos (-1) negative means do not draw menu bar
+  TCanvas* canvas = new TCanvas(name.data(), "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  canvas->UseCurrentStyle();
+  gSystem->ProcessEvents();
+
+  // create pad for histograms
+  const std::string histPadName = name + "_hist";
+  TPad* histPad = new TPad(histPadName.data(), "for histograms", 0.0, 0.0, 1.0, 0.9);
+  histPad->SetFillStyle(4000);
+  canvas->cd();
+  histPad->Draw();
+
+  // divide hist pad into appropriate no. of pads
+  const int   nRow = std::min(nHist, 2);
+  const int   nCol = (nHist / 2) + (nHist % 2);
+  const float bRow = 0.01;
+  const float bCol = 0.01;
+  if (nHist > 1)
+  {
+    histPad->Divide(nRow, nCol, bRow, bCol);
+  }
+
+  // create pad for run number
+  const std::string runPadName = name + "_run";
+  TPad* runPad = new TPad(runPadName.data(), "for run and build", 0.0, 0.9, 1.0, 1.0);
+  runPad->SetFillStyle(4000);
+  canvas->cd();
+  runPad->Draw();
+
+  // add canvas/pads to vector
+  plots.push_back( {canvas, histPad, runPad} );
+
+  // return w/o error
   return;
+}
 
-}  // end 'SaveCanvasesToFile(TFile*)'
+// ----------------------------------------------------------------------------
+//! Update style of current pad based on options
+// ----------------------------------------------------------------------------
+void JetDraw::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
+{
+  gPad->UseCurrentStyle();
+  gPad->Update();
+  gPad->SetRightMargin(hist.margin);
+  gPad->SetLogy(hist.logy);
+  gPad->SetLogz(hist.logz);
+}
 
-void JetDraw::myText(double x, double y, int color, const char *text, double tsize)
+// ----------------------------------------------------------------------------
+//! Turn text into a TLatex object
+// ----------------------------------------------------------------------------
+/* Currently unused. */
+void JetDraw::myText(double x, double y, int color, const char* text, double tsize)
 {
   TLatex l;
   l.SetTextAlign(22);

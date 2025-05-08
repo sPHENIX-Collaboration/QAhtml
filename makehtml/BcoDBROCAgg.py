@@ -8,9 +8,9 @@ import time
 import argparse
 import hashlib
 
-NROCS = [6,8,24]
-
-hist_types = ["HIST_DST_STREAMING_EVENT_MVTX", "HIST_DST_STREAMING_EVENT_INTT","HIST_DST_STREAMING_EVENT_TPC"]
+NROCS = [1,6,8,24]
+nsubsys = 4
+hist_types = ["HIST_DST_STREAMING_EVENT_TPOT","HIST_DST_STREAMING_EVENT_MVTX", "HIST_DST_STREAMING_EVENT_INTT","HIST_DST_STREAMING_EVENT_TPC"]
 
 runtypes = ["_run3auau"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
@@ -27,17 +27,18 @@ print("Test is " + str(args.test))
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type + runtype
-    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset;".format(dsttype)
-   
+    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset order by runnumber desc;".format(dsttype)
+    if args.verbose:
+        print(query)
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
     return runnumbers
 
 
 def get_aggregated_file(cursor, dsttype, runnumber):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and runnumber='{}')".format(dsttype,runnumber)
-    #if args.verbose:
-        #print(query)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=0 and runnumber='{}')".format(dsttype,runnumber)
+    if args.verbose:
+        print(query)
     cursor.execute(query)
     returnfile = ""
     # there is only ever one return for this query
@@ -53,28 +54,39 @@ def main():
     FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
     FCWriteCursor = FCWrite.cursor()
     for runtype in runtypes:
-        for subsystemID in range(3):
+        for subsystemID in range(nsubsys):
             nrocs = NROCS[subsystemID]
             hist = hist_types[subsystemID]
             # just use the 0th one to get the run/db range once per subsystem instead of for each ROC
             dummyhisttype = hist+"0"
             if hist.find("TPC") != -1:
                 dummyhisttype = hist+"00"
-            for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype): 
+            if hist.find("TPOT") != -1:
+                dummyhisttype = hist
+            for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype):
+                
+                if run < 59000:
+                    continue
+                if args.verbose:
+                    print("Checking run " + str(run))
                 filesToAdd = []
                 for ROC in range(nrocs):
-                    histtype = hist+str(ROC)
+                    histtype = hist
+                    if hist.find("TPOT") == -1:
+                        histtype = hist+str(ROC)
                     if hist.find("TPC") != -1:
                         histtype = hist+"{:02d}".format(ROC)
+                    histtype += runtype
                     thisfile = get_aggregated_file(FCReadCursor, histtype, run)
                     if len(thisfile) > 0:
                         filesToAdd.append(thisfile)
                 if args.verbose :
+                    print("files to add is:")
                     print(filesToAdd)
                 if len(filesToAdd) == 0:
                     # nothing to add, move on
                     continue
-                print(filesToAdd[0])
+                
                 tags = (filesToAdd[0]).split(os.sep)
                 index = tags.index(runtype[1:])
                 collisiontag = tags[index]
@@ -108,7 +120,10 @@ def main():
                 if len(path) == 0:
                     reagg=True
                 newFileTime = 0
+            
                 for rocpath in filesToAdd:
+                    if not os.path.exists(rocpath):
+                        continue
                     if os.path.getmtime(rocpath) > newFileTime:
                         newFileTime = os.path.getmtime(rocpath)
                     if os.path.getmtime(rocpath) > aggFileTime:
@@ -129,9 +144,16 @@ def main():
                     print ("lfn is " + lfn)
                     print("agg file path is " + path)
                 command = ["hadd","-ff",path]
-            
+                nRocsToAdd = 0
                 for rocpath in filesToAdd:
                     command.append(str(rocpath))
+                    nRocsToAdd+=1
+                    
+                if nRocsToAdd != nrocs:
+                    print("One of the ROCS failed! There is a missing histogram file")
+                    print("for lfn: " + lfn)
+                    print("ROCs available: ")
+                    print(filesToAdd)
                 if args.verbose:
                     print("executing command for "+str(len(filesToAdd)) + " files")
                     print(command)
