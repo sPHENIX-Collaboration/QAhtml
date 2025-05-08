@@ -420,8 +420,7 @@ QADrawClient::htmlRegisterPage(const QADraw &drawer,
   return fHtml->registerPage(drawer.Name(), path, basefilename, ext);
 }
 
-//int QADrawClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
-int QADrawClient::CanvasToPng([[maybe_unused]] TCanvas *canvas, [[maybe_unused]] std::string const &pngfilename)
+int QADrawClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
 {
   // in order not to collide when running multiple html generators
   // create a unique filename (okay tempnam is not totally safe against
