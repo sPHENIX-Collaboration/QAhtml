@@ -1,7 +1,5 @@
 #include "BCODraw.h"
-
 #include <sPhenixStyle.C>
-
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
 
@@ -298,7 +296,7 @@ int BCODraw::DrawMVTX()
     // histogram is missing
     return -1;
   }
-     
+  
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);

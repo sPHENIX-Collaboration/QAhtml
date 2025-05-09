@@ -19,6 +19,10 @@ void draw_calo(const std::string &rootfile) {
   ch->SetHistfile(rootfile);
   std::string mapsfile = ch->MakeHotColdDeadMaps();
 
+  //Reference Hist
+  ch->SetRefHistfile("/sphenix/data/data02/sphnxpro/QAhtml/aggregated/HIST_CALOQA_run2auau_ana462_2024p010_v001-00054909-9000.root");
+  std::string ref_mapsfile = ch->MakeHotColdDeadMapsRef();
+
   // EMCal
   ch->CemcCheckGoodRun();
   TCanvas* cemc_summ = ch->CemcMakeSummary();
@@ -38,6 +42,8 @@ void draw_calo(const std::string &rootfile) {
   // std::cout << "Reading histograms from maps files..." << std::endl;
 
   cl->ReadHistogramsFromFile(mapsfile.c_str());
+  //cl->ReadHistogramsFromFile(ref_mapsfile.c_str());  // Load reference maps
+
   /* cl->Print("ALL"); */
 
   // Debug output before making HTML
@@ -57,6 +63,7 @@ void draw_calo(const std::string &rootfile) {
   // std::cout << "Hot/cold/dead maps deleted." << std::endl;
 
   // Write good/bad run status to triage database
+
   std::cout << "Writing emcal_auto to run triage DB... ";
   ch->CaloWriteDB("emcal");
   std::cout << "Done!!" << std::endl;
@@ -66,7 +73,6 @@ void draw_calo(const std::string &rootfile) {
   std::cout << "Writing ohcal_auto to run triage DB... ";
   ch->CaloWriteDB("ohcal");
   std::cout << "Done!" << std::endl;
-
   delete cl;
 
   gSystem->Exit(0);

@@ -4,6 +4,7 @@
 #include <qahtml/QADraw.h>
 
 #include <vector>
+#include <string>
 
 class QADB;
 class QADBVar;
@@ -28,6 +29,9 @@ class CaloDraw : public QADraw
   void SetohcalSummary(TCanvas* c);  // Declaration for ohcal summary setter
   void SetCaloChecker(CaloGoodRunChecker* ch) {calo_checker = ch;}
 
+  // New function to set reference file path
+  void SetReferenceFile(const std::string &filepath) { refFilePath = filepath; }
+
  private:
   int MakeCanvas(const std::string &name, int num);
   int DrawCemc();
@@ -36,6 +40,7 @@ class CaloDraw : public QADraw
   int DrawZdcMbd();
   int DrawCorr();
   TH1 *proj(TH2 *h2);
+  TH1 *projRef(TH2 *h2);  // New function for reference projection
   TH1 *FBratio(TH1 *h);
   void myText(double x, double y, int color, const char *text, double tsize = 0.04);
   //  QADB *db {nullptr};
@@ -54,6 +59,10 @@ class CaloDraw : public QADraw
   const char *histprefix;
   // for good run determination
   CaloGoodRunChecker* calo_checker = nullptr;
+
+  // New member variable to store reference file path
+  std::string refFilePath = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/HIST_CALOQA_run2auau_ana462_2024p010_v001-00054909-9000.root";
+
 };
 
 #endif
