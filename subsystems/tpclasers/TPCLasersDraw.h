@@ -23,11 +23,11 @@ class TPCLasersDraw : public QADraw
   int DBVarInit();
 
  private:
-  int MakeCanvas(const std::string &name);
+  int MakeCanvas(const std::string &name, int num);
   int DrawLaserInfo();
-  TCanvas *TC{nullptr};
+  TCanvas *TC[3]{nullptr};
   TPad *transparent{nullptr};
-  TPad *Pad[2]{nullptr};
+  TPad *Pad[2][2]{nullptr};
   const char *histprefix;
 };
 
