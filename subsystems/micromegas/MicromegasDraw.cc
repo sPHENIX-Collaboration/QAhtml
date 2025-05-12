@@ -45,11 +45,6 @@ int MicromegasDraw::Draw(const std::string &what)
       iret += DrawClusterInfo();
       idraw++;
     }
-  if (what== "ALL" || what == "BCO")
-    {
-      iret += DrawBCOInfo();
-      idraw++;
-    }
   if (!idraw)
     {
       std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -194,96 +189,6 @@ int MicromegasDraw::DrawClusterInfo()
   return 0;
 }
 
-int MicromegasDraw::DrawBCOInfo()
-{
-  QADrawClient *cl = QADrawClient::instance();
-  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
-  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
-  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
-  auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
-
-  if (!h_waveform_bco_dropped || !h_waveform_pool_dropped || !h_waveform_total || !h_gl1_raw)
-    {
-      std::cerr << "Error: One or more histograms could not be retrieved." << std::endl;
-      return -1;
-    }
-
-  auto h_drop= new TH1F("h_drop", "Drop Rate", 3, 0, 3);
-  h_drop->GetXaxis()->SetBinLabel(1, "5001");
-  h_drop->GetXaxis()->SetBinLabel(2, "5002");
-  h_drop->GetXaxis()->SetBinLabel(3, "all");
-  h_drop->GetXaxis()->SetTitle("Packet");
-  h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
-  h_drop->SetTitle("Fraction of Dropped Waveforms by packet");
-
-  h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/h_waveform_total->GetBinContent(1));
-  h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/h_waveform_total->GetBinContent(2));
-  h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(h_waveform_total->GetBinContent(1)+h_waveform_total->GetBinContent(2)) );
-
-  auto h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
-  h_gl1->GetXaxis()->SetBinLabel(1, "5001");
-  h_gl1->GetXaxis()->SetBinLabel(2, "5002");
-  h_gl1->GetXaxis()->SetBinLabel(3, "all");
-
-  h_gl1->SetBinContent(3,double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
-  h_gl1->SetBinContent(2,double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
-  h_gl1->SetBinContent(1,double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
-
-  if (!TC[1])
-  {
-    MakeCanvas("BCO_QA", 1);
-  }
-
-  TC[1]->cd();
-  TC[1]->Clear("D");
-
-  Pad[1][0]->cd();
-  h_drop->SetMinimum(0);
-  h_drop->SetMaximum(1.6);
-  h_drop->SetFillColor(42);
-  h_drop->SetFillStyle(3002);
-  h_drop->DrawCopy();
-
-  TLegend* legend_drop = new TLegend(0.56, 0.6, 0.85, 0.84);
-  legend_drop->SetHeader("Values", "C");
-  legend_drop->SetTextSize(0.045);
-  legend_drop->SetBorderSize(0);
-  legend_drop->SetFillStyle(0);
-
-  for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
-  {
-    legend_drop->AddEntry((TObject*)0, Form("%s: %.4f", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
-  }
-  legend_drop->Draw();
-  gPad->Update();
-
-  Pad[1][1]->cd();
-  h_gl1->GetXaxis()->SetTitle("Packet");
-  h_gl1->GetYaxis()->SetTitle("Match Rate");
-  h_gl1->SetTitle("Matching Tagger Rate by packet");
-  h_gl1->SetFillColor(42);
-  h_gl1->SetFillStyle(3002);
-  h_gl1->SetMinimum(0);
-  h_gl1->SetMaximum(1.6);
-  h_gl1->DrawCopy();
-
-  auto legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
-  legend_gl1->SetHeader("Values", "C");
-  legend_gl1->SetTextSize(0.045);
-  legend_gl1->SetBorderSize(0);
-  legend_gl1->SetFillStyle(0);
-
-  for (int i = 1; i <= h_gl1->GetNbinsX(); ++i)
-  {
-    legend_gl1->AddEntry((TObject*)0, Form("%s: %.4f", h_gl1->GetXaxis()->GetBinLabel(i), h_gl1->GetBinContent(i)), "");
-  }
-  legend_gl1->Draw();
-  gPad->Update();
-
-  TC[1]->Update();
-
-  return 0;
-}
 
 int MicromegasDraw::MakeHtml(const std::string &what)
 {
@@ -303,12 +208,7 @@ int MicromegasDraw::MakeHtml(const std::string &what)
       pngfile = cl->htmlRegisterPage(*this, "cluster_info", "1", "png");
       cl->CanvasToPng(TC[0], pngfile);
     }
-  if (what == "ALL" || what == "BCO")
-    {
-      pngfile = cl->htmlRegisterPage(*this, "bco_info", "2", "png");
-      cl->CanvasToPng(TC[1], pngfile);
 
-    }
 
   return 0;
 }
