@@ -436,6 +436,7 @@ int QADrawClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
   img->WriteImage(pngfilename.c_str());
   delete img;
   remove(tmpname);*/
+
   // NOLINTNEXTLINE(hicpp-no-malloc)
   //free(tmpname);
   
