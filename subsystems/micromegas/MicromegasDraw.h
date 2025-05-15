@@ -21,7 +21,7 @@ class MicromegasDraw : public QADraw
   int MakeCanvas(const std::string &name, int num);
   TH1* ClusterAverage(TH2*, std::string);
   int DrawClusterInfo();
-  int DrawBCOInfo();
+  int DrawRawInfo();
   TCanvas *TC[4]{};
   TPad *transparent[4]{};
   TPad *Pad[4][4]{};

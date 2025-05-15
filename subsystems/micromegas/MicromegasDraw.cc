@@ -45,6 +45,11 @@ int MicromegasDraw::Draw(const std::string &what)
       iret += DrawClusterInfo();
       idraw++;
     }
+  if (what == "ALL" || what == "RAW")
+    {
+      iret += DrawRawInfo();
+      idraw++;
+    }
   if (!idraw)
     {
       std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -189,6 +194,54 @@ int MicromegasDraw::DrawClusterInfo()
   return 0;
 }
 
+int MicromegasDraw::DrawRawInfo()
+{
+  QADrawClient *cl = QADrawClient::instance();
+  auto h_cluster_multiplicity = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
+  auto h_cluster_size = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
+  auto h_cluster_charge = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
+
+  if (!h_cluster_multiplicity || !h_cluster_size || !h_cluster_charge)
+    {
+      std::cerr << "Error: One or more histograms could not be retrieved." << std::endl;
+      return -1;
+    }
+
+  if (!TC[1])
+    {
+      MakeCanvas("RawQA", 1);
+    }
+
+  TC[1]->cd();
+  TC[1]->Clear("D");
+
+  Pad[1][0]->cd();
+  h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
+  h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
+  h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
+  h_cluster_multiplicity->SetMinimum(0);
+  h_cluster_multiplicity->SetMaximum(10);
+  h_cluster_multiplicity->DrawCopy("COLZ");
+
+  Pad[1][1]->cd();
+  h_cluster_size->SetTitle("Cluster Size");
+  h_cluster_size->GetXaxis()->SetTitle("Chamber");
+  h_cluster_size->GetYaxis()->SetTitle("Size");
+  h_cluster_size->SetMinimum(0);
+  h_cluster_size->SetMaximum(8);
+  h_cluster_size->DrawCopy("COLZ");
+
+  Pad[1][2]->cd();
+  h_cluster_charge->SetTitle("Cluster Charge");
+  h_cluster_charge->GetXaxis()->SetTitle("Chamber");
+  h_cluster_charge->GetYaxis()->SetTitle("Charge");
+  h_cluster_charge->SetMinimum(0);
+  h_cluster_charge->SetMaximum(1000);
+  h_cluster_charge->DrawCopy("COLZ");
+
+  TC[1]->Update();
+  return 0;
+}
 
 int MicromegasDraw::MakeHtml(const std::string &what)
 {
