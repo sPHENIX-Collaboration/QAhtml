@@ -26,7 +26,7 @@ elif histoarg == "cluster":
 elif histoarg == "seed":
     subsys = [{"siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"], "tpcsil" : ["HIST_DST_TRKR_SEED","TPCSILICONQA","draw_tpcsil.C"]}]
 elif histoarg == "bco":
-    subsys = [{"bco" : ["HIST_DST_STREAMING_EVENT_MVTX","MVTXBCO","draw_packets.C"]}, {"bco" : ["HIST_DST_STREAMING_EVENT_INTT","INTTBCO","draw_packets.C"]},{"bco" : ["HIST_DST_STREAMING_EVENT_TPOT","TPOTBCO","draw_packets.C"]}]
+    subsys = [{"bco" : ["HIST_DST_STREAMING_EVENT_mvtx","MVTXBCO","draw_packets.C"]}, {"bco" : ["HIST_DST_STREAMING_EVENT_intt","INTTBCO","draw_packets.C"]},{"bco" : ["HIST_DST_STREAMING_EVENT_ebdc39","TPOTBCO","draw_packets.C"]}]
     
 print("subsys list is")
 print(subsys)
