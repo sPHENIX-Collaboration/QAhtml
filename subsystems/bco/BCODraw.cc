@@ -47,12 +47,12 @@ int BCODraw::Draw(const std::string &what)
   /* SetsPhenixStyle(); */
   int iret = 0;
   int idraw = 0;
-  if (what == "ALL" || what == "MVTX")
+  if (what == "ALL" || what == "MVTX" || what=="mvtx")
   {
     iret += DrawMVTX();
     idraw++;
   }
-  if (what == "ALL" || what == "INTT")
+  if (what == "ALL" || what == "INTT" || what=="intt")
   {
     iret += DrawINTT();
     idraw++;
@@ -62,7 +62,7 @@ int BCODraw::Draw(const std::string &what)
     iret += DrawTPC();
     idraw++;
   }
-  if (what == "ALL" || what == "TPOT")
+  if (what == "ALL" || what == "TPOT" || what=="ebdc39")
   {
     iret += DrawTPOT();
     idraw++;
@@ -72,6 +72,7 @@ int BCODraw::Draw(const std::string &what)
     std::cout << " Unimplemented Drawing option: " << what << std::endl;
     iret = -1;
   }
+  
   return iret;
 }
 
@@ -294,6 +295,7 @@ int BCODraw::DrawMVTX()
     }
   else
   {
+    std::cout << "DrawMvtx() histogram was missing"<<std::endl;
     // histogram is missing
     return -1;
   }
@@ -355,7 +357,7 @@ int BCODraw::DrawINTT()
     float allfeestagged[ninttpackets] = {0};
     float perfee[ninttpackets][14] = {{0}};
     TGraph *grs[ninttpackets];
-    std::cout << "intt gl1 " << inttgl1<<std::endl;
+    
     for(int i=0; i<ninttpackets; i++)
       {
 	allfeestagged[i] = h_allfeestagged[i]->GetEntries();
@@ -371,7 +373,7 @@ int BCODraw::DrawINTT()
 	
 	grs[i] = new TGraph(14,x,perfee[i]);
       }
-    std::cout << "packetallfees"<<std::endl;
+    
     TH1 *packetallfees = new TH1F("inttpacketallfees",";Server;Frac. GL1 Tagged",8,0,8);
     for(int i=0; i<ninttpackets; i++)
       {
@@ -383,14 +385,14 @@ int BCODraw::DrawINTT()
 	MakeCanvas("intt_evt_building_1", 2);
       }
 
-    std::cout << "clear canvas"<<std::endl;
+   
     TC[2]->Clear("D");
     Pad[2][0]->cd();
     gStyle->SetOptStat(0);
     
     packetallfees->GetYaxis()->SetRangeUser(0,1.2);
     packetallfees->DrawCopy("hist");
-    std::cout << "cd next can"<<std::endl;
+    
     Pad[2][1]->cd();
     gStyle->SetOptStat(0);
     
@@ -412,7 +414,7 @@ int BCODraw::DrawINTT()
 	    grs[i]->Draw("psame");
 	  }
       }
-    std::cout << "first mytexts"<<std::endl;
+    
     myText(0.22,0.6,grs[0]->GetMarkerColor(),"Server 0");
     myText(0.22,0.55,grs[1]->GetMarkerColor(),"Server 1");
     myText(0.22,0.5,grs[2]->GetMarkerColor(), "Server 2");
@@ -680,12 +682,12 @@ int BCODraw::MakeHtml(const std::string &what)
   std::string pngfile;
 
   // Register the canvas png file to the menu and produces the png file.
-  if (what == "ALL" || what == "MVTX")
+  if (what == "ALL" || what == "MVTX" || what=="mvtx")
   {
     pngfile = cl->htmlRegisterPage(*this, "mvtx_evt_building_1", "1", "png");
     cl->CanvasToPng(TC[0], pngfile);
   }
-  if (what == "ALL" || what == "INTT")
+  if (what == "ALL" || what == "INTT" || what=="intt")
   {
     pngfile = cl->htmlRegisterPage(*this, "intt_evt_building_1", "3", "png");
     cl->CanvasToPng(TC[2], pngfile);
@@ -696,7 +698,7 @@ int BCODraw::MakeHtml(const std::string &what)
     pngfile = cl->htmlRegisterPage(*this, "tpc_evt_building_1", "5", "png");
     cl->CanvasToPng(TC[4], pngfile);
   }
-  if (what == "ALL" || what == "TPOT")
+  if (what == "ALL" || what == "TPOT" || what=="ebdc39")
   {
     pngfile = cl->htmlRegisterPage(*this, "tpot_evt_building_1", "6", "png");
     cl->CanvasToPng(TC[5], pngfile);
