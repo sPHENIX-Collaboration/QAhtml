@@ -13,7 +13,7 @@
 #include <iostream>
 #include <sstream>
 
-// ctor/dtor ==================================================================
+// ctor =======================================================================
 
 // ----------------------------------------------------------------------------
 //! Base component constructor
@@ -40,7 +40,95 @@ BaseJetDrawer::BaseJetDrawer(const std::string& name,
   , m_do_debug(debug)
 {}
 
-// protected methods ==========================================================
+// public methods to be implemented ===========================================
+
+// ----------------------------------------------------------------------------
+//! Run drawing for specified triggers and resolution parameters
+// ----------------------------------------------------------------------------
+/*! This method must be implemented by derived components.
+ *  It should code how to loop over the provided the trigger
+ *  and resolution indices.
+ */
+void BaseJetDrawer::Draw(std::vector<uint32_t> /*vecTrigToDraw*/,
+                         std::vector<uint32_t> /*vecResToDraw*/)
+{
+  return;
+}
+
+// ----------------------------------------------------------------------------
+//! Make HTML pages for component
+// ----------------------------------------------------------------------------
+/*! This method must be implemented by derived components.
+ *  It should code how to generate the relevant html pages
+ *  from accumulated plots in `m_plots`.
+ */
+void BaseJetDrawer::MakeHtml()
+{
+  return;
+}
+
+// other public methods =======================================================
+
+// ----------------------------------------------------------------------------
+//! Save plots to file
+// ----------------------------------------------------------------------------
+/*! Helper method to save all plots to a specified file.
+ *  This is useful for debugging and quick testing when
+ *  adjusting plotting details/etc.
+ *
+ *  \param[out] file file to write plots to
+ */
+void BaseJetDrawer::SaveToFile(TFile* file)
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "  -- Saving plots to file:\n"
+              << "       component = " << m_name   << "\n"
+              << "       module    = " << m_module << "\n"
+              << "       file      = " << file->GetName()
+              << std::endl;
+  }
+
+  // check if you can cd into file
+  //   - if not, exit
+  const bool isGoodCD = file->cd();
+  if (!isGoodCD)
+  {
+    if (m_do_debug)
+    {
+      std::cerr << PHWHERE << "WARNING: couldn't cd into output file!" << std::endl;
+    }
+    return;
+  }
+
+  // save & exit 
+  std::size_t nWrite = m_plots.Save();
+  if (m_do_debug)
+  {
+    std::cout << "  -- Saved " << m_name << " plots:\n"
+              << "       "     << nWrite << " plots written."
+              << std::endl;
+  }
+  return;
+}
+
+// protected methods to be implemented ========================================
+
+// ----------------------------------------------------------------------------
+//! Do histogram drawing for a specific trigger + jet resolution combination
+// ----------------------------------------------------------------------------
+/*! This method must be implemented by derived components.
+ *  It should code how to actually draw histograms for a
+ *  specific combination of trigger index and resolution
+ *  index.
+ */
+void BaseJetDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
+{
+  return;
+}
+
+// other protected methods ====================================================
 
 // ----------------------------------------------------------------------------
 //! Draw run and build info on a TPad

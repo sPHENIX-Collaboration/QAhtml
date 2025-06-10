@@ -203,6 +203,27 @@ namespace JetDrawDefs
       }
 
       // ----------------------------------------------------------------------
+      //! Draw and save all plots to current directory
+      // ----------------------------------------------------------------------
+      std::size_t Save()
+      {
+        std::size_t nWrite = 0;
+        for (auto row : m_matrix)
+        {
+          for (auto column : row)
+          {
+            for (auto page : column)
+            {
+              page.canvas->Draw();
+              page.canvas->Write();
+              ++nWrite;
+            }
+          }
+        }
+        return nWrite;
+      }
+
+      // ----------------------------------------------------------------------
       //! Default ctor/dtor
       // ----------------------------------------------------------------------
       PlotPadMatrix()  {};

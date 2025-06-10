@@ -31,9 +31,9 @@ class BaseJetDrawer
     ~BaseJetDrawer() {};
 
     // public methods to be implemented
-    virtual void Draw() {return;}
-    virtual void MakeHtml() {return;}
-    virtual void SaveToFile(TFile* /*file*/) {return;}
+    virtual void Draw(std::vector<uint32_t> vecTrigToRaw,
+                      std::vector<uint32_t> vecResToDraw);
+    virtual void MakeHtml();
 
     // setters
     void SetDoDebug(const bool debug) {m_do_debug = debug;}
@@ -46,6 +46,9 @@ class BaseJetDrawer
     std::string GetName() const {return m_name;}
     std::string GetJetType() const {return m_jet_type;}
     std::string GetHistPrefix() const {return m_hist_prefix;}
+
+    // other public methods
+    void SaveToFile(TFile* file);
 
   protected:
 
@@ -66,6 +69,9 @@ class BaseJetDrawer
 
     ///! matrix of PlotPads (canvas + pads)
     JetDrawDefs::PlotPadMatrix m_plots;
+
+    // protected methods to be implemented
+    virtual void DoDrawing(const uint32_t trig, const uint32_t res);
 
     // other protected methods
     void DrawRunAndBuild(TPad* pad,
