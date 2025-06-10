@@ -1,32 +1,87 @@
-// Derek Anderson <ruse-traveler@github.com>
+// Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #ifndef BASE_JET_DRAWER_H
 #define BASE_JET_DRAWER_H
 
+#include "JetDrawDefs.h"
+
+#include <string>
+
+class TFile;
+
 // ============================================================================
 //! Base class for jet QA components
 // ============================================================================
-/*! Base class to define common functionality across
- *  the different components of the jet QA. Each
- *  jet QA module should have a corresponding
- *  "drawer" class inheriting from this one.
+/*! Abstract base class to define common functionality
+ *  across the different components of the jet QA. Each
+ *  jet QA module should have a corresponding "drawer"
+ *  class inheriting from this one.
  */
 class BaseJetDrawer
 {
 
-  protected:
-
-    /* TODO inheritable things will go here */
-
   public:
 
-    /* TODO common interface things will go here */
-
-    // ------------------------------------------------------------------------
-    //! default ctor/dtor
-    // ------------------------------------------------------------------------
-    BaseJetDrawer()  {};
+    // ctor/dtor
+    BaseJetDrawer(const std::string& name = "Base",
+                  const std::string& modu = "JetDraw",
+                  const std::string& type = "towersub1_antikt",
+                  const std::string& pref = "h_eventwiserho",
+                  const bool debug = false);
     ~BaseJetDrawer() {};
+
+    // public methods to be implemented
+    virtual void Draw() {return;}
+    virtual void MakeHtml() {return;}
+    virtual void SaveToFile(TFile* /*file*/) {return;}
+
+    // setters
+    void SetDoDebug(const bool debug) {m_do_debug = debug;}
+    void SetName(const std::string& name) {m_name = name;}
+    void SetJetType(const std::string& type) {m_jet_type = type;}
+    void SetHistPrefix(const std::string& prefix) {m_hist_prefix = prefix;}
+
+    // getters
+    bool GetDoDebug() const {return m_do_debug;}
+    std::string GetName() const {return m_name;}
+    std::string GetJetType() const {return m_jet_type;}
+    std::string GetHistPrefix() const {return m_hist_prefix;}
+
+  protected:
+
+    ///! name of component
+    std::string m_name;
+
+    ///! module name
+    std::string m_module;
+
+    ///! type of jet input (used in histogram names)
+    std::string m_jet_type;
+
+    ///! prefix of qa histograms
+    std::string m_hist_prefix;
+
+    ///! turn debugging statements on/off
+    bool m_do_debug;
+
+    ///! matrix of PlotPads (canvas + pads)
+    JetDrawDefs::PlotPadMatrix m_plots;
+
+    // other protected methods
+    void DrawRunAndBuild(TPad* pad,
+                         const int trig = -1,
+                         const int res = -1);
+    void DrawHists(const std::vector<std::size_t>& indices,
+                   const JetDrawDefs::VHistAndOpts1D& hists,
+                   const int trig = -1,
+                   const int res = -1);
+    void DrawHistOnPad(const std::size_t iHist,
+                       const std::size_t iPad,
+                       const JetDrawDefs::VHistAndOpts1D& hists,
+                       JetDrawDefs::PlotPads& plot);
+    void DrawEmptyHistogram(const std::string& what = "histogram");
+    void MakeCanvas(const std::string& name, const int nHist);
+    void UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist);
 
 };  // end BaseJetDrawer
 

@@ -26,6 +26,7 @@ jetinclude_HEADERS = \
   JetDrawDefs.h
 
 libqadrawjet_la_SOURCES = \
+  BaseJetDrawer.cc \
   JetDraw.cc 
 
 noinst_PROGRAMS = \
