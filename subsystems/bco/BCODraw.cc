@@ -1,7 +1,5 @@
 #include "BCODraw.h"
-
 #include <sPhenixStyle.C>
-
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADrawDB.h>
 
@@ -18,6 +16,7 @@
 #include <TText.h>
 #include <TPaveText.h>
 #include <TLatex.h>
+#include <TLegend.h>
 
 #include <boost/format.hpp>
 
@@ -48,12 +47,12 @@ int BCODraw::Draw(const std::string &what)
   /* SetsPhenixStyle(); */
   int iret = 0;
   int idraw = 0;
-  if (what == "ALL" || what == "MVTX")
+  if (what == "ALL" || what == "MVTX" || what=="mvtx")
   {
     iret += DrawMVTX();
     idraw++;
   }
-  if (what == "ALL" || what == "INTT")
+  if (what == "ALL" || what == "INTT" || what=="intt")
   {
     iret += DrawINTT();
     idraw++;
@@ -63,7 +62,7 @@ int BCODraw::Draw(const std::string &what)
     iret += DrawTPC();
     idraw++;
   }
-  if (what == "ALL" || what == "TPOT")
+  if (what == "ALL" || what == "TPOT" || what=="ebdc39")
   {
     iret += DrawTPOT();
     idraw++;
@@ -73,6 +72,7 @@ int BCODraw::Draw(const std::string &what)
     std::cout << " Unimplemented Drawing option: " << what << std::endl;
     iret = -1;
   }
+  
   return iret;
 }
 
@@ -85,7 +85,7 @@ int BCODraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("BCO Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  if (num == 0 || num == 2)
+  if (num == 0 || num == 2 || num == 5)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.25, 0.45, 0.75, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
@@ -93,7 +93,7 @@ int BCODraw::MakeCanvas(const std::string &name, int num)
     Pad[num][0]->Draw();
     Pad[num][1]->Draw(); 
   }
-  else if (num == 4 || num == 5)
+  else if (num == 4)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.2, 0.95, 0.8, 0);
 
@@ -295,10 +295,11 @@ int BCODraw::DrawMVTX()
     }
   else
   {
+    std::cout << "DrawMvtx() histogram was missing"<<std::endl;
     // histogram is missing
     return -1;
   }
-     
+  
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
@@ -356,7 +357,7 @@ int BCODraw::DrawINTT()
     float allfeestagged[ninttpackets] = {0};
     float perfee[ninttpackets][14] = {{0}};
     TGraph *grs[ninttpackets];
-    std::cout << "intt gl1 " << inttgl1<<std::endl;
+    
     for(int i=0; i<ninttpackets; i++)
       {
 	allfeestagged[i] = h_allfeestagged[i]->GetEntries();
@@ -372,7 +373,7 @@ int BCODraw::DrawINTT()
 	
 	grs[i] = new TGraph(14,x,perfee[i]);
       }
-    std::cout << "packetallfees"<<std::endl;
+    
     TH1 *packetallfees = new TH1F("inttpacketallfees",";Server;Frac. GL1 Tagged",8,0,8);
     for(int i=0; i<ninttpackets; i++)
       {
@@ -384,14 +385,14 @@ int BCODraw::DrawINTT()
 	MakeCanvas("intt_evt_building_1", 2);
       }
 
-    std::cout << "clear canvas"<<std::endl;
+   
     TC[2]->Clear("D");
     Pad[2][0]->cd();
     gStyle->SetOptStat(0);
     
     packetallfees->GetYaxis()->SetRangeUser(0,1.2);
     packetallfees->DrawCopy("hist");
-    std::cout << "cd next can"<<std::endl;
+    
     Pad[2][1]->cd();
     gStyle->SetOptStat(0);
     
@@ -413,7 +414,7 @@ int BCODraw::DrawINTT()
 	    grs[i]->Draw("psame");
 	  }
       }
-    std::cout << "first mytexts"<<std::endl;
+    
     myText(0.22,0.6,grs[0]->GetMarkerColor(),"Server 0");
     myText(0.22,0.55,grs[1]->GetMarkerColor(),"Server 1");
     myText(0.22,0.5,grs[2]->GetMarkerColor(), "Server 2");
@@ -573,65 +574,85 @@ int BCODraw::DrawTPOT()
 {
   std::cout << "BCO DrawTPOT() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
-
-  auto h_tpotstat = dynamic_cast <TH1 *> (cl->getHisto("h_MicromegasBCOQA_packet_stat"));
-    
-  if (h_tpotstat)
-  {
-    auto h_copy = new TH1F(
-      "h_MicromegasBCOQA_packet_stat_copy",
-      "Matching BCO count per packet",
-      h_tpotstat->GetNbinsX(), h_tpotstat->GetXaxis()->GetXmin(), h_tpotstat->GetXaxis()->GetXmax() );
-
-    h_copy->GetXaxis()->SetTitle(h_tpotstat->GetXaxis()->GetTitle() );
-    for( int i = 0; i < h_tpotstat->GetNbinsX(); ++i )
-    { 
-      h_copy->GetXaxis()->SetBinLabel( i+1, h_tpotstat->GetXaxis()->GetBinLabel(i+1) ); 
-    }
-
-    // normalize
-    auto norm = h_tpotstat->GetBinContent(1);
-
-    for( int i = 0; i < 3; ++i )
-    { 
-      h_copy->SetBinContent( i+1, h_tpotstat->GetBinContent(i+1)/norm ); 
-    }
-
-    h_copy->SetBinContent( 4, h_tpotstat->GetBinContent(4)/norm );
-
-    if (! gROOT->FindObject("tpot_evt_building_1"))
+  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
+  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
+  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
+  auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
+  if (h_waveform_bco_dropped && h_waveform_pool_dropped && h_waveform_total && h_gl1_raw)
     {
-      MakeCanvas("tpot_evt_building_1", 5);
-    }
-    TC[5]->Clear("D");
-    Pad[5][0]->cd();
-    gStyle->SetOptStat(0);
-    h_copy->SetMinimum(0.8);
-    h_copy->GetYaxis()->SetTitle("GL1 trigger fraction" );
-    h_copy->SetFillStyle(1001);
-    h_copy->SetFillColor(kYellow);
-    h_copy->SetStats(false);
-    h_copy->GetYaxis()->SetTitleOffset(1.4);
-    h_copy->DrawCopy("hist");
+      auto h_drop= new TH1F("h_drop", "Drop Rate", 3, 0, 3);
+      h_drop->GetXaxis()->SetBinLabel(1, "5001");
+      h_drop->GetXaxis()->SetBinLabel(2, "5002");
+      h_drop->GetXaxis()->SetBinLabel(3, "all");
+      h_drop->GetXaxis()->SetTitle("Packet");
+      h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
+      h_drop->SetTitle("Fraction of Dropped Waveforms by packet");
 
-    // add information
-    auto text = new TPaveText(0.2, 0.2, 0.5, 0.4, "NDC" );
-    text->SetFillColor(0);
-    text->SetFillStyle(0);
-    text->SetBorderSize(0);
-    text->SetTextAlign(11);
-    text->AddText( (boost::format( "Runnumber: %i") % cl->RunNumber() ).str().c_str() );
-    text->AddText( (boost::format("build: %s") % cl->build()).str().c_str() );
-    text->AddText( (boost::format( "Triggers: %.3g") % double(norm) ).str().c_str() );
-    text->Draw();
-    gPad->SetLeftMargin(0.15);     
-  }
+      h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/h_waveform_total->GetBinContent(1));
+      h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/h_waveform_total->GetBinContent(2));
+      h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(h_waveform_total->GetBinContent(1)+h_waveform_total->GetBinContent(2)) );
+      
+      auto h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
+      h_gl1->GetXaxis()->SetBinLabel(1, "5001");
+      h_gl1->GetXaxis()->SetBinLabel(2, "5002");
+      h_gl1->GetXaxis()->SetBinLabel(3, "all");
+
+      h_gl1->SetBinContent(3,double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
+      h_gl1->SetBinContent(2,double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
+      h_gl1->SetBinContent(1,double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
+
+      if (! gROOT->FindObject("tpot_evt_building_1"))
+	{
+	  MakeCanvas("tpot_evt_building_1", 5);
+	}
+      TC[5]->Clear("D");
+      Pad[5][0]->cd();
+      h_drop->SetMinimum(0);
+      h_drop->SetMaximum(1.6);
+      h_drop->SetFillColor(42);
+      h_drop->SetFillStyle(3002);
+      h_drop->DrawCopy();
+
+      TLegend* legend_drop = new TLegend(0.56, 0.6, 0.85, 0.84);
+      legend_drop->SetHeader("Values", "C");
+      legend_drop->SetTextSize(0.045);
+      legend_drop->SetBorderSize(0);
+      legend_drop->SetFillStyle(0);
+
+      for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
+	{
+	  legend_drop->AddEntry((TObject*)0, Form("%s: %.4f", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
+	}
+      legend_drop->Draw();
+      
+      Pad[5][1]->cd();
+      h_gl1->GetXaxis()->SetTitle("Packet");
+      h_gl1->GetYaxis()->SetTitle("Match Rate");
+      h_gl1->SetTitle("Matching Tagger Rate by packet");
+      h_gl1->SetFillColor(42);
+      h_gl1->SetFillStyle(3002);
+      h_gl1->SetMinimum(0);
+      h_gl1->SetMaximum(1.6);
+      h_gl1->DrawCopy();
+      
+      auto legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
+      legend_gl1->SetHeader("Values", "C");
+      legend_gl1->SetTextSize(0.045);
+      legend_gl1->SetBorderSize(0);
+      legend_gl1->SetFillStyle(0);
+
+      for (int i = 1; i <= h_gl1->GetNbinsX(); ++i)
+	{
+	  legend_gl1->AddEntry((TObject*)0, Form("%s: %.4f", h_gl1->GetXaxis()->GetBinLabel(i), h_gl1->GetBinContent(i)), "");
+	}
+      legend_gl1->Draw();
+    }
   else
-  {
-    // histogram is missing
-    return -1;
-  }
-     
+    {
+      // histogram is missing
+      return -1;
+    }
+
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
@@ -645,11 +666,10 @@ int BCODraw::DrawTPOT()
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
   
   TC[5]->Update();
-   
   std::cout << "DrawTPOT Ending" << std::endl;
   return 0;
 }
- 
+
 int BCODraw::MakeHtml(const std::string &what)
 {
   int iret = Draw(what);
@@ -662,12 +682,12 @@ int BCODraw::MakeHtml(const std::string &what)
   std::string pngfile;
 
   // Register the canvas png file to the menu and produces the png file.
-  if (what == "ALL" || what == "MVTX")
+  if (what == "ALL" || what == "MVTX" || what=="mvtx")
   {
     pngfile = cl->htmlRegisterPage(*this, "mvtx_evt_building_1", "1", "png");
     cl->CanvasToPng(TC[0], pngfile);
   }
-  if (what == "ALL" || what == "INTT")
+  if (what == "ALL" || what == "INTT" || what=="intt")
   {
     pngfile = cl->htmlRegisterPage(*this, "intt_evt_building_1", "3", "png");
     cl->CanvasToPng(TC[2], pngfile);
@@ -678,7 +698,7 @@ int BCODraw::MakeHtml(const std::string &what)
     pngfile = cl->htmlRegisterPage(*this, "tpc_evt_building_1", "5", "png");
     cl->CanvasToPng(TC[4], pngfile);
   }
-  if (what == "ALL" || what == "TPOT")
+  if (what == "ALL" || what == "TPOT" || what=="ebdc39")
   {
     pngfile = cl->htmlRegisterPage(*this, "tpot_evt_building_1", "6", "png");
     cl->CanvasToPng(TC[5], pngfile);

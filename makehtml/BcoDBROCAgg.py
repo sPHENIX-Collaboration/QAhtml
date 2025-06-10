@@ -9,8 +9,9 @@ import argparse
 import hashlib
 
 NROCS = [1,6,8,24]
+NENDPOINTS=[1,1,1,2]
 nsubsys = 4
-hist_types = ["HIST_DST_STREAMING_EVENT_TPOT","HIST_DST_STREAMING_EVENT_MVTX", "HIST_DST_STREAMING_EVENT_INTT","HIST_DST_STREAMING_EVENT_TPC"]
+hist_types = ["HIST_DST_STREAMING_EVENT_ebdc39","HIST_DST_STREAMING_EVENT_mvtx", "HIST_DST_STREAMING_EVENT_intt","HIST_DST_STREAMING_EVENT_ebdc"]
 
 runtypes = ["_run3auau"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
@@ -56,30 +57,38 @@ def main():
     for runtype in runtypes:
         for subsystemID in range(nsubsys):
             nrocs = NROCS[subsystemID]
+            neps = NENDPOINTS[subsystemID]
             hist = hist_types[subsystemID]
             # just use the 0th one to get the run/db range once per subsystem instead of for each ROC
-            dummyhisttype = hist+"0"
-            if hist.find("TPC") != -1:
-                dummyhisttype = hist+"00"
-            if hist.find("TPOT") != -1:
-                dummyhisttype = hist
+            dummyhisttype = ""
+            if hist.find("mvtx") != -1 or hist.find("intt") != -1:
+                dummyhisttype = hist+"0_0"
+            if hist.find("ebdc39") != -1:
+                dummyhisttype = hist+"_0"
+            elif hist.find("ebdc") != -1:
+                dummyhisttype = hist + "00_0"
+            print("Checking dummyhsttype " + dummyhisttype)
             for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype):
                 
-                if run < 59000:
+                if run < 64000:
                     continue
                 if args.verbose:
                     print("Checking run " + str(run))
                 filesToAdd = []
                 for ROC in range(nrocs):
-                    histtype = hist
-                    if hist.find("TPOT") == -1:
-                        histtype = hist+str(ROC)
-                    if hist.find("TPC") != -1:
-                        histtype = hist+"{:02d}".format(ROC)
-                    histtype += runtype
-                    thisfile = get_aggregated_file(FCReadCursor, histtype, run)
-                    if len(thisfile) > 0:
-                        filesToAdd.append(thisfile)
+                    for EP in range(neps):
+                        histtype = hist
+                        if hist.find("ebdc39") != -1:
+                            histtype = hist+"_"+str(EP)
+                        elif hist.find("ebdc") != -1:
+                            histtype = hist+"{:02d}".format(ROC)+"_"+str(EP)
+                        else:
+                            histtype = hist+str(ROC)+"_"+str(EP)
+                        
+                        histtype += runtype
+                        thisfile = get_aggregated_file(FCReadCursor, histtype, run)
+                        if len(thisfile) > 0:
+                            filesToAdd.append(thisfile)
                 if args.verbose :
                     print("files to add is:")
                     print(filesToAdd)
@@ -154,6 +163,7 @@ def main():
                     print("for lfn: " + lfn)
                     print("ROCs available: ")
                     print(filesToAdd)
+                    continue
                 if args.verbose:
                     print("executing command for "+str(len(filesToAdd)) + " files")
                     print(command)
