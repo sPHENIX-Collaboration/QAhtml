@@ -23,8 +23,6 @@ parser.add_argument("-t","--test",help="run a verbose test without actually aggr
 args = parser.parse_args()
 if args.test and not args.verbose:
     args.verbose = True
-args.verbose = True
-args.test = True
 print("Verbose is " + str(args.verbose))
 print("Test is " + str(args.test))
 
