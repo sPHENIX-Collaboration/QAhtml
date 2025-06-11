@@ -246,6 +246,6 @@ class JetCstDrawer : public BaseJetdrawer
       return;
     }
 
-};  // end EventRhoDrawer
+};  // end JetCstDrawer
 
 #endif

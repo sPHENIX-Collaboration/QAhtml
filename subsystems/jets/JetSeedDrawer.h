@@ -1,0 +1,238 @@
+// Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
+
+#ifndef JET_SEED_DRAWER_H
+#define JET_SEED_DRAWER_H
+
+#include "BaseJetDrawer.h"
+
+// ============================================================================
+//! Drawer for Jet Seeds
+// ============================================================================
+/*! Class to draw histograms produced by the JetSeedCount module
+ */
+class JetSeedDrawer : public BaseJetdrawer
+{
+  public:
+
+    // ------------------------------------------------------------------------
+    //! Default ctor
+    // ------------------------------------------------------------------------
+    JetSeedDrawer(const std::string& name = "JetSeed",
+                  const std::string& modu = "JetDraw",
+                  const std::string& type = "towersub1_antikt",
+                  const std::string& pref = "h_jetseedcount",
+                  const bool debug = false)
+      : BaseJetDrawer(name, modu, type, pref, debug) {};
+
+    // ------------------------------------------------------------------------
+    //! Default dtor
+    // ------------------------------------------------------------------------
+    ~JetSeedDrawer() {};
+
+    // ------------------------------------------------------------------------
+    //! Run histogram drawing for each trigger and resolution
+    // ------------------------------------------------------------------------
+    int Draw(const std::vector<uint32_t> vecTrigToDraw,
+             const std::vector<uint32_t> vecResToDraw) override
+    {
+      // emit debugging message
+      if (m_do_debug)
+      {
+        std::cout << "  -- Drawing component " << m_name << std::endl;
+      }
+
+      // loop over resolutions
+      int nDraw = 0;
+      for (const uint32_t resToDraw : vecResToDraw)
+      {
+        // add a row for resolution
+        m_plots.AddRow();
+
+        // now loop over triggers
+        for (const uint32_t trigToDraw : vecTrigToDraw)
+        {
+          // add a column for trigger and draw hists
+          m_plots.AddColumn();
+          DoDrawing(trigToDraw, resToDraw);
+          ++nDraw;
+        }
+      }
+      return nDraw;
+    }
+
+    // ------------------------------------------------------------------------
+    //! Generate HTML pages for each trigger and resolution
+    // ------------------------------------------------------------------------
+    int MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
+                 const std::vector<uint32_t> vecResToDraw) override
+    {
+      // emit debugging messages
+      if (m_do_debug)
+      {
+        std::cout << "  -- Creating HTML pages for " << m_name << std::endl;
+      }
+
+      // instantiate draw client
+      QADrawClient* cl = QADrawClient::instance();
+
+      // loop over resolutions and triggers
+      for (std::size_t iRes = 0; iRes < vecResToDraw; ++iRes)
+      {
+
+        // now loop over triggers
+        for (std::size_t iTrig = 0; iTrig < vecTrigToDraw; ++iTrig)
+        {
+          // grab index & name of trigger being drawn
+          const uint32_t idTrig = vecTrigToDraw[iTrig];
+          const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
+
+          // grab index & name of resolution being drawn
+          const uint32_t idRes = m_vecResToDraw[iRes];
+          const std::string nameRes = m_mapResToName[idRes];
+          const std::string dirRes = nameTrig + "/" + nameRes;
+          const std::string fileRes = nameTrig + "_" + nameRes;
+
+          // draw seed plots
+          for (const auto& seed : m_plots.GetPlotPads(iRes, iTrig))
+          {
+            const std::string nameSeed = seed.canvas->GetName();
+            const std::string dirSeed = dirRes + "JetSeeds/" + nameSeed;
+            const std::string pngSeed = cl->htmlRegisterPage(*this, dirSeed, nameSeed, "png");
+            cl->CanvasToPng(seed.canvas, pngSeed);
+          }
+        }
+      }
+      return 0;
+    }
+
+  private:
+
+    // ------------------------------------------------------------------------
+    //! Draw histograms for a given trigger and resolution
+    // ------------------------------------------------------------------------
+    void DoDrawing(const uint32_t trig, const uint32_t res) override
+    {
+      // emit debugging message
+      if (m_do_debug)
+      {
+        switch (res)
+        {
+          case JetDrawDefs::JetRes::R02:
+            std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.2)" << std::endl;
+            break;
+          case JetDrawDefs::JetRes::R03:
+            std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.3)" << std::endl;
+            break;
+          case JetDrawDefs::JetRes::R04:
+            std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.4)" << std::endl;
+            break;
+          case JetDrawDefs::JetRes::R05:
+            std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.5)" << std::endl;
+            break;
+          default:
+            std::cerr << "Warning: trying to draw jet seed histograms with Unknown resolution" << std::endl;
+            return;
+        }
+      }
+
+      // for seed hist names
+      const std::string seedHistName = m_seed_prefix + "_" + m_mapTrigToTag[trig] + "_" + m_jet_type + "_" + m_mapResToTag[res];
+
+      // connect to draw client
+      QADrawClient* cl = QADrawClient::instance();
+
+      // grab histograms to draw and set options
+      JetDrawDefs::VHistAndOpts1D seedHists = {
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawetavsphi")),
+          "Raw Seed #eta vs #phi",
+          "Seed #eta_{raw} [Rads.]",
+          "Seed #phi_{raw} [Rads.]",
+          "Counts",
+          0.25,
+          false,
+          true
+        },
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawpt")),
+          "Raw Seed p_{T}",
+          "Seed p_{T,raw} [GeV/c]",
+          "Counts",
+          "",
+          0.25,
+          true,
+          false
+        },
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawptall")),
+          "Raw Seed p_{T} (all jet seeds)",
+          "Seed p_{T,raw} [GeV/c]",
+          "Counts",
+          "",
+          0.25,
+          true,
+          false
+        },
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawseedcount")),
+          "Raw Seed Count per Event",
+          "N Seed per Event",
+          "Counts",
+          "",
+          0.25,
+          true,
+          false
+        },
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subetavsphi")),
+          "Subtracted Seed #eta vs #phi",
+          "Seed #eta_{sub} [Rads.]",
+          "Seed #phi_{sub} [Rads.]",
+          "Counts",
+          0.25,
+          false,
+          true
+        },
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subpt")),
+          "Subtracted Seed p_{T}",
+          "Seed p_{T,sub} [GeV/c]",
+          "Counts",
+          "",
+          0.25,
+          true,
+          false
+        },
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subptall")),
+          "Subtracted Seed p_{T} (all jet seeds)",
+          "Seed p_{T,sub} [GeV/c]",
+          "Counts",
+          "",
+          0.25,
+          true,
+          false
+        },
+        {
+          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subseedcount")),
+          "Subtracted Seed Count per Event",
+          "N Seed per Event",
+          "Counts",
+          "",
+          0.25,
+          true,
+          false
+        }
+      };
+
+      // draw raw seed hists
+      DrawHists("JetSeeds_Raw", {0, 1, 2, 3}, seedHists, m_plots.GetBackPlotPad(), trig, res);
+
+      // draw subtracted seed hists
+      DrawHists("JetSeeds_Sub", {4, 5, 6, 7}, seedHists, m_plots.GetBackPlotPad(), trig, res);
+      return;
+    }
+
+};  // end JetSeedDrawer
+
+#endif

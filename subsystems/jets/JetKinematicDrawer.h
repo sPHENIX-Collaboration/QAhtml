@@ -8,7 +8,7 @@
 // ============================================================================
 //! Drawer for Jet Kinematics
 // ============================================================================
-/*! Class to draw histograms produced by the ConstituentsinJets module
+/*! Class to draw histograms produced by the JetKinematicCheck module
  */
 class JetKinematicDrawer : public BaseJetdrawer
 {
@@ -87,7 +87,7 @@ class JetKinematicDrawer : public BaseJetdrawer
           const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
 
           // grab index & name of resolution being drawn
-          const uint32_t idRes = m_vecResToDraw[iResToDraw];
+          const uint32_t idRes = m_vecResToDraw[iRes];
           const std::string nameRes = m_mapResToName[idRes];
           const std::string dirRes = nameTrig + "/" + nameRes;
           const std::string fileRes = nameTrig + "_" + nameRes;
@@ -117,17 +117,17 @@ class JetKinematicDrawer : public BaseJetdrawer
       {
         switch (res)
         {
-          case R02:
-            std::cout << "Drawing jet kinematic histograms (trig = " << trig << ", R = 0.2)" << std::endl;
+          case JetDrawDefs::JetRes::R02:
+            std::cout << "  -- Drawing jet kinematic histograms (trig = " << trig << ", R = 0.2)" << std::endl;
             break;
-          case R03:
-            std::cout << "Drawing jet kinematic histograms (trig = " << trig << ", R = 0.3)" << std::endl;
+          case JetDrawDefs::JetRes::R03:
+            std::cout << "  -- Drawing jet kinematic histograms (trig = " << trig << ", R = 0.3)" << std::endl;
             break;
-          case R04:
-            std::cout << "Drawing jet kinematic histograms (trig = " << trig << ", R = 0.4)" << std::endl;
+          case JetDrawDefs::JetRes::R04:
+            std::cout << "  -- Drawing jet kinematic histograms (trig = " << trig << ", R = 0.4)" << std::endl;
             break;
-          case R05:
-            std::cout << "Drawing jet kinematic histograms (trig = " << trig << ", R = 0.5)" << std::endl;
+          case JetDrawDefs::JetRes::R05:
+            std::cout << "  -- Drawing jet kinematic histograms (trig = " << trig << ", R = 0.5)" << std::endl;
             break;
           default:
             std::cerr << "Warning: trying to draw jet kinemtic histograms for Unknown resolution" << std::endl;
@@ -215,6 +215,6 @@ class JetKinematicDrawer : public BaseJetdrawer
       return;
     }
 
-};  // end EventRhoDrawer
+};  // end JetKinematicDrawer
 
 #endif
