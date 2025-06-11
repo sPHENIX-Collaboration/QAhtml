@@ -25,7 +25,8 @@ jetinclude_HEADERS = \
   EventRhoDrawer.h \
   JetCstDrawer.h \
   JetDraw.h \
-  JetDrawDefs.h
+  JetDrawDefs.h \
+  JetKinematicDrawer.h
 
 libqadrawjet_la_SOURCES = \
   BaseJetDrawer.cc \
