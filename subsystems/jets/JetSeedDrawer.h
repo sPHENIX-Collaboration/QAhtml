@@ -4,13 +4,14 @@
 #define JET_SEED_DRAWER_H
 
 #include "BaseJetDrawer.h"
+#include <qahtml/QADrawClient.h>
 
 // ============================================================================
 //! Drawer for Jet Seeds
 // ============================================================================
 /*! Class to draw histograms produced by the JetSeedCount module
  */
-class JetSeedDrawer : public BaseJetdrawer
+class JetSeedDrawer : public BaseJetDrawer
 {
   public:
 
@@ -64,7 +65,8 @@ class JetSeedDrawer : public BaseJetdrawer
     //! Generate HTML pages for each trigger and resolution
     // ------------------------------------------------------------------------
     int MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
-                 const std::vector<uint32_t> vecResToDraw) override
+                 const std::vector<uint32_t> vecResToDraw,
+                 const QADraw& subsystem) override
     {
       // emit debugging messages
       if (m_do_debug)
@@ -76,29 +78,28 @@ class JetSeedDrawer : public BaseJetdrawer
       QADrawClient* cl = QADrawClient::instance();
 
       // loop over resolutions and triggers
-      for (std::size_t iRes = 0; iRes < vecResToDraw; ++iRes)
+      for (std::size_t iRes = 0; iRes < vecResToDraw.size(); ++iRes)
       {
-
         // now loop over triggers
-        for (std::size_t iTrig = 0; iTrig < vecTrigToDraw; ++iTrig)
+        for (std::size_t iTrig = 0; iTrig < vecTrigToDraw.size(); ++iTrig)
         {
           // grab index & name of trigger being drawn
           const uint32_t idTrig = vecTrigToDraw[iTrig];
           const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
 
           // grab index & name of resolution being drawn
-          const uint32_t idRes = m_vecResToDraw[iRes];
-          const std::string nameRes = m_mapResToName[idRes];
+          const uint32_t idRes = vecResToDraw[iRes];
+          const std::string nameRes = JetDrawDefs::MapResToName().at(idRes);
           const std::string dirRes = nameTrig + "/" + nameRes;
           const std::string fileRes = nameTrig + "_" + nameRes;
 
-          // draw seed plots
-          for (const auto& seed : m_plots.GetPlotPads(iRes, iTrig))
+          // make html pages
+          for (const auto& plot : m_plots.GetVecPlotPads(iRes, iTrig))
           {
-            const std::string nameSeed = seed.canvas->GetName();
-            const std::string dirSeed = dirRes + "JetSeeds/" + nameSeed;
-            const std::string pngSeed = cl->htmlRegisterPage(*this, dirSeed, nameSeed, "png");
-            cl->CanvasToPng(seed.canvas, pngSeed);
+            const std::string name = plot.canvas->GetName();
+            const std::string dir = dirRes + "/JetSeeds/" + name;
+            const std::string png = cl->htmlRegisterPage(subsystem, dir, name, "png");
+            cl->CanvasToPng(plot.canvas, png);
           }
         }
       }
@@ -136,15 +137,21 @@ class JetSeedDrawer : public BaseJetdrawer
       }
 
       // for seed hist names
-      const std::string seedHistName = m_seed_prefix + "_" + m_mapTrigToTag[trig] + "_" + m_jet_type + "_" + m_mapResToTag[res];
+      const std::string histName = m_hist_prefix
+                                 + "_"
+                                 + JetDrawDefs::MapTrigToTag().at(trig)
+                                 + "_"
+                                 + m_jet_type
+                                 + "_"
+                                 + JetDrawDefs::MapResToTag().at(res);
 
       // connect to draw client
       QADrawClient* cl = QADrawClient::instance();
 
       // grab histograms to draw and set options
-      JetDrawDefs::VHistAndOpts1D seedHists = {
+      JetDrawDefs::VHistAndOpts1D hists = {
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawetavsphi")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_rawetavsphi")),
           "Raw Seed #eta vs #phi",
           "Seed #eta_{raw} [Rads.]",
           "Seed #phi_{raw} [Rads.]",
@@ -154,7 +161,7 @@ class JetSeedDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawpt")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_rawpt")),
           "Raw Seed p_{T}",
           "Seed p_{T,raw} [GeV/c]",
           "Counts",
@@ -164,7 +171,7 @@ class JetSeedDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawptall")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_rawptall")),
           "Raw Seed p_{T} (all jet seeds)",
           "Seed p_{T,raw} [GeV/c]",
           "Counts",
@@ -174,7 +181,7 @@ class JetSeedDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_rawseedcount")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_rawseedcount")),
           "Raw Seed Count per Event",
           "N Seed per Event",
           "Counts",
@@ -184,7 +191,7 @@ class JetSeedDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subetavsphi")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_subetavsphi")),
           "Subtracted Seed #eta vs #phi",
           "Seed #eta_{sub} [Rads.]",
           "Seed #phi_{sub} [Rads.]",
@@ -194,7 +201,7 @@ class JetSeedDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subpt")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_subpt")),
           "Subtracted Seed p_{T}",
           "Seed p_{T,sub} [GeV/c]",
           "Counts",
@@ -204,7 +211,7 @@ class JetSeedDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subptall")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_subptall")),
           "Subtracted Seed p_{T} (all jet seeds)",
           "Seed p_{T,sub} [GeV/c]",
           "Counts",
@@ -214,7 +221,7 @@ class JetSeedDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(seedHistName + "_subseedcount")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_subseedcount")),
           "Subtracted Seed Count per Event",
           "N Seed per Event",
           "Counts",
@@ -226,10 +233,10 @@ class JetSeedDrawer : public BaseJetdrawer
       };
 
       // draw raw seed hists
-      DrawHists("JetSeeds_Raw", {0, 1, 2, 3}, seedHists, m_plots.GetBackPlotPad(), trig, res);
+      DrawHists("JetSeeds_Raw", {0, 1, 2, 3}, hists, trig, res);
 
       // draw subtracted seed hists
-      DrawHists("JetSeeds_Sub", {4, 5, 6, 7}, seedHists, m_plots.GetBackPlotPad(), trig, res);
+      DrawHists("JetSeeds_Sub", {4, 5, 6, 7}, hists, trig, res);
       return;
     }
 

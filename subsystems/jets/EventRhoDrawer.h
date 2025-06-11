@@ -4,13 +4,14 @@
 #define EVENT_RHO_DRAWER_H
 
 #include "BaseJetDrawer.h"
+#include <qahtml/QADrawClient.h>
 
 // ============================================================================
 //! Drawer for Event-Wise Rho
 // ============================================================================
 /*! Class to draw histograms produced by the RhosinEvent module
  */
-class EventRhoDrawer : public BaseJetdrawer
+class EventRhoDrawer : public BaseJetDrawer
 {
   public:
 
@@ -59,7 +60,8 @@ class EventRhoDrawer : public BaseJetdrawer
     //! Generate HTML pages for each trigger
     // ------------------------------------------------------------------------
     int MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
-                 const std::vector<uint32_t> /*vecResToDraw*/) override
+                 const std::vector<uint32_t> /*vecResToDraw*/,
+                 const QADraw& subsystem) override
     {
       // emit debugging messages
       if (m_do_debug)
@@ -74,16 +76,16 @@ class EventRhoDrawer : public BaseJetdrawer
       for (std::size_t iTrig = 0; iTrig < vecTrigToDraw.size(); ++iTrig)
       {
         // grab index & name of trigger being drawn
-        const uint32_t idTrig   = vecTrigToDraw[iTrig];
+        const uint32_t idTrig = vecTrigToDraw[iTrig];
         const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
 
-        // make an html page for each plot
-        for (const auto& rho : m_plots.GetVecPlotPads(0, iTrig))
+        // make html pages
+        for (const auto& plot : m_plots.GetVecPlotPads(0, iTrig))
         {
-          const std::string name = rho.canvas->GetName();
-          const std::string dirRho  = nameTrig + "/" + nameRho;
-          const std::string pngRho  = cl->htmlRegisterPage(*this, dirRho, nameRho, "png");
-          cl->CanvasToPng(rho.canvas, pngRho);
+          const std::string name = plot.canvas->GetName();
+          const std::string dir = nameTrig + "/" + name;
+          const std::string png = cl->htmlRegisterPage(subsystem, dir, name, "png");
+          cl->CanvasToPng(plot.canvas, png);
         }
       }
 
@@ -105,15 +107,17 @@ class EventRhoDrawer : public BaseJetdrawer
       }
 
       // for rho histogram names
-      const std::string rhoHistName = m_hist_prefix + "_" + JetDrawDefs::MapTrigToTag[trig];
+      const std::string histName = m_hist_prefix
+                                 + "_"
+                                 + JetDrawDefs::MapTrigToTag().at(trig);
 
       // connect to draw client
       QADrawClient* cl = QADrawClient::instance();
 
       // grab histograms to draw and set options
-      JetDrawDefs::VHistAndOpts1D rhoHists = {
+      JetDrawDefs::VHistAndOpts1D hists = {
         {
-          dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_rhoarea")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_rhoarea")),
           "Rho, Area Method",
           "#rho_{area}",
           "Counts",
@@ -123,7 +127,7 @@ class EventRhoDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_rhomult")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_rhomult")),
           "Rho, Multiplicity Method",
           "#rho_{mult}",
           "Counts",
@@ -133,7 +137,7 @@ class EventRhoDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_sigmaarea")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_sigmaarea")),
           "Sigma, Area Method",
           "#sigma_{area}",
           "Counts",
@@ -143,7 +147,7 @@ class EventRhoDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(rhoHistName + "_sigmamult")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_sigmamult")),
           "Sigma, Multiplicity Method",
           "#sigma_{mult}",
           "Counts",
@@ -155,7 +159,7 @@ class EventRhoDrawer : public BaseJetdrawer
       };
 
       // draw rho plots on one page
-      DrawHists("EvtRho", {0, 1, 2, 3}, rhoHists, trig);
+      DrawHists("EvtRho", {0, 1, 2, 3}, hists, trig);
       return;
     }
 

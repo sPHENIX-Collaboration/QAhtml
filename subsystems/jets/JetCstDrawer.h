@@ -4,13 +4,14 @@
 #define JET_CST_DRAWER_H
 
 #include "BaseJetDrawer.h"
+#include <qahtml/QADrawClient.h>
 
 // ============================================================================
 //! Drawer for Calorimeter Jet Contituents
 // ============================================================================
 /*! Class to draw histograms produced by the ConstituentsinJets module
  */
-class JetCstDrawer : public BaseJetdrawer
+class JetCstDrawer : public BaseJetDrawer
 {
   public:
 
@@ -64,7 +65,8 @@ class JetCstDrawer : public BaseJetdrawer
     //! Generate HTML pages for each trigger and resolution
     // ------------------------------------------------------------------------
     int MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
-                 const std::vector<uint32_t> vecResToDraw) override
+                 const std::vector<uint32_t> vecResToDraw,
+                 const QADraw& subsystem) override
     {
       // emit debugging messages
       if (m_do_debug)
@@ -76,29 +78,28 @@ class JetCstDrawer : public BaseJetdrawer
       QADrawClient* cl = QADrawClient::instance();
 
       // loop over resolutions and triggers
-      for (std::size_t iRes = 0; iRes < vecResToDraw; ++iRes)
+      for (std::size_t iRes = 0; iRes < vecResToDraw.size(); ++iRes)
       {
-
         // now loop over triggers
-        for (std::size_t iTrig = 0; iTrig < vecTrigToDraw; ++iTrig)
+        for (std::size_t iTrig = 0; iTrig < vecTrigToDraw.size(); ++iTrig)
         {
           // grab index & name of trigger being drawn
           const uint32_t idTrig = vecTrigToDraw[iTrig];
           const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
 
           // grab index & name of resolution being drawn
-          const uint32_t idRes = m_vecResToDraw[iRes];
+          const uint32_t idRes = vecResToDraw[iRes];
           const std::string nameRes = JetDrawDefs::MapResToName().at(idRes);
           const std::string dirRes = nameTrig + "/" + nameRes;
           const std::string fileRes = nameTrig + "_" + nameRes;
 
-          // draw constituent plots 
-          for (const auto& cst : m_plots.GetVecPlotPads(iRes, iTrg);
+          // make html pages
+          for (const auto& plot : m_plots.GetVecPlotPads(iRes, iTrig))
           {
-            const std::string nameCst = cst.canvas->GetName();
-            const std::string dirCst  = dirRes + "/Constituents/" + nameCst;
-            const std::string pngCst  = cl->htmlRegisterPage(*this, dirCst, nameCst, "png");
-            cl->CanvasToPng(cst.canvas, pngCst);
+            const std::string name = plot.canvas->GetName();
+            const std::string dir = dirRes + "/Constituents/" + name;
+            const std::string png = cl->htmlRegisterPage(subsystem, dir, name, "png");
+            cl->CanvasToPng(plot.canvas, png);
           }
         }
       }
@@ -136,15 +137,21 @@ class JetCstDrawer : public BaseJetdrawer
       }
 
       // for constituent hist names
-      const std::string cstHistName = m_constituent_prefix + "_" + m_mapTrigToTag[trigToDraw] + "_" + m_jet_type + "_" + m_mapResToTag[resToDraw];
+      const std::string histName = m_hist_prefix
+                                 + "_"
+                                 + JetDrawDefs::MapTrigToTag().at(trig)
+                                 + "_"
+                                 + m_jet_type
+                                 + "_"
+                                 + JetDrawDefs::MapResToTag().at(res);
 
       // connect to draw client
       QADrawClient* cl = QADrawClient::instance();
 
       // grab histograms to draw and set options
-      JetDrawDefs::VHistAndOpts1D cstHists = {
+      JetDrawDefs::VHistAndOpts1D hists = {
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_cemc")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_cemc")),
           "Jet N Constituents in CEMC",
           "N Constituents",
           "Counts",
@@ -154,7 +161,7 @@ class JetCstDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_ihcal")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_ihcal")),
           "Jet N Constituents in IHCal",
           "N Constituents",
           "Counts",
@@ -164,7 +171,7 @@ class JetCstDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_ohcal")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_ohcal")),
           "Jet N Constituents in OHCal",
           "N Constituents",
           "Counts",
@@ -174,7 +181,7 @@ class JetCstDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncsts_total")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_total")),
           "Jet N Constituents",
           "N Constituents",
           "Counts",
@@ -184,7 +191,7 @@ class JetCstDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_ncstsvscalolayer")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_ncstsvscalolayer")),
           "Jet N Constituents vs Calo Layer",
           "Calo Layer",
           "N Constituents",
@@ -194,7 +201,7 @@ class JetCstDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjet_cemc")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_cemc")),
           "Jet E Fraction in CEMC",
           "Jet E Fraction",
           "Counts",
@@ -204,7 +211,7 @@ class JetCstDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjet_ihcal")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_ihcal")),
           "Jet E Fraction in IHCal",
           "Jet E Fraction",
           "Counts",
@@ -214,7 +221,7 @@ class JetCstDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjet_ohcal")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_ohcal")),
           "Jet E Fraction in OHCal",
           "Jet E Fraction",
           "Counts",
@@ -224,7 +231,7 @@ class JetCstDrawer : public BaseJetdrawer
           false
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(cstHistName + "_efracjetvscalolayer")),
+          dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjetvscalolayer")),
           "Jet E Fraction vs Calo Layer",
           "Calo Layer",
           "Jet E Fraction",
@@ -236,13 +243,13 @@ class JetCstDrawer : public BaseJetdrawer
       };
 
       // draw 1d ncst hists on a page
-      DrawHists("JetCsts_NCsts", {0, 1, 2, 3}, cstHists, trig, res);
+      DrawHists("JetCsts_NCsts", {0, 1, 2, 3}, hists, trig, res);
 
       // draw e fraction on a page
-      DrawHists("JetCsts_EFrac", {5, 6, 7}, cstHists, trig, res);
+      DrawHists("JetCsts_EFrac", {5, 6, 7}, hists, trig, res);
 
       // draw ncst and e faction vs. calo layer on a page
-      DrawHists("JetCsts_VsCaloLayer", {4, 8}, cstHists, trig, res);
+      DrawHists("JetCsts_VsCaloLayer", {4, 8}, hists, trig, res);
       return;
     }
 

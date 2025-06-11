@@ -4,13 +4,14 @@
 #define JET_KINEMATIC_DRAWER_H
 
 #include "BaseJetDrawer.h"
+#include <qahtml/QADrawClient.h>
 
 // ============================================================================
 //! Drawer for Jet Kinematics
 // ============================================================================
 /*! Class to draw histograms produced by the JetKinematicCheck module
  */
-class JetKinematicDrawer : public BaseJetdrawer
+class JetKinematicDrawer : public BaseJetDrawer
 {
   public:
 
@@ -64,7 +65,8 @@ class JetKinematicDrawer : public BaseJetdrawer
     //! Generate HTML pages for each trigger and resolution
     // ------------------------------------------------------------------------
     int MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
-                 const std::vector<uint32_t> vecResToDraw) override
+                 const std::vector<uint32_t> vecResToDraw,
+                 const QADraw& subsystem) override
     {
       // emit debugging messages
       if (m_do_debug)
@@ -76,29 +78,28 @@ class JetKinematicDrawer : public BaseJetdrawer
       QADrawClient* cl = QADrawClient::instance();
 
       // loop over resolutions and triggers
-      for (std::size_t iRes = 0; iRes < vecResToDraw; ++iRes)
+      for (std::size_t iRes = 0; iRes < vecResToDraw.size(); ++iRes)
       {
-
         // now loop over triggers
-        for (std::size_t iTrig = 0; iTrig < vecTrigToDraw; ++iTrig)
+        for (std::size_t iTrig = 0; iTrig < vecTrigToDraw.size(); ++iTrig)
         {
           // grab index & name of trigger being drawn
           const uint32_t idTrig = vecTrigToDraw[iTrig];
           const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
 
           // grab index & name of resolution being drawn
-          const uint32_t idRes = m_vecResToDraw[iRes];
-          const std::string nameRes = m_mapResToName[idRes];
+          const uint32_t idRes = vecResToDraw[iRes];
+          const std::string nameRes = JetDrawDefs::MapResToName().at(idRes);
           const std::string dirRes = nameTrig + "/" + nameRes;
           const std::string fileRes = nameTrig + "_" + nameRes;
 
-          // draw kinematic plots 
-          for (const auto& kine : m_plots.GetPlotPads(iRes, iTrg))
+          // make html pages
+          for (const auto& plot : m_plots.GetVecPlotPads(iRes, iTrig))
           {
-            const std::string nameKine = kine.canvas->GetName();
-            const std::string dirKine = dirRes + "JetKinematics/" + nameKine;
-            const std::string pngKine = cl->htmlRegisterPage(*this, dirKine, nameKine, "png");
-            cl->CanvasToPng(kine.canvas, pngKine);
+            const std::string name = plot.canvas->GetName();
+            const std::string dir = dirRes + "/JetKinematics/" + name;
+            const std::string png = cl->htmlRegisterPage(subsystem, dir, name, "png");
+            cl->CanvasToPng(plot.canvas, png);
           }
         }
       }
@@ -136,16 +137,21 @@ class JetKinematicDrawer : public BaseJetdrawer
       }
 
       // for kinematic hist names
-      const std::string kineHistPrefix = m_kinematic_prefix + "_" + m_mapTrigToTag[trig] + "_" + m_jet_type;
-      const std::string kineProfSuffix = m_mapResToTag[res] + "_pfx";
+      const std::string histPrefix = m_hist_prefix
+                                   + "_"
+                                   + JetDrawDefs::MapTrigToTag().at(trig)
+                                   + "_"
+                                   + m_jet_type;
+      const std::string profSuffix = JetDrawDefs::MapResToTag().at(res)
+                                   + "_pfx";
 
       // connect to draw client
       QADrawClient* cl = QADrawClient::instance();
 
       // grab histograms to draw and set options
-      JetDrawDefs::VHistAndOpts1D kineHists = {
+      JetDrawDefs::VHistAndOpts1D hists = {
         {
-          dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_etavsphi_" + m_mapResToTag[res])),
+          dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_etavsphi_" + JetDrawDefs::MapResToTag().at(res))),
           "Jet #eta vs. #phi",
           "Jet #eta",
           "Jet #phi",
@@ -155,7 +161,7 @@ class JetKinematicDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + m_mapResToTag[res])),
+          dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvseta_" + JetDrawDefs::MapResToTag().at(res))),
           "Jet Mass vs #eta",
           "Jet #eta",
           "Jet Mass [GeV/c^{2}]",
@@ -165,7 +171,7 @@ class JetKinematicDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvseta_" + kineProfSuffix)),
+          dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvseta_" + profSuffix)),
           "Jet Mass vs #eta",
           "Jet #eta",
           "Jet Mass [GeV/c^{2}]",
@@ -175,7 +181,7 @@ class JetKinematicDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + m_mapResToTag[res])),
+          dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvspt_" + JetDrawDefs::MapResToTag().at(res))),
           "Jet Mass vs p_{T}",
           "Jet p_{T} [GeV/c]",
           "Jet Mass [GeV/c^{2}]",
@@ -185,7 +191,7 @@ class JetKinematicDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_jetmassvspt_" + kineProfSuffix)),
+          dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvspt_" + profSuffix)),
           "Jet Mass vs p_{T}",
           "Jet p_{T} [GeV/c]",
           "Jet Mass [GeV/c^{2}]",
@@ -195,7 +201,7 @@ class JetKinematicDrawer : public BaseJetdrawer
           true
         },
         {
-          dynamic_cast<TH1*>(cl->getHisto(kineHistPrefix + "_spectra_" + m_mapResToTag[res])),
+          dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_spectra_" + JetDrawDefs::MapResToTag().at(res))),
           "Jet Spectra",
           "Jet p_{T} [GeV/c]",
           "Counts",
@@ -207,11 +213,11 @@ class JetKinematicDrawer : public BaseJetdrawer
       };
 
       // draw all kinematic hists on 1 page
-      DrawHists("JetKinematics", {0, 1, 3, 5}, kineHists, trig, res);
+      DrawHists("JetKinematics", {0, 1, 3, 5}, hists, trig, res);
 
       // draw profiles on relevant pads
-      DrawHistOnPad(2, 2, kineHists, m_plots.GetBackPlotPad());
-      DrawHistOnPad(4, 3, kineHists, m_plots.GetBackPlotPad());
+      DrawHistOnPad(2, 2, hists, m_plots.GetBackPlotPad());
+      DrawHistOnPad(4, 3, hists, m_plots.GetBackPlotPad());
       return;
     }
 

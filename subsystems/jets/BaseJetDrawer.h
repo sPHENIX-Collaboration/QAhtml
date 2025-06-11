@@ -4,9 +4,9 @@
 #define BASE_JET_DRAWER_H
 
 #include "JetDrawDefs.h"
-
 #include <string>
 
+class QADraw;
 class TFile;
 
 // ============================================================================
@@ -19,7 +19,6 @@ class TFile;
  */
 class BaseJetDrawer
 {
-
   public:
 
     // ctor/dtor
@@ -34,7 +33,8 @@ class BaseJetDrawer
     virtual int Draw(const std::vector<uint32_t> vecTrigToDraw,
                      const std::vector<uint32_t> vecResToDraw);
     virtual int MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
-                         const std::vector<uint32_t> vecResToDraw);
+                         const std::vector<uint32_t> vecResToDraw,
+                         const QADraw& subsystem);
 
     // setters
     void SetDoDebug(const bool debug) {m_do_debug = debug;}

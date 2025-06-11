@@ -1,6 +1,7 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #include "BaseJetDrawer.h"
+#include <qahtml/QADraw.h>
 #include <qahtml/QADrawClient.h>
 #include <TCanvas.h>
 #include <TFile.h>
@@ -64,7 +65,8 @@ int BaseJetDrawer::Draw(const std::vector<uint32_t> /*vecTrigToDraw*/,
  *  from accumulated plots in `m_plots`.
  */
 int BaseJetDrawer::MakeHtml(const std::vector<uint32_t> /*vecTrigToDraw*/,
-                            const std::vector<uint32_t> /*vecResToDraw*/)
+                            const std::vector<uint32_t> /*vecResToDraw*/,
+                            const QADraw& /*subsystem*/)
 {
   return 0;
 }
