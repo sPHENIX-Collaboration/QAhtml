@@ -31,9 +31,10 @@ class BaseJetDrawer
     ~BaseJetDrawer() {};
 
     // public methods to be implemented
-    virtual void Draw(std::vector<uint32_t> vecTrigToRaw,
-                      std::vector<uint32_t> vecResToDraw);
-    virtual void MakeHtml();
+    virtual int Draw(const std::vector<uint32_t> vecTrigToDraw,
+                     const std::vector<uint32_t> vecResToDraw);
+    virtual int MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
+                         const std::vector<uint32_t> vecResToDraw);
 
     // setters
     void SetDoDebug(const bool debug) {m_do_debug = debug;}
@@ -74,10 +75,12 @@ class BaseJetDrawer
     virtual void DoDrawing(const uint32_t trig, const uint32_t res);
 
     // other protected methods
-    void DrawRunAndBuild(TPad* pad,
+    void DrawRunAndBuild(const std::string& what,
+                         TPad* pad,
                          const int trig = -1,
                          const int res = -1);
-    void DrawHists(const std::vector<std::size_t>& indices,
+    void DrawHists(const std::string& what,
+                   const std::vector<std::size_t>& indices,
                    const JetDrawDefs::VHistAndOpts1D& hists,
                    const int trig = -1,
                    const int res = -1);

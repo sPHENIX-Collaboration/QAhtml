@@ -22,6 +22,8 @@ jetincludedir=$(pkgincludedir)/jet
 
 jetinclude_HEADERS = \
   BaseJetDrawer.h \
+  EventRhoDrawer.h \
+  JetCstDrawer.h \
   JetDraw.h \
   JetDrawDefs.h
 

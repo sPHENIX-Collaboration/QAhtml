@@ -47,12 +47,13 @@ BaseJetDrawer::BaseJetDrawer(const std::string& name,
 // ----------------------------------------------------------------------------
 /*! This method must be implemented by derived components.
  *  It should code how to loop over the provided the trigger
- *  and resolution indices.
+ *  and resolution indices and run the histogram drawing for
+ *  the relevant combinations.
  */
-void BaseJetDrawer::Draw(std::vector<uint32_t> /*vecTrigToDraw*/,
-                         std::vector<uint32_t> /*vecResToDraw*/)
+int BaseJetDrawer::Draw(const std::vector<uint32_t> /*vecTrigToDraw*/,
+                        const std::vector<uint32_t> /*vecResToDraw*/)
 {
-  return;
+  return 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -62,9 +63,10 @@ void BaseJetDrawer::Draw(std::vector<uint32_t> /*vecTrigToDraw*/,
  *  It should code how to generate the relevant html pages
  *  from accumulated plots in `m_plots`.
  */
-void BaseJetDrawer::MakeHtml()
+int BaseJetDrawer::MakeHtml(const std::vector<uint32_t> /*vecTrigToDraw*/,
+                            const std::vector<uint32_t> /*vecResToDraw*/)
 {
-  return;
+  return 0;
 }
 
 // other public methods =======================================================
@@ -137,18 +139,20 @@ void BaseJetDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
  *  text.  However, if trigger or resolution indices are
  *  provided, then that info will be added.
  *
+ *  \param[in]  what the pad's associated QA component (e.g. JetKinematics)
  *  \param[out] pad  the pad to draw text on
  *  \param      trig trigger index (optional)
  *  \param      res  jet resolution index (optional)
  */
-void BaseJetDrawer::DrawRunAndBuild(TPad* pad,
+void BaseJetDrawer::DrawRunAndBuild(const std::string& what,
+                                    TPad* pad,
                                     const int trig,
                                     const int res)
 {
   // emit debugging message
   if (m_do_debug)
   {
-    std::cout << "Drawing run and build info for " << m_name << std::endl;
+    std::cout << "  -- Drawing run and build info for " << what << std::endl;
   }
 
   // connect to draw client
@@ -159,8 +163,8 @@ void BaseJetDrawer::DrawRunAndBuild(TPad* pad,
   runnostream << cl->RunNumber() << ", build " << cl->build();
 
   // prepend module name, component, and other info as needed
-  std::string runstring = m_module;
-  runstring.append("_" + m_name);
+  std::string runstring = m_name;
+  runstring.append("_" + what);
   if (trig > -1)
   {
     runstring.append("_" + JetDrawDefs::MapTrigToName().at(trig));
@@ -194,12 +198,14 @@ void BaseJetDrawer::DrawRunAndBuild(TPad* pad,
  *  resolution indices are provided, then that info will
  *  be added.
  *
+ *  \param what    the histograms' associated QA component (e.g. JetSeed)
  *  \param indices the indices of the histograms to draw
  *  \param hists   the histograms to select from
  *  \param trig    trigger index (optional)
  *  \param res     jet resolution index (optional)
  */
-void BaseJetDrawer::DrawHists(const std::vector<std::size_t>& indices,
+void BaseJetDrawer::DrawHists(const std::string& what,
+                              const std::vector<std::size_t>& indices,
                               const JetDrawDefs::VHistAndOpts1D& hists,
                               const int trig,
                               const int res)
@@ -207,11 +213,11 @@ void BaseJetDrawer::DrawHists(const std::vector<std::size_t>& indices,
   // emit debugging message
   if (m_do_debug)
   {
-    std::cout << "Drawing histograms for " << m_name << std::endl;
+    std::cout << "  -- Drawing histograms for " << what << std::endl;
   }
 
   // form canvas name
-  std::string canName = m_name;
+  std::string canName = what;
   if (trig > -1)
   {
     canName.append("_" + JetDrawDefs::MapTrigToTag().at(trig));
@@ -244,7 +250,7 @@ void BaseJetDrawer::DrawHists(const std::vector<std::size_t>& indices,
   }
 
   // add run/build info to canvas
-  DrawRunAndBuild(m_plots.GetBackPlotPad().runPad, trig, res);
+  DrawRunAndBuild(what, m_plots.GetBackPlotPad().runPad, trig, res);
   m_plots.GetBackPlotPad().canvas->Update();
 }
 
@@ -270,7 +276,7 @@ void BaseJetDrawer::DrawHistOnPad(const std::size_t iHist,
   // emit debugging message
   if (m_do_debug)
   {
-    std::cout << "Drawing histogram " << iHist << " on pad " << iPad << std::endl;
+    std::cout << "  -- Drawing histogram " << iHist << " on pad " << iPad << std::endl;
   }
 
   // draw histogram
@@ -328,7 +334,7 @@ void BaseJetDrawer::MakeCanvas(const std::string& name, const int nHist)
   // emit debugging message
   if (m_do_debug)
   {
-    std::cout << "Making canvas " << name << std::endl;
+    std::cout << "  -- Making canvas " << name << std::endl;
   }
 
   // instantiate draw client & grab display size

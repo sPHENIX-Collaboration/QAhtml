@@ -194,12 +194,23 @@ namespace JetDrawDefs
         return m_matrix.at(reso).at(trig).back();
       }
 
+      // ----------------------------------------------------------------------
       //! Get a particular PlotPad at a particular (jet R, trigger) index
+      // ----------------------------------------------------------------------
+      /*! FIXME might not be needed... */
       PlotPads& GetPlotPad(const std::size_t page,
                            const std::size_t reso,
                            const std::size_t trig)
       {
         return m_matrix.at(reso).at(trig).at(page);
+      }
+
+      // ----------------------------------------------------------------------
+      //! Get vector of PlotPads at a particular (jet R, trigger)
+      // ----------------------------------------------------------------------
+      VPlotPads1D& GetVecPlotPads(const std::size_t reso, const std::size_t trig)
+      {
+        return m_matrix.at(reso).at(trig);
       }
 
       // ----------------------------------------------------------------------
