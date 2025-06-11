@@ -31,7 +31,7 @@ elif histoarg == "bco":
 print("subsys list is")
 print(subsys)
     
-runtypes = ["_run3auau"]
+runtypes = ["_run3physics"]
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
@@ -69,6 +69,8 @@ def main():
                 subsysAggRunsDbtag = {}
                 for aggfile in full_paths:
                     runnumber = int(aggfile.split("/")[-1].split("-")[1])
+                    if runnumber < 66000:
+                        continue
                     dbtag = getBuildDbTag(runtype, aggfile.split("/")[-1])
                     if runnumber in subsysAggRuns:
                         #only take the highest db tag, as that is what we end up plotting
@@ -94,7 +96,7 @@ def main():
                         if args.verbose:
                             print("checking rundir "+rundir)
                         runnum = int(rundir.split("/")[-1])
-                        if runnum < 59000:
+                        if runnum < 66000:
                             continue
                         qafiles = glob.glob(qapath+"/"+d+"/"+rundir+"/"+dictionary[s][1]+"*")
 
