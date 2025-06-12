@@ -239,7 +239,7 @@ void BaseJetDrawer::DrawHists(const std::string& what,
   //   - n.b. COLZ does nothing for 1D histograms
   for (std::size_t iPad = 0; iPad < indices.size(); ++iPad)
   {
-    m_plots.GetBackPlotPad(res, trig).histPad->cd(iPad + 1);
+    m_plots.GetBackPlotPad().histPad->cd(iPad + 1);
     if (hists.at(indices[iPad]).hist)
     {
       UpdatePadStyle(hists.at(indices[iPad]));
@@ -308,11 +308,15 @@ void BaseJetDrawer::DrawEmptyHistogram(const std::string& what)
   // emit debugging message
   if (m_do_debug)
   {
-    std::cout << "Drawing empty message for '" << what << "'" << std::endl;
+    std::cout << "  -- Drawing empty message for '" << what << "'" << std::endl;
   }
 
+  // make empty hist name
+  std::string name(gPad->GetName());
+  name += "_is_missing";
+
   // set up hist/text
-  TH1D* hEmpty = new TH1D("hEmpty", "", 10, 0, 10);
+  TH1D* hEmpty = new TH1D(name.data(), "", 10, 0, 10);
   TLatex* lEmpty = new TLatex();
 
   // set up message

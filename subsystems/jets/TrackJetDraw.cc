@@ -1,6 +1,8 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #include "TrackJetDraw.h"
+#include "JetKinematicDrawer.h"
+#include "JetSeedDrawer.h"
 #include <TFile.h>
 #include <TCanvas.h>
 #include <iostream>

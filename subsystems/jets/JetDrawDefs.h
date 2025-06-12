@@ -66,7 +66,8 @@ namespace JetDrawDefs
       {JetQADefs::GL1::MBDNSJet1, "JetCoin6GeV"},
       {JetQADefs::GL1::MBDNSJet2, "JetCoin8GeV"},
       {JetQADefs::GL1::MBDNSJet3, "JetCoin10GeV"},
-      {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"}
+      {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"},
+      {999, "Inclusive"}  // FIXME this should be implemented in core & macros
     };
     return mapTrigToName;
   }
@@ -82,7 +83,8 @@ namespace JetDrawDefs
       {JetQADefs::GL1::MBDNSJet1, "mbdnsjet1"},
       {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
       {JetQADefs::GL1::MBDNSJet3, "mbdnsjet3"},
-      {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"}
+      {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"},
+      {999, "inclusive"}  // FIXME this should be implmenented in core & macros
     };
     return mapTrigToTag;
   }

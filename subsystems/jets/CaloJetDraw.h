@@ -4,10 +4,6 @@
 #define CALO_JET_DRAW_H
 
 #include "BaseJetDrawer.h"
-#include "EventRhoDrawer.h"
-#include "JetCstDrawer.h"
-#include "JetKinematicDrawer.h"
-#include "JetSeedDrawer.h"
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADraw.h>
 #include <jetqa/JetQADefs.h>
@@ -68,7 +64,8 @@ class CaloJetDraw : public QADraw
       JetQADefs::GL1::MBDNSJet1,
       JetQADefs::GL1::MBDNSJet2,
       JetQADefs::GL1::MBDNSJet3,
-      JetQADefs::GL1::MBDNSJet4
+      JetQADefs::GL1::MBDNSJet4,
+      999  // FIXME swap out for official tag when ready
     };
 
     ///! resolutions we want to draw

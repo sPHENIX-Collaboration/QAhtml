@@ -4,8 +4,6 @@
 #define TRACK_JET_DRAW_H
 
 #include "BaseJetDrawer.h"
-#include "JetKinematicDrawer.h"
-#include "JetSeedDrawer.h"
 #include <qahtml/QADrawClient.h>
 #include <qahtml/QADraw.h>
 #include <jetqa/JetQADefs.h>

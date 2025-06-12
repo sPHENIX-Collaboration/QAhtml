@@ -1,6 +1,10 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #include "CaloJetDraw.h"
+#include "EventRhoDrawer.h"
+#include "JetCstDrawer.h"
+#include "JetKinematicDrawer.h"
+#include "JetSeedDrawer.h"
 #include <TFile.h>
 #include <TCanvas.h>
 #include <iostream>
@@ -18,10 +22,10 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
   , m_do_debug(debug)
 {
   // initialize components
-  m_drawers["RHO"] = std::make_unique<EventRhoDrawer>();
-  m_drawers["CONSTITUENTS"] = std::make_unique<JetCstDrawer>();
-  m_drawers["KINEMATIC"] = std::make_unique<JetKinematicDrawer>();
-  m_drawers["SEED"] = std::make_unique<JetSeedDrawer>();
+  m_drawers["RHO"] = std::make_unique<EventRhoDrawer>("EventRho", name, type, "h_eventwiserho", debug);
+  m_drawers["CONSTITUENTS"] = std::make_unique<JetCstDrawer>("JetCst", name, type, "h_constituentsinjets", debug);
+  m_drawers["KINEMATIC"] = std::make_unique<JetKinematicDrawer>("JetKinematic", name, type, "h_jetkinematiccheck", debug);
+  m_drawers["SEED"] = std::make_unique<JetSeedDrawer>("JetSeed", name, type, "h_jetseedcount", debug);
 }
 
 // ----------------------------------------------------------------------------
@@ -52,11 +56,13 @@ int CaloJetDraw::Draw(const std::string& what)
   }
 
   int nDraw = 0;
+  int index = 0;
   if (what == "ALL")
   {
     for (auto& drawer : m_drawers)
     {
       nDraw += drawer.second->Draw(m_vecTrigToDraw, m_vecResToDraw);
+      ++index;
     }
   }
   else
@@ -67,7 +73,6 @@ int CaloJetDraw::Draw(const std::string& what)
   // return error (-1) if nothing drawn, otherwise return 0
   if (nDraw == 0)
   {
-    std::cout << "Warning: unimplemented drawing option, " << what << "!" << std::endl;
     return -1;
   }
   else
