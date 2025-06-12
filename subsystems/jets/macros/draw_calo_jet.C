@@ -1,9 +1,9 @@
 #include <qahtml/QADrawClient.h>
-#include <iostream>
 #include <qahtml/jet/CaloJetDraw.h>
 #include <sPhenixStyle.C>
 #include <TFile.h>
 #include <TSystem.h>
+#include <iostream>
 
 R__LOAD_LIBRARY(libqadrawjet.so)
 
@@ -35,8 +35,8 @@ void draw_calo_jet(const std::string& infile,
   }
 
   // create instance of relevant module
-  CaloJetDraw* jets = new CaloJetDraw("CaloJetDraw", "towersub1_antikt", do_debug);
-  //jets -> SetDoDebug(do_debug);  // FIXME setters need to propagate things
+  CaloJetDraw* jets = new CaloJetDraw();
+  jets -> SetDoDebug(do_debug);
 
   // create draw client
   QADrawClient* client = QADrawClient::instance();
