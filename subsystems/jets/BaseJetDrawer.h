@@ -12,9 +12,9 @@ class TFile;
 // ============================================================================
 //! Base class for jet QA components
 // ============================================================================
-/*! Abstract base class to define common functionality
- *  across the different components of the jet QA. Each
- *  jet QA module should have a corresponding "drawer"
+/*! Base class to define common functionality across
+ *  the different components of the jet QA. Each jet
+ *  QA module should have a corresponding "drawer"
  *  class inheriting from this one.
  */
 class BaseJetDrawer
