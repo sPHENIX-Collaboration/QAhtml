@@ -10,6 +10,7 @@
 #include "JetCstDrawer.h"
 #include "JetKinematicDrawer.h"
 #include "JetSeedDrawer.h"
+#include "PhotonKinematicDrawer.h"
 #include <map>
 #include <memory>
 #include <string>
@@ -34,6 +35,7 @@ class CaloJetDraw : public BaseJetDraw
      *    - "KINEMATIC" = draw jet kinematic plots,
      *    - "SEED" = draw jet seed plots,
      *    - "DIJET" = draw dijet qa plots,
+     *    - "PHOTON" = draw photon kinematic plots,
      *    - "ALL" = draw all of the above.
      *
      *  Note that "ALL" doesn't have an associated drawer class, since
@@ -47,9 +49,10 @@ class CaloJetDraw : public BaseJetDraw
       // initialize components
       m_drawers["RHO"] = std::make_unique<EventRhoDrawer>("EventRho", name, type, "h_eventwiserho", debug);
       m_drawers["CONSTITUENTS"] = std::make_unique<JetCstDrawer>("JetCst", name, type, "h_constituentsinjets", debug);
-      m_drawers["KINEMATIC"] = std::make_unique<JetKinematicDrawer>("JetKinematic", name, type, "h_jetkinematiccheck", debug);
+      m_drawers["KINEMATIC"] = std::make_unique<JetKinematicDrawer>("JetKinematics", name, type, "h_jetkinematiccheck", debug);
       m_drawers["SEED"] = std::make_unique<JetSeedDrawer>("JetSeed", name, type, "h_jetseedcount", debug);
       m_drawers["DIJET"] = std::make_unique<DijetQADrawer>("DijetQA", name, type, "h_dijetqa", debug);
+      m_drawers["PHOTON"] = std::make_unique<PhotonKinematicDrawer>("PhotonKinematics", name, "emcal_cluster", "h_photonjetskinematics");
     }
 
     // ------------------------------------------------------------------------

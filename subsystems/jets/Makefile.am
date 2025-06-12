@@ -31,6 +31,7 @@ jetinclude_HEADERS = \
   JetDrawDefs.h \
   JetKinematicDrawer.h \
   JetSeedDrawer.h \
+  PhotonKinematicDrawer.h \
   TrackJetDraw.h
 
 libqadrawjet_la_SOURCES = \
