@@ -24,6 +24,7 @@ jetinclude_HEADERS = \
   BaseJetDrawer.h \
   BaseJetDraw.h \
   CaloJetDraw.h \
+  DijetQADrawer.h \
   EventRhoDrawer.h \
   JetCstDrawer.h \
   JetDraw.h \
