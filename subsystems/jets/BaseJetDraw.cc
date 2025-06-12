@@ -1,12 +1,7 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
-#include "CaloJetDraw.h"
-#include "EventRhoDrawer.h"
-#include "JetCstDrawer.h"
-#include "JetKinematicDrawer.h"
-#include "JetSeedDrawer.h"
+#include "BaseJetDraw.h"
 #include <TFile.h>
-#include <TCanvas.h>
 #include <iostream>
 
 // ctor/dtor ==================================================================
@@ -14,40 +9,32 @@
 // ----------------------------------------------------------------------------
 //! Subsystem constructor
 // ----------------------------------------------------------------------------
-CaloJetDraw::CaloJetDraw(const std::string& name,
+BaseJetDraw::BaseJetDraw(const std::string& name,
                          const std::string& type,
                          const bool debug)
   : QADraw(name)
   , m_jet_type(type)
   , m_do_debug(debug)
 {
-  // initialize components
-  m_drawers["RHO"] = std::make_unique<EventRhoDrawer>("EventRho", name, type, "h_eventwiserho", debug);
-  m_drawers["CONSTITUENTS"] = std::make_unique<JetCstDrawer>("JetCst", name, type, "h_constituentsinjets", debug);
-  m_drawers["KINEMATIC"] = std::make_unique<JetKinematicDrawer>("JetKinematic", name, type, "h_jetkinematiccheck", debug);
-  m_drawers["SEED"] = std::make_unique<JetSeedDrawer>("JetSeed", name, type, "h_jetseedcount", debug);
-}
+  /* TODO picking out triggers goes here */
+};
 
 // ----------------------------------------------------------------------------
 //! Subsystem destructor
 // ----------------------------------------------------------------------------
-CaloJetDraw::~CaloJetDraw() {};
+BaseJetDraw::~BaseJetDraw() {};
 
 // inherited public methods ===================================================
 
 // ----------------------------------------------------------------------------
 //! Draw plots
 // ----------------------------------------------------------------------------
-/*! Draws plots based on options. Implemented options:
- *    - `"RHO"` = draw event-wise rho plots,
- *    - `"CONSTITUENTS"` = draw jet calorimeter constituent plots,
- *    - `"KINEMATIC"` = draw jet kinematic plots,
- *    - `"SEED"` = draw jet seed plots,
- *    - `"ALL"` = draw all of the above.
+/*! Draws plots based on options. Specific options need to be
+ *  implemented in derived classes such as `CaloJetDraw`.
  *
  *  \param what drawing option
  */
-int CaloJetDraw::Draw(const std::string& what)
+int BaseJetDraw::Draw(const std::string& what)
 {
   // emit debugging message
   if (m_do_debug)
@@ -84,12 +71,12 @@ int CaloJetDraw::Draw(const std::string& what)
 // ----------------------------------------------------------------------------
 //! Draw plots and generate HTML pages
 // ----------------------------------------------------------------------------
-/*! Draws plots based on provided option (see `JetDraw::Draw(std::string&)`)
- *  and generates html pages for each.
+/*! Draws plots based on provided option -- see `BaseJetDraw::
+ *  Draw(std::string&)` -- and generates html pages for each.
  *
  *  \param what drawing option
  */
-int CaloJetDraw::MakeHtml(const std::string& what)
+int BaseJetDraw::MakeHtml(const std::string& what)
 {
   // emit debugging messages
   if (m_do_debug)
@@ -124,6 +111,36 @@ int CaloJetDraw::MakeHtml(const std::string& what)
 // other public methods =======================================================
 
 // ----------------------------------------------------------------------------
+//! Turn on/off debugging
+// ----------------------------------------------------------------------------
+/*! Setter to turn on/off debugging for the QA subsystem
+ *  and all of its associated components.
+ */
+void BaseJetDraw::SetDoDebug(const bool debug)
+{
+  m_do_debug = debug;
+  for (auto& drawer : m_drawers)
+  {
+    drawer.second->SetDoDebug(m_do_debug);
+  }
+}
+
+// ----------------------------------------------------------------------------
+//! Set jet type
+// ----------------------------------------------------------------------------
+/*! Setter to update jet type for the QA subsystem
+ *  and all of its associated components.
+ */
+void BaseJetDraw::SetJetType(const std::string& type)
+{
+  m_jet_type = type;
+  for (auto& drawer : m_drawers)
+  {
+    drawer.second->SetJetType(type);
+  }
+}
+
+// ----------------------------------------------------------------------------
 //! Save canvases to file
 // ----------------------------------------------------------------------------
 /*! Helper method to save all canvases to a specified file.
@@ -132,7 +149,7 @@ int CaloJetDraw::MakeHtml(const std::string& what)
  *
  *  \param[out] file file to write canvases to
  */
-void CaloJetDraw::SaveCanvasesToFile(TFile* file)
+void BaseJetDraw::SaveCanvasesToFile(TFile* file)
 {
   // emit debugging message
   if (m_do_debug)

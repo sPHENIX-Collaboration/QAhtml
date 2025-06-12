@@ -3,15 +3,13 @@
 #ifndef TRACK_JET_DRAW_H
 #define TRACK_JET_DRAW_H
 
+#include "BaseJetDraw.h"
 #include "BaseJetDrawer.h"
-#include <qahtml/QADrawClient.h>
-#include <qahtml/QADraw.h>
-#include <jetqa/JetQADefs.h>
+#include "JetKinematicDrawer.h"
+#include "JetSeedDrawer.h"
 #include <map>
 #include <memory>
 #include <string>
-
-class TFile;
 
 // ============================================================================
 //! Draw track jet QA histograms
@@ -19,62 +17,36 @@ class TFile;
 /*! A QAhtml subsystem to draw track jet QA histograms
  *  and generate relevant HTML pages.
  */
-class TrackJetDraw : public QADraw
+class TrackJetDraw : public BaseJetDraw
 {
   public:
 
-    // ctor/dtor
+    // ------------------------------------------------------------------------
+    //! Default ctor
+    // ------------------------------------------------------------------------
+    /*! Which components to implement are set here. Currently
+     *  implemented ones:
+     *    - `"KINEMATIC"` = draw jet kinematic plots,
+     *    - `"SEED"` = draw jet seed plots,
+     *    - `"ALL"` = draw all of the above.
+     *
+     *  Note that "ALL" doesn't have an associated drawer class, since
+     *  it just indicates to run all of the above drawers.
+     */
     TrackJetDraw(const std::string& name = "TrackJetQA",
                  const std::string& type = "track_antikt",
-                 const bool debug = false);
-    ~TrackJetDraw();
+                 const bool debug = false)
+      : BaseJetDraw(name, type, debug)
+    {
+      // initialize components
+      m_drawers["KINEMATIC"] = std::make_unique<JetKinematicDrawer>("JetKinematic", name, type, "h_jetkinematiccheck", debug);
+      m_drawers["SEED"] = std::make_unique<JetSeedDrawer>("JetSeed", name, type, "h_jetseedcount", debug);
+    }
 
-    // setters
-    void SetDoDebug(const bool debug) {m_do_debug = debug;}
-    void SetJetType(const std::string& type) {m_jet_type = type;}
-
-    // getters 
-    bool GetDoDebug() const {return m_do_debug;}
-    std::string GetJetType() const {return m_jet_type;}
-
-    // inherited public methods
-    int Draw(const std::string& what = "ALL") override;
-    int MakeHtml(const std::string& what = "ALL") override;
-
-    // other public methods
-    void SaveCanvasesToFile(TFile* file);
-
-  private:
-
-    ///! name of subsystem
-    std::string m_name;
-
-    ///! type of jet input, used in histogram names
-    std::string m_jet_type;
-
-    ///! turn debugging statements on/off
-    bool m_do_debug;
-
-    ///! components to do actual histogram drawing
-    std::map<std::string, std::unique_ptr<BaseJetDrawer>> m_drawers;
-
-    ///! triggers we want to draw
-    ///!   - FIXME dynamically allocate based on pp vs. pau
-    std::vector<uint32_t> m_vecTrigToDraw = {
-      JetQADefs::GL1::MBDNSJet1,
-      JetQADefs::GL1::MBDNSJet2,
-      JetQADefs::GL1::MBDNSJet3,
-      JetQADefs::GL1::MBDNSJet4
-    };
-
-    ///! resolutions we want to draw
-    ///!   - FIXME initialize in ctor
-    std::vector<uint32_t> m_vecResToDraw = {
-      JetDrawDefs::JetRes::R02,
-      JetDrawDefs::JetRes::R03,
-      JetDrawDefs::JetRes::R04,
-      JetDrawDefs::JetRes::R05
-    };
+    // ------------------------------------------------------------------------
+    //! Default dtor
+    // ------------------------------------------------------------------------
+    ~TrackJetDraw() {};
 
 };  // end TrackJetDraw
 

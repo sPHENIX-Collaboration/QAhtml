@@ -22,6 +22,7 @@ jetincludedir=$(pkgincludedir)/jet
 
 jetinclude_HEADERS = \
   BaseJetDrawer.h \
+  BaseJetDraw.h \
   CaloJetDraw.h \
   EventRhoDrawer.h \
   JetCstDrawer.h \
@@ -33,9 +34,8 @@ jetinclude_HEADERS = \
 
 libqadrawjet_la_SOURCES = \
   BaseJetDrawer.cc \
-  CaloJetDraw.cc \
-  JetDraw.cc \
-  TrackJetDraw.cc
+  BaseJetDraw.cc \
+  JetDraw.cc
 
 noinst_PROGRAMS = \
   testexternals
