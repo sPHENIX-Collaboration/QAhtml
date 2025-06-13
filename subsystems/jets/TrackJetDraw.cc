@@ -3,7 +3,9 @@
 #include "TrackJetDraw.h"
 
 #include "BaseJetDrawer.h"
+#include "BeamBackgroundDrawer.h"
 #include "DijetQADrawer.h"
+#include "EventRhoDrawer.h"
 #include "JetKinematicDrawer.h"
 #include "JetSeedDrawer.h"
 #include <map>
@@ -16,6 +18,8 @@
 // ----------------------------------------------------------------------------
 /*! Which components to implement are set here. Currently
  *  implemented ones:
+ *    - "BEAM" = draw beam background plots,
+ *    - "RHO" = draw event-wise rho plots,
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "DIJET" = draw dijet qa plots,
  *    - "SEED" = draw jet seed plots,
@@ -29,6 +33,20 @@ TrackJetDraw::TrackJetDraw(const std::string& name,
                            const bool debug)
   : BaseJetDraw(name, type, debug)
 {
+  // for beam background plots
+  m_drawers["BEAM"] = std::make_unique<BeamBackgroundDrawer>("BeamBackground",
+                                                             name,
+                                                             "",
+                                                             "h_beambackgroundfilterandqa",
+                                                             debug);
+
+  // for event-wise rho plots
+  m_drawers["RHO"] = std::make_unique<EventRhoDrawer>("EventRho",
+                                                      name,
+                                                      type,
+                                                      "h_eventwisetrackrho",
+                                                      debug);
+
   // for jet kinematic plots
   m_drawers["KINEMATIC"] = std::make_unique<JetKinematicDrawer>("JetKinematic",
                                                                 name,
