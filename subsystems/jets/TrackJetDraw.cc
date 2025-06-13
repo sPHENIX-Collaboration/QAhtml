@@ -8,6 +8,7 @@
 #include "EventRhoDrawer.h"
 #include "JetKinematicDrawer.h"
 #include "JetSeedDrawer.h"
+#include "JetVsTrackSumDrawer.h"
 #include <map>
 #include <memory>
 
@@ -23,6 +24,7 @@
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "DIJET" = draw dijet qa plots,
  *    - "SEED" = draw jet seed plots,
+ *    - "SUM" = draw track sum plots,
  *    - "ALL" = draw all of the above.
  *
  *  Note that "ALL" doesn't have an associated drawer class, since
@@ -67,6 +69,13 @@ TrackJetDraw::TrackJetDraw(const std::string& name,
                                                       type,
                                                       "h_jetseedcount",
                                                       debug);
+
+  // for track sum vs. jet plots
+  m_drawers["SUM"] = std::make_unique<JetVsTrackSumDrawer>("JetVsTrackSum",
+                                                           name,
+                                                           type,
+                                                           "h_structureinjets",
+                                                           debug);
 }
 
 // ----------------------------------------------------------------------------
