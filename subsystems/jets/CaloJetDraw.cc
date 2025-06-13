@@ -3,6 +3,7 @@
 #include "CaloJetDraw.h"
 
 #include "BaseJetDrawer.h"
+#include "BeamBackgroundDrawer.h"
 #include "DijetQADrawer.h"
 #include "EventRhoDrawer.h"
 #include "JetCstDrawer.h"
@@ -20,6 +21,7 @@
 // ----------------------------------------------------------------------------
 /*! Which components to implement are set here. Currently
  *  implemented ones:
+ *    - "BEAM" = draw beam background plots,
  *    - "STATUS" = draw calo status map plots,
  *    - "PHOTON" = draw photon kinematic plots,
  *    - "RHO" = draw event-wise rho plots,
@@ -37,6 +39,13 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                          const bool debug)
   : BaseJetDraw(name, type, debug)
 {
+  // for beam background plots
+  m_drawers["BEAM"] = std::make_unique<BeamBackgroundDrawer>("BeamBackground",
+                                                             name,
+                                                             "",
+                                                             "h_beambackgroundfilterandqa",
+                                                             debug);
+
   // for status map plots
   m_drawers["STATUS"] = std::make_unique<StatusMapDrawer>("CaloStatusMap",
                                                           name,

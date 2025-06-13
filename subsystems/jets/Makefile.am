@@ -23,6 +23,7 @@ jetincludedir=$(pkgincludedir)/jet
 jetinclude_HEADERS = \
   BaseJetDrawer.h \
   BaseJetDraw.h \
+  BeamBackgroundDrawer.h \
   CaloJetDraw.h \
   DijetQADrawer.h \
   EventRhoDrawer.h \
@@ -38,6 +39,7 @@ jetinclude_HEADERS = \
 libqadrawjet_la_SOURCES = \
   BaseJetDrawer.cc \
   BaseJetDraw.cc \
+  BeamBackgroundDrawer.cc \
   CaloJetDraw.cc \
   DijetQADrawer.cc \
   EventRhoDrawer.cc \
