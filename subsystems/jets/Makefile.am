@@ -32,12 +32,15 @@ jetinclude_HEADERS = \
   JetKinematicDrawer.h \
   JetSeedDrawer.h \
   PhotonKinematicDrawer.h \
-  TrackJetDraw.h
+  TrackJetDraw.h \
+  StatusMapDrawer.h
 
 libqadrawjet_la_SOURCES = \
   BaseJetDrawer.cc \
   BaseJetDraw.cc \
-  JetDraw.cc
+  CaloJetDraw.cc \
+  JetDraw.cc \
+  StatusMapDrawer.cc
 
 noinst_PROGRAMS = \
   testexternals
