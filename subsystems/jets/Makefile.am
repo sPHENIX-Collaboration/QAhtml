@@ -46,6 +46,7 @@ libqadrawjet_la_SOURCES = \
   JetCstDrawer.cc \
   JetKinematicDrawer.cc \
   JetDraw.cc \
+  JetSeedDrawer.cc \
   PhotonKinematicDrawer.cc \
   StatusMapDrawer.cc \
   TrackJetDraw.cc
