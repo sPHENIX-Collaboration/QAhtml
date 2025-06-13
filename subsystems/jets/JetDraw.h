@@ -103,7 +103,7 @@ class JetDraw : public QADraw
     ///! prefix of jet seed qa histograms
     std::string m_seed_prefix;
 
-    ///! summary of overall jet qa goodness
+    ///! summary of overall jet qa goodness (currently unused)
     TCanvas* m_jetSummary{nullptr};
 
     ///! event-wise rho canvases
