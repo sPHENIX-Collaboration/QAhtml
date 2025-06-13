@@ -136,7 +136,7 @@ class JetSeedDrawer : public BaseJetDrawer
         }
       }
 
-      // for seed hist names
+      // for hist names
       const std::string histName = m_hist_prefix
                                  + "_"
                                  + JetDrawDefs::MapTrigToTag().at(trig)

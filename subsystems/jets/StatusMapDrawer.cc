@@ -14,7 +14,7 @@ StatusMapDrawer::StatusMapDrawer(const std::string& name,
                                  const std::string& type,
                                  const std::string& pref,
                                  const bool debug)
-  : BaseJetDrawer(name, modu, type, pref, debug){};
+  : BaseJetDrawer(name, modu, type, pref, debug) {};
 
 // ----------------------------------------------------------------------------
 //! Default dtor

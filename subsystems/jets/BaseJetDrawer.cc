@@ -1,6 +1,7 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #include "BaseJetDrawer.h"
+
 #include <qahtml/QADraw.h>
 #include <qahtml/QADrawClient.h>
 #include <TCanvas.h>
