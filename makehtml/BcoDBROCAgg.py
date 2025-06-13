@@ -13,7 +13,7 @@ NENDPOINTS=[1,1,1,2]
 nsubsys = 4
 hist_types = ["HIST_DST_STREAMING_EVENT_ebdc39","HIST_DST_STREAMING_EVENT_mvtx", "HIST_DST_STREAMING_EVENT_intt","HIST_DST_STREAMING_EVENT_ebdc"]
 
-runtypes = ["_run3auau"]
+runtypes = ["_run3physics"]#,"_run3auau"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     
 
@@ -62,10 +62,10 @@ def main():
             # just use the 0th one to get the run/db range once per subsystem instead of for each ROC
             dummyhisttype = ""
             if hist.find("mvtx") != -1 or hist.find("intt") != -1:
-                dummyhisttype = hist+"0_0"
-            if hist.find("ebdc39") != -1:
-                dummyhisttype = hist+"_0"
-            elif hist.find("ebdc") != -1:
+                dummyhisttype = hist+"0"
+            elif hist.find("39") != -1:
+                dummyhisttype=hist
+            else:
                 dummyhisttype = hist + "00_0"
             print("Checking dummyhsttype " + dummyhisttype)
             for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype):
@@ -78,13 +78,10 @@ def main():
                 for ROC in range(nrocs):
                     for EP in range(neps):
                         histtype = hist
-                        if hist.find("ebdc39") != -1:
-                            histtype = hist+"_"+str(EP)
-                        elif hist.find("ebdc") != -1:
+                        if hist.find("ebdc") != -1 and hist.find("39") == -1:
                             histtype = hist+"{:02d}".format(ROC)+"_"+str(EP)
-                        else:
-                            histtype = hist+str(ROC)+"_"+str(EP)
-                        
+                        elif hist.find("ebdc") == -1:
+                            histtype=hist+str(ROC)
                         histtype += runtype
                         thisfile = get_aggregated_file(FCReadCursor, histtype, run)
                         if len(thisfile) > 0:
@@ -97,7 +94,7 @@ def main():
                     continue
                 
                 tags = (filesToAdd[0]).split(os.sep)
-                index = tags.index(runtype[1:])
+                index = tags.index("production")+1
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
                 anadbtag = dbtag
