@@ -6,9 +6,9 @@
 #include "BaseJetDrawer.h"
 
 // ============================================================================
-//! Drawer for Event-Wise Rho
+//! Drawer for Calo Status Mapper
 // ============================================================================
-/*! Class to draw histograms produced by the RhosinEvent module
+/*! Class to draw histograms produced by the CaloStatusMapper module
  */
 class StatusMapDrawer : public BaseJetDrawer
 {
