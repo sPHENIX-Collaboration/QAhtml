@@ -13,7 +13,7 @@ NENDPOINTS=[1,1,1,2]
 nsubsys = 4
 hist_types = ["HIST_DST_STREAMING_EVENT_ebdc39","HIST_DST_STREAMING_EVENT_mvtx", "HIST_DST_STREAMING_EVENT_intt","HIST_DST_STREAMING_EVENT_ebdc"]
 
-runtypes = ["_run3physics"]#,"_run3auau"]
+runtypes = ["_run3auau"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     
 
