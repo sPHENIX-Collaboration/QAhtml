@@ -4,7 +4,7 @@ echo $$ > htmlrunningcalo
 source ./setup_all.sh
 Xvfb :4 -nolisten tcp &
 export DISPLAY=unix:4
-python3 makehtmlcalo.py >& /sphenix/u/sphnxpro/qahtml/QAhtml/makehtml/makehtmlcalo.log
+python3 makehtmlcalo.py >& /sphenix/user/sphnxpro/htmllogs/makehtmlcalo.log
 kill $!
 rm htmlrunningcalo
 rm -f deadHotTowers*HIST_CALO*.root # -f: no error if no files exist
