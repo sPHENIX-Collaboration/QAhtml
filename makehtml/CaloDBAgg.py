@@ -8,7 +8,7 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = ["HIST_CALOFITTINGQA","HIST_CALOQA", "HIST_JETS"]
+track_hist_types = ["HIST_CALOQA", "HIST_CALOFITTINGQA","HIST_JETS"]
 runtypes = ["_run3auau"]
 
 
@@ -25,6 +25,8 @@ print("Test is " + str(args.test))
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type + runtype
     query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber,dataset;".format(dsttype)
+    if args.verbose:
+        print(query)
     cursor.execute(query)
     runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
     
@@ -42,7 +44,8 @@ def getPaths(cursor, run, dataset, type, runtype):
 def getBuildDbTag(type, filename):
     parts = filename.split(os.sep)
     index = parts.index(type[1:])
-    return parts[index+2]
+    
+    return parts[index+3]
 
 def main():   
     import time
@@ -56,17 +59,21 @@ def main():
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
             for run, dbtag in runs_dbtags:
                 print("Processing run " + str(run))
+                if run < 66000:
+                    continue
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
                     print("all total filepaths")
                     print(filepaths)
 
                 tags = next(iter(filepaths)).split(os.sep)
+                
                 index = tags.index(runtype[1:])
+                
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
                 anadbtag = dbtag
-                dsttypetag = tags[index+3]
+                dsttypetag = tags[index+2]
                 rundirtag = tags[index+4]
                 
                 # make an analogous path to the production DST in sphenix/data
@@ -100,6 +107,7 @@ def main():
                         continue
                     thistag = getBuildDbTag(runtype,newpath)
                     tags = thistag.split("_")
+                    print(tags)
                     if tags[1].find("nocdbtag") != -1:
                         break
                     if int(tags[1].split("p")[1]) > latestdbtagInt:
