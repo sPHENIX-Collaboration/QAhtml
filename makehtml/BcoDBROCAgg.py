@@ -92,7 +92,8 @@ def main():
                 if len(filesToAdd) == 0:
                     # nothing to add, move on
                     continue
-                
+                if filesToAdd[0].find("/") == -1:
+                    continue
                 tags = (filesToAdd[0]).split(os.sep)
                 index = tags.index("production")+1
                 collisiontag = tags[index]
