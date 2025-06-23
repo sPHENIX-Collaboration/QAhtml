@@ -21,7 +21,7 @@ qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
 
 def get_aggregated_files(cursor, dsttype):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999) order by full_file_path desc".format(dsttype)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999)".format(dsttype)
     if args.verbose :
         print(query)
     cursor.execute(query)
