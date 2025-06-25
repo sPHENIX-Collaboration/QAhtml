@@ -34,6 +34,10 @@ void draw_calo_jet(const std::string& infile,
               << std::endl;
   }
 
+  // make sure hist title disply is DEFINITELY on
+  gStyle -> SetOptTitle(1);
+  gROOT  -> ForceStyle();
+
   // create instance of relevant module
   CaloJetDraw* jets = new CaloJetDraw();
   jets -> SetDoDebug(do_debug);

@@ -10,6 +10,7 @@
 #include <TLatex.h>
 #include <TPad.h>
 #include <TROOT.h>
+#include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
 #include <iostream>
@@ -286,8 +287,19 @@ void BaseJetDrawer::DrawHistOnPad(const std::size_t iHist,
   plot.histPad->cd(iPad);
   if (hists.at(iHist).hist)
   {
+    // make hist title
+    const std::string title = hists[iHist].title
+                            + ";"
+                            + hists[iHist].titlex
+                            + ";"
+                            + hists[iHist].titley
+                            + ";"
+                            + hists[iHist].titlez;
+
+    // update pad style and draw
     UpdatePadStyle(hists.at(iHist));
-    hists.at(iHist).hist->DrawCopy("SAME");
+    hists[iHist].hist->SetTitle(title.data());
+    hists[iHist].hist->DrawCopy("SAME");
   }
   else
   {
@@ -391,6 +403,8 @@ void BaseJetDrawer::MakeCanvas(const std::string& name, const int nHist)
 // ----------------------------------------------------------------------------
 void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
 {
+  gStyle->SetOptTitle(1);
+  gROOT->ForceStyle();
   gPad->UseCurrentStyle();
   gPad->Update();
   gPad->SetRightMargin(hist.margin);
