@@ -134,9 +134,9 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
                                + "_"
                                + JetDrawDefs::MapTrigToTag().at(trig)
                                + "_"
-                               + m_jet_type;
-  const std::string profSuffix = JetDrawDefs::MapResToTag().at(res)
-                               + "_pfx";
+                               + m_jet_type
+                               + "_"
+                               + JetDrawDefs::MapResToTag().at(res);
 
   // connect to draw client
   QADrawClient* cl = QADrawClient::instance();
@@ -144,7 +144,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
   // grab histograms to draw and set options
   JetDrawDefs::VHistAndOpts1D hists = {
     {
-      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_etavsphi_" + JetDrawDefs::MapResToTag().at(res))),
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_etavsphi")),
       "Jet #eta vs. #phi",
       "Jet #eta",
       "Jet #phi",
@@ -154,7 +154,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       true
     },
     {
-      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvseta_" + JetDrawDefs::MapResToTag().at(res))),
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvseta")),
       "Jet Mass vs #eta",
       "Jet #eta",
       "Jet Mass [GeV/c^{2}]",
@@ -164,7 +164,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       true
     },
     {
-      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvseta_" + profSuffix)),
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvseta_pfx")),
       "Jet Mass vs #eta",
       "Jet #eta",
       "Jet Mass [GeV/c^{2}]",
@@ -174,7 +174,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       true
     },
     {
-      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvspt_" + JetDrawDefs::MapResToTag().at(res))),
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvspt")),
       "Jet Mass vs p_{T}",
       "Jet p_{T} [GeV/c]",
       "Jet Mass [GeV/c^{2}]",
@@ -184,7 +184,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       true
     },
     {
-      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvspt_" + profSuffix)),
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvspt_pfx")),
       "Jet Mass vs p_{T}",
       "Jet p_{T} [GeV/c]",
       "Jet Mass [GeV/c^{2}]",
@@ -194,7 +194,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       true
     },
     {
-      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_spectra_" + JetDrawDefs::MapResToTag().at(res))),
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_spectra")),
       "Jet Spectra",
       "Jet p_{T} [GeV/c]",
       "Counts",
