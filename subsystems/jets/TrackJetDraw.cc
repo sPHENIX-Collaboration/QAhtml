@@ -8,6 +8,7 @@
 #include "EventRhoDrawer.h"
 #include "JetKinematicDrawer.h"
 #include "JetSeedDrawer.h"
+#include "TrackInJetDrawer.h"
 #include "JetVsTrackSumDrawer.h"
 #include <map>
 #include <memory>
@@ -24,6 +25,7 @@
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "DIJET" = draw dijet qa plots,
  *    - "SEED" = draw jet seed plots,
+ *    - "TRACK" = draw track-in-jet plots,
  *    - "SUM" = draw track sum plots,
  *    - "ALL" = draw all of the above.
  *
@@ -76,6 +78,13 @@ TrackJetDraw::TrackJetDraw(const std::string& name,
                                                            type,
                                                            "h_structureinjets",
                                                            debug);
+
+  // for track-in-jet plots
+  m_drawers["TRACK"] = std::make_unique<TrackInJetDrawer>("TrackInJet",
+                                                          name,
+                                                          type,
+                                                          "h_trksinjet",
+                                                          debug);
 }
 
 // ----------------------------------------------------------------------------

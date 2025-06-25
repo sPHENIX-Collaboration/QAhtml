@@ -35,6 +35,7 @@ jetinclude_HEADERS = \
   JetVsTrackSumDrawer.h \
   PhotonKinematicDrawer.h \
   StatusMapDrawer.h \
+  TrackInJetDrawer.h \
   TrackJetDraw.h
 
 libqadrawjet_la_SOURCES = \
@@ -51,6 +52,7 @@ libqadrawjet_la_SOURCES = \
   JetVsTrackSumDrawer.cc \
   PhotonKinematicDrawer.cc \
   StatusMapDrawer.cc \
+  TrackInJetDrawer.cc \
   TrackJetDraw.cc
 
 noinst_PROGRAMS = \
