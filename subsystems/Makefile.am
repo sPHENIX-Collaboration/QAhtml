@@ -7,6 +7,7 @@ include_HEADERS =
 SUBDIRS = \
   bco \
   calo \
+  calofitting \
   example \
 	globalQA \
   intt \
