@@ -26,6 +26,7 @@ AC_CONFIG_FILES([
   subsystems/Makefile
   subsystems/bco/Makefile
   subsystems/calo/Makefile
+  subsystems/calofitting/Makefile
   subsystems/example/Makefile
   subsystems/globalQA/Makefile
   subsystems/intt/Makefile
