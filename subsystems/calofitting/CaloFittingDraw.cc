@@ -376,7 +376,7 @@ int CaloFittingDraw::MakeAlignmentSummary( const std::string &name, int num )
   transparent[num]->SetFillStyle(4000);
   transparent[num]->Draw();
 
-  TLegend * leg = new TLegend(0.2, 0.9, 0.83, 0.95);
+  TLegend * leg = new TLegend(0.1, 0.9, 0.9, 0.95);
   leg->SetFillColor(0);
   leg->SetBorderSize(0);
   leg->SetTextSize(0.03);
@@ -705,7 +705,6 @@ int CaloFittingDraw::MakeDets( const std::string &name, int num )
     double const x2 = dx_margin + (i + 1) * dx;
     double const y1 = yi - dy; // start from the top of the pad
     double const y2 = yi;
-    yi -= dy; // move down for the next row
     std::string header = buffer; // use the buffer for the header
     tex->SetTextColor(kBlack);
     tex->DrawLatex((x1 + x2) / 2.0, (y1 + y2) / 2.0, header.c_str());
@@ -716,15 +715,18 @@ int CaloFittingDraw::MakeDets( const std::string &name, int num )
   
   // bool gl1daq_dropped = gl1daq_dropped();
   std::vector< int > incomplete_packets_gl1tagged {}; 
-  int gl1daq_dropped_event = -1;
-  if (gl1daq_dropped()) {
-    // Find the maximum dropped event count
-    gl1daq_dropped_event = std::max_element(packet_events_map.begin(), packet_events_map.end(),
+  int max_reco = std::max_element(packet_events_map.begin(), packet_events_map.end(),
       [](const std::pair<int, int>& a, const std::pair<int, int>& b) { return a.second < b.second; })->second;
     
-    std::vector<int> incomplete_packets_copy = incomplete_packets; // make a copy to iterate over
+
+  if (gl1daq_dropped()) {
+    // Find the maximum dropped event count
+    std::vector<int> incomplete_packets_copy{};
+    for (const auto &packet_id : incomplete_packets) {
+      incomplete_packets_copy.push_back(packet_id);
+    }
     for (const auto &packet_id : incomplete_packets_copy) {
-      if (packet_events_map[packet_id] == gl1daq_dropped_event) {
+      if (packet_events_map[packet_id] == max_reco) {
         incomplete_packets_gl1tagged.push_back(packet_id);
         // Remove the packet from the incomplete_packets vector
         incomplete_packets.erase(std::remove(incomplete_packets.begin(), incomplete_packets.end(), packet_id), incomplete_packets.end());
