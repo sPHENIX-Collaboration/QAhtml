@@ -31,7 +31,7 @@ elif histoarg == "bco":
 print("subsys list is")
 print(subsys)
     
-runtypes = ["_run3physics"]
+runtypes = ["_run3auau"]
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
@@ -68,8 +68,11 @@ def main():
                 subsysAggRuns = {}
                 subsysAggRunsDbtag = {}
                 for aggfile in full_paths:
+                    
                     runnumber = int(aggfile.split("/")[-1].split("-")[1])
                     if runnumber < 66000:
+                        continue
+                    if aggfile.find("_run3physics") != -1:
                         continue
                     dbtag = getBuildDbTag(runtype, aggfile.split("/")[-1])
                     if runnumber in subsysAggRuns:
@@ -116,18 +119,18 @@ def main():
                    
                     if (not run in qaFilesModified) or (qaFilesModified[run] < subsysAggRuns[run]) :
                         
-                        if run < 59000:
+                        if run < 66000:
                             continue
-                        if histoarg == "bco" and run < 61900:
-                            continue
-                        aggFile= get_file(cursor, dictionary[s][0], run)
-
                         
+                        aggFile= get_file(cursor, dictionary[s][0], run)
+                     
                         if len(aggFile) == 0:
                             print("There is no aggregated histos file for run " + str(run))
                             print("Doing nothing.")
                             continue
-                        if len(aggFile) == 1 : 
+                        if len(aggFile) == 1 :
+                            if aggFile[0].find("_run3physics") != -1:
+                                continue
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\")"
                             if histoarg == "bco":
                                 macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\","+"\""+dictionary[s][0].split("_")[4]+"\")"
@@ -146,6 +149,8 @@ def main():
                             for file in aggFile:
                                 # find the db string
                                 filename = file.split("/")[-1]
+                                if file.find("_run3physics") != -1:
+                                    continue
                                 dbtag = getBuildDbTag(runtype, filename)
                                 if dbtag.find("nocdbtag") != -1:
                                     fileToDraw = file

@@ -24,7 +24,7 @@ print("Test is " + str(args.test))
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type
-    query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber,tag;".format(dsttype)
+    query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber,tag order by runnumber desc;".format(dsttype)
     if args.verbose:
         print(query)
     cursor.execute(query)
@@ -109,6 +109,7 @@ def main():
                     tags = thistag.split("_")
                    
                     if tags[1].find("cdbtag") != -1:
+                        latestdbtag=thistag
                         break
                     if int(tags[1].split("p")[1]) > latestdbtagInt:
                         latestdbtag=thistag
