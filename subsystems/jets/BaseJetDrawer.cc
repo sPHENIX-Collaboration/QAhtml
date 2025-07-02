@@ -22,25 +22,28 @@
 //! Base component constructor
 // ----------------------------------------------------------------------------
 /*! Default constructor to initialize base
- *  Jet QA component. All are technically
- *  optional. 
+ *  Jet QA component. All argumentss are
+ *  technically optional. 
  *
  *    \param name  name of component (e.g. "EventWiseRho")
  *    \param modu  name of QAhtml module (e.g. "JetDraw")
  *    \param type  type of jet being drawn, part of the histogram names
  *    \param pref  prefix of histograms being drawn,
  *    \param debug turn debugging on/off
+ *    \param local turn local mode on/off
  */
 BaseJetDrawer::BaseJetDrawer(const std::string& name,
                              const std::string& modu,
                              const std::string& type,
                              const std::string& pref,
-                             const bool debug)
+                             const bool debug,
+                             const bool local)
   : m_name(name)
   , m_module(modu)
   , m_jet_type(type)
   , m_hist_prefix(pref)
   , m_do_debug(debug)
+  , m_do_local(local)
 {}
 
 // public methods to be implemented ===========================================
@@ -363,7 +366,15 @@ void BaseJetDrawer::MakeCanvas(const std::string& name, const int nHist)
 
   // create canvas
   //   - n.b. xpos (-1) negative means do not draw menu bar
-  TCanvas* canvas = new TCanvas(name.data(), "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  TCanvas* canvas;
+  if (m_do_local)
+  {
+    canvas = new TCanvas(name.data(), "", 950, 950);
+  }
+  else
+  {
+    canvas = new TCanvas(name.data(), "", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
+  }
   canvas->UseCurrentStyle();
   gSystem->ProcessEvents();
 

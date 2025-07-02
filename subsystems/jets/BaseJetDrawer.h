@@ -26,7 +26,8 @@ class BaseJetDrawer
                   const std::string& modu = "JetDraw",
                   const std::string& type = "towersub1_antikt",
                   const std::string& pref = "h_eventwiserho",
-                  const bool debug = false);
+                  const bool debug = false,
+                  const bool local = false);
     ~BaseJetDrawer() {};
 
     // public methods to be implemented
@@ -38,12 +39,14 @@ class BaseJetDrawer
 
     // setters
     void SetDoDebug(const bool debug) {m_do_debug = debug;}
+    void SetDoLocal(const bool local) {m_do_local = local;}
     void SetName(const std::string& name) {m_name = name;}
     void SetJetType(const std::string& type) {m_jet_type = type;}
     void SetHistPrefix(const std::string& prefix) {m_hist_prefix = prefix;}
 
     // getters
     bool GetDoDebug() const {return m_do_debug;}
+    bool GetDoLocal() const {return m_do_local;}
     std::string GetName() const {return m_name;}
     std::string GetJetType() const {return m_jet_type;}
     std::string GetHistPrefix() const {return m_hist_prefix;}
@@ -67,6 +70,9 @@ class BaseJetDrawer
 
     ///! turn debugging statements on/off
     bool m_do_debug;
+
+    ///! turn local drawing mode on/off
+    bool m_do_local;
 
     ///! matrix of PlotPads (canvas + pads)
     JetDrawDefs::PlotPadMatrix m_plots;

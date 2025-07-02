@@ -27,11 +27,13 @@ class BaseJetDraw : public QADraw
     // ctor/dtor
     BaseJetDraw(const std::string& name = "JetQA",
                 const std::string& type = "towersub1_antikt",
-                const bool debug = false);
+                const bool debug = false,
+                const bool local = false);
     ~BaseJetDraw();
 
     // getters 
     bool GetDoDebug() const {return m_do_debug;}
+    bool GetDoLocal() const {return m_do_local;}
     std::string GetJetType() const {return m_jet_type;}
     std::string GetName() const {return m_name;}
 
@@ -41,6 +43,7 @@ class BaseJetDraw : public QADraw
 
     // other public methods
     void SetDoDebug(const bool debug);
+    void SetDoLocal(const bool local);
     void SetJetType(const std::string& type);
     void SaveCanvasesToFile(TFile* file);
 
@@ -54,6 +57,9 @@ class BaseJetDraw : public QADraw
 
     ///! turn debugging statements on/off
     bool m_do_debug;
+
+    ///! turn on/off local drawing mode
+    bool m_do_local;
 
     ///! components to do actual histogram drawing
     std::map<std::string, std::unique_ptr<BaseJetDrawer>> m_drawers;

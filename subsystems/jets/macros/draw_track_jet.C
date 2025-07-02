@@ -42,6 +42,10 @@ void draw_track_jet(const std::string& infile,
   // create instance of relevant module
   TrackJetDraw* jets = new TrackJetDraw();
   jets -> SetDoDebug(do_debug);
+  if (!do_html)
+  {
+    jets -> SetDoLocal(true);
+  }
 
   // create draw client
   QADrawClient* client = QADrawClient::instance();
@@ -68,14 +72,14 @@ void draw_track_jet(const std::string& infile,
   {
     jets -> Draw("ALL");
     if (do_debug) std::cout << " --- Drew plots" << std::endl;
-  }
 
-  // save histograms
-  TFile* output = new TFile(outfile.data(), "recreate");
-  jets -> SaveCanvasesToFile(output);
-  if (do_debug)
-  {
-     std::cout << " --- Save plots to file" << std::endl;
+    // save histograms
+    TFile* output = new TFile(outfile.data(), "recreate");
+    jets -> SaveCanvasesToFile(output);
+    if (do_debug)
+    {
+       std::cout << " --- Save plots to file" << std::endl;
+    }
   }
 
   // delete QADrawClient instance

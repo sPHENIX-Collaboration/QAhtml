@@ -10,12 +10,23 @@
 // ----------------------------------------------------------------------------
 //! Subsystem constructor
 // ----------------------------------------------------------------------------
+/*! Default constructor to initialize base
+ *  jet QAhtml module. All arguments are
+ *  technically optional.
+ *
+ *    \param name  name of the QAhtml module (e.g. "JetDraw")
+ *    \param type  type of jet being drawn, part of the histogram names
+ *    \param debug turn debugging mode on/off
+ *    \param local turn local mode on/off
+ */
 BaseJetDraw::BaseJetDraw(const std::string& name,
                          const std::string& type,
-                         const bool debug)
+                         const bool debug,
+                         const bool local)
   : QADraw(name)
   , m_jet_type(type)
   , m_do_debug(debug)
+  , m_do_local(local)
 {
   /* TODO picking out triggers goes here */
 };
@@ -123,6 +134,21 @@ void BaseJetDraw::SetDoDebug(const bool debug)
   for (auto& drawer : m_drawers)
   {
     drawer.second->SetDoDebug(m_do_debug);
+  }
+}
+
+// ----------------------------------------------------------------------------
+//! Turn on/off local mode
+// ----------------------------------------------------------------------------
+/*! Setter to turn on/off local mode for the QA subsystem
+ *  and all of its associated components.
+ */
+void BaseJetDraw::SetDoLocal(const bool local)
+{
+  m_do_local = local;
+  for (auto& drawer : m_drawers)
+  {
+    drawer.second->SetDoLocal(m_do_local);
   }
 }
 
