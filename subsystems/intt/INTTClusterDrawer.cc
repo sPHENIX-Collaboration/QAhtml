@@ -37,9 +37,9 @@ INTTClusterDrawer::~INTTClusterDrawer()
   // ...
 }
 
-int INTTClusterDrawer::MakeCanvas()
+int INTTClusterDrawer::MakeCanvas(int width, int height)
 {
-  if(SingleCanvasDrawer::MakeCanvas())
+  if(SingleCanvasDrawer::MakeCanvas(width, height))
   {
     return 0;
   }

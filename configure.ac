@@ -41,6 +41,7 @@ AC_CONFIG_FILES([
   subsystems/tpcrawhit/Makefile
   subsystems/tpcseeds/Makefile
   subsystems/tpcsil/Makefile
+  subsystems/tracking/Makefile
   subsystems/vertex/Makefile
 ])
 
