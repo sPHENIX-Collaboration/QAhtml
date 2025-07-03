@@ -30,6 +30,51 @@ namespace JetDrawDefs
   };
 
   // ==========================================================================
+  //! List of resolutions to draw
+  // ==========================================================================
+  inline std::vector<uint32_t> VecResToDraw()
+  {
+    static const std::vector<uint32_t> vecResToDraw = {
+      JetDrawDefs::JetRes::R02,
+      JetDrawDefs::JetRes::R03,
+      JetDrawDefs::JetRes::R04,
+      JetDrawDefs::JetRes::R05
+    };
+    return vecResToDraw;
+  }
+
+  // ==========================================================================
+  //! List of triggers to draw (p+p)
+  // ==========================================================================
+  /*! FIXME 999 = JetQADefs::GL1::Inclusive */
+  inline std::vector<uint32_t> VecTrigToDrawPP()
+  {
+    static const std::vector<uint32_t> vecTrigToDrawPP = {
+      JetQADefs::GL1::MBDNSJet1,
+      JetQADefs::GL1::MBDNSJet2,
+      JetQADefs::GL1::MBDNSJet3,
+      JetQADefs::GL1::MBDNSJet4,
+      999  // FIXME swap out for official tag when ready
+    };
+    return vecTrigToDrawPP;
+  }
+
+  // ==========================================================================
+  //! List of triggers to draw (Au+Au)
+  // ==========================================================================
+  /*! FIXME 999 = JetQADefs::GL1::Inclusive */
+  inline std::vector<uint32_t> VecTrigToDrawAuAu()
+  {
+    static const std::vector<uint32_t> vecTrigToDrawAuAu = {
+      JetQADefs::GL1::MBDNSVtx10,  // actually 10 cm
+      JetQADefs::GL1::MBDNSVtx30,  // actually 60 cm
+      JetQADefs::GL1::MBDNSVtx60,   // actually 150 cm
+      999  // FIXME swap out for official tag when ready
+    };
+    return vecTrigToDrawAuAu;
+  }
+
+  // ==========================================================================
   //! Map of resolution index onto name
   // ==========================================================================
   inline std::map<uint32_t, std::string> MapResToName()
@@ -67,6 +112,9 @@ namespace JetDrawDefs
       {JetQADefs::GL1::MBDNSJet2, "JetCoin8GeV"},
       {JetQADefs::GL1::MBDNSJet3, "JetCoin10GeV"},
       {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"},
+      {JetQADefs::GL1::MBDNSVtx10, "MBDNSVtx10"},
+      {JetQADefs::GL1::MBDNSVtx30, "MBDNSVtx30"},
+      {JetQADefs::GL1::MBDNSVtx60, "MBDNSVtx60"},
       {999, "Inclusive"}  // FIXME this should be implemented in core & macros
     };
     return mapTrigToName;
@@ -75,7 +123,6 @@ namespace JetDrawDefs
   // ==========================================================================
   //! Map of trigger index onto tag (FIXME use those from Jet_QA.C)
   // ==========================================================================
-  /*! TODO need to add triggers for AuAu */
   inline std::map<uint32_t, std::string> MapTrigToTag()
   {
     static const std::map<uint32_t, std::string> mapTrigToTag = {
@@ -84,9 +131,24 @@ namespace JetDrawDefs
       {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
       {JetQADefs::GL1::MBDNSJet3, "mbdnsjet3"},
       {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"},
+      {JetQADefs::GL1::MBDNSVtx10, "mbdnsvtx10"},
+      {JetQADefs::GL1::MBDNSVtx30, "mbdnsvtx30"},
+      {JetQADefs::GL1::MBDNSVtx60, "mbdnsvtx60"},
       {999, "inclusive"}  // FIXME this should be implmenented in core & macros
     };
     return mapTrigToTag;
+  }
+
+  // ==========================================================================
+  //! Helper method to heck if a run number is p+p or Au+Au
+  // ==========================================================================
+  /*! Used to check if a run falls in p+p running:
+   *    - Start: Run 30392 (1st recorded run of run 2, 02.26.2024)
+   *    - Stop: Run 53880 (end of p+p running, 09.30.2024)
+   */
+  inline bool IsPP(const int run)
+  {
+    return (run > 30392) && (run <= 53880);
   }
 
   // ==========================================================================
@@ -182,7 +244,6 @@ namespace JetDrawDefs
       // ----------------------------------------------------------------------
       //! Get latest PlotPad at a particular trigger index
       // ----------------------------------------------------------------------
-      /*! FIXME might not be needed... */
       PlotPads& GetBackPlotPad(const std::size_t trig)
       {
         return m_matrix.back().at(trig).back();
@@ -199,7 +260,6 @@ namespace JetDrawDefs
       // ----------------------------------------------------------------------
       //! Get a particular PlotPad at a particular (jet R, trigger) index
       // ----------------------------------------------------------------------
-      /*! FIXME might not be needed... */
       PlotPads& GetPlotPad(const std::size_t page,
                            const std::size_t reso,
                            const std::size_t trig)

@@ -27,7 +27,7 @@
  *    - "RHO" = draw event-wise rho plots,
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "CONSTITUENTS" = draw jet calorimeter constituent plots,
- *    - "SEED" = draw jet seed plots,
+ *    - "SEED" = draw jet seed plots (AuAu only),
  *    - "DIJET" = draw dijet qa plots,
  *    - "ALL" = draw all of the above.
  *
@@ -81,11 +81,14 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                        debug);
 
   // for jet seed plots
-  m_drawers["SEED"] = std::make_unique<JetSeedDrawer>("JetSeed",
-                                                      name,
-                                                      type,
-                                                      "h_jetseedcount",
-                                                      debug);
+  if (!m_is_pp)
+  {
+    m_drawers["SEED"] = std::make_unique<JetSeedDrawer>("JetSeed",
+                                                        name,
+                                                        type,
+                                                        "h_jetseedcount",
+                                                        debug);
+  }
 
   // for calo jet constituent plots
   m_drawers["CONSTITUENTS"] = std::make_unique<JetCstDrawer>("JetCst",

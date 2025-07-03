@@ -4,7 +4,6 @@
 #define BASE_JET_DRAW_H
 
 #include "BaseJetDrawer.h"
-#include <qahtml/QADrawClient.h>
 #include <qahtml/QADraw.h>
 #include <map>
 #include <memory>
@@ -49,6 +48,9 @@ class BaseJetDraw : public QADraw
 
   protected:
 
+    // inherited private methods
+    void Initialize();
+
     ///! name of subsystem
     std::string m_name;
 
@@ -61,28 +63,17 @@ class BaseJetDraw : public QADraw
     ///! turn on/off local drawing mode
     bool m_do_local;
 
+    ///! sets p+p (true) vs. Au+Au mode (false)
+    bool m_is_pp;
+
     ///! components to do actual histogram drawing
     std::map<std::string, std::unique_ptr<BaseJetDrawer>> m_drawers;
 
     ///! triggers we want to draw
-    ///!   - FIXME dynamically allocate based on pp vs. pau
-    std::vector<uint32_t> m_vecTrigToDraw = {
-      JetQADefs::GL1::MBDNSJet1,
-      JetQADefs::GL1::MBDNSJet2,
-      JetQADefs::GL1::MBDNSJet3,
-      JetQADefs::GL1::MBDNSJet4,
-      999  // FIXME swap out for official tag when ready
-    };
+    std::vector<uint32_t> m_vecTrigToDraw;
 
     ///! resolutions we want to draw
-    ///!   - FIXME initialize in ctor
-    std::vector<uint32_t> m_vecResToDraw = {
-      JetDrawDefs::JetRes::R02,
-      JetDrawDefs::JetRes::R03,
-      JetDrawDefs::JetRes::R04,
-      JetDrawDefs::JetRes::R05
-    };
-
+    std::vector<uint32_t> m_vecResToDraw;
 
 };  // end BaseJetDraw
 

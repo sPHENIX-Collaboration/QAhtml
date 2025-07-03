@@ -1,7 +1,9 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #include "BaseJetDraw.h"
+#include "JetDrawDefs.h"
 
+#include <qahtml/QADrawClient.h>
 #include <TFile.h>
 #include <iostream>
 
@@ -27,9 +29,10 @@ BaseJetDraw::BaseJetDraw(const std::string& name,
   , m_jet_type(type)
   , m_do_debug(debug)
   , m_do_local(local)
+  , m_is_pp(true)
 {
-  /* TODO picking out triggers goes here */
-};
+  Initialize();
+}
 
 // ----------------------------------------------------------------------------
 //! Subsystem destructor
@@ -191,4 +194,57 @@ void BaseJetDraw::SaveCanvasesToFile(TFile* file)
   {
     drawer.second->SaveToFile(file);
   }
+}
+
+// inherited private methods ==================================================
+
+// ----------------------------------------------------------------------------
+//! Initialize a module
+// ----------------------------------------------------------------------------
+/*! This method determines if the run being drawn is p+p
+ *  or Au+Au and loads the appropriate list of triggers
+ *  and resolutions to draw.
+ */
+void BaseJetDraw::Initialize()
+{
+  // emit debugging message
+  if (m_do_debug)
+  {
+    std::cout << "  -- Initializing module: " << m_name << std::endl;
+  }
+
+  // connect to draw client
+  QADrawClient* cl = QADrawClient::instance();
+
+  // grab run number & set pp/AuAu mode accordingly
+  m_is_pp = JetDrawDefs::IsPP(cl->RunNumber());
+  if (m_do_debug)
+  {
+    std::cout << "  -- Is Run " << cl->RunNumber() << " p+p? " << m_is_pp << std::endl;
+  }
+
+  // now pick out appropriate trigger list
+  if (m_is_pp)
+  {
+    auto triggers = JetDrawDefs::VecTrigToDrawPP();
+    m_vecTrigToDraw.clear();
+    m_vecTrigToDraw.insert(m_vecTrigToDraw.end(),
+                           triggers.begin(),
+                           triggers.end());
+  }
+  else
+  {
+    auto triggers = JetDrawDefs::VecTrigToDrawAuAu();
+    m_vecTrigToDraw.clear();
+    m_vecTrigToDraw.insert(m_vecTrigToDraw.end(),
+                           triggers.begin(),
+                           triggers.end());
+  }
+
+  // finally, load resolutions to draw
+  auto resos = JetDrawDefs::VecResToDraw();
+  m_vecResToDraw.clear();
+  m_vecResToDraw.insert(m_vecResToDraw.end(),
+                        resos.begin(),
+                        resos.end());
 }
