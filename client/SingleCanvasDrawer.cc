@@ -22,7 +22,7 @@ SingleCanvasDrawer::~SingleCanvasDrawer()
   delete gROOT->FindObject(m_name.c_str());
 }
 
-int SingleCanvasDrawer::MakeCanvas()
+int SingleCanvasDrawer::MakeCanvas(int width, int height)
 {
   TObject* found_object = gROOT->FindObject(m_name.c_str());
   if(found_object && found_object == m_canvas)
@@ -43,29 +43,29 @@ int SingleCanvasDrawer::MakeCanvas()
   }
 
   QADrawClient *cl = QADrawClient::instance();
-  int xsize = cl->GetDisplaySizeX();
-  int ysize = cl->GetDisplaySizeY();
+  if (width <= 0) width = cl->GetDisplaySizeX();
+  if (height <= 0) height = cl->GetDisplaySizeY();
 
   // Running the macro in batch mode -b causes the rootWindow to have size 0
   // These guard clauses should really be in the QADrawClient implementation
   // Batch mode also causes TASImage::WriteImage errors
   // So this shouldn't be run in batch mode at all, anyways
-  if(xsize <= 0)
+  if(width <= 0)
   {
-    xsize = 1920;
+    width = 1920;
     std::cerr << PHWHERE << "\n"
               << "\tQADrawClient::GetDisplaySizeX returned <= 0\n"
-              << "\tUsing xsize = " << xsize << std::endl;
+              << "\tUsing width = " << width << std::endl;
   }
-  if(ysize <= 0)
+  if(height <= 0)
   {
-    ysize = 1080;
+    height = 1080;
     std::cerr << PHWHERE << "\n"
               << "\tQADrawClient::GetDisplaySizeY returned <= 0\n"
-              << "\tUsing ysize = " << ysize << std::endl;
+              << "\tUsing height = " << height << std::endl;
   }
 
-  m_canvas = new TCanvas(m_name.c_str(), m_name.c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
+  m_canvas = new TCanvas(m_name.c_str(), m_name.c_str(), -1, 0, width, height);
   gSystem->ProcessEvents();
 
   return 0;
