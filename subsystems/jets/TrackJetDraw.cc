@@ -24,7 +24,6 @@
  *    - "RHO" = draw event-wise rho plots,
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "DIJET" = draw dijet qa plots,
- *    - "SEED" = draw jet seed plots (AuAu only),
  *    - "TRACK" = draw track-in-jet plots,
  *    - "SUM" = draw track sum plots,
  *    - "ALL" = draw all of the above.
@@ -64,16 +63,6 @@ TrackJetDraw::TrackJetDraw(const std::string& name,
                                                        type,
                                                        "h_dijetqa",
                                                        debug);
-
-  // for jet seed plots
-  if (!m_is_pp)
-  {
-    m_drawers["SEED"] = std::make_unique<JetSeedDrawer>("JetSeed",
-                                                        name,
-                                                        type,
-                                                        "h_jetseedcount",
-                                                        debug);
-  }
 
   // for track sum vs. jet plots
   m_drawers["SUM"] = std::make_unique<JetVsTrackSumDrawer>("JetVsTrackSum",

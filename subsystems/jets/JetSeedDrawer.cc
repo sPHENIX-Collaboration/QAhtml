@@ -27,7 +27,7 @@ JetSeedDrawer::~JetSeedDrawer() {};
 //! Run histogram drawing for each trigger and resolution
 // ------------------------------------------------------------------------
 int JetSeedDrawer::Draw(const std::vector<uint32_t> vecTrigToDraw,
-                        const std::vector<uint32_t> vecResToDraw)
+                        const std::vector<uint32_t> /*vecResToDraw*/)
 {
   // emit debugging message
   if (m_do_debug)
@@ -35,21 +35,17 @@ int JetSeedDrawer::Draw(const std::vector<uint32_t> vecTrigToDraw,
     std::cout << "  -- Drawing component " << m_name << std::endl;
   }
 
-  // loop over resolutions
-  int nDraw = 0;
-  for (const uint32_t resToDraw : vecResToDraw)
-  {
-    // add a row for resolution
-    m_plots.AddRow();
+  // create 1 row to hold trigger vectors
+  m_plots.AddRow();
 
-    // now loop over triggers
-    for (const uint32_t trigToDraw : vecTrigToDraw)
-    {
-      // add a column for trigger and draw hists
-      m_plots.AddColumn();
-      DoDrawing(trigToDraw, resToDraw);
-      ++nDraw;
-    }
+  // loop over triggers
+  int nDraw = 0;
+  for (const uint32_t trigToDraw : vecTrigToDraw)
+  {
+    // add a column for trigger and draw hists
+    m_plots.AddColumn();
+    DoDrawing(trigToDraw, 0);
+    ++nDraw;
   }
   return nDraw;
 }
@@ -58,7 +54,7 @@ int JetSeedDrawer::Draw(const std::vector<uint32_t> vecTrigToDraw,
 //! Generate HTML pages for each trigger and resolution
 // ------------------------------------------------------------------------
 int JetSeedDrawer::MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
-                            const std::vector<uint32_t> vecResToDraw,
+                            const std::vector<uint32_t> /*vecResToDraw*/,
                             const QADraw& subsystem)
 {
   // emit debugging messages
@@ -70,32 +66,24 @@ int JetSeedDrawer::MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
   // instantiate draw client
   QADrawClient* cl = QADrawClient::instance();
 
-  // loop over resolutions and triggers
-  for (std::size_t iRes = 0; iRes < vecResToDraw.size(); ++iRes)
+  // loop over triggers to draw
+  for (std::size_t iTrig = 0; iTrig < vecTrigToDraw.size(); ++iTrig)
   {
-    // now loop over triggers
-    for (std::size_t iTrig = 0; iTrig < vecTrigToDraw.size(); ++iTrig)
+    // grab index & name of trigger being drawn
+    const uint32_t idTrig = vecTrigToDraw[iTrig];
+    const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
+
+    // make html pages
+    for (const auto& plot : m_plots.GetVecPlotPads(0, iTrig))
     {
-      // grab index & name of trigger being drawn
-      const uint32_t idTrig = vecTrigToDraw[iTrig];
-      const std::string nameTrig = JetDrawDefs::MapTrigToName().at(idTrig);
-
-      // grab index & name of resolution being drawn
-      const uint32_t idRes = vecResToDraw[iRes];
-      const std::string nameRes = JetDrawDefs::MapResToName().at(idRes);
-      const std::string dirRes = nameTrig + "/" + nameRes;
-      const std::string fileRes = nameTrig + "_" + nameRes;
-
-      // make html pages
-      for (const auto& plot : m_plots.GetVecPlotPads(iRes, iTrig))
-      {
-        const std::string name = plot.canvas->GetName();
-        const std::string dir = dirRes + "/JetSeeds/" + name;
-        const std::string png = cl->htmlRegisterPage(subsystem, dir, name, "png");
-        cl->CanvasToPng(plot.canvas, png);
-      }
+      const std::string name = plot.canvas->GetName();
+      const std::string dir = nameTrig + "/" + name;
+      const std::string png = cl->htmlRegisterPage(subsystem, dir, name, "png");
+      cl->CanvasToPng(plot.canvas, png);
     }
   }
+
+  // return w/o error
   return 0;
 }
 
@@ -104,29 +92,12 @@ int JetSeedDrawer::MakeHtml(const std::vector<uint32_t> vecTrigToDraw,
 // ------------------------------------------------------------------------
 //! Draw histograms for a given trigger and resolution
 // ------------------------------------------------------------------------
-void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
+void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
 {
   // emit debugging message
   if (m_do_debug)
   {
-    switch (res)
-    {
-      case JetDrawDefs::JetRes::R02:
-        std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.2)" << std::endl;
-        break;
-      case JetDrawDefs::JetRes::R03:
-        std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.3)" << std::endl;
-        break;
-      case JetDrawDefs::JetRes::R04:
-        std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.4)" << std::endl;
-        break;
-      case JetDrawDefs::JetRes::R05:
-        std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ", R = 0.5)" << std::endl;
-        break;
-      default:
-        std::cerr << "Warning: trying to draw jet seed histograms with Unknown resolution" << std::endl;
-        return;
-    }
+    std::cout << "  -- Drawing jet seed histograms (trig = " << trig << ")" << std::endl;
   }
 
   // for hist names
@@ -135,8 +106,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
                              + JetDrawDefs::MapTrigToTag().at(trig)
                              + "_"
                              + m_jet_type
-                             + "_"
-                             + JetDrawDefs::MapResToTag().at(res);
+                             + "_r02";
 
   // connect to draw client
   QADrawClient* cl = QADrawClient::instance();
@@ -226,9 +196,9 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
   };
 
   // draw raw seed hists
-  DrawHists("JetSeeds_Raw", {0, 1, 2, 3}, hists, trig, res);
+  DrawHists("JetSeeds_Raw", {0, 1, 2, 3}, hists, trig);
 
   // draw subtracted seed hists
-  DrawHists("JetSeeds_Sub", {4, 5, 6, 7}, hists, trig, res);
+  DrawHists("JetSeeds_Sub", {4, 5, 6, 7}, hists, trig);
   return;
 }
