@@ -38,9 +38,9 @@ INTTRawHitChipDrawer::~INTTRawHitChipDrawer()
   // Do nothing
 }
 
-int INTTRawHitChipDrawer::MakeCanvas()
+int INTTRawHitChipDrawer::MakeCanvas(int width, int height)
 {
-  if(SingleCanvasDrawer::MakeCanvas())
+  if(SingleCanvasDrawer::MakeCanvas(width, height))
   {
     return 0;
   }
