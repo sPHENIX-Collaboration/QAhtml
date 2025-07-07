@@ -28,7 +28,7 @@ print("Verbose is " + str(args.verbose))
 print("Test is " + str(args.test))
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
-    dsttype = type + runtype
+    dsttype = type
     query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber, tag order by runnumber desc;".format(dsttype)
     if args.verbose:
         print(query)
@@ -85,7 +85,7 @@ def main():
                             histtype = hist+"{:02d}".format(ROC)+"_"+str(EP)
                         elif hist.find("ebdc") == -1:
                             histtype=hist+str(ROC)
-                        histtype += runtype
+                    
                        
                         thisfile = get_aggregated_file(FCReadCursor, histtype, run)
                         if len(thisfile) > 0:

@@ -27,7 +27,7 @@ elif args.histotype == "seed":
     track_hist_types = ["HIST_DST_TRKR_SEED"]
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
-    dsttype = type + "_"+runtype
+    dsttype = type
     query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber, tag order by runnumber desc;".format(dsttype)
     if args.verbose:
         print(query)
@@ -36,8 +36,8 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
     return runnumbers
 
 def getPaths(cursor, run, dataset, type, runtype):
-    dsttype = type+"_"+runtype
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' and files.lfn=datasets.filename".format(run,dataset, dsttype,dataset)
+    dsttype = type
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' and files.lfn=datasets.filename".format(run,runtype, dsttype,dataset)
     if args.verbose == True:
         print(query)
     cursor.execute(query)
