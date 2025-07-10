@@ -15,7 +15,7 @@ if args.test and not args.verbose:
     args.verbose = True
     
 runtypes = ["_run3auau"]
-subsys = { "calofitting" : ["HIST_CALOFITTINGQA","CALOFITTINGQA","draw_calo_fitting.C"],"calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"], "globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"],"jets" : ["HIST_JETS","JETSQA","draw_jet.C"] }
+subsys = { "calofitting" : ["HIST_CALOFITTINGQA","CALOFITTINGQA","draw_calo_fitting.C"],"calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"], "globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"],"jets" : ["HIST_JETS","JETSQA","draw_calo_jet.C"] }
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 

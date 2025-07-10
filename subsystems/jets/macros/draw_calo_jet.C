@@ -1,18 +1,16 @@
 #include <qahtml/QADrawClient.h>
-#include <iostream>
-#include <qahtml/jet/JetDraw.h>
+#include <qahtml/jet/CaloJetDraw.h>
 #include <sPhenixStyle.C>
 #include <TFile.h>
 #include <TSystem.h>
+#include <iostream>
 
 R__LOAD_LIBRARY(libqadrawjet.so)
 
-
-
 // ----------------------------------------------------------------------------
-//! Draw jet QA
+//! Draw calo jet QA
 // ----------------------------------------------------------------------------
-/*! Short ROOT macro to test the Jet QADrawClient.
+/*! Short ROOT macro to test the Calo Jet QADrawClient.
  *  Reads histograms in `infile` and saves produced
  *  plots to `outfile`.
  *
@@ -21,24 +19,32 @@ R__LOAD_LIBRARY(libqadrawjet.so)
  *  \param      do_debug turn on (true)/ off (false) debugging messages
  *  \param      do_html  turn on (true)/ off (false) trying to make html page
  */
-void draw_jet(const std::string& infile,
-              const std::string& outfile,
-              const bool do_debug = false,
-              const bool do_html = false)
+void draw_calo_jet(const std::string& infile,
+                   const std::string& outfile,
+                   const bool do_debug = false,
+                   const bool do_html = false)
 {
 
   // set plotting style to sPHENIX
   SetsPhenixStyle();
   if (do_debug)
   {
-    std::cout << " --- Testing JetDraw\n"
+    std::cout << " --- Testing CaloJetDraw\n"
               << " --- Style set to sPHENIX"
               << std::endl;
   }
 
+  // make sure hist title disply is DEFINITELY on
+  gStyle -> SetOptTitle(1);
+  gROOT  -> ForceStyle();
+
   // create instance of relevant module
-  JetDraw* jets = new JetDraw();
+  CaloJetDraw* jets = new CaloJetDraw();
   jets -> SetDoDebug(do_debug);
+  if (!do_html)
+  {
+    jets -> SetDoLocal(true);
+  }
 
   // create draw client
   QADrawClient* client = QADrawClient::instance();
@@ -89,3 +95,4 @@ void draw_jet(const std::string& infile,
 }
 
 // end ------------------------------------------------------------------------
+
