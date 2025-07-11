@@ -160,10 +160,7 @@ def main():
                             break;
                     elif nfiles > 100:
                         break
-                # wait for at least 10 files
-                if nfiles < 4:
-                    print("not enough files")
-                    continue
+                
                 if args.verbose:
                     print("executing command")
                     print(command)

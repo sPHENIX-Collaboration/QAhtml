@@ -142,26 +142,28 @@ def main():
                                 subprocess.run(cmd)
                                 updatedRuns.append(run)
                         else :
-                            dbtagToDraw = "001"
+                            dbtagToDraw = "000"
                             fileToDraw = ""
                             # find the file with the most recent db tag
-                       
+                            if args.verbose:
+                                print("file options")
+                                print(aggFile)
+                            #find file with most recent db tag
                             for file in aggFile:
                                 # find the db string
                                 filename = file.split("/")[-1]
                                 if file.find("_run3physics") != -1:
                                     continue
                                 dbtag = getBuildDbTag(runtype, filename)
-                                if dbtag.find("nocdbtag") != -1:
+                                if dbtag.find("newcdbtag") != -1 and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
                                     fileToDraw = file
-                                    dbtagToDraw = "nocdbtag"
-                                    break
-                                else:
-                                    if int(dbtag.split("p")[1]) > int(dbtagToDraw):
-                                        fileToDraw = file
-                                        dbtagToDraw = int(dbtag.split("p")[1])
-                                        #Draw that one
+                                    dbtagToDraw = int(filename.split("_v")[1][0:3])
                                 
+                                elif(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
+                                    fileToDraw = file
+                                    dbtagToDraw = int(dbtag.split("p")[1])
+
+                            #Draw that one
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+fileToDraw+"\")"
                             if histoarg == "bco":
                                 macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\","+"\""+dictionary[s][0].split("_")[4]+"\")"
@@ -181,7 +183,7 @@ def main():
                     print(updatedRuns)
 
     conn.close()
-
+    print("Finished script")
     
 if __name__ == "__main__":
     main()

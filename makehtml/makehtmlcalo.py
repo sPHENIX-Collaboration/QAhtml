@@ -122,7 +122,9 @@ def main():
                             # find the db string
                             filename = file.split("/")[-1]
                             dbtag = getBuildDbTag(runtype, filename)
-                            
+                            print("dbtag is " + dbtag)
+                            print("dbtag to draw is " + str(dbtagToDraw))
+                            print("file to draw is " +fileToDraw)
                             if dbtag.find("newcdbtag") != -1 and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
                                 fileToDraw = file
                                 dbtagToDraw = int(filename.split("_v")[1][0:3])
@@ -147,6 +149,6 @@ def main():
                 print("run numbers updated")
                 print(updatedRuns)
     conn.close()
-    
+    print("Finished script")
 if __name__ == "__main__":
     main()
