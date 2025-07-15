@@ -2,6 +2,7 @@
 #define MICROMEGAS_MICROMEGASDRAW_H__
 
 #include <qahtml/QADraw.h>
+#include <vector>
 
 class TCanvas;
 class TPad;
@@ -18,17 +19,22 @@ class MicromegasDraw : public QADraw
   int DBVarInit();
 
  private:
-  int MakeCanvas(const std::string &name, int num);
   TH1* ClusterAverage(TH2*, std::string);
+
+  // get canvas by name
+  TCanvas* get_canvas(const std::string& name, bool clear = true );
+
+  // create canbas
+  TCanvas* create_canvas(const std::string &name);
 
   int DrawBCOInfo();
   int DrawClusterInfo();
   int DrawRawInfo();
   int DrawSummary();
 
-  TCanvas *TC[4]{};
-  TPad *transparent[4]{};
-  TPad *Pad[4][4]{};
+  // canvases
+  std::vector<TCanvas*> m_canvas;
+
 };
 
 #endif

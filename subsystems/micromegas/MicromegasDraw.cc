@@ -28,6 +28,54 @@
 #include <iostream>
 #include <sstream>
 
+namespace
+{
+ //! make canvas editable in creator, and non-editable in destructor
+  class CanvasEditor
+  {
+    public:
+    CanvasEditor( TCanvas* cv ):m_cv(cv)
+    { if( m_cv ) m_cv->SetEditable(true); }
+
+    ~CanvasEditor()
+    // {}
+    { if( m_cv ) m_cv->SetEditable(false); }
+
+    private:
+    TCanvas* m_cv = nullptr;
+  };
+
+  TPad* create_transparent_pad( const std::string& name )
+  {
+    auto transparent = new TPad( (name+"_transparent").c_str(), "", 0, 0, 1, 1);
+    transparent->SetFillStyle(4000);
+    transparent->Draw();
+    return transparent;
+  };
+
+  // divide canvas, adjusting canvas positions to leave room for a banner at the top
+  void divide_canvas( TCanvas* cv, int ncol, int nrow )
+  {
+    static constexpr double max_height = 0.94;
+
+    cv->Divide( ncol, nrow );
+    for( int i = 0; i < ncol*nrow; ++i )
+    {
+      auto pad = cv->GetPad( i+1 );
+      int col = i%ncol;
+      int row = i/ncol;
+      const double xmin = double(col)/ncol;
+      const double xmax = double(col+1)/ncol;
+
+      const double ymin = max_height*(1. - double(row+1)/nrow);
+      const double ymax = max_height*(1. - double(row)/nrow);
+      pad->SetPad( xmin, ymin, xmax, ymax );
+    }
+  }
+
+
+}
+
 //____________________________________________________________________________________________________
 MicromegasDraw::MicromegasDraw(const std::string &name)
   : QADraw(name)
@@ -92,40 +140,52 @@ TH1* MicromegasDraw::ClusterAverage(TH2* hist, std::string type)
   return graph;
 }
 
-//____________________________________________________________________________________________________
-int MicromegasDraw::MakeCanvas(const std::string &name, int num)
+
+
+//__________________________________________________________________________________
+TCanvas* MicromegasDraw::get_canvas(const std::string& name, bool clear )
 {
+  auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( name.c_str() ) );
+  if( !cv ) cv = create_canvas( name );
+  if( cv && clear ) cv->Clear("D");
+  return cv;
+}
+
+//__________________________________________________________________________________
+TCanvas* MicromegasDraw::create_canvas(const std::string &name)
+{
+
+  if( Verbosity() )
+  { std::cout << "MicromegasDraw::create_canvas - name: " << name << std::endl; }
+
   QADrawClient *cl = QADrawClient::instance();
-  gStyle->SetOptTitle(1);
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
-  TC[num] = new TCanvas(name.c_str(), (boost::format("Micromegas Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
-  gSystem->ProcessEvents();
 
-  Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.52, 0.45, 0.97, 0);
-  Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.52, 0.95, 0.97, 0);
-  Pad[num][2] = new TPad((boost::format("mypad%d2") % num).str().c_str(), "name", 0.05, 0.02, 0.45, 0.47, 0);
-  Pad[num][3] = new TPad((boost::format("mypad%d3") % num).str().c_str(), "here", 0.5, 0.02, 0.95, 0.47, 0);
+  if (name == "TPOT_CLUSTERS_MEAN")
+  {
 
-  for (int i=0; i<4; i++)
-    {
-      Pad[num][i]->SetTopMargin(0.15);
-      Pad[num][i]->SetBottomMargin(0.15);
-      Pad[num][i]->SetRightMargin(0.15);
-      Pad[num][i]->SetLeftMargin(0.15);
-    }
+    auto cv = new TCanvas(name.c_str(), "TPOT cluster mean distributions", -1, 0,xsize/1.2, ysize/1.2);
+    gSystem->ProcessEvents();
+    divide_canvas(cv, 2, 2);
+    create_transparent_pad(name);
+    cv->SetEditable(false);
+    m_canvas.push_back( cv );
+    return cv;
 
-  Pad[num][0]->Draw();
-  Pad[num][1]->Draw();
-  Pad[num][2]->Draw();
-  Pad[num][3]->Draw();
+  } else if (name == "TPOT_CLUSTERS_RAW") {
 
-  // this one is used to plot the run number on the canvas
-  transparent[num] = new TPad((boost::format("transparent%d") % num).str().c_str(), "this does not show", 0, 0, 1, 1);
-  transparent[num]->SetFillStyle(4000);
-  transparent[num]->Draw();
+    auto cv = new TCanvas(name.c_str(), "TPOT cluster raw distributions [expert]", -1, 0,xsize/1.2, ysize/1.2);
+    gSystem->ProcessEvents();
+    divide_canvas(cv, 2, 2);
+    create_transparent_pad(name);
+    cv->SetEditable(false);
+    m_canvas.push_back( cv );
+    return cv;
 
-  return 0;
+  }
+
+  return nullptr;
 }
 
 //____________________________________________________________________________________________________
@@ -159,15 +219,15 @@ int MicromegasDraw::DrawClusterInfo()
   auto h_cluster_size = ClusterAverage(h_cluster_size_raw, "size");
   auto h_cluster_charge = ClusterAverage(h_cluster_charge_raw, "charge");
 
-  if (!TC[0])
+  auto cv = get_canvas("TPOT_CLUSTERS_MEAN");
+  if( !cv )
   {
-    MakeCanvas("ClusterQA", 0);
+    if( Verbosity() ) std::cout << "MicromegasDraw::DrawClusterInfo - no canvas" << std::endl;
+    return -1;
   }
 
-  TC[0]->cd();
-  TC[0]->Clear("D");
-
-  Pad[0][1]->cd();
+  CanvasEditor cv_edit(cv);
+  cv->cd(1);
   h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
   h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
   h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
@@ -176,7 +236,7 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_multiplicity->SetMaximum(10);
   h_cluster_multiplicity->DrawCopy("P");
 
-  Pad[0][2]->cd();
+  cv->cd(2);
   h_cluster_size->SetTitle("Cluster Size");
   h_cluster_size->GetXaxis()->SetTitle("Chamber");
   h_cluster_size->GetYaxis()->SetTitle("Size");
@@ -185,7 +245,7 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_size->SetMaximum(8);
   h_cluster_size->DrawCopy("P");
 
-  Pad[0][0]->cd();
+  cv->cd(3);
   h_cluster_charge->SetTitle("Cluster Charge");
   h_cluster_charge->GetXaxis()->SetTitle("Chamber");
   h_cluster_charge->GetYaxis()->SetTitle("Charge");
@@ -194,7 +254,7 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_charge->SetMaximum(1000);
   h_cluster_charge->DrawCopy("P");
 
-  Pad[0][3]->cd();
+  cv->cd(4);
   efficiency->SetMinimum(0);
   efficiency->SetMaximum(1);
   efficiency->SetTitle("Efficiency Estimate by Chamber");
@@ -203,8 +263,7 @@ int MicromegasDraw::DrawClusterInfo()
   efficiency->SetStats(0);
   efficiency->DrawCopy( "P" );
 
-  TC[0]->Update();
-
+  cv->Update();
   return 0;
 }
 
@@ -222,13 +281,13 @@ int MicromegasDraw::DrawRawInfo()
       return -1;
     }
 
-  if (!TC[1])
-    {
-      MakeCanvas("RawQA", 1);
-    }
-
-  TC[1]->cd();
-  TC[1]->Clear("D");
+  auto cv = get_canvas("TPOT_CLUSTERS_RAW");
+  if( !cv )
+  {
+    if( Verbosity() ) std::cout << "MicromegasDraw::DrawRawInfo - no canvas" << std::endl;
+    return -1;
+  }
+  CanvasEditor cv_edit(cv);
 
   auto draw_profile = []( TH2* h )
   {
@@ -238,28 +297,28 @@ int MicromegasDraw::DrawRawInfo()
   };
 
 
-  Pad[1][0]->cd();
+  cv->cd(1);
   h_cluster_charge->SetTitle("Cluster Charge");
   h_cluster_charge->GetXaxis()->SetTitle("Chamber");
   h_cluster_charge->GetYaxis()->SetTitle("Charge");
   h_cluster_charge->DrawCopy("COLZ");
   draw_profile(h_cluster_charge);
 
-  Pad[1][1]->cd();
+  cv->cd(2);
   h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
   h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
   h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
   h_cluster_multiplicity->DrawCopy("COLZ");
   draw_profile(h_cluster_multiplicity);
 
-  Pad[1][2]->cd();
+  cv->cd(3);
   h_cluster_size->SetTitle("Cluster Size");
   h_cluster_size->GetXaxis()->SetTitle("Chamber");
   h_cluster_size->GetYaxis()->SetTitle("Size");
   h_cluster_size->DrawCopy("COLZ");
   draw_profile(h_cluster_size);
 
-  TC[1]->Update();
+  cv->Update();
   return 0;
 }
 
@@ -282,31 +341,25 @@ int MicromegasDraw::MakeHtml(const std::string &what)
   // average cluster information
   if (what == "ALL" || what == "CLUSTERS")
   {
-    if( TC[0] )
-    {
-      pngfile = cl->htmlRegisterPage(*this, "cluster_info", "1", "png");
-      cl->CanvasToPng(TC[0], pngfile);
-    }
+    pngfile = cl->htmlRegisterPage(*this, "cluster_info", "1", "png");
+    auto cv = get_canvas("TPOT_CLUSTERS_MEAN" );
+    cl->CanvasToPng(cv, pngfile);
   }
 
   // raw cluster information (experts)
   if (what == "ALL" || what == "RAW")
   {
-    if( TC[1] )
-    {
-      pngfile = cl->htmlRegisterPage(*this, "raw_cluster_info", "2", "png");
-      cl->CanvasToPng(TC[1], pngfile);
-    }
+    pngfile = cl->htmlRegisterPage(*this, "raw_cluster_info", "2", "png");
+    auto cv = get_canvas("TPOT_CLUSTERS_RAW" );
+    cl->CanvasToPng(cv, pngfile);
   }
 
   // summary page
   if (what == "ALL" || what == "SUMMARY")
   {
-    if( TC[2] )
-    {
-      pngfile = cl->htmlRegisterPage(*this, "raw_cluster_info", "2", "png");
-      cl->CanvasToPng(TC[2], pngfile);
-    }
+    pngfile = cl->htmlRegisterPage(*this, "tpot summary", "3", "png");
+    auto cv = get_canvas("TPOT_CLUSTERS_RAW" );
+    cl->CanvasToPng(cv, pngfile);
   }
 
   return 0;
