@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream>
 
+//____________________________________________________________________________________________________
 MicromegasDraw::MicromegasDraw(const std::string &name)
   : QADraw(name)
 {
@@ -35,11 +36,17 @@ MicromegasDraw::MicromegasDraw(const std::string &name)
   return;
 }
 
+//____________________________________________________________________________________________________
 int MicromegasDraw::Draw(const std::string &what)
 {
   /* SetsPhenixStyle(); */
   int iret = 0;
   int idraw = 0;
+  if (what == 'ALL' || what == "BCO" )
+    {
+      iret += DrawBCOInfo();
+      idraw++;
+    }
   if (what == "ALL" || what == "CLUSTERS")
     {
       iret += DrawClusterInfo();
@@ -50,6 +57,13 @@ int MicromegasDraw::Draw(const std::string &what)
       iret += DrawRawInfo();
       idraw++;
     }
+  if (what == "ALL" || what == "SUMMARY")
+    {
+      iret += DrawSummary();
+      idraw++;
+    }
+
+
   if (!idraw)
     {
       std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -58,6 +72,7 @@ int MicromegasDraw::Draw(const std::string &what)
   return iret;
 }
 
+//____________________________________________________________________________________________________
 TH1* MicromegasDraw::ClusterAverage(TH2* hist, std::string type)
 {
   int nX = hist->GetNbinsX();
@@ -91,6 +106,7 @@ TH1* MicromegasDraw::ClusterAverage(TH2* hist, std::string type)
   return graph;
 }
 
+//____________________________________________________________________________________________________
 int MicromegasDraw::MakeCanvas(const std::string &name, int num)
 {
   QADrawClient *cl = QADrawClient::instance();
@@ -126,6 +142,11 @@ int MicromegasDraw::MakeCanvas(const std::string &name, int num)
   return 0;
 }
 
+//____________________________________________________________________________________________________
+int MicromegasDraw::DrawBCOInfo()
+{ return 0; }
+
+//____________________________________________________________________________________________________
 int MicromegasDraw::DrawClusterInfo()
 {
   QADrawClient *cl = QADrawClient::instance();
@@ -194,6 +215,7 @@ int MicromegasDraw::DrawClusterInfo()
   return 0;
 }
 
+//____________________________________________________________________________________________________
 int MicromegasDraw::DrawRawInfo()
 {
   QADrawClient *cl = QADrawClient::instance();
@@ -219,30 +241,29 @@ int MicromegasDraw::DrawRawInfo()
   h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
   h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
   h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
-  h_cluster_multiplicity->SetMinimum(0);
-  h_cluster_multiplicity->SetMaximum(10);
   h_cluster_multiplicity->DrawCopy("COLZ");
 
   Pad[1][1]->cd();
   h_cluster_size->SetTitle("Cluster Size");
   h_cluster_size->GetXaxis()->SetTitle("Chamber");
   h_cluster_size->GetYaxis()->SetTitle("Size");
-  h_cluster_size->SetMinimum(0);
-  h_cluster_size->SetMaximum(8);
   h_cluster_size->DrawCopy("COLZ");
 
   Pad[1][2]->cd();
   h_cluster_charge->SetTitle("Cluster Charge");
   h_cluster_charge->GetXaxis()->SetTitle("Chamber");
   h_cluster_charge->GetYaxis()->SetTitle("Charge");
-  h_cluster_charge->SetMinimum(0);
-  h_cluster_charge->SetMaximum(1000);
   h_cluster_charge->DrawCopy("COLZ");
 
   TC[1]->Update();
   return 0;
 }
 
+//____________________________________________________________________________________________________
+int MicromegasDraw::DrawSummary()
+{ return 0; }
+
+//________________________________________________________________
 int MicromegasDraw::MakeHtml(const std::string &what)
 {
   int iret = Draw(what);
@@ -254,21 +275,41 @@ int MicromegasDraw::MakeHtml(const std::string &what)
   auto cl = QADrawClient::instance();
   std::string pngfile;
 
-  // Register the canvas png file to the menu and produces the png file.
-
+  // average cluster information
   if (what == "ALL" || what == "CLUSTERS")
+  {
+    if( TC[0] )
     {
       pngfile = cl->htmlRegisterPage(*this, "cluster_info", "1", "png");
       cl->CanvasToPng(TC[0], pngfile);
     }
+  }
 
+  // raw cluster information (experts)
+  if (what == "ALL" || what == "RAW")
+  {
+    if( TC[1] )
+    {
+      pngfile = cl->htmlRegisterPage(*this, "raw_cluster_info", "2", "png");
+      cl->CanvasToPng(TC[1], pngfile);
+    }
+  }
+
+  // summary page
+  if (what == "ALL" || what == "SUMMARY")
+  {
+    if( TC[2] )
+    {
+      pngfile = cl->htmlRegisterPage(*this, "raw_cluster_info", "2", "png");
+      cl->CanvasToPng(TC[2], pngfile);
+    }
+  }
 
   return 0;
 }
 
+//________________________________________________________________
 int MicromegasDraw::DBVarInit()
 {
-  /* db = new QADrawDB(this); */
-  /* db->DBInit(); */
   return 0;
 }
