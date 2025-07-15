@@ -42,7 +42,7 @@ int MicromegasDraw::Draw(const std::string &what)
   /* SetsPhenixStyle(); */
   int iret = 0;
   int idraw = 0;
-  if (what == 'ALL' || what == "BCO" )
+  if (what == "ALL" || what == "BCO" )
     {
       iret += DrawBCOInfo();
       idraw++;
@@ -75,31 +75,17 @@ int MicromegasDraw::Draw(const std::string &what)
 //____________________________________________________________________________________________________
 TH1* MicromegasDraw::ClusterAverage(TH2* hist, std::string type)
 {
-  int nX = hist->GetNbinsX();
-  int nY = hist->GetNbinsY();
-
+  const auto nX = hist->GetNbinsX();
   auto graph = new TH1F( Form("avg_%s", type.c_str()), "", nX, hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
 
-  std::vector<double> xValues, yAverages;
-
-  for (int i = 1; i <= nX; ++i)
-    {
-      double sum_y = 0;
-      double totalEntries = 0;
-      for (int j = 1; j <= nY; ++j)
-	{
-	  double value = hist->GetBinContent(i, j);
-	  double center = hist->GetYaxis()->GetBinCenter(j);
-	  sum_y += value * center;
-	  totalEntries += value;
-	}
-
-      double average;
-      if (totalEntries > 0){average = sum_y / totalEntries;} else{average = 0;}
-      graph->SetBinContent(i, average);
-      const char* label = hist->GetXaxis()->GetBinLabel(i);
-      graph->GetXaxis()->SetBinLabel(i, label);
-    }
+  //
+  for (int ix = 1; ix <= nX; ++ix)
+  {
+    std::unique_ptr<TH1> h( hist->ProjectionY("proj", ix, ix ));
+    graph->SetBinContent(ix, h->GetMean() );
+    graph->SetBinError(ix, h->GetMeanError() );
+    graph->GetXaxis()->SetBinLabel(ix, hist->GetXaxis()->GetBinLabel(ix) );
+  }
 
   graph->SetMarkerStyle(8);
 
@@ -163,9 +149,12 @@ int MicromegasDraw::DrawClusterInfo()
     return -1;
   }
 
+  // efficiency histogram
   auto efficiency = static_cast<TH1*>(h_cluster_count_found->Clone("efficiency"));
-  efficiency->Divide(h_cluster_count_ref);
+  efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
+  efficiency->SetMarkerStyle(20);
 
+  // per chamber efficiency distributions
   auto h_cluster_multiplicity = ClusterAverage(h_cluster_multiplicity_raw, "mult");
   auto h_cluster_size = ClusterAverage(h_cluster_size_raw, "size");
   auto h_cluster_charge = ClusterAverage(h_cluster_charge_raw, "charge");
@@ -182,6 +171,7 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
   h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
   h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
+  h_cluster_multiplicity->SetStats(0);
   h_cluster_multiplicity->SetMinimum(0);
   h_cluster_multiplicity->SetMaximum(10);
   h_cluster_multiplicity->DrawCopy("P");
@@ -190,6 +180,7 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_size->SetTitle("Cluster Size");
   h_cluster_size->GetXaxis()->SetTitle("Chamber");
   h_cluster_size->GetYaxis()->SetTitle("Size");
+  h_cluster_size->SetStats(0);
   h_cluster_size->SetMinimum(0);
   h_cluster_size->SetMaximum(8);
   h_cluster_size->DrawCopy("P");
@@ -198,6 +189,7 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_charge->SetTitle("Cluster Charge");
   h_cluster_charge->GetXaxis()->SetTitle("Chamber");
   h_cluster_charge->GetYaxis()->SetTitle("Charge");
+  h_cluster_charge->SetStats(0);
   h_cluster_charge->SetMinimum(0);
   h_cluster_charge->SetMaximum(1000);
   h_cluster_charge->DrawCopy("P");
@@ -208,7 +200,8 @@ int MicromegasDraw::DrawClusterInfo()
   efficiency->SetTitle("Efficiency Estimate by Chamber");
   efficiency->GetXaxis()->SetTitle("Chamber");
   efficiency->GetYaxis()->SetTitle("Efficiency");
-  efficiency->DrawCopy();
+  efficiency->SetStats(0);
+  efficiency->DrawCopy( "P" );
 
   TC[0]->Update();
 
@@ -237,23 +230,34 @@ int MicromegasDraw::DrawRawInfo()
   TC[1]->cd();
   TC[1]->Clear("D");
 
+  auto draw_profile = []( TH2* h )
+  {
+    auto p = h->ProfileX( Form( "%s_p", h->GetName() ) );
+    p->SetMarkerStyle(20);
+    p->Draw("same");
+  };
+
+
   Pad[1][0]->cd();
-  h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
-  h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
-  h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
-  h_cluster_multiplicity->DrawCopy("COLZ");
-
-  Pad[1][1]->cd();
-  h_cluster_size->SetTitle("Cluster Size");
-  h_cluster_size->GetXaxis()->SetTitle("Chamber");
-  h_cluster_size->GetYaxis()->SetTitle("Size");
-  h_cluster_size->DrawCopy("COLZ");
-
-  Pad[1][2]->cd();
   h_cluster_charge->SetTitle("Cluster Charge");
   h_cluster_charge->GetXaxis()->SetTitle("Chamber");
   h_cluster_charge->GetYaxis()->SetTitle("Charge");
   h_cluster_charge->DrawCopy("COLZ");
+  draw_profile(h_cluster_charge);
+
+  Pad[1][1]->cd();
+  h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
+  h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
+  h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
+  h_cluster_multiplicity->DrawCopy("COLZ");
+  draw_profile(h_cluster_multiplicity);
+
+  Pad[1][2]->cd();
+  h_cluster_size->SetTitle("Cluster Size");
+  h_cluster_size->GetXaxis()->SetTitle("Chamber");
+  h_cluster_size->GetYaxis()->SetTitle("Size");
+  h_cluster_size->DrawCopy("COLZ");
+  draw_profile(h_cluster_size);
 
   TC[1]->Update();
   return 0;
