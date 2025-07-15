@@ -6,18 +6,15 @@
 #include <qahtml/QADrawDB.h>
 
 #include <TCanvas.h>
-#include <TDatime.h>
-#include <TGraphErrors.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TLine.h>
 #include <TProfile.h>
 #include <TPad.h>
 #include <TROOT.h>
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
-#include <TLatex.h>
-#include <TLegend.h>
 
 
 #include <boost/format.hpp>
@@ -73,6 +70,34 @@ namespace
     }
   }
 
+
+  // draw an horizontal line that extends automatically from both sides of a canvas
+  [[maybe_unused]] TLine* horizontal_line( TVirtualPad* pad, Double_t y )
+  {
+    Double_t xMin = pad->GetUxmin();
+    Double_t xMax = pad->GetUxmax();
+
+    if( pad->GetLogx() )
+    {
+      xMin = std::pow( 10, xMin );
+      xMax = std::pow( 10, xMax );
+    }
+
+    return new TLine( xMin, y, xMax, y );
+  }
+
+  //____________________________________________________________________________________________________
+  void draw_range( TVirtualPad* pad, const MicromegasDraw::range_t& range )
+  {
+    for( const auto& y:{range.first,range.second} )
+    {
+      auto line = horizontal_line( pad, y );
+      line->SetLineColor(2);
+      line->SetLineStyle(2);
+      line->SetLineWidth(2);
+      line->Draw();
+    }
+  }
 
 }
 
@@ -235,6 +260,8 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_multiplicity->SetMinimum(0);
   h_cluster_multiplicity->SetMaximum(10);
   h_cluster_multiplicity->DrawCopy("P");
+  gPad->Update();
+  draw_range( gPad, m_cluster_multiplicity_range );
 
   cv->cd(2);
   h_cluster_size->SetTitle("Cluster Size");
@@ -244,6 +271,8 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_size->SetMinimum(0);
   h_cluster_size->SetMaximum(8);
   h_cluster_size->DrawCopy("P");
+  gPad->Update();
+  draw_range( gPad, m_cluster_size_range );
 
   cv->cd(3);
   h_cluster_charge->SetTitle("Cluster Charge");
@@ -253,6 +282,8 @@ int MicromegasDraw::DrawClusterInfo()
   h_cluster_charge->SetMinimum(0);
   h_cluster_charge->SetMaximum(1000);
   h_cluster_charge->DrawCopy("P");
+  gPad->Update();
+  draw_range( gPad, m_cluster_charge_range );
 
   cv->cd(4);
   efficiency->SetMinimum(0);
@@ -262,6 +293,8 @@ int MicromegasDraw::DrawClusterInfo()
   efficiency->GetYaxis()->SetTitle("Efficiency");
   efficiency->SetStats(0);
   efficiency->DrawCopy( "P" );
+  gPad->Update();
+  draw_range( gPad, m_efficiency_range );
 
   cv->Update();
   return 0;
