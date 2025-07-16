@@ -32,6 +32,7 @@ AC_CONFIG_FILES([
   subsystems/intt/Makefile
   subsystems/inttrawhit/Makefile
   subsystems/jets/Makefile
+  subsystems/kfparticle/Makefile
   subsystems/micromegas/Makefile
   subsystems/mvtx/Makefile
   subsystems/mvtxrawhit/Makefile
