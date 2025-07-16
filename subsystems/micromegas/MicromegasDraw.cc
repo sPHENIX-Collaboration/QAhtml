@@ -9,9 +9,8 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TLine.h>
-#include <TProfile.h>
 #include <TPad.h>
-#include <TROOT.h>
+#include <TProfile.h>
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TText.h>
@@ -146,23 +145,22 @@ int MicromegasDraw::Draw(const std::string &what)
 }
 
 //____________________________________________________________________________________________________
-TH1* MicromegasDraw::ClusterAverage(TH2* hist, std::string type)
+TH1* MicromegasDraw::get_detector_average(TH2* source, double offset)
 {
-  const auto nX = hist->GetNbinsX();
-  auto graph = new TH1F( Form("avg_%s", type.c_str()), "", nX, hist->GetXaxis()->GetXmin(), hist->GetXaxis()->GetXmax());
+  auto h = new TH1F( Form("%s_average", source->GetName()), "", source->GetNbinsX(), source->GetXaxis()->GetXmin(), source->GetXaxis()->GetXmax());
 
   //
-  for (int ix = 1; ix <= nX; ++ix)
+  for (int ix = 1; ix <= source->GetNbinsX(); ++ix)
   {
-    std::unique_ptr<TH1> h( hist->ProjectionY("proj", ix, ix ));
-    graph->SetBinContent(ix, h->GetMean() );
-    graph->SetBinError(ix, h->GetMeanError() );
-    graph->GetXaxis()->SetBinLabel(ix, hist->GetXaxis()->GetBinLabel(ix) );
+    std::unique_ptr<TH1> p( source->ProjectionY("proj", ix, ix ));
+    h->SetBinContent(ix, p->GetMean()+offset );
+    h->SetBinError(ix, p->GetMeanError() );
+    h->GetXaxis()->SetBinLabel(ix, source->GetXaxis()->GetBinLabel(ix) );
   }
 
-  graph->SetMarkerStyle(8);
+  h->SetMarkerStyle(20);
 
-  return graph;
+  return h;
 }
 
 
@@ -239,10 +237,14 @@ int MicromegasDraw::DrawClusterInfo()
   efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
   efficiency->SetMarkerStyle(20);
 
-  // per chamber efficiency distributions
-  auto h_cluster_multiplicity = ClusterAverage(h_cluster_multiplicity_raw, "mult");
-  auto h_cluster_size = ClusterAverage(h_cluster_size_raw, "size");
-  auto h_cluster_charge = ClusterAverage(h_cluster_charge_raw, "charge");
+  // per chamber averaged distributions
+  /* for cluster size and cluster multiplicity,
+   * correct profile by 0.5 due to incorrect binning,
+   * with integer values at bin edges rather than bin center
+   */
+  auto h_cluster_multiplicity = get_detector_average(h_cluster_multiplicity_raw, -0.5);
+  auto h_cluster_size = get_detector_average(h_cluster_size_raw, -0.5);
+  auto h_cluster_charge = get_detector_average(h_cluster_charge_raw);
 
   auto cv = get_canvas("TPOT_CLUSTERS_MEAN");
   if( !cv )
@@ -322,34 +324,41 @@ int MicromegasDraw::DrawRawInfo()
   }
   CanvasEditor cv_edit(cv);
 
-  auto draw_profile = []( TH2* h )
+  auto draw_profile = []( TH2* h, double offset = 0 )
   {
-    auto p = h->ProfileX( Form( "%s_p", h->GetName() ) );
-    p->SetMarkerStyle(20);
-    p->Draw("same");
+    std::unique_ptr<TProfile> p(h->ProfileX());
+    auto hp = new TH1F(Form( "%s_p", h->GetName()), "", h->GetNbinsX(), h->GetXaxis()->GetXmin(), h->GetXaxis()->GetXmax() );
+    for( int i = 0; i < p->GetNbinsX(); ++i )
+    {
+      hp->SetBinContent(i+1, p->GetBinContent(i+1)+offset );
+      hp->SetBinError(i+1, p->GetBinError(i+1) );
+    }
+    hp->SetMarkerStyle(20);
+    hp->Draw("p same");
   };
 
-
   cv->cd(1);
+  h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
+  h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
+  h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
+  h_cluster_multiplicity->DrawCopy("COLZ");
+  /* correct profile by 0.5 due to incorrect binning, with integer values at bin edges rather than bin center */
+  draw_profile(h_cluster_multiplicity, -0.5);
+
+  cv->cd(2);
+  h_cluster_size->SetTitle("Cluster Size");
+  h_cluster_size->GetXaxis()->SetTitle("Chamber");
+  h_cluster_size->GetYaxis()->SetTitle("Size");
+  h_cluster_size->DrawCopy("COLZ");
+  /* correct profile by 0.5 due to incorrect binning, with integer values at bin edges rather than bin center */
+  draw_profile(h_cluster_size, -0.5);
+
+  cv->cd(3);
   h_cluster_charge->SetTitle("Cluster Charge");
   h_cluster_charge->GetXaxis()->SetTitle("Chamber");
   h_cluster_charge->GetYaxis()->SetTitle("Charge");
   h_cluster_charge->DrawCopy("COLZ");
   draw_profile(h_cluster_charge);
-
-  cv->cd(2);
-  h_cluster_multiplicity->SetTitle("Cluster Multiplicity");
-  h_cluster_multiplicity->GetXaxis()->SetTitle("Chamber");
-  h_cluster_multiplicity->GetYaxis()->SetTitle("Multiplicity");
-  h_cluster_multiplicity->DrawCopy("COLZ");
-  draw_profile(h_cluster_multiplicity);
-
-  cv->cd(3);
-  h_cluster_size->SetTitle("Cluster Size");
-  h_cluster_size->GetXaxis()->SetTitle("Chamber");
-  h_cluster_size->GetYaxis()->SetTitle("Size");
-  h_cluster_size->DrawCopy("COLZ");
-  draw_profile(h_cluster_size);
 
   cv->Update();
   return 0;
