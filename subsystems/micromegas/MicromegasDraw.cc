@@ -116,22 +116,22 @@ int MicromegasDraw::Draw(const std::string &what)
   int idraw = 0;
   if (what == "ALL" || what == "BCO" )
     {
-      iret += DrawBCOInfo();
+      iret += draw_bco_info();
       idraw++;
     }
-  if (what == "ALL" || what == "CLUSTERS")
+  if (what == "ALL" || what == "CLUSTERS_RAW")
     {
-      iret += DrawClusterInfo();
+      iret += draw_raw_cluster_info();
       idraw++;
     }
-  if (what == "ALL" || what == "RAW")
+  if (what == "ALL" || what == "CLUSTERS_AVG")
     {
-      iret += DrawRawInfo();
+      iret += draw_average_cluster_info();
       idraw++;
     }
   if (what == "ALL" || what == "SUMMARY")
     {
-      iret += DrawSummary();
+      iret += draw_summary();
       idraw++;
     }
 
@@ -185,7 +185,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
 
-  if (name == "TPOT_CLUSTERS_MEAN")
+  if (name == "TPOT_CLUSTERS_AVG")
   {
 
     auto cv = new TCanvas(name.c_str(), "TPOT cluster mean distributions", -1, 0,xsize/1.2, ysize/1.2);
@@ -212,11 +212,11 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
 }
 
 //____________________________________________________________________________________________________
-int MicromegasDraw::DrawBCOInfo()
+int MicromegasDraw::draw_bco_info()
 { return 0; }
 
 //____________________________________________________________________________________________________
-int MicromegasDraw::DrawClusterInfo()
+int MicromegasDraw::draw_average_cluster_info()
 {
   QADrawClient *cl = QADrawClient::instance();
 
@@ -246,10 +246,10 @@ int MicromegasDraw::DrawClusterInfo()
   auto h_cluster_size = get_detector_average(h_cluster_size_raw, -0.5);
   auto h_cluster_charge = get_detector_average(h_cluster_charge_raw);
 
-  auto cv = get_canvas("TPOT_CLUSTERS_MEAN");
+  auto cv = get_canvas("TPOT_CLUSTERS_AVG");
   if( !cv )
   {
-    if( Verbosity() ) std::cout << "MicromegasDraw::DrawClusterInfo - no canvas" << std::endl;
+    if( Verbosity() ) std::cout << "MicromegasDraw::draw_average_cluster_info - no canvas" << std::endl;
     return -1;
   }
 
@@ -303,7 +303,7 @@ int MicromegasDraw::DrawClusterInfo()
 }
 
 //____________________________________________________________________________________________________
-int MicromegasDraw::DrawRawInfo()
+int MicromegasDraw::draw_raw_cluster_info()
 {
   QADrawClient *cl = QADrawClient::instance();
   auto h_cluster_multiplicity = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
@@ -319,7 +319,7 @@ int MicromegasDraw::DrawRawInfo()
   auto cv = get_canvas("TPOT_CLUSTERS_RAW");
   if( !cv )
   {
-    if( Verbosity() ) std::cout << "MicromegasDraw::DrawRawInfo - no canvas" << std::endl;
+    if( Verbosity() ) std::cout << "MicromegasDraw::draw_raw_cluster_info - no canvas" << std::endl;
     return -1;
   }
   CanvasEditor cv_edit(cv);
@@ -365,7 +365,7 @@ int MicromegasDraw::DrawRawInfo()
 }
 
 //____________________________________________________________________________________________________
-int MicromegasDraw::DrawSummary()
+int MicromegasDraw::draw_summary()
 { return 0; }
 
 //________________________________________________________________
@@ -380,19 +380,19 @@ int MicromegasDraw::MakeHtml(const std::string &what)
   auto cl = QADrawClient::instance();
   std::string pngfile;
 
-  // average cluster information
-  if (what == "ALL" || what == "CLUSTERS")
-  {
-    pngfile = cl->htmlRegisterPage(*this, "cluster_info", "1", "png");
-    auto cv = get_canvas("TPOT_CLUSTERS_MEAN" );
-    cl->CanvasToPng(cv, pngfile);
-  }
-
   // raw cluster information (experts)
-  if (what == "ALL" || what == "RAW")
+  if (what == "ALL" || what == "CLUSTERS_RAW")
   {
     pngfile = cl->htmlRegisterPage(*this, "raw_cluster_info", "2", "png");
     auto cv = get_canvas("TPOT_CLUSTERS_RAW" );
+    cl->CanvasToPng(cv, pngfile);
+  }
+
+  // average cluster information
+  if (what == "ALL" || what == "CLUSTERS_AVG")
+  {
+    pngfile = cl->htmlRegisterPage(*this, "cluster_info", "1", "png");
+    auto cv = get_canvas("TPOT_CLUSTERS_AVG" );
     cl->CanvasToPng(cv, pngfile);
   }
 
@@ -400,7 +400,7 @@ int MicromegasDraw::MakeHtml(const std::string &what)
   if (what == "ALL" || what == "SUMMARY")
   {
     pngfile = cl->htmlRegisterPage(*this, "tpot summary", "3", "png");
-    auto cv = get_canvas("TPOT_CLUSTERS_RAW" );
+    auto cv = get_canvas("SUMMARY" );
     cl->CanvasToPng(cv, pngfile);
   }
 
