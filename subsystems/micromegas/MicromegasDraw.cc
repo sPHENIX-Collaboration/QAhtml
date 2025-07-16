@@ -166,8 +166,6 @@ TH1* MicromegasDraw::get_detector_average(TH2* source, double offset)
   return h;
 }
 
-
-
 //__________________________________________________________________________________
 TCanvas* MicromegasDraw::get_canvas(const std::string& name, bool clear )
 {
@@ -494,27 +492,47 @@ int MicromegasDraw::MakeHtml(const std::string &what)
   std::string pngfile;
 
   // raw cluster information (experts)
+  if (what == "ALL" || what == "BCO")
+  {
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_BCO" ) );
+    if( cv )
+    {
+      pngfile = cl->htmlRegisterPage(*this, "tpot_bco", "1", "png");
+      cl->CanvasToPng(cv, pngfile);
+    }
+  }
+
+  // raw cluster information (experts)
   if (what == "ALL" || what == "CLUSTERS_RAW")
   {
-    pngfile = cl->htmlRegisterPage(*this, "raw_cluster_info", "2", "png");
-    auto cv = get_canvas("TPOT_CLUSTERS_RAW" );
-    cl->CanvasToPng(cv, pngfile);
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_CLUSTERS_RAW" ) );
+    if( cv )
+    {
+      pngfile = cl->htmlRegisterPage(*this, "tpot_raw_cluster_info", "2", "png");
+      cl->CanvasToPng(cv, pngfile);
+    }
   }
 
   // average cluster information
   if (what == "ALL" || what == "CLUSTERS_AVG")
   {
-    pngfile = cl->htmlRegisterPage(*this, "cluster_info", "1", "png");
-    auto cv = get_canvas("TPOT_CLUSTERS_AVG" );
-    cl->CanvasToPng(cv, pngfile);
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_CLUSTERS_AVG" ) );
+    if( cv )
+    {
+      pngfile = cl->htmlRegisterPage(*this, "tpot_average_cluster_info", "3", "png");
+      cl->CanvasToPng(cv, pngfile);
+    }
   }
 
   // summary page
   if (what == "ALL" || what == "SUMMARY")
   {
-    pngfile = cl->htmlRegisterPage(*this, "tpot summary", "3", "png");
-    auto cv = get_canvas("SUMMARY" );
-    cl->CanvasToPng(cv, pngfile);
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_SUMMARY" ) );
+    if( cv )
+    {
+      pngfile = cl->htmlRegisterPage(*this, "tpot_summary", "4", "png");
+      cl->CanvasToPng(cv, pngfile);
+    }
   }
 
   return 0;
