@@ -69,32 +69,28 @@ namespace
     }
   }
 
-
-  // draw an horizontal line that extends automatically from both sides of a canvas
-  [[maybe_unused]] TLine* horizontal_line( TVirtualPad* pad, Double_t y )
-  {
-    Double_t xMin = pad->GetUxmin();
-    Double_t xMax = pad->GetUxmax();
-
-    if( pad->GetLogx() )
-    {
-      xMin = std::pow( 10, xMin );
-      xMax = std::pow( 10, xMax );
-    }
-
-    return new TLine( xMin, y, xMax, y );
-  }
-
   //____________________________________________________________________________________________________
-  void draw_range( TVirtualPad* pad, const MicromegasDraw::range_t& range )
+  void draw_range( TH1* h, const MicromegasDraw::range_list_t& range_list )
   {
-    for( const auto& y:{range.first,range.second} )
+
+    TLine line;
+    line.SetLineColor(2);
+    line.SetLineStyle(2);
+    line.SetLineWidth(2);
+
+    for( int i=0; i<16; ++i )
     {
-      auto line = horizontal_line( pad, y );
-      line->SetLineColor(2);
-      line->SetLineStyle(2);
-      line->SetLineWidth(2);
-      line->Draw();
+      auto x_min = h->GetXaxis()->GetBinLowEdge(i+1);
+      auto x_max = h->GetXaxis()->GetBinUpEdge(i+1);
+
+      // lower edge
+      line.DrawLine(x_min, range_list[i].first, x_max, range_list[i].first );
+      if( i>0 && range_list[i-1].first != range_list[i].first) { line.DrawLine(x_min, range_list[i-1].first, x_min, range_list[i].first ); }
+
+      // upper edge
+      line.DrawLine(x_min, range_list[i].second, x_max, range_list[i].second );
+      if( i>0 && range_list[i-1].second != range_list[i].second) { line.DrawLine(x_min, range_list[i-1].second, x_min, range_list[i].second ); }
+
     }
   }
 
@@ -404,7 +400,7 @@ int MicromegasDraw::draw_average_cluster_info()
     h_cluster_multiplicity->SetMaximum(10);
     h_cluster_multiplicity->DrawCopy("P");
     gPad->Update();
-    draw_range( gPad, m_cluster_multiplicity_range );
+    draw_range( h_cluster_multiplicity, m_cluster_multiplicity_range );
     gPad->Update();
   }
 
@@ -427,7 +423,7 @@ int MicromegasDraw::draw_average_cluster_info()
     h_cluster_size->SetMaximum(8);
     h_cluster_size->DrawCopy("P");
     gPad->Update();
-    draw_range( gPad, m_cluster_size_range );
+    draw_range( h_cluster_size, m_cluster_size_range );
     gPad->Update();
   }
 
@@ -447,7 +443,7 @@ int MicromegasDraw::draw_average_cluster_info()
     h_cluster_charge->SetMaximum(1000);
     h_cluster_charge->DrawCopy("P");
     gPad->Update();
-    draw_range( gPad, m_cluster_charge_range );
+    draw_range( h_cluster_charge, m_cluster_charge_range );
     gPad->Update();
   }
 
@@ -469,7 +465,7 @@ int MicromegasDraw::draw_average_cluster_info()
     efficiency->SetStats(0);
     efficiency->DrawCopy( "P" );
     gPad->Update();
-    draw_range( gPad, m_efficiency_range );
+    draw_range( efficiency, m_efficiency_range );
     gPad->Update();
   }
   return 0;
