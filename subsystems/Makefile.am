@@ -13,6 +13,7 @@ SUBDIRS = \
   intt \
   inttrawhit \
   jets \
+  kfparticle \
   micromegas \
   mvtx \
   mvtxrawhit \
