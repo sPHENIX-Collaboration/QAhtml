@@ -33,7 +33,7 @@ class MicromegasDraw : public QADraw
   void set_efficiency_range( const range_t& value ) { m_efficiency_range = value; }
 
  private:
-  TH1* ClusterAverage(TH2*, std::string);
+  TH1* get_detector_average(TH2*, double /*offset*/ = 0);
 
   // get canvas by name
   TCanvas* get_canvas(const std::string& name, bool clear = true );
@@ -49,11 +49,11 @@ class MicromegasDraw : public QADraw
   //! canvases
   std::vector<TCanvas*> m_canvas;
 
-  //! acceptable cluster size range
-  range_t m_cluster_size_range = {2,5};
-
   //! acceptable cluster multiplicity range
-  range_t m_cluster_multiplicity_range = {2,4};
+  range_t m_cluster_multiplicity_range = {1.5,4};
+
+  //! acceptable cluster size range
+  range_t m_cluster_size_range = {1.5,4};
 
   //! acceptable cluster charge range
   range_t m_cluster_charge_range = {300,700};
