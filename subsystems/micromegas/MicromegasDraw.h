@@ -41,9 +41,16 @@ class MicromegasDraw : public QADraw
   // create canbas
   TCanvas* create_canvas(const std::string &name);
 
+  //! bco information
   int draw_bco_info();
-  int draw_average_cluster_info();
+
+  //! raw cluster information
   int draw_raw_cluster_info();
+
+  //! averaged cluster information
+  int draw_average_cluster_info();
+
+  //! summary
   int draw_summary();
 
   //! canvases
