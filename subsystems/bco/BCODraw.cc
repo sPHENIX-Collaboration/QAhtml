@@ -72,7 +72,7 @@ int BCODraw::Draw(const std::string &what)
     std::cout << " Unimplemented Drawing option: " << what << std::endl;
     iret = -1;
   }
-  
+
   return iret;
 }
 
@@ -91,7 +91,7 @@ int BCODraw::MakeCanvas(const std::string &name, int num)
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
 
     Pad[num][0]->Draw();
-    Pad[num][1]->Draw(); 
+    Pad[num][1]->Draw();
   }
   else if (num == 4)
   {
@@ -135,7 +135,7 @@ int BCODraw::MakeCanvas(const std::string &name, int num)
     Pad[num][6]->Draw();
     Pad[num][7]->Draw();
   }
-  
+
   // this one is used to plot the run number on the canvas
   transparent[num] = new TPad((boost::format("transparent%d") % num).str().c_str(), "this does not show", 0, 0, 1, 1);
   transparent[num]->SetFillStyle(4000);
@@ -155,7 +155,7 @@ int BCODraw::DrawMVTX()
   auto h_mvtxrefgl1 = dynamic_cast <TH1 *> (cl->getHisto("h_MvtxPoolQA_RefGL1BCO"));
   std::ostringstream name;
   bool missingHisto = false;
-  
+
   TH1* feesstrobemvtx[nmvtxpacket];
   TH1* feesll1mvtx[nmvtxpacket];
   for(int i=0; i<nmvtxpacket; i++)
@@ -163,7 +163,7 @@ int BCODraw::DrawMVTX()
       name.str("");
       name << "h_MvtxPoolQA_TagStBcoFEEsPacket"<<i;
       feesstrobemvtx[i] = dynamic_cast<TH1*>(cl->getHisto(name.str().c_str()));
-      
+
       name.str("");
       name << "h_MvtxPoolQA_TagL1BcoFEEsPacket"<<i;
       feesll1mvtx[i] = dynamic_cast<TH1*>(cl->getHisto(name.str().c_str()));
@@ -182,7 +182,7 @@ int BCODraw::DrawMVTX()
 	  name.str("");
 	  name<<"feesstrobefrac"<<i;
 	  feesstrobefrac[i] = new TH1F(name.str().c_str(),";FEEID;GL1 Strobe Tag Frac",12,0,12);
-	  
+
 	  int feeid = 0;
 	  for(int j=0; j<feesstrobemvtx[i]->GetXaxis()->GetNbins(); j++)
 	    {
@@ -190,19 +190,19 @@ int BCODraw::DrawMVTX()
 		{
 		  continue;
 		}
-	      
+
 	      const int numbcosFee = feesstrobemvtx[i]->GetBinContent(j+1);
-	      
+
 	      float frac = (float)numbcosFee / mvtxgl1;
 	      feesstrobefrac[i]->SetBinContent(feeid+1, frac);
 	      feeid++;
-	      
+
 	    }
 	  feesstrobefrac[i]->GetYaxis()->SetRangeUser(0,1.3);
-	  
+
 	}
-      
-      
+
+
       TH1 *feesll1frac[nmvtxpacket];
       for(int i=0; i<nmvtxpacket; i++)
 	{
@@ -216,20 +216,20 @@ int BCODraw::DrawMVTX()
 		{
 		  continue;
 		}
-	      
+
 	      const int numbcosFee = feesll1mvtx[i]->GetBinContent(j+1);
-	      
+
 	      float frac = (float)numbcosFee / mvtxgl1;
 	      feesll1frac[i]->SetBinContent(feeid+1, frac);
 	      feeid++;
-	      
+
 	    }
 	  feesll1frac[i]->GetYaxis()->SetRangeUser(0,1.3);
-	  
+
 	}
-      
-      
-      
+
+
+
       if (! gROOT->FindObject("mvtx_evt_building_1"))
 	{
 	  MakeCanvas("mvtx_evt_building_1", 0);
@@ -237,7 +237,7 @@ int BCODraw::DrawMVTX()
       TC[0]->Clear("D");
       Pad[0][0]->cd();
       gStyle->SetOptStat(0);
-      
+
       for(int i=0; i<nmvtxpacket; i++)
 	{
 	  feesstrobefrac[i]->SetLineColor(i+1);
@@ -250,7 +250,7 @@ int BCODraw::DrawMVTX()
 	      y->SetTitle("Strobe-GL1 Tagged Frac.");
 	      y->SetRangeUser(0,1.3);
 	      feesstrobefrac[i]->DrawCopy("hist");
-	      
+
 	    }
 	  else
 	    {
@@ -261,11 +261,11 @@ int BCODraw::DrawMVTX()
       myText(0.22,0.63,feesstrobefrac[1]->GetLineColor(),"Felix.Endpoint 0.1");
       myText(0.22,0.57,feesstrobefrac[2]->GetLineColor(),"Felix.Endpoint 1.0");
       myText(0.22,0.51,kBlack,"...");
-      
+
       Pad[0][1]->cd();
       gStyle->SetOptStat(0);
-      
-      
+
+
       for(int i=0; i<nmvtxpacket; i++)
 	{
 	  feesll1frac[i]->SetLineColor(i+1);
@@ -278,20 +278,20 @@ int BCODraw::DrawMVTX()
 	      y->SetTitle("LL1-GL1 Tagged Frac.");
 	      y->SetRangeUser(0,1.3);
 	      feesll1frac[i]->DrawCopy("hist");
-	      
+
 	    }
 	  else
 	    {
 	      feesll1frac[i]->DrawCopy("histsame");
 	    }
 	}
-      
+
       myText(0.22,0.69,feesll1frac[0]->GetLineColor(),"Felix.Endpoint 0.0");
       myText(0.22,0.63,feesll1frac[1]->GetLineColor(),"Felix.Endpoint 0.1");
       myText(0.22,0.57,feesll1frac[2]->GetLineColor(),"Felix.Endpoint 1.0");
       myText(0.22,0.51,kBlack,"...");
-      
-      
+
+
     }
   else
   {
@@ -299,7 +299,7 @@ int BCODraw::DrawMVTX()
     // histogram is missing
     return -1;
   }
-  
+
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
@@ -316,7 +316,7 @@ int BCODraw::DrawMVTX()
 
   TC[0]->Update();
   //TC[1]->Update();
-   
+
   std::cout << "DrawMVTX Ending" << std::endl;
   return 0;
 }
@@ -349,7 +349,7 @@ int BCODraw::DrawINTT()
 	     }
 	 }
     }
-  
+
   if (!missinghisto)
   {
     const int inttgl1 = h_inttrefgl1->GetEntries() / ninttpackets;
@@ -357,7 +357,7 @@ int BCODraw::DrawINTT()
     float allfeestagged[ninttpackets] = {0};
     float perfee[ninttpackets][14] = {{0}};
     TGraph *grs[ninttpackets];
-    
+
     for(int i=0; i<ninttpackets; i++)
       {
 	allfeestagged[i] = h_allfeestagged[i]->GetEntries();
@@ -366,14 +366,14 @@ int BCODraw::DrawINTT()
 	for(int j=0; j<14; j++)
 	  {
 	    perfee[i][j] = h_perfee[i][j]->GetEntries();
-	    
+
 	    perfee[i][j] /= inttgl1;
 	    x[j] = j;
 	  }
-	
+
 	grs[i] = new TGraph(14,x,perfee[i]);
       }
-    
+
     TH1 *packetallfees = new TH1F("inttpacketallfees",";Server;Frac. GL1 Tagged",8,0,8);
     for(int i=0; i<ninttpackets; i++)
       {
@@ -385,17 +385,17 @@ int BCODraw::DrawINTT()
 	MakeCanvas("intt_evt_building_1", 2);
       }
 
-   
+
     TC[2]->Clear("D");
     Pad[2][0]->cd();
     gStyle->SetOptStat(0);
-    
+
     packetallfees->GetYaxis()->SetRangeUser(0,1.2);
     packetallfees->DrawCopy("hist");
-    
+
     Pad[2][1]->cd();
     gStyle->SetOptStat(0);
-    
+
     for(int i=0; i<ninttpackets; i++)
       {
 	grs[i]->SetMarkerColor(i+1);
@@ -414,19 +414,19 @@ int BCODraw::DrawINTT()
 	    grs[i]->Draw("psame");
 	  }
       }
-    
+
     myText(0.22,0.6,grs[0]->GetMarkerColor(),"Server 0");
     myText(0.22,0.55,grs[1]->GetMarkerColor(),"Server 1");
     myText(0.22,0.5,grs[2]->GetMarkerColor(), "Server 2");
     myText(0.22,0.45,kBlack,"...");
-    
+
   }
   else
   {
     // histogram is missing
     return -1;
   }
-     
+
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
@@ -438,9 +438,9 @@ int BCODraw::DrawINTT()
   runstring1 = runnostream1.str();
   transparent[2]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
- 
+
   TC[2]->Update();
-   
+
   std::cout << "DrawINTT Ending" << std::endl;
   return 0;
 }
@@ -455,7 +455,7 @@ int BCODraw::DrawTPC()
 
   auto h_tpcrefgl1 = dynamic_cast <TH1 *> (cl->getHisto("h_TpcPoolQA_RefGL1BCO"));
   auto h_tpctagall = dynamic_cast <TH1 *> (cl->getHisto("h_TpcPoolQA_TagBCOAllPackets"));
-    
+
   if (h_tpcrefgl1 && h_tpctagall)
   {
     const int nTpcGL1BCOs = h_tpcrefgl1->GetEntries();
@@ -468,7 +468,7 @@ int BCODraw::DrawTPC()
     {
       for(int j=0; j<ntpcpackets; j++)
         {
-          tpcTagEbdc[i][j] = (dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_TpcPoolQA_TagBCO_ebdc%i_packet%i") % (i) % (j)).str()))); 
+          tpcTagEbdc[i][j] = (dynamic_cast <TH1 *> (cl->getHisto((boost::format("h_TpcPoolQA_TagBCO_ebdc%i_packet%i") % (i) % (j)).str())));
           nTpcTagEbdc[i][j] = tpcTagEbdc[i][j]->GetEntries();
           tpcTagEbdcFrac[i][j] = (float)nTpcTagEbdc[i][j] / nTpcGL1BCOs;
           //tpcEbdcPacket[j] = j;
@@ -483,7 +483,7 @@ int BCODraw::DrawTPC()
       tpchistosummary->SetBinContent(i+1, tpcTagEbdcFrac[ebdc][i%2]);
     }
     tpchistosummary->SetBinContent(49, h_tpctagall->GetEntries() / nTpcGL1BCOs);
-    
+
     if (! gROOT->FindObject("tpc_evt_building_1"))
     {
       MakeCanvas("tpc_evt_building_1", 4);
@@ -544,14 +544,14 @@ int BCODraw::DrawTPC()
     tpchistosummary->GetXaxis()->SetLabelSize(0.03);
     tpchistosummary->GetXaxis()->LabelsOption("v");
     tpchistosummary->DrawCopy("hist");
-    gPad->SetRightMargin(0.15);  
+    gPad->SetRightMargin(0.15);
   }
   else
   {
     // histogram is missing
     return -1;
   }
-     
+
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
@@ -565,7 +565,7 @@ int BCODraw::DrawTPC()
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
   TC[4]->Update();
-   
+
   std::cout << "DrawTPC Ending" << std::endl;
   return 0;
 }
@@ -591,7 +591,7 @@ int BCODraw::DrawTPOT()
       h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/h_waveform_total->GetBinContent(1));
       h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/h_waveform_total->GetBinContent(2));
       h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(h_waveform_total->GetBinContent(1)+h_waveform_total->GetBinContent(2)) );
-      
+
       auto h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
       h_gl1->GetXaxis()->SetBinLabel(1, "5001");
       h_gl1->GetXaxis()->SetBinLabel(2, "5002");
@@ -624,17 +624,17 @@ int BCODraw::DrawTPOT()
 	  legend_drop->AddEntry((TObject*)0, Form("%s: %.4f", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
 	}
       legend_drop->Draw();
-      
+
       Pad[5][1]->cd();
       h_gl1->GetXaxis()->SetTitle("Packet");
-      h_gl1->GetYaxis()->SetTitle("Match Rate");
-      h_gl1->SetTitle("Matching Tagger Rate by packet");
+      h_gl1->GetYaxis()->SetTitle("GL1 BCO Match Rate");
+      h_gl1->SetTitle("GL1 BCO Matching Tagger Rate by packet");
       h_gl1->SetFillColor(42);
       h_gl1->SetFillStyle(3002);
       h_gl1->SetMinimum(0);
       h_gl1->SetMaximum(1.6);
       h_gl1->DrawCopy();
-      
+
       auto legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
       legend_gl1->SetHeader("Values", "C");
       legend_gl1->SetTextSize(0.045);
@@ -664,7 +664,7 @@ int BCODraw::DrawTPOT()
   runstring1 = runnostream1.str();
   transparent[5]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
-  
+
   TC[5]->Update();
   std::cout << "DrawTPOT Ending" << std::endl;
   return 0;
@@ -712,11 +712,11 @@ int BCODraw::DBVarInit()
   /* db->DBInit(); */
   return 0;
 }
-void BCODraw::myText(Double_t x,Double_t y,Color_t color, 
+void BCODraw::myText(Double_t x,Double_t y,Color_t color,
 		     const char *text, Double_t tsize, double angle) {
 
-  TLatex l; //l.SetTextAlign(12); 
-  l.SetTextSize(tsize); 
+  TLatex l; //l.SetTextAlign(12);
+  l.SetTextSize(tsize);
   l.SetNDC();
   l.SetTextColor(color);
   if (angle > 0) l.SetTextAngle(angle);
