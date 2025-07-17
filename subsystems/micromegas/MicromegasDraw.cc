@@ -10,6 +10,7 @@
 #include <TH2.h>
 #include <TLine.h>
 #include <TPad.h>
+#include <TPaveText.h>
 #include <TProfile.h>
 #include <TStyle.h>
 #include <TSystem.h>
@@ -92,6 +93,23 @@ namespace
       if( i>0 && range_list[i-1].second != range_list[i].second) { line.DrawLine(x_min, range_list[i-1].second, x_min, range_list[i].second ); }
 
     }
+  }
+
+  //____________________________________________________________________________________________________
+  // from histogram, get number of detectors in acceptable range
+  int get_num_valid_detectors( TH1* h, const MicromegasDraw::range_list_t& range_list )
+  {
+    auto nbins = h->GetNbinsX();
+    assert( (int) range_list.size() == nbins );
+
+    int out = 0;
+    for( int ibin = 0; ibin < nbins; ++ibin )
+    {
+      auto content = h->GetBinContent( ibin+1 );
+      if( content >= range_list[ibin].first && content<= range_list[ibin].second ) { ++out; }
+    }
+
+    return out;
   }
 
 }
@@ -178,7 +196,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
   if( Verbosity() )
   { std::cout << "MicromegasDraw::create_canvas - name: " << name << std::endl; }
 
-  QADrawClient *cl = QADrawClient::instance();
+  auto cl = QADrawClient::instance();
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
 
@@ -201,6 +219,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
     cv->SetEditable(false);
     m_canvas.push_back( cv );
     return cv;
+
   } else if (name == "TPOT_CLUSTERS_AVG") {
 
     auto cv = new TCanvas(name.c_str(), "TPOT cluster mean distributions", -1, 0,xsize/1.2, ysize/1.2);
@@ -211,14 +230,24 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
     m_canvas.push_back( cv );
     return cv;
 
+  } else if (name == "TPOT_SUMMARY") {
+
+    auto cv = new TCanvas(name.c_str(), "TPOT summary", -1, 0,xsize/1.2, ysize/1.2);
+    gSystem->ProcessEvents();
+    create_transparent_pad(name);
+    cv->SetEditable(false);
+    m_canvas.push_back( cv );
+    return cv;
+
   }
+
   return nullptr;
 }
 
 //____________________________________________________________________________________________________
 int MicromegasDraw::draw_bco_info()
 {
-  QADrawClient *cl = QADrawClient::instance();
+  auto cl = QADrawClient::instance();
 
   // load histograms
   auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
@@ -308,7 +337,7 @@ int MicromegasDraw::draw_bco_info()
 //____________________________________________________________________________________________________
 int MicromegasDraw::draw_raw_cluster_info()
 {
-  QADrawClient *cl = QADrawClient::instance();
+  auto cl = QADrawClient::instance();
   auto h_cluster_multiplicity = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
   auto h_cluster_size = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
   auto h_cluster_charge = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
@@ -373,7 +402,7 @@ int MicromegasDraw::draw_raw_cluster_info()
 //____________________________________________________________________________________________________
 int MicromegasDraw::draw_average_cluster_info()
 {
-  QADrawClient *cl = QADrawClient::instance();
+  auto cl = QADrawClient::instance();
 
   auto h_cluster_count_ref = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
   auto h_cluster_count_found = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_found"));
@@ -473,7 +502,66 @@ int MicromegasDraw::draw_average_cluster_info()
 
 //____________________________________________________________________________________________________
 int MicromegasDraw::draw_summary()
-{ return 0; }
+{
+  auto cl = QADrawClient::instance();
+
+  // load histograms
+  auto h_cluster_count_ref = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
+  auto h_cluster_count_found = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_found"));
+  auto h_cluster_multiplicity_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
+  auto h_cluster_size_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
+  auto h_cluster_charge_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
+
+  if( !((h_cluster_count_ref&&h_cluster_count_found)||h_cluster_multiplicity_raw||h_cluster_size_raw||h_cluster_charge_raw))
+  {
+    std::cout << "MicromegasDraw::draw_summary - no histograms found." << std::endl;
+    return 0;
+  }
+
+  auto cv = get_canvas("TPOT_SUMMARY" );
+  CanvasEditor cv_edit(cv);
+
+  auto text = new TPaveText(0.1,0.1,0.9,0.9, "NDC" );
+  text->SetFillColor(0);
+  text->SetFillStyle(0);
+  text->SetBorderSize(0);
+  text->SetTextAlign(11);
+
+  if( h_cluster_multiplicity_raw )
+  {
+    std::unique_ptr<TH1> h_cluster_multiplicity( get_detector_average(h_cluster_multiplicity_raw, -0.5) );
+    auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
+    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/16",ngood) );
+  }
+
+  if( h_cluster_size_raw )
+  {
+    std::unique_ptr<TH1> h_cluster_size( get_detector_average(h_cluster_size_raw, -0.5) );
+    auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
+    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/16",ngood) );
+  }
+
+  if( h_cluster_charge_raw )
+  {
+    std::unique_ptr<TH1> h_cluster_charge( get_detector_average(h_cluster_charge_raw) );
+    auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
+    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/16",ngood) );
+  }
+
+  if( h_cluster_count_ref&&h_cluster_count_found )
+  {
+    std::unique_ptr<TH1> efficiency(static_cast<TH1*>(h_cluster_count_found->Clone("efficiency_summary")));
+    efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
+
+    auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
+    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/16",ngood) );
+  }
+
+  text->Draw();
+  cv->Update();
+
+  return 0;
+}
 
 //________________________________________________________________
 int MicromegasDraw::MakeHtml(const std::string &what)
