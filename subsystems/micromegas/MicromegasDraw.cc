@@ -112,6 +112,31 @@ namespace
     return out;
   }
 
+  //! status flag
+  enum class Status
+  {
+    status_unknown,
+    status_bad,
+    status_questionable,
+    status_good
+  };
+
+  //! status strings
+  const std::map<Status,std::string> status_string = {
+    { Status::status_unknown, "unknown" },
+    { Status::status_bad, "bad" },
+    { Status::status_questionable, "questionable" },
+    { Status::status_good, "good" }
+  };
+
+  //! get status based on how many detectors are in acceptable range
+  Status get_status( int n_detectors, const MicromegasDraw::detector_range_t acceptable_range )
+  {
+    if( n_detectors < acceptable_range.first ) { return Status::status_bad; }
+    else if( n_detectors < acceptable_range.second ) { return Status::status_questionable; }
+    else { return Status::status_good; }
+  }
+
 }
 
 //____________________________________________________________________________________________________
@@ -505,6 +530,12 @@ int MicromegasDraw::draw_summary()
 {
   auto cl = QADrawClient::instance();
 
+  Status status_cluster_multiplicity = Status::status_unknown;
+  Status status_cluster_size = Status::status_unknown;
+  Status status_cluster_charge = Status::status_unknown;
+  Status status_efficiency = Status::status_unknown;
+  Status status_global = Status::status_unknown;
+
   // load histograms
   auto h_cluster_count_ref = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
   auto h_cluster_count_found = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_found"));
@@ -527,35 +558,59 @@ int MicromegasDraw::draw_summary()
   text->SetBorderSize(0);
   text->SetTextAlign(11);
 
+  text->AddText( "TPOT summary:" );
+
   if( h_cluster_multiplicity_raw )
   {
     std::unique_ptr<TH1> h_cluster_multiplicity( get_detector_average(h_cluster_multiplicity_raw, -0.5) );
     auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
-    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/16",ngood) );
+    status_cluster_multiplicity = get_status( ngood, m_detector_cluster_mult_range );
+    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/16 - %s",ngood, status_string.at(status_cluster_multiplicity).c_str()));
   }
 
   if( h_cluster_size_raw )
   {
     std::unique_ptr<TH1> h_cluster_size( get_detector_average(h_cluster_size_raw, -0.5) );
     auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
-    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/16",ngood) );
+    status_cluster_size = get_status( ngood, m_detector_cluster_size_range );
+    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/16 - %s",ngood,status_string.at(status_cluster_size).c_str()));
   }
 
   if( h_cluster_charge_raw )
   {
     std::unique_ptr<TH1> h_cluster_charge( get_detector_average(h_cluster_charge_raw) );
     auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
-    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/16",ngood) );
+    status_cluster_charge = get_status( ngood, m_detector_cluster_charge_range );
+    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/16 - %s",ngood,status_string.at(status_cluster_charge).c_str()));
   }
 
   if( h_cluster_count_ref&&h_cluster_count_found )
   {
     std::unique_ptr<TH1> efficiency(static_cast<TH1*>(h_cluster_count_found->Clone("efficiency_summary")));
     efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
-
     auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
-    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/16",ngood) );
+    status_efficiency = get_status( ngood, m_detector_efficiency_range );
+    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/16 - %s",ngood,status_string.at(status_efficiency).c_str()));
   }
+
+  // global status
+  const std::vector<Status> all_status = { status_cluster_multiplicity, status_cluster_size, status_cluster_charge, status_efficiency };
+  status_global = Status::status_questionable;
+
+  // run is good if all is good
+  if( std::all_of( all_status.begin(), all_status.end(), [](const Status& status){ return status == Status::status_good;}))
+  { status_global = Status::status_good; }
+
+  // run is bad if any is bad
+  else if( std::any_of( all_status.begin(), all_status.end(), [](const Status& status){ return status == Status::status_bad;}))
+  { status_global = Status::status_bad; }
+
+  // run is unknown if any is unknown
+  else if( std::any_of( all_status.begin(), all_status.end(), [](const Status& status){ return status == Status::status_unknown;}))
+  { status_global = Status::status_unknown; }
+
+  text->AddText( Form("Overall run status: %s",status_string.at(status_global).c_str()));
+
 
   text->Draw();
   cv->Update();

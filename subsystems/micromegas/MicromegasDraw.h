@@ -23,19 +23,13 @@ class MicromegasDraw : public QADraw
   using range_t = std::pair<double,double>;
   using range_list_t = std::vector<range_t>;
 
-  //! acceptable cluster size range
-  void set_cluster_size_range( const range_t& value )
-  {
-    for( size_t i=0; i<m_cluster_size_range.size(); ++i )
-    { m_cluster_size_range[i] = value; }
-  }
-
-  //! acceptable cluster size range
-  void set_cluster_size_range( size_t i, const range_t& value )
-  {
-    assert( i<m_cluster_size_range.size());
-    m_cluster_size_range[i] = value;
-  }
+  //! acceptable n detector range
+  /**
+   * first is range below which status is bad
+   * second is range below which status us questionable
+   * and above which status is good
+   */
+  using detector_range_t = std::pair<int, int>;
 
   //! acceptable cluster multiplicity range
   void set_cluster_multiplicity_range( const range_t& value )
@@ -51,6 +45,28 @@ class MicromegasDraw : public QADraw
     m_cluster_multiplicity_range[i] = value;
   }
 
+  //! acceptable number of good detectors for cluster multiplicity
+  void set_detector_cluster_mult_range( int n_questionable, int n_good )
+  { m_detector_cluster_mult_range = {n_questionable,n_good}; }
+
+  //! acceptable cluster size range
+  void set_cluster_size_range( const range_t& value )
+  {
+    for( size_t i=0; i<m_cluster_size_range.size(); ++i )
+    { m_cluster_size_range[i] = value; }
+  }
+
+  //! acceptable cluster size range
+  void set_cluster_size_range( size_t i, const range_t& value )
+  {
+    assert( i<m_cluster_size_range.size());
+    m_cluster_size_range[i] = value;
+  }
+
+  //! acceptable number of good detectors for cluster size
+  void set_detector_cluster_size_range( int n_questionable, int n_good )
+  { m_detector_cluster_size_range = {n_questionable,n_good}; }
+
   //! acceptable charge range
   void set_cluster_charge_range( const range_t& value )
   {
@@ -65,6 +81,10 @@ class MicromegasDraw : public QADraw
     m_cluster_charge_range[i] = value;
   }
 
+  //! acceptable number of good detectors for cluster charge
+  void set_detector_cluster_charge_range( int n_questionable, int n_good )
+  { m_detector_cluster_charge_range = {n_questionable,n_good}; }
+
   //! acceptable efficiency range
   void set_efficiency_range( const range_t& value )
   {
@@ -78,6 +98,10 @@ class MicromegasDraw : public QADraw
     assert( i<m_efficiency_range.size());
     m_efficiency_range[i] = value;
   }
+
+  //! acceptable number of good detectors for cluster charge
+  void set_detector_efficiency_range( int n_questionable, int n_good )
+  { m_detector_efficiency_range = {n_questionable,n_good}; }
 
   private:
   TH1* get_detector_average(TH2*, double /*offset*/ = 0);
@@ -132,6 +156,11 @@ class MicromegasDraw : public QADraw
     {0.6,1.0}, // SWIZ
     {0.6,1.0}  // NWIZ
   };
+
+  detector_range_t m_detector_cluster_mult_range = {7,13};
+  detector_range_t m_detector_cluster_size_range = {8,13};
+  detector_range_t m_detector_cluster_charge_range = {8,13};
+  detector_range_t m_detector_efficiency_range = {9,13};
 
 };
 
