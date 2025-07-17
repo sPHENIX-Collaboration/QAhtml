@@ -131,7 +131,24 @@ class MicromegasDraw : public QADraw
   range_list_t m_cluster_multiplicity_range = range_list_t(16, {1.5,4});
 
   //! acceptable cluster size range
-  range_list_t m_cluster_size_range = range_list_t(16, {1.5,4});
+  range_list_t m_cluster_size_range = {
+    {2,4}, // SCOP
+    {2,4}, // SCIP
+    {2,4}, // NCIP
+    {2,4}, // NCOP
+    {2,4}, // SEIP
+    {2,4}, // NEIP
+    {2,4}, // SWIP
+    {2,4}, // NWIP
+    {1.5,3.5}, // SCOZ
+    {1.5,3.5}, // SCIZ
+    {1.5,3.5}, // NCIZ
+    {1.5,3.5}, // NCOZ
+    {1.5,3.5}, // SEIZ
+    {1.5,3.5}, // NEIZ
+    {1.5,3.5}, // SWIZ
+    {1.5,3.5}  // NWIZ
+  };
 
   //! acceptable cluster charge range
   range_list_t m_cluster_charge_range = range_list_t(16, {300,700});
