@@ -288,25 +288,26 @@ int MicromegasDraw::draw_bco_info()
     auto h_gl1= new TH1F("h_gl1", "Match Rate", m_npackets_active+1, 0, m_npackets_active+1);
     h_gl1->SetStats(0);
     h_gl1->GetXaxis()->SetTitle("Packet");
-    h_gl1->GetYaxis()->SetTitle("GL1 BCO Match Rate");
-    h_gl1->SetTitle("GL1 BCO Matching Rate by packet");
+    h_gl1->GetYaxis()->SetTitle("GL1 BCO drop rate");
+    h_gl1->SetTitle("GL1 BCO drop rate by packet");
 
     h_gl1->GetXaxis()->SetBinLabel(1, "5001");
     h_gl1->GetXaxis()->SetBinLabel(2, "5002");
     h_gl1->GetXaxis()->SetBinLabel(3, "all");
 
-    h_gl1->SetBinContent(3,double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
-    h_gl1->SetBinContent(2,double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
-    h_gl1->SetBinContent(1,double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
+    h_gl1->SetBinContent(1,1.-double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
+    h_gl1->SetBinContent(2,1.-double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
+    h_gl1->SetBinContent(3,1.-double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
 
     auto cv = get_canvas("TPOT_BCO");
     CanvasEditor cv_edit(cv);
     cv->cd(1);
-    h_gl1->SetMinimum(0);
+    h_gl1->SetMinimum(1e-5);
     h_gl1->SetMaximum(1.1);
     h_gl1->SetFillStyle(1001);
     h_gl1->SetFillColor(kYellow);
     h_gl1->Draw();
+    gPad->SetLogy();
 
     auto legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
     legend_gl1->SetHeader("Values", "C");
@@ -316,7 +317,7 @@ int MicromegasDraw::draw_bco_info()
 
     for (int i = 1; i <= h_gl1->GetNbinsX(); ++i)
     {
-      legend_gl1->AddEntry((TObject*)0, Form("%s: %.4f", h_gl1->GetXaxis()->GetBinLabel(i), h_gl1->GetBinContent(i)), "");
+      legend_gl1->AddEntry((TObject*)0, Form("%s: %5.3g", h_gl1->GetXaxis()->GetBinLabel(i), h_gl1->GetBinContent(i)), "");
     }
     legend_gl1->Draw();
 
@@ -367,7 +368,7 @@ int MicromegasDraw::draw_bco_info()
 
     for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
     {
-      legend_drop->AddEntry((TObject*)0, Form("%s: %.4f", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
+      legend_drop->AddEntry((TObject*)0, Form("%s: %5.3g", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
     }
     legend_drop->Draw();
   }
