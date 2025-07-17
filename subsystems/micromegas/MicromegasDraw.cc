@@ -322,8 +322,8 @@ int MicromegasDraw::draw_bco_info()
     auto h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
     h_gl1->SetStats(0);
     h_gl1->GetXaxis()->SetTitle("Packet");
-    h_gl1->GetYaxis()->SetTitle("GL1 Match Rate");
-    h_gl1->SetTitle("Matching Tagger Rate by packet");
+    h_gl1->GetYaxis()->SetTitle("GL1 BCO Match Rate");
+    h_gl1->SetTitle("GL1 BCO Matching Rate by packet");
 
     h_gl1->GetXaxis()->SetBinLabel(1, "5001");
     h_gl1->GetXaxis()->SetBinLabel(2, "5002");
