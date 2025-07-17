@@ -127,8 +127,11 @@ class MicromegasDraw : public QADraw
   //! canvases
   std::vector<TCanvas*> m_canvas;
 
+  //! number of fee boards
+  static constexpr int m_nfee = 16;
+
   //! acceptable cluster multiplicity range
-  range_list_t m_cluster_multiplicity_range = range_list_t(16, {1.5,4});
+  range_list_t m_cluster_multiplicity_range = range_list_t(m_nfee, {1.5,4});
 
   //! acceptable cluster size range
   range_list_t m_cluster_size_range = {
@@ -151,7 +154,7 @@ class MicromegasDraw : public QADraw
   };
 
   //! acceptable cluster charge range
-  range_list_t m_cluster_charge_range = range_list_t(16, {300,700});
+  range_list_t m_cluster_charge_range = range_list_t(m_nfee, {300,700});
 
   //! acceptable efficiency range
   range_list_t m_efficiency_range =

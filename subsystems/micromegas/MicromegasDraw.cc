@@ -27,6 +27,13 @@
 
 namespace
 {
+
+  // maximum number of packets
+  static constexpr int m_npackets_active = 2;
+
+  //! number of fee boards
+  static constexpr int m_nfee_max = 26;
+
  //! make canvas editable in creator, and non-editable in destructor
   class CanvasEditor
   {
@@ -79,7 +86,7 @@ namespace
     line.SetLineStyle(2);
     line.SetLineWidth(2);
 
-    for( int i=0; i<16; ++i )
+    for( size_t i=0; i<range_list.size(); ++i )
     {
       auto x_min = h->GetXaxis()->GetBinLowEdge(i+1);
       auto x_max = h->GetXaxis()->GetBinUpEdge(i+1);
@@ -229,7 +236,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
 
     auto cv = new TCanvas(name.c_str(), "TPOT BCO information", -1, 0,xsize/1.2, ysize/1.2);
     gSystem->ProcessEvents();
-    divide_canvas(cv, 2, 1);
+    divide_canvas(cv, 2, 2);
     create_transparent_pad(name);
     cv->SetEditable(false);
     m_canvas.push_back( cv );
@@ -274,52 +281,11 @@ int MicromegasDraw::draw_bco_info()
 {
   auto cl = QADrawClient::instance();
 
-  // load histograms
-  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
-  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
-  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
+  // GLI BCO matching rate
   auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
-
-  if (h_waveform_bco_dropped && h_waveform_pool_dropped && h_waveform_total )
-  {
-    auto h_drop= new TH1F("h_drop", "Drop Rate", 3, 0, 3);
-    h_drop->SetStats(0);
-    h_drop->GetXaxis()->SetBinLabel(1, "5001");
-    h_drop->GetXaxis()->SetBinLabel(2, "5002");
-    h_drop->GetXaxis()->SetBinLabel(3, "all");
-    h_drop->GetXaxis()->SetTitle("Packet");
-    h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
-    h_drop->SetTitle("Fraction of Dropped Waveforms by packet");
-
-    h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/h_waveform_total->GetBinContent(1));
-    h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/h_waveform_total->GetBinContent(2));
-    h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(h_waveform_total->GetBinContent(1)+h_waveform_total->GetBinContent(2)) );
-
-    auto cv = get_canvas("TPOT_BCO");
-    CanvasEditor cv_edit(cv);
-    cv->cd(1);
-    h_drop->SetMinimum(0);
-    h_drop->SetMaximum(1.1);
-    h_drop->SetFillStyle(1001);
-    h_drop->SetFillColor(kYellow);
-    h_drop->Draw();
-
-    auto legend_drop = new TLegend(0.56, 0.6, 0.85, 0.84);
-    legend_drop->SetHeader("Values", "C");
-    legend_drop->SetTextSize(0.045);
-    legend_drop->SetBorderSize(0);
-    legend_drop->SetFillStyle(0);
-
-    for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
-    {
-      legend_drop->AddEntry((TObject*)0, Form("%s: %.4f", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
-    }
-    legend_drop->Draw();
-  }
-
   if (h_gl1_raw)
   {
-    auto h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
+    auto h_gl1= new TH1F("h_gl1", "Match Rate", m_npackets_active+1, 0, m_npackets_active+1);
     h_gl1->SetStats(0);
     h_gl1->GetXaxis()->SetTitle("Packet");
     h_gl1->GetYaxis()->SetTitle("GL1 BCO Match Rate");
@@ -335,7 +301,7 @@ int MicromegasDraw::draw_bco_info()
 
     auto cv = get_canvas("TPOT_BCO");
     CanvasEditor cv_edit(cv);
-    cv->cd(2);
+    cv->cd(1);
     h_gl1->SetMinimum(0);
     h_gl1->SetMaximum(1.1);
     h_gl1->SetFillStyle(1001);
@@ -356,6 +322,88 @@ int MicromegasDraw::draw_bco_info()
 
   }
 
+  // per packet BCO drop
+  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
+  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
+  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
+  if (h_waveform_bco_dropped && h_waveform_pool_dropped && h_waveform_total )
+  {
+    auto h_drop= new TH1F("h_drop", "Drop Rate", m_npackets_active+1, 0, m_npackets_active+1);
+    h_drop->SetStats(0);
+    h_drop->GetXaxis()->SetBinLabel(1, "5001");
+    h_drop->GetXaxis()->SetBinLabel(2, "5002");
+    h_drop->GetXaxis()->SetBinLabel(3, "all");
+    h_drop->GetXaxis()->SetTitle("Packet");
+    h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
+    h_drop->SetTitle("Fraction of Dropped Waveforms by packet");
+
+    const double total1 = h_waveform_total->GetBinContent(1);
+    if(total1>0)
+    { h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/total1); }
+
+    const double total2 = h_waveform_total->GetBinContent(2);
+    if( total2>0 )
+    { h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/total2); }
+
+    if( total1+total2>0)
+    { h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(total1+total2) ); }
+
+    auto cv = get_canvas("TPOT_BCO");
+    CanvasEditor cv_edit(cv);
+    cv->cd(3);
+    h_drop->SetMinimum(1e-5);
+    h_drop->SetMaximum(1.1);
+    h_drop->SetFillStyle(1001);
+    h_drop->SetFillColor(kYellow);
+    h_drop->Draw();
+
+    gPad->SetLogy();
+
+    auto legend_drop = new TLegend(0.56, 0.6, 0.85, 0.84);
+    legend_drop->SetHeader("Values", "C");
+    legend_drop->SetTextSize(0.045);
+    legend_drop->SetBorderSize(0);
+    legend_drop->SetFillStyle(0);
+
+    for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
+    {
+      legend_drop->AddEntry((TObject*)0, Form("%s: %.4f", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
+    }
+    legend_drop->Draw();
+  }
+
+  // per FEE BCO drop
+  auto h_fee_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_dropped_bco"));
+  auto h_fee_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_dropped_pool"));
+  auto h_fee_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_total"));
+  if (h_fee_waveform_bco_dropped && h_fee_waveform_pool_dropped && h_fee_waveform_total )
+  {
+    auto h_drop= new TH1F("h_drop_fee", "Drop Rate", m_nfee_max, 0, m_nfee_max);
+    h_drop->SetStats(0);
+    h_drop->GetXaxis()->SetTitle("FEE ID");
+    h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
+    h_drop->SetTitle("Fraction of Dropped Waveforms by fee");
+
+    for( int i = 0; i< m_nfee_max; ++i )
+    {
+      const double total = h_fee_waveform_total->GetBinContent(i+1);
+      if( total > 0 )
+      { h_drop->SetBinContent(i+1, double(h_fee_waveform_bco_dropped->GetBinContent(i+1)+ h_fee_waveform_pool_dropped->GetBinContent(i+1))/total); }
+    }
+
+    auto cv = get_canvas("TPOT_BCO");
+    CanvasEditor cv_edit(cv);
+    cv->cd(4);
+    h_drop->SetMinimum(1e-5);
+    h_drop->SetMaximum(1.1);
+    h_drop->SetFillStyle(1001);
+    h_drop->SetFillColor(kYellow);
+    h_drop->Draw();
+
+    gPad->SetLogy();
+
+  }
+
   return 0;
 }
 
@@ -363,10 +411,6 @@ int MicromegasDraw::draw_bco_info()
 int MicromegasDraw::draw_raw_cluster_info()
 {
   auto cl = QADrawClient::instance();
-  auto h_cluster_multiplicity = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
-  auto h_cluster_size = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
-  auto h_cluster_charge = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
-
   auto draw_profile = []( TH2* h, double offset = 0 )
   {
     std::unique_ptr<TProfile> p(h->ProfileX());
@@ -380,6 +424,8 @@ int MicromegasDraw::draw_raw_cluster_info()
     hp->Draw("p same");
   };
 
+  // cluster multiplicity
+  auto h_cluster_multiplicity = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
   if( h_cluster_multiplicity )
   {
     auto cv = get_canvas("TPOT_CLUSTERS_RAW");
@@ -394,6 +440,8 @@ int MicromegasDraw::draw_raw_cluster_info()
     gPad->Update();
   }
 
+  // cluster size
+  auto h_cluster_size = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
   if( h_cluster_size )
   {
     auto cv = get_canvas("TPOT_CLUSTERS_RAW");
@@ -408,6 +456,8 @@ int MicromegasDraw::draw_raw_cluster_info()
     gPad->Update();
   }
 
+  // cluster charge
+  auto h_cluster_charge = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
   if( h_cluster_charge )
   {
     auto cv = get_canvas("TPOT_CLUSTERS_RAW");
@@ -429,12 +479,8 @@ int MicromegasDraw::draw_average_cluster_info()
 {
   auto cl = QADrawClient::instance();
 
-  auto h_cluster_count_ref = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
-  auto h_cluster_count_found = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_found"));
+  // cluster multiplicity
   auto h_cluster_multiplicity_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_multiplicity"));
-  auto h_cluster_size_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
-  auto h_cluster_charge_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
-
   if( h_cluster_multiplicity_raw )
   {
     auto cv = get_canvas("TPOT_CLUSTERS_AVG");
@@ -458,6 +504,8 @@ int MicromegasDraw::draw_average_cluster_info()
     gPad->Update();
   }
 
+  // cluster size
+  auto h_cluster_size_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_size"));
   if( h_cluster_size_raw )
   {
     auto cv = get_canvas("TPOT_CLUSTERS_AVG");
@@ -481,6 +529,8 @@ int MicromegasDraw::draw_average_cluster_info()
     gPad->Update();
   }
 
+  // cluster charge
+  auto h_cluster_charge_raw = static_cast<TH2*>(cl->getHisto("h_MicromegasClusterQA_cluster_charge"));
   if( h_cluster_charge_raw )
   {
     auto cv = get_canvas("TPOT_CLUSTERS_AVG");
@@ -501,6 +551,9 @@ int MicromegasDraw::draw_average_cluster_info()
     gPad->Update();
   }
 
+  // estimated efficiency
+  auto h_cluster_count_ref = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
+  auto h_cluster_count_found = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_found"));
   if( h_cluster_count_ref && h_cluster_count_found )
   {
     auto cv = get_canvas("TPOT_CLUSTERS_AVG");
@@ -565,7 +618,7 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_multiplicity( get_detector_average(h_cluster_multiplicity_raw, -0.5) );
     auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
     status_cluster_multiplicity = get_status( ngood, m_detector_cluster_mult_range );
-    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/16 - %s",ngood, status_string.at(status_cluster_multiplicity).c_str()));
+    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/%i - %s",ngood, m_nfee, status_string.at(status_cluster_multiplicity).c_str()));
   }
 
   if( h_cluster_size_raw )
@@ -573,7 +626,7 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_size( get_detector_average(h_cluster_size_raw, -0.5) );
     auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
     status_cluster_size = get_status( ngood, m_detector_cluster_size_range );
-    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/16 - %s",ngood,status_string.at(status_cluster_size).c_str()));
+    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/%i - %s",ngood, m_nfee, status_string.at(status_cluster_size).c_str()));
   }
 
   if( h_cluster_charge_raw )
@@ -581,7 +634,7 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_charge( get_detector_average(h_cluster_charge_raw) );
     auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
     status_cluster_charge = get_status( ngood, m_detector_cluster_charge_range );
-    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/16 - %s",ngood,status_string.at(status_cluster_charge).c_str()));
+    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/%i - %s",ngood,m_nfee,status_string.at(status_cluster_charge).c_str()));
   }
 
   if( h_cluster_count_ref&&h_cluster_count_found )
@@ -590,7 +643,7 @@ int MicromegasDraw::draw_summary()
     efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
     auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
     status_efficiency = get_status( ngood, m_detector_efficiency_range );
-    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/16 - %s",ngood,status_string.at(status_efficiency).c_str()));
+    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/%i - %s",ngood,m_nfee,status_string.at(status_efficiency).c_str()));
   }
 
   // global status
