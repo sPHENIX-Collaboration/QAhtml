@@ -750,7 +750,7 @@ int MicromegasDraw::draw_bco_summary()
 
   // global status
   const auto status_global = get_combined_status({ status_gl1_drop_rate, status_waveform_drop_rate, status_fee_waveform_drop_rate});
-  text->AddText( Form("Overall run status (BCO): %s",status_string.at(status_global).c_str()))
+  text->AddText( Form("Overall status (BCO): %s",status_string.at(status_global).c_str()))
     ->SetTextColor(status_color.at(status_global));
 
   text->Draw();
@@ -844,7 +844,7 @@ int MicromegasDraw::draw_summary()
 
   // global status
   const auto status_global = get_combined_status({ status_cluster_multiplicity, status_cluster_size, status_cluster_charge, status_efficiency });
-  text->AddText( Form("Overall run status: %s",status_string.at(status_global).c_str()))
+  text->AddText( Form("Overall status: %s",status_string.at(status_global).c_str()))
     ->SetTextColor(status_color.at(status_global));
 
   text->Draw();
