@@ -28,12 +28,6 @@
 namespace
 {
 
-  // maximum number of packets
-  static constexpr int m_npackets_active = 2;
-
-  //! number of fee boards
-  static constexpr int m_nfee_max = 26;
-
  //! make canvas editable in creator, and non-editable in destructor
   class CanvasEditor
   {
@@ -321,6 +315,9 @@ int MicromegasDraw::draw_bco_info()
     }
     legend_gl1->Draw();
 
+    gPad->Update();
+    draw_range( h_gl1, m_gl1_drop_rate_range );
+
   }
 
   // per packet BCO drop
@@ -366,6 +363,9 @@ int MicromegasDraw::draw_bco_info()
     legend_drop->SetBorderSize(0);
     legend_drop->SetFillStyle(0);
 
+    gPad->Update();
+    draw_range( h_drop, m_waveform_drop_rate_range );
+
     for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
     {
       legend_drop->AddEntry((TObject*)0, Form("%s: %5.3g", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
@@ -402,6 +402,9 @@ int MicromegasDraw::draw_bco_info()
     h_drop->Draw();
 
     gPad->SetLogy();
+
+    gPad->Update();
+    draw_range( h_drop, m_fee_waveform_drop_rate_range );
 
   }
 
@@ -501,6 +504,7 @@ int MicromegasDraw::draw_average_cluster_info()
     h_cluster_multiplicity->SetMaximum(10);
     h_cluster_multiplicity->DrawCopy("P");
     gPad->Update();
+
     draw_range( h_cluster_multiplicity, m_cluster_multiplicity_range );
     gPad->Update();
   }
@@ -619,7 +623,7 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_multiplicity( get_detector_average(h_cluster_multiplicity_raw, -0.5) );
     auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
     status_cluster_multiplicity = get_status( ngood, m_detector_cluster_mult_range );
-    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/%i - %s",ngood, m_nfee, status_string.at(status_cluster_multiplicity).c_str()));
+    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_multiplicity).c_str()));
   }
 
   if( h_cluster_size_raw )
@@ -627,7 +631,7 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_size( get_detector_average(h_cluster_size_raw, -0.5) );
     auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
     status_cluster_size = get_status( ngood, m_detector_cluster_size_range );
-    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/%i - %s",ngood, m_nfee, status_string.at(status_cluster_size).c_str()));
+    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_size).c_str()));
   }
 
   if( h_cluster_charge_raw )
@@ -635,7 +639,7 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_charge( get_detector_average(h_cluster_charge_raw) );
     auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
     status_cluster_charge = get_status( ngood, m_detector_cluster_charge_range );
-    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/%i - %s",ngood,m_nfee,status_string.at(status_cluster_charge).c_str()));
+    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_cluster_charge).c_str()));
   }
 
   if( h_cluster_count_ref&&h_cluster_count_found )
@@ -644,7 +648,7 @@ int MicromegasDraw::draw_summary()
     efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
     auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
     status_efficiency = get_status( ngood, m_detector_efficiency_range );
-    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/%i - %s",ngood,m_nfee,status_string.at(status_efficiency).c_str()));
+    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_efficiency).c_str()));
   }
 
   // global status
