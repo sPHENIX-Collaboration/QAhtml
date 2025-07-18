@@ -100,12 +100,15 @@ namespace
   // from histogram, get number of detectors in acceptable range
   int get_num_valid_detectors( TH1* h, const MicromegasDraw::range_list_t& range_list )
   {
-    auto nbins = h->GetNbinsX();
-    assert( (int) range_list.size() == nbins );
+    auto nbins = range_list.size();
 
     int out = 0;
-    for( int ibin = 0; ibin < nbins; ++ibin )
+    for( size_t ibin = 0; ibin < nbins; ++ibin )
     {
+      // check range validity
+      if( range_list[ibin].first >= range_list[ibin].second ) continue;
+
+      // get histogram content and compare
       auto content = h->GetBinContent( ibin+1 );
       if( content >= range_list[ibin].first && content<= range_list[ibin].second ) { ++out; }
     }
@@ -138,6 +141,25 @@ namespace
     else { return Status::status_good; }
   }
 
+  //! get combined status from subset
+  Status get_combined_status( const std::vector<Status>& status_list )
+  {
+    // global  status is good if all is good
+    if( std::all_of( status_list.begin(), status_list.end(), [](const Status& status){ return status == Status::status_good;}))
+    { return Status::status_good; }
+
+    // global status is bad if any is bad
+    else if( std::any_of( status_list.begin(), status_list.end(), [](const Status& status){ return status == Status::status_bad;}))
+    { return Status::status_bad; }
+
+    // global status is unknown if any is unknown
+    else if( std::any_of( status_list.begin(), status_list.end(), [](const Status& status){ return status == Status::status_unknown;}))
+    { return Status::status_unknown; }
+
+    // status is questionable in all other cases
+    else return Status::status_questionable;
+  }
+
 }
 
 //____________________________________________________________________________________________________
@@ -154,30 +176,41 @@ int MicromegasDraw::Draw(const std::string &what)
   /* SetsPhenixStyle(); */
   int iret = 0;
   int idraw = 0;
+
+  // TPOT BCO QA
   if (what == "ALL" || what == "BCO" )
   {
     iret += draw_bco_info();
     idraw++;
   }
 
+  // TPOT raw distributions for cluster QA
   if (what == "ALL" || what == "CLUSTERS_RAW")
   {
     iret += draw_raw_cluster_info();
     idraw++;
   }
 
+  // TPOT average distributions for cluster QA
   if (what == "ALL" || what == "CLUSTERS_AVG")
   {
     iret += draw_average_cluster_info();
     idraw++;
   }
 
+  // TPOT BCO QA summary
+  if (what == "ALL" || what == "BCO_SUMMARY")
+  {
+    iret += draw_bco_summary();
+    idraw++;
+  }
+
+  // TPOT Cluster QA summary
   if (what == "ALL" || what == "SUMMARY")
   {
     iret += draw_summary();
     idraw++;
   }
-
 
   if (!idraw)
     {
@@ -226,6 +259,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
   int xsize = cl->GetDisplaySizeX();
   int ysize = cl->GetDisplaySizeY();
 
+  // TPOT BCO QA
   if (name == "TPOT_BCO") {
 
     auto cv = new TCanvas(name.c_str(), "TPOT BCO information", -1, 0,xsize/1.2, ysize/1.2);
@@ -236,6 +270,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
     m_canvas.push_back( cv );
     return cv;
 
+  // TPOT raw distributions for cluster QA
   } else if (name == "TPOT_CLUSTERS_RAW") {
 
     auto cv = new TCanvas(name.c_str(), "TPOT cluster raw distributions [expert]", -1, 0,xsize/1.2, ysize/1.2);
@@ -246,6 +281,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
     m_canvas.push_back( cv );
     return cv;
 
+  // TPOT average distributions for cluster QA
   } else if (name == "TPOT_CLUSTERS_AVG") {
 
     auto cv = new TCanvas(name.c_str(), "TPOT cluster mean distributions", -1, 0,xsize/1.2, ysize/1.2);
@@ -256,6 +292,17 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
     m_canvas.push_back( cv );
     return cv;
 
+  // TPOT BCO QA summary
+  } else if (name == "TPOT_BCO_SUMMARY") {
+
+    auto cv = new TCanvas(name.c_str(), "TPOT BCO summary", -1, 0,xsize/1.2, ysize/1.2);
+    gSystem->ProcessEvents();
+    create_transparent_pad(name);
+    cv->SetEditable(false);
+    m_canvas.push_back( cv );
+    return cv;
+
+  // TPOT Cluster QA summary
   } else if (name == "TPOT_SUMMARY") {
 
     auto cv = new TCanvas(name.c_str(), "TPOT summary", -1, 0,xsize/1.2, ysize/1.2);
@@ -274,6 +321,12 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
 int MicromegasDraw::draw_bco_info()
 {
   auto cl = QADrawClient::instance();
+
+//   static constexpr int fill_style = 1001;
+//   static constexpr int fill_color = kYellow;
+
+  static constexpr int fill_style = 3002;
+  static constexpr int fill_color = 42;
 
   // GLI BCO matching rate
   auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
@@ -298,8 +351,8 @@ int MicromegasDraw::draw_bco_info()
     cv->cd(1);
     h_gl1->SetMinimum(1e-5);
     h_gl1->SetMaximum(1.1);
-    h_gl1->SetFillStyle(1001);
-    h_gl1->SetFillColor(kYellow);
+    h_gl1->SetFillStyle(fill_style);
+    h_gl1->SetFillColor(fill_color);
     h_gl1->Draw();
     gPad->SetLogy();
 
@@ -351,8 +404,8 @@ int MicromegasDraw::draw_bco_info()
     cv->cd(3);
     h_drop->SetMinimum(1e-5);
     h_drop->SetMaximum(1.1);
-    h_drop->SetFillStyle(1001);
-    h_drop->SetFillColor(kYellow);
+    h_drop->SetFillStyle(fill_style);
+    h_drop->SetFillColor(fill_color);
     h_drop->Draw();
 
     gPad->SetLogy();
@@ -397,8 +450,8 @@ int MicromegasDraw::draw_bco_info()
     cv->cd(4);
     h_drop->SetMinimum(1e-5);
     h_drop->SetMaximum(1.1);
-    h_drop->SetFillStyle(1001);
-    h_drop->SetFillColor(kYellow);
+    h_drop->SetFillStyle(fill_style);
+    h_drop->SetFillColor(fill_color);
     h_drop->Draw();
 
     gPad->SetLogy();
@@ -583,6 +636,104 @@ int MicromegasDraw::draw_average_cluster_info()
   return 0;
 }
 
+
+//____________________________________________________________________________________________________
+int MicromegasDraw::draw_bco_summary()
+{
+  auto cl = QADrawClient::instance();
+
+  Status status_gl1_drop_rate = Status::status_unknown;
+  Status status_waveform_drop_rate = Status::status_unknown;
+  Status status_fee_waveform_drop_rate = Status::status_unknown;
+
+  // GLI BCO matching rate
+  auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
+
+  // dropped waveforms per packet
+  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
+  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
+  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
+
+  // dropped waveforms per fee
+  auto h_fee_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_dropped_bco"));
+  auto h_fee_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_dropped_pool"));
+  auto h_fee_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_total"));
+
+  // check histogram valiity
+  if( !( h_gl1_raw ||
+    (h_waveform_bco_dropped&&h_waveform_pool_dropped&&h_waveform_total) ||
+    (h_fee_waveform_bco_dropped&&h_fee_waveform_pool_dropped&&h_fee_waveform_total)) )
+  {
+    std::cout << "MicromegasDraw::draw_bco_summary - no histograms found." << std::endl;
+    return 0;
+  }
+
+  auto cv = get_canvas("TPOT_BCO_SUMMARY" );
+  CanvasEditor cv_edit(cv);
+
+  auto text = new TPaveText(0.1,0.1,0.9,0.9, "NDC" );
+  text->SetFillColor(0);
+  text->SetFillStyle(0);
+  text->SetBorderSize(0);
+  text->SetTextAlign(11);
+
+  text->AddText( "TPOT BCO summary:" );
+
+  if (h_gl1_raw)
+  {
+    std::unique_ptr<TH1> h_gl1(new TH1F("h_gl1_summary", "Match Rate", m_npackets_active+1, 0, m_npackets_active+1));
+    h_gl1->SetBinContent(1,1.-double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
+    h_gl1->SetBinContent(2,1.-double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
+    h_gl1->SetBinContent(3,1.-double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
+    const auto ngood = get_num_valid_detectors( h_gl1.get(), m_gl1_drop_rate_range );
+    status_gl1_drop_rate = get_status( ngood, m_packet_gl1_drop_rate_range );
+    text->AddText( Form("Number of packets with gl1 drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_gl1_drop_rate).c_str()));
+  }
+
+  // per packet BCO drop
+  if (h_waveform_bco_dropped && h_waveform_pool_dropped && h_waveform_total )
+  {
+    std::unique_ptr<TH1> h_drop( new TH1F("h_drop_summary", "Drop Rate", m_npackets_active+1, 0, m_npackets_active+1) );
+    const double total1 = h_waveform_total->GetBinContent(1);
+    if(total1>0)
+    { h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/total1); }
+
+    const double total2 = h_waveform_total->GetBinContent(2);
+    if( total2>0 )
+    { h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/total2); }
+
+    if( total1+total2>0)
+    { h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(total1+total2) ); }
+
+    const auto ngood = get_num_valid_detectors( h_drop.get(), m_waveform_drop_rate_range );
+    status_waveform_drop_rate = get_status( ngood, m_packet_wf_drop_rate_range );
+    text->AddText( Form("Number of packets with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_waveform_drop_rate).c_str()));
+  }
+
+  // per FEE BCO drop
+  if (h_fee_waveform_bco_dropped && h_fee_waveform_pool_dropped && h_fee_waveform_total )
+  {
+    std::unique_ptr<TH1> h_drop( new TH1F("h_drop_fee_summary", "Drop Rate", m_nfee_max, 0, m_nfee_max));
+    for( int i = 0; i< m_nfee_max; ++i )
+    {
+      const double total = h_fee_waveform_total->GetBinContent(i+1);
+      if( total > 0 )
+      { h_drop->SetBinContent(i+1, double(h_fee_waveform_bco_dropped->GetBinContent(i+1)+ h_fee_waveform_pool_dropped->GetBinContent(i+1))/total); }
+    }
+    const auto ngood = get_num_valid_detectors( h_drop.get(), m_fee_waveform_drop_rate_range );
+    status_fee_waveform_drop_rate = get_status( ngood, m_fee_wf_drop_rate_range );
+    text->AddText( Form("Number of fee with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_fee_waveform_drop_rate).c_str()));
+  }
+
+  // global status
+  const auto status_global = get_combined_status({ status_gl1_drop_rate, status_waveform_drop_rate, status_fee_waveform_drop_rate});
+  text->AddText( Form("Overall run status (BCO): %s",status_string.at(status_global).c_str()));
+
+  text->Draw();
+  cv->Update();
+  return 0;
+}
+
 //____________________________________________________________________________________________________
 int MicromegasDraw::draw_summary()
 {
@@ -592,7 +743,6 @@ int MicromegasDraw::draw_summary()
   Status status_cluster_size = Status::status_unknown;
   Status status_cluster_charge = Status::status_unknown;
   Status status_efficiency = Status::status_unknown;
-  Status status_global = Status::status_unknown;
 
   // load histograms
   auto h_cluster_count_ref = static_cast<TH1*>(cl->getHisto("h_MicromegasClusterQA_clustercount_ref"));
@@ -621,7 +771,7 @@ int MicromegasDraw::draw_summary()
   if( h_cluster_multiplicity_raw )
   {
     std::unique_ptr<TH1> h_cluster_multiplicity( get_detector_average(h_cluster_multiplicity_raw, -0.5) );
-    auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
+    const auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
     status_cluster_multiplicity = get_status( ngood, m_detector_cluster_mult_range );
     text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_multiplicity).c_str()));
   }
@@ -629,7 +779,7 @@ int MicromegasDraw::draw_summary()
   if( h_cluster_size_raw )
   {
     std::unique_ptr<TH1> h_cluster_size( get_detector_average(h_cluster_size_raw, -0.5) );
-    auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
+    const auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
     status_cluster_size = get_status( ngood, m_detector_cluster_size_range );
     text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_size).c_str()));
   }
@@ -637,7 +787,7 @@ int MicromegasDraw::draw_summary()
   if( h_cluster_charge_raw )
   {
     std::unique_ptr<TH1> h_cluster_charge( get_detector_average(h_cluster_charge_raw) );
-    auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
+    const auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
     status_cluster_charge = get_status( ngood, m_detector_cluster_charge_range );
     text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_cluster_charge).c_str()));
   }
@@ -646,29 +796,14 @@ int MicromegasDraw::draw_summary()
   {
     std::unique_ptr<TH1> efficiency(static_cast<TH1*>(h_cluster_count_found->Clone("efficiency_summary")));
     efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
-    auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
+    const auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
     status_efficiency = get_status( ngood, m_detector_efficiency_range );
     text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_efficiency).c_str()));
   }
 
   // global status
-  const std::vector<Status> all_status = { status_cluster_multiplicity, status_cluster_size, status_cluster_charge, status_efficiency };
-  status_global = Status::status_questionable;
-
-  // run is good if all is good
-  if( std::all_of( all_status.begin(), all_status.end(), [](const Status& status){ return status == Status::status_good;}))
-  { status_global = Status::status_good; }
-
-  // run is bad if any is bad
-  else if( std::any_of( all_status.begin(), all_status.end(), [](const Status& status){ return status == Status::status_bad;}))
-  { status_global = Status::status_bad; }
-
-  // run is unknown if any is unknown
-  else if( std::any_of( all_status.begin(), all_status.end(), [](const Status& status){ return status == Status::status_unknown;}))
-  { status_global = Status::status_unknown; }
-
+  const auto status_global = get_combined_status({ status_cluster_multiplicity, status_cluster_size, status_cluster_charge, status_efficiency });
   text->AddText( Form("Overall run status: %s",status_string.at(status_global).c_str()));
-
 
   text->Draw();
   cv->Update();
@@ -722,12 +857,23 @@ int MicromegasDraw::MakeHtml(const std::string &what)
   }
 
   // summary page
+  if (what == "ALL" || what == "BCO_SUMMARY")
+  {
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_BCO_SUMMARY" ) );
+    if( cv )
+    {
+      pngfile = cl->htmlRegisterPage(*this, "tpot_bco_summary", "4", "png");
+      cl->CanvasToPng(cv, pngfile);
+    }
+  }
+
+  // summary page
   if (what == "ALL" || what == "SUMMARY")
   {
     auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_SUMMARY" ) );
     if( cv )
     {
-      pngfile = cl->htmlRegisterPage(*this, "tpot_summary", "4", "png");
+      pngfile = cl->htmlRegisterPage(*this, "tpot_summary", "5", "png");
       cl->CanvasToPng(cv, pngfile);
     }
   }

@@ -122,6 +122,9 @@ class MicromegasDraw : public QADraw
   int draw_average_cluster_info();
 
   //! summary
+  int draw_bco_summary();
+
+  //! summary
   int draw_summary();
 
   //! canvases
@@ -137,7 +140,7 @@ class MicromegasDraw : public QADraw
   static constexpr int m_nfee_max = 26;
 
   //! acceptable gl1 drop rate
-  range_list_t m_gl1_drop_rate_range = range_list_t(m_npackets_active+1, {0, 0.05});
+  range_list_t m_gl1_drop_rate_range = range_list_t(m_npackets_active+1, {0, 0.01});
 
   //! acceptable numbers of good packets for g1l drop rate
   detector_range_t m_packet_gl1_drop_rate_range = {3,3};
@@ -149,7 +152,13 @@ class MicromegasDraw : public QADraw
   detector_range_t m_packet_wf_drop_rate_range = {3,3};
 
   //! acceptable per packet waveform drop rate
-  range_list_t m_fee_waveform_drop_rate_range = range_list_t(m_nfee_max, {0, 0.05});
+  range_list_t m_fee_waveform_drop_rate_range = {
+    {0, 0.05}, {0, 0.05}, {0, 0.00}, {0, 0.00}, {0, 0.00},
+    {0, 0.05}, {0, 0.05}, {0, 0.05}, {0, 0.05}, {0, 0.05},
+    {0, 0.00}, {0, 0.00}, {0, 0.05}, {0, 0.00}, {0, 0.05},
+    {0, 0.05}, {0, 0.00}, {0, 0.00}, {0, 0.05}, {0, 0.05},
+    {0, 0.00}, {0, 0.05}, {0, 0.00}, {0, 0.05}, {0, 0.05},
+    {0, 0.05} };
 
   //! acceptable numbers of good fee for waveform drop rate
   detector_range_t m_fee_wf_drop_rate_range = {8,13};
