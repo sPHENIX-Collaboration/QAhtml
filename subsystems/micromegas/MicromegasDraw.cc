@@ -133,6 +133,14 @@ namespace
     { Status::status_good, "good" }
   };
 
+  //! statis color
+  const std::map<Status,int> status_color = {
+    { Status::status_unknown, kRed+2 },
+    { Status::status_bad, kRed+2 },
+    { Status::status_questionable, kOrange+2 },
+    { Status::status_good, kGreen+2 }
+  };
+
   //! get status based on how many detectors are in acceptable range
   Status get_status( int n_detectors, const MicromegasDraw::detector_range_t acceptable_range )
   {
@@ -690,9 +698,11 @@ int MicromegasDraw::draw_bco_summary()
     h_gl1->SetBinContent(3,1.-double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
     const auto ngood = get_num_valid_detectors( h_gl1.get(), m_gl1_drop_rate_range );
     status_gl1_drop_rate = get_status( ngood, m_packet_gl1_drop_rate_range );
-    text->AddText( Form("Number of packets with gl1 drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_gl1_drop_rate).c_str()));
+    text->AddText( Form("Number of packets with gl1 drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_gl1_drop_rate).c_str()))
+      ->SetTextColor(status_color.at(status_gl1_drop_rate));
   } else {
-    text->AddText("Number of packets with gl1 drop rate in acceptable range: unknown (missing histograms)");
+    text->AddText("Number of packets with gl1 drop rate in acceptable range: unknown (missing histograms)")
+      ->SetTextColor(status_color.at(status_gl1_drop_rate));
   }
 
   // per packet BCO drop
@@ -712,9 +722,11 @@ int MicromegasDraw::draw_bco_summary()
 
     const auto ngood = get_num_valid_detectors( h_drop.get(), m_waveform_drop_rate_range );
     status_waveform_drop_rate = get_status( ngood, m_packet_wf_drop_rate_range );
-    text->AddText( Form("Number of packets with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_waveform_drop_rate).c_str()));
+    text->AddText( Form("Number of packets with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_waveform_drop_rate).c_str()))
+      ->SetTextColor(status_color.at(status_waveform_drop_rate));
   } else {
-    text->AddText( "Number of packets with waveform drop rate in acceptable range: unknown (missing histograms)" );
+    text->AddText( "Number of packets with waveform drop rate in acceptable range: unknown (missing histograms)" )
+      ->SetTextColor(status_color.at(status_waveform_drop_rate));
   }
 
   // per FEE BCO drop
@@ -729,14 +741,17 @@ int MicromegasDraw::draw_bco_summary()
     }
     const auto ngood = get_num_valid_detectors( h_drop.get(), m_fee_waveform_drop_rate_range );
     status_fee_waveform_drop_rate = get_status( ngood, m_fee_wf_drop_rate_range );
-    text->AddText( Form("Number of fee with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_fee_waveform_drop_rate).c_str()));
+    text->AddText( Form("Number of fee with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_fee_waveform_drop_rate).c_str()))
+      ->SetTextColor(status_color.at(status_fee_waveform_drop_rate));
   } else {
-    text->AddText( "Number of fee with waveform drop rate in acceptable range: unknown (missing histograms)" );
+    text->AddText( "Number of fee with waveform drop rate in acceptable range: unknown (missing histograms)" )
+      ->SetTextColor(status_color.at(status_fee_waveform_drop_rate));
   }
 
   // global status
   const auto status_global = get_combined_status({ status_gl1_drop_rate, status_waveform_drop_rate, status_fee_waveform_drop_rate});
-  text->AddText( Form("Overall run status (BCO): %s",status_string.at(status_global).c_str()));
+  text->AddText( Form("Overall run status (BCO): %s",status_string.at(status_global).c_str()))
+    ->SetTextColor(status_color.at(status_global));
 
   text->Draw();
   cv->Update();
@@ -783,9 +798,11 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_multiplicity( get_detector_average(h_cluster_multiplicity_raw, -0.5) );
     const auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
     status_cluster_multiplicity = get_status( ngood, m_detector_cluster_mult_range );
-    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_multiplicity).c_str()));
+    text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_multiplicity).c_str()))
+      ->SetTextColor(status_color.at(status_cluster_multiplicity));
   } else {
-    text->AddText("Number of detectors with cluster multiplicity in acceptable range: unknown (missing histograms)" );
+    text->AddText("Number of detectors with cluster multiplicity in acceptable range: unknown (missing histograms)" )
+      ->SetTextColor(status_color.at(status_cluster_multiplicity));
   }
 
   if( h_cluster_size_raw )
@@ -793,9 +810,11 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_size( get_detector_average(h_cluster_size_raw, -0.5) );
     const auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
     status_cluster_size = get_status( ngood, m_detector_cluster_size_range );
-    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_size).c_str()));
+    text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_size).c_str()))
+      ->SetTextColor(status_color.at(status_cluster_size));
   } else {
-    text->AddText( "Number of detectors with cluster size in acceptable range: unknown (missing histograms)" );
+    text->AddText( "Number of detectors with cluster size in acceptable range: unknown (missing histograms)" )
+      ->SetTextColor(status_color.at(status_cluster_size));
   }
 
   if( h_cluster_charge_raw )
@@ -803,9 +822,11 @@ int MicromegasDraw::draw_summary()
     std::unique_ptr<TH1> h_cluster_charge( get_detector_average(h_cluster_charge_raw) );
     const auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
     status_cluster_charge = get_status( ngood, m_detector_cluster_charge_range );
-    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_cluster_charge).c_str()));
+    text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_cluster_charge).c_str()))
+      ->SetTextColor(status_color.at(status_cluster_charge));
   } else {
-    text->AddText( "Number of detectors with cluster charge in acceptable range: unknown (missing histograms)" );
+    text->AddText( "Number of detectors with cluster charge in acceptable range: unknown (missing histograms)" )
+      ->SetTextColor(status_color.at(status_cluster_charge));
   }
 
   if( h_cluster_count_ref&&h_cluster_count_found )
@@ -814,14 +835,17 @@ int MicromegasDraw::draw_summary()
     efficiency->Divide(h_cluster_count_found, h_cluster_count_ref, 1, 1, "B" );
     const auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
     status_efficiency = get_status( ngood, m_detector_efficiency_range );
-    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_efficiency).c_str()));
+    text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_efficiency).c_str()))
+      ->SetTextColor(status_color.at(status_efficiency));
   } else {
-    text->AddText( "Number of detectors with efficiency estimate in acceptable range: unknown (missing histograms)" );
+    text->AddText( "Number of detectors with efficiency estimate in acceptable range: unknown (missing histograms)" )
+      ->SetTextColor(status_color.at(status_efficiency));
   }
 
   // global status
   const auto status_global = get_combined_status({ status_cluster_multiplicity, status_cluster_size, status_cluster_charge, status_efficiency });
-  text->AddText( Form("Overall run status: %s",status_string.at(status_global).c_str()));
+  text->AddText( Form("Overall run status: %s",status_string.at(status_global).c_str()))
+    ->SetTextColor(status_color.at(status_global));
 
   text->Draw();
   cv->Update();
