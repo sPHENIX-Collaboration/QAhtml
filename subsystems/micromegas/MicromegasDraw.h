@@ -122,19 +122,81 @@ class MicromegasDraw : public QADraw
   int draw_average_cluster_info();
 
   //! summary
+  int draw_bco_summary();
+
+  //! summary
   int draw_summary();
 
   //! canvases
   std::vector<TCanvas*> m_canvas;
 
+  //! number of active fee boards
+  static constexpr int m_nfee_active = 16;
+
+  // maximum number of packets
+  static constexpr int m_npackets_active = 2;
+
+  //! number of fee boards
+  static constexpr int m_nfee_max = 26;
+
+  //! acceptable gl1 drop rate
+  range_list_t m_gl1_drop_rate_range = range_list_t(m_npackets_active+1, {0, 0.01});
+
+  //! acceptable numbers of good packets for g1l drop rate
+  detector_range_t m_packet_gl1_drop_rate_range = {3,3};
+
+  //! acceptable per packet waveform drop rate
+  range_list_t m_waveform_drop_rate_range = range_list_t(m_npackets_active+1, {0, 0.05});
+
+  //! acceptable numbers of good packets for waveform drop rate
+  detector_range_t m_packet_wf_drop_rate_range = {3,3};
+
+  //! acceptable per packet waveform drop rate
+  range_list_t m_fee_waveform_drop_rate_range = {
+    {0, 0.05}, {0, 0.05}, {0, 0.00}, {0, 0.00}, {0, 0.00},
+    {0, 0.05}, {0, 0.05}, {0, 0.05}, {0, 0.05}, {0, 0.05},
+    {0, 0.00}, {0, 0.00}, {0, 0.05}, {0, 0.00}, {0, 0.05},
+    {0, 0.05}, {0, 0.00}, {0, 0.00}, {0, 0.05}, {0, 0.05},
+    {0, 0.00}, {0, 0.05}, {0, 0.00}, {0, 0.05}, {0, 0.05},
+    {0, 0.05} };
+
+  //! acceptable numbers of good fee for waveform drop rate
+  detector_range_t m_fee_wf_drop_rate_range = {8,13};
+
   //! acceptable cluster multiplicity range
-  range_list_t m_cluster_multiplicity_range = range_list_t(16, {1.5,4});
+  range_list_t m_cluster_multiplicity_range = range_list_t(m_nfee_active, {1.5,4});
+
+  //! acceptable numbers of good detectors for cluster multiplicity
+  detector_range_t m_detector_cluster_mult_range = {7,13};
 
   //! acceptable cluster size range
-  range_list_t m_cluster_size_range = range_list_t(16, {1.5,4});
+  range_list_t m_cluster_size_range = {
+    {2,4}, // SCOP
+    {2,4}, // SCIP
+    {2,4}, // NCIP
+    {2,4}, // NCOP
+    {2,4}, // SEIP
+    {2,4}, // NEIP
+    {2,4}, // SWIP
+    {2,4}, // NWIP
+    {1.5,3.5}, // SCOZ
+    {1.5,3.5}, // SCIZ
+    {1.5,3.5}, // NCIZ
+    {1.5,3.5}, // NCOZ
+    {1.5,3.5}, // SEIZ
+    {1.5,3.5}, // NEIZ
+    {1.5,3.5}, // SWIZ
+    {1.5,3.5}  // NWIZ
+  };
+
+  //! acceptable numbers of good detectors for cluster size
+  detector_range_t m_detector_cluster_size_range = {8,13};
 
   //! acceptable cluster charge range
-  range_list_t m_cluster_charge_range = range_list_t(16, {300,700});
+  range_list_t m_cluster_charge_range = range_list_t(m_nfee_active, {300,700});
+
+  //! acceptable numbers of good detectors for cluster charge
+  detector_range_t m_detector_cluster_charge_range = {8,13};
 
   //! acceptable efficiency range
   range_list_t m_efficiency_range =
@@ -157,9 +219,7 @@ class MicromegasDraw : public QADraw
     {0.6,1.0}  // NWIZ
   };
 
-  detector_range_t m_detector_cluster_mult_range = {7,13};
-  detector_range_t m_detector_cluster_size_range = {8,13};
-  detector_range_t m_detector_cluster_charge_range = {8,13};
+  //! acceptable numbers of good detectors for efficiency estimate
   detector_range_t m_detector_efficiency_range = {9,13};
 
 };
