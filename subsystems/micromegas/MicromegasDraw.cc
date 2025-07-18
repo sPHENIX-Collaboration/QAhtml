@@ -297,6 +297,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
 
     auto cv = new TCanvas(name.c_str(), "TPOT BCO summary", -1, 0,xsize/1.2, ysize/1.2);
     gSystem->ProcessEvents();
+    cv->Divide(1,1);
     create_transparent_pad(name);
     cv->SetEditable(false);
     m_canvas.push_back( cv );
@@ -307,6 +308,7 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
 
     auto cv = new TCanvas(name.c_str(), "TPOT summary", -1, 0,xsize/1.2, ysize/1.2);
     gSystem->ProcessEvents();
+    cv->Divide(1,1);
     create_transparent_pad(name);
     cv->SetEditable(false);
     m_canvas.push_back( cv );
@@ -671,6 +673,7 @@ int MicromegasDraw::draw_bco_summary()
   auto cv = get_canvas("TPOT_BCO_SUMMARY" );
   CanvasEditor cv_edit(cv);
 
+  cv->cd(1);
   auto text = new TPaveText(0.1,0.1,0.9,0.9, "NDC" );
   text->SetFillColor(0);
   text->SetFillStyle(0);
@@ -760,6 +763,7 @@ int MicromegasDraw::draw_summary()
   auto cv = get_canvas("TPOT_SUMMARY" );
   CanvasEditor cv_edit(cv);
 
+  cv->cd(1);
   auto text = new TPaveText(0.1,0.1,0.9,0.9, "NDC" );
   text->SetFillColor(0);
   text->SetFillStyle(0);
