@@ -691,6 +691,8 @@ int MicromegasDraw::draw_bco_summary()
     const auto ngood = get_num_valid_detectors( h_gl1.get(), m_gl1_drop_rate_range );
     status_gl1_drop_rate = get_status( ngood, m_packet_gl1_drop_rate_range );
     text->AddText( Form("Number of packets with gl1 drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_gl1_drop_rate).c_str()));
+  } else {
+    text->AddText("Number of packets with gl1 drop rate in acceptable range: unknown (missing histograms)");
   }
 
   // per packet BCO drop
@@ -711,6 +713,8 @@ int MicromegasDraw::draw_bco_summary()
     const auto ngood = get_num_valid_detectors( h_drop.get(), m_waveform_drop_rate_range );
     status_waveform_drop_rate = get_status( ngood, m_packet_wf_drop_rate_range );
     text->AddText( Form("Number of packets with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_npackets_active+1, status_string.at(status_waveform_drop_rate).c_str()));
+  } else {
+    text->AddText( "Number of packets with waveform drop rate in acceptable range: unknown (missing histograms)" );
   }
 
   // per FEE BCO drop
@@ -726,6 +730,8 @@ int MicromegasDraw::draw_bco_summary()
     const auto ngood = get_num_valid_detectors( h_drop.get(), m_fee_waveform_drop_rate_range );
     status_fee_waveform_drop_rate = get_status( ngood, m_fee_wf_drop_rate_range );
     text->AddText( Form("Number of fee with waveform drop rate in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_fee_waveform_drop_rate).c_str()));
+  } else {
+    text->AddText( "Number of fee with waveform drop rate in acceptable range: unknown (missing histograms)" );
   }
 
   // global status
@@ -778,6 +784,8 @@ int MicromegasDraw::draw_summary()
     const auto ngood = get_num_valid_detectors( h_cluster_multiplicity.get(), m_cluster_multiplicity_range );
     status_cluster_multiplicity = get_status( ngood, m_detector_cluster_mult_range );
     text->AddText( Form("Number of detectors with cluster multiplicity in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_multiplicity).c_str()));
+  } else {
+    text->AddText("Number of detectors with cluster multiplicity in acceptable range: unknown (missing histograms)" );
   }
 
   if( h_cluster_size_raw )
@@ -786,6 +794,8 @@ int MicromegasDraw::draw_summary()
     const auto ngood = get_num_valid_detectors( h_cluster_size.get(), m_cluster_size_range );
     status_cluster_size = get_status( ngood, m_detector_cluster_size_range );
     text->AddText( Form("Number of detectors with cluster size in acceptable range: %i/%i - %s",ngood, m_nfee_active, status_string.at(status_cluster_size).c_str()));
+  } else {
+    text->AddText( "Number of detectors with cluster size in acceptable range: unknown (missing histograms)" );
   }
 
   if( h_cluster_charge_raw )
@@ -794,6 +804,8 @@ int MicromegasDraw::draw_summary()
     const auto ngood = get_num_valid_detectors( h_cluster_charge.get(), m_cluster_charge_range );
     status_cluster_charge = get_status( ngood, m_detector_cluster_charge_range );
     text->AddText( Form("Number of detectors with cluster charge in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_cluster_charge).c_str()));
+  } else {
+    text->AddText( "Number of detectors with cluster charge in acceptable range: unknown (missing histograms)" );
   }
 
   if( h_cluster_count_ref&&h_cluster_count_found )
@@ -803,6 +815,8 @@ int MicromegasDraw::draw_summary()
     const auto ngood = get_num_valid_detectors( efficiency.get(), m_efficiency_range );
     status_efficiency = get_status( ngood, m_detector_efficiency_range );
     text->AddText( Form("Number of detectors with efficiency estimate in acceptable range: %i/%i - %s",ngood,m_nfee_active,status_string.at(status_efficiency).c_str()));
+  } else {
+    text->AddText( "Number of detectors with efficiency estimate in acceptable range: unknown (missing histograms)" );
   }
 
   // global status
