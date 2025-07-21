@@ -16,6 +16,7 @@ class TrackingDraw : public QADraw
 
   int Draw(const std::string &what = "ALL") override;
   int MakeHtml(const std::string &what = "ALL") override;
+  int SaveCanvas(const std::string &what = "ALL");
   int DBVarInit();
 
  private:
