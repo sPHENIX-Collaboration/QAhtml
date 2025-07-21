@@ -166,6 +166,9 @@ class MicromegasDraw : public QADraw
   // create canbas
   TCanvas* create_canvas(const std::string &name);
 
+  // draw run and time in a given pad
+  void draw_title( TPad*);
+
   //! bco information
   int draw_bco_info();
 
