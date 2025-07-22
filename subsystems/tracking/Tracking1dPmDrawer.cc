@@ -89,11 +89,13 @@ Tracking1dPmDrawer::DrawCanvas (
 
 	h_pos->SetLineColor(kRed);
 	h_pos->SetMarkerColor(kRed);
+	h_pos->SetMarkerStyle(kFullTriangleUp);
 	//...
 	h_pos->Draw();
 
 	h_neg->SetLineColor(kBlue);
 	h_neg->SetMarkerColor(kBlue);
+	h_neg->SetMarkerStyle(kFullTriangleDown);
 	//...
 	h_neg->Draw("same");
 

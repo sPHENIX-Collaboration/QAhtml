@@ -114,6 +114,46 @@ TrackingDraw::MakeHtml (
 }
 
 int
+TrackingDraw::SaveCanvas (
+	std::string const& what
+) {
+	int iret = 0;
+	int idraw = 0;
+	for(auto const& [name, option] : m_options)
+	{
+		++idraw;
+		if(what != "ALL" && what != name)continue;
+
+		// I've seen people returning -1 on error instead of 1
+		// Increment if the return value is nonzero
+		int rv = option->DrawCanvas() != 0;
+		iret += rv;
+
+		// on error no html output please
+		if(rv || !option->GetCanvas())continue;
+
+		// Simple save in same directory
+		option->GetCanvas()->SaveAs((name + ".png").c_str());
+	}
+
+	if(!idraw)
+	{
+		std::cerr
+			<< "Unimplemented drawing option:\n"
+			<< "\t" << what << "\n"
+			<< "Implemented options:\n"
+			<< "\tALL" << std::endl;
+		for(auto const& [name, option] : m_options)
+		{
+			std::cerr << "\t" << name << std::endl;
+		}
+		++iret;
+	}
+
+	return iret;
+}
+
+int
 TrackingDraw::DBVarInit (
 ) {
 	/* db = new QADrawDB(this); */
