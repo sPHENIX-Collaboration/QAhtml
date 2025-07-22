@@ -1,7 +1,7 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #include "EventRhoDrawer.h"
-
+#include "JetDrawDefs.h"
 #include <qahtml/QADrawClient.h>
 
 // ctor/dtor ==================================================================

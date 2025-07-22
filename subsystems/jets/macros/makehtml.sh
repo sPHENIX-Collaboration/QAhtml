@@ -1,7 +1,7 @@
 #!/bin/bash
 [[ -e htmlrunning ]] && exit 0
 echo $$ > htmlrunning
-source /sphenix/user/jamesj3j3/QAhtml/makehtml/setup_all.sh
+source ./setup_all.sh
 Xvfb :2 -nolisten tcp &
 export DISPLAY=unix:2
 
