@@ -32,6 +32,60 @@ class MicromegasDraw : public QADraw
   using detector_range_t = std::pair<int, int>;
 
   //! acceptable cluster multiplicity range
+  void set_gl1_drop_rate_range( const range_t& value )
+  {
+    for( size_t i=0; i<m_gl1_drop_rate_range.size(); ++i )
+    { m_gl1_drop_rate_range[i] = value; }
+  }
+
+  //! acceptable gl1 drop rate range
+  void set_gl1_drop_rate_range( size_t i, const range_t& value )
+  {
+    assert( i<m_gl1_drop_rate_range.size());
+    m_gl1_drop_rate_range[i] = value;
+  }
+
+  //! acceptable number of good packets for gl1 drop rate
+  void set_packet_gl1_drop_rate_range( int n_questionable, int n_good )
+  { m_packet_gl1_drop_rate_range = {n_questionable,n_good}; }
+
+  //! acceptable per packet waveform drop rate range
+  void set_waveform_drop_rate_range( const range_t& value )
+  {
+    for( size_t i=0; i<m_waveform_drop_rate_range.size(); ++i )
+    { m_waveform_drop_rate_range[i] = value; }
+  }
+
+  //! acceptable per packet waveform drop rate range
+  void set_waveform_drop_rate_range( size_t i, const range_t& value )
+  {
+    assert( i<m_waveform_drop_rate_range.size());
+    m_waveform_drop_rate_range[i] = value;
+  }
+
+  //! acceptable number of good packets for waveform drop rate
+  void set_packet_wf_drop_rate_range( int n_questionable, int n_good )
+  { m_packet_wf_drop_rate_range = {n_questionable,n_good}; }
+
+  //! acceptable per fee waveform drop rate range
+  void set_fee_waveform_drop_rate_range( const range_t& value )
+  {
+    for( size_t i=0; i<m_fee_waveform_drop_rate_range.size(); ++i )
+    { m_fee_waveform_drop_rate_range[i] = value; }
+  }
+
+  //! acceptable per fee waveform drop rate range
+  void set_fee_waveform_drop_rate_range( size_t i, const range_t& value )
+  {
+    assert( i<m_fee_waveform_drop_rate_range.size());
+    m_fee_waveform_drop_rate_range[i] = value;
+  }
+
+  //! acceptable number of good fee for waveform drop rate
+  void set_fee_wf_drop_rate_range( int n_questionable, int n_good )
+  { m_fee_wf_drop_rate_range = {n_questionable,n_good}; }
+
+  //! acceptable cluster multiplicity range
   void set_cluster_multiplicity_range( const range_t& value )
   {
     for( size_t i=0; i<m_cluster_multiplicity_range.size(); ++i )
@@ -111,6 +165,9 @@ class MicromegasDraw : public QADraw
 
   // create canbas
   TCanvas* create_canvas(const std::string &name);
+
+  // draw run and time in a given pad
+  void draw_title( TPad*);
 
   //! bco information
   int draw_bco_info();

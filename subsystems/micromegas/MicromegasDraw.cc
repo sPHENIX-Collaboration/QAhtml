@@ -36,21 +36,36 @@ namespace
     { if( m_cv ) m_cv->SetEditable(true); }
 
     ~CanvasEditor()
-    // {}
     { if( m_cv ) m_cv->SetEditable(false); }
 
     private:
     TCanvas* m_cv = nullptr;
   };
 
+  //____________________________________________________________________________________________________
   TPad* create_transparent_pad( const std::string& name )
   {
     auto transparent = new TPad( (name+"_transparent").c_str(), "", 0, 0, 1, 1);
     transparent->SetFillStyle(4000);
     transparent->Draw();
     return transparent;
-  };
+  }
 
+  //____________________________________________________________________________________________________
+  TPad* get_transparent_pad( TPad* parent, const std::string& name, bool clear = true)
+  {
+    // todo: test if can start from groot
+    if( !parent ) return nullptr;
+    const std::string transparent_name = name+"_transparent";
+    auto out = dynamic_cast<TPad*>( parent->FindObject( transparent_name.c_str() ) );
+
+    if( !out ) std::cout << "get_transparent_pad - " << transparent_name << " not found" << std::endl;
+    if( out && clear ) out->Clear("D");
+    return out;
+
+  }
+
+  //____________________________________________________________________________________________________
   // divide canvas, adjusting canvas positions to leave room for a banner at the top
   void divide_canvas( TCanvas* cv, int ncol, int nrow )
   {
@@ -327,13 +342,34 @@ TCanvas* MicromegasDraw::create_canvas(const std::string &name)
   return nullptr;
 }
 
+//__________________________________________________________________________________
+void MicromegasDraw::draw_title( TPad* pad )
+{
+  if( !pad )
+  {
+    if( Verbosity() ) std::cout << "MicromegasDraw::draw_title - invalid pad" << std::endl;
+    return;
+  }
+
+  pad->SetPad( 0, 0.95, 1, 1 );
+  pad->Clear();
+  TText PrintRun;
+  PrintRun.SetTextSize(0.7);
+  PrintRun.SetNDC();          // set to normalized coordinates
+  PrintRun.SetTextAlign(23);  // center/top alignment
+
+  std::ostringstream runnostream;
+  auto cl = QADrawClient::instance();
+  runnostream << Name() << " Run " << cl->RunNumber();
+
+  pad->cd();
+  PrintRun.DrawText(0.5, 0.5, runnostream.str().c_str());
+}
+
 //____________________________________________________________________________________________________
 int MicromegasDraw::draw_bco_info()
 {
   auto cl = QADrawClient::instance();
-
-//   static constexpr int fill_style = 1001;
-//   static constexpr int fill_color = kYellow;
 
   static constexpr int fill_style = 3002;
   static constexpr int fill_color = 42;
@@ -471,6 +507,14 @@ int MicromegasDraw::draw_bco_info()
 
   }
 
+  {
+    // title
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_BCO" ) );
+    CanvasEditor cv_edit(cv);
+    auto transparent = get_transparent_pad( cv, "TPOT_BCO");
+    draw_title(transparent);
+  }
+
   return 0;
 }
 
@@ -538,6 +582,13 @@ int MicromegasDraw::draw_raw_cluster_info()
     gPad->Update();
   }
 
+  {
+    // title
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_CLUSTERS_RAW" ) );
+    CanvasEditor cv_edit(cv);
+    auto transparent = get_transparent_pad( cv, "TPOT_CLUSTERS_RAW");
+    draw_title(transparent);
+  }
   return 0;
 }
 
@@ -642,6 +693,14 @@ int MicromegasDraw::draw_average_cluster_info()
     gPad->Update();
     draw_range( efficiency, m_efficiency_range );
     gPad->Update();
+  }
+
+  {
+    // title
+    auto cv = dynamic_cast<TCanvas*>( gROOT->FindObject( "TPOT_CLUSTERS_AVG" ) );
+    CanvasEditor cv_edit(cv);
+    auto transparent = get_transparent_pad( cv, "TPOT_CLUSTERS_AVG");
+    draw_title(transparent);
   }
   return 0;
 }
@@ -754,6 +813,10 @@ int MicromegasDraw::draw_bco_summary()
     ->SetTextColor(status_color.at(status_global));
 
   text->Draw();
+
+  auto transparent = get_transparent_pad( cv, "TPOT_BCO_SUMMARY");
+  draw_title(transparent);
+
   cv->Update();
   return 0;
 }
@@ -848,6 +911,10 @@ int MicromegasDraw::draw_summary()
     ->SetTextColor(status_color.at(status_global));
 
   text->Draw();
+
+  // title
+  auto transparent = get_transparent_pad( cv, "TPOT_SUMMARY");
+  draw_title(transparent);
   cv->Update();
 
   return 0;
