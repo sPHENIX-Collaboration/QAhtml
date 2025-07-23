@@ -221,36 +221,71 @@ class MicromegasDraw : public QADraw
   detector_range_t m_fee_wf_drop_rate_range = {8,13};
 
   //! acceptable cluster multiplicity range
-  range_list_t m_cluster_multiplicity_range = range_list_t(m_nfee_active, {1.5,4});
+  range_list_t m_cluster_multiplicity_range ={
+    {2.,2.6}, // SCOP
+    {2.,2.6}, // SCIP
+    {2.,2.6}, // NCIP
+    {2.,2.8}, // NCOP
+    {2.,2.6}, // SEIP
+    {2.,2.8}, // NEIP
+    {2.,2.6}, // SWIP
+    {2.,2.6}, // NWIP
+    {1.8,2.6}, // SCOZ
+    {2.,2.8}, // SCIZ
+    {2.,2.8}, // NCIZ
+    {2.,2.8}, // NCOZ
+    {2.,2.8}, // SEIZ
+    {2.,2.8}, // NEIZ
+    {2.,2.8}, // SWIZ
+    {2.,2.8} // NWIZ
+  };
 
   //! acceptable numbers of good detectors for cluster multiplicity
   detector_range_t m_detector_cluster_mult_range = {7,13};
 
   //! acceptable cluster size range
   range_list_t m_cluster_size_range = {
-    {2,4}, // SCOP
-    {2,4}, // SCIP
-    {2,4}, // NCIP
-    {2,4}, // NCOP
-    {2,4}, // SEIP
-    {2,4}, // NEIP
-    {2,4}, // SWIP
-    {2,4}, // NWIP
-    {1.5,3.5}, // SCOZ
-    {1.5,3.5}, // SCIZ
-    {1.5,3.5}, // NCIZ
-    {1.5,3.5}, // NCOZ
-    {1.5,3.5}, // SEIZ
-    {1.5,3.5}, // NEIZ
-    {1.5,3.5}, // SWIZ
-    {1.5,3.5}  // NWIZ
+    {2.6,3.}, // SCOP
+    {2.6,3.}, // SCIP
+    {2.6,3.}, // NCIP
+    {2.8,3.2}, // NCOP
+    {2.6,3.}, // SEIP
+    {2.6,3.}, // NEIP
+    {2.6,3.}, // SWIP
+    {2.6,3.}, // NWIP
+    {2.,2.4}, // SCOZ
+    {2.,2.4}, // SCIZ
+    {2.,2.4}, // NCIZ
+    {2.3,2.7}, // NCOZ
+    {1.8,2.2}, // SEIZ
+    {2.,2.4}, // NEIZ
+    {2.,2.4}, // SWIZ
+    {2.,2.4} // NWIZ
   };
 
   //! acceptable numbers of good detectors for cluster size
   detector_range_t m_detector_cluster_size_range = {8,13};
 
   //! acceptable cluster charge range
-  range_list_t m_cluster_charge_range = range_list_t(m_nfee_active, {300,700});
+  range_list_t m_cluster_charge_range = {
+    {500,600}, // SCOP
+    {450,550}, // SCIP
+    {400,500}, // NCIP
+    {500,600}, // NCOP
+    {500,600}, // SEIP
+    {500,600}, // NEIP
+    {400,500}, // SWIP
+    {450,550}, // NWIP
+    {450,550}, // SCOZ
+    {500,600}, // SCIZ
+    {450,550}, // NCIZ
+    {450,550}, // NCOZ
+    {450,550}, // SEIZ
+    {450,550}, // NEIZ
+    {450,550}, // SWIZ
+    {450,550} // NWIZ
+  };
+
 
   //! acceptable numbers of good detectors for cluster charge
   detector_range_t m_detector_cluster_charge_range = {8,13};
@@ -258,22 +293,22 @@ class MicromegasDraw : public QADraw
   //! acceptable efficiency range
   range_list_t m_efficiency_range =
   {
-    {0.6,1.0}, // SCOP
-    {0.6,1.0}, // SCIP
-    {0.5,1.0}, // NCIP
-    {0.6,1.0}, // NCOP
-    {0.6,1.0}, // SEIP
-    {0.6,1.0}, // NEIP
-    {0.5,1.0}, // SWIP
-    {0.4,1.0}, // NWIP
-    {0.4,1.0}, // SCOZ
-    {0.6,1.0}, // SCIZ
-    {0.6,1.0}, // NCIZ
-    {0.6,1.0}, // NCOZ
-    {0.6,1.0}, // SEIZ
-    {0.6,1.0}, // NEIZ
-    {0.6,1.0}, // SWIZ
-    {0.6,1.0}  // NWIZ
+    {0.85,1.0}, // SCOP
+    {0.70,1.0}, // SCIP
+    {0.66,1.0}, // NCIP
+    {0.76,1.0}, // NCOP
+    {0.72,1.0}, // SEIP
+    {0.72,1.0}, // NEIP
+    {0.58,1.0}, // SWIP
+    {0.72,1.0}, // NWIP
+    {0.46,1.0}, // SCOZ
+    {0.76,1.0}, // SCIZ
+    {0.80,1.0}, // NCIZ
+    {0.74,1.0}, // NCOZ
+    {0.74,1.0}, // SEIZ
+    {0.72,1.0}, // NEIZ
+    {0.78,1.0}, // SWIZ
+    {0.74,1.0}  // NWIZ
   };
 
   //! acceptable numbers of good detectors for efficiency estimate
