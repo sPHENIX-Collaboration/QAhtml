@@ -222,97 +222,97 @@ class MicromegasDraw : public QADraw
 
   //! acceptable cluster multiplicity range
   range_list_t m_cluster_multiplicity_range ={
-    {2.,2.6}, // SCOP
-    {2.,2.6}, // SCIP
-    {2.,2.6}, // NCIP
-    {2.,2.8}, // NCOP
-    {2.,2.6}, // SEIP
-    {2.,2.8}, // NEIP
-    {2.,2.6}, // SWIP
-    {2.,2.6}, // NWIP
-    {1.8,2.6}, // SCOZ
-    {2.,2.8}, // SCIZ
-    {2.,2.8}, // NCIZ
-    {2.,2.8}, // NCOZ
-    {2.,2.8}, // SEIZ
-    {2.,2.8}, // NEIZ
-    {2.,2.8}, // SWIZ
-    {2.,2.8} // NWIZ
+    {1.5,3.}, // SCOP
+    {1.5,3.}, // SCIP
+    {1.5,3.}, // NCIP
+    {1.5,3.}, // NCOP
+    {1.5,3.}, // SEIP
+    {1.5,3.}, // NEIP
+    {1.5,3.}, // SWIP
+    {1.5,3.}, // NWIP
+    {1.6,3.2}, // SCOZ
+    {1.6,3.2}, // SCIZ
+    {1.6,3.2}, // NCIZ
+    {1.6,3.2}, // NCOZ
+    {1.6,3.2}, // SEIZ
+    {1.6,3.2}, // NEIZ
+    {1.6,3.2}, // SWIZ
+    {1.6,3.2} // NWIZ
   };
 
   //! acceptable numbers of good detectors for cluster multiplicity
-  detector_range_t m_detector_cluster_mult_range = {7,13};
+  detector_range_t m_detector_cluster_mult_range = {8,15};
 
   //! acceptable cluster size range
   range_list_t m_cluster_size_range = {
-    {2.6,3.}, // SCOP
-    {2.6,3.}, // SCIP
-    {2.6,3.}, // NCIP
-    {2.8,3.2}, // NCOP
-    {2.6,3.}, // SEIP
-    {2.6,3.}, // NEIP
-    {2.6,3.}, // SWIP
-    {2.6,3.}, // NWIP
-    {2.,2.4}, // SCOZ
-    {2.,2.4}, // SCIZ
-    {2.,2.4}, // NCIZ
-    {2.3,2.7}, // NCOZ
-    {1.8,2.2}, // SEIZ
-    {2.,2.4}, // NEIZ
-    {2.,2.4}, // SWIZ
-    {2.,2.4} // NWIZ
+    {2., 3.5}, // SCOP
+    {2., 3.5}, // SCIP
+    {2., 3.5}, // NCIP
+    {2., 3.5}, // NCOP
+    {2., 3.5}, // SEIP
+    {2., 3.5}, // NEIP
+    {2., 3.5}, // SWIP
+    {2., 3.5}, // NWIP
+    {1.5,3.}, // SCOZ
+    {1.5,3.}, // SCIZ
+    {1.5,3.}, // NCIZ
+    {1.5,3.}, // NCOZ
+    {1.5,3.}, // SEIZ
+    {1.5,3.}, // NEIZ
+    {1.5,3.}, // SWIZ
+    {1.5,3.} // NWIZ
   };
 
   //! acceptable numbers of good detectors for cluster size
-  detector_range_t m_detector_cluster_size_range = {8,13};
+  detector_range_t m_detector_cluster_size_range = {8,15};
 
   //! acceptable cluster charge range
   range_list_t m_cluster_charge_range = {
-    {500,600}, // SCOP
-    {450,550}, // SCIP
-    {400,500}, // NCIP
-    {500,600}, // NCOP
-    {500,600}, // SEIP
-    {500,600}, // NEIP
-    {400,500}, // SWIP
-    {450,550}, // NWIP
-    {450,550}, // SCOZ
-    {500,600}, // SCIZ
-    {450,550}, // NCIZ
-    {450,550}, // NCOZ
-    {450,550}, // SEIZ
-    {450,550}, // NEIZ
-    {450,550}, // SWIZ
-    {450,550} // NWIZ
+    {450,800}, // SCOP
+    {450,800}, // SCIP
+    {450,800}, // NCIP
+    {450,800}, // NCOP
+    {450,800}, // SEIP
+    {450,800}, // NEIP
+    {450,800}, // SWIP
+    {450,800}, // NWIP
+    {400,750}, // SCOZ
+    {400,750}, // SCIZ
+    {400,750}, // NCIZ
+    {400,750}, // NCOZ
+    {400,750}, // SEIZ
+    {400,750}, // NEIZ
+    {400,750}, // SWIZ
+    {400,750} // NWIZ
   };
 
 
   //! acceptable numbers of good detectors for cluster charge
-  detector_range_t m_detector_cluster_charge_range = {8,13};
+  detector_range_t m_detector_cluster_charge_range = {8,15};
 
   //! acceptable efficiency range
   range_list_t m_efficiency_range =
   {
-    {0.85,1.0}, // SCOP
-    {0.70,1.0}, // SCIP
-    {0.66,1.0}, // NCIP
-    {0.76,1.0}, // NCOP
-    {0.72,1.0}, // SEIP
-    {0.72,1.0}, // NEIP
-    {0.58,1.0}, // SWIP
-    {0.72,1.0}, // NWIP
-    {0.46,1.0}, // SCOZ
-    {0.76,1.0}, // SCIZ
-    {0.80,1.0}, // NCIZ
-    {0.74,1.0}, // NCOZ
-    {0.74,1.0}, // SEIZ
-    {0.72,1.0}, // NEIZ
-    {0.78,1.0}, // SWIZ
-    {0.74,1.0}  // NWIZ
+    {0.65,1.0}, // SCOP
+    {0.65,1.0}, // SCIP
+    {0.60,1.0}, // NCIP
+    {0.65,1.0}, // NCOP
+    {0.65,1.0}, // SEIP
+    {0.65,1.0}, // NEIP
+    {0.65,1.0}, // SWIP
+    {0.65,1.0}, // NWIP
+    {0.40,1.0}, // SCOZ
+    {0.70,1.0}, // SCIZ
+    {0.70,1.0}, // NCIZ
+    {0.70,1.0}, // NCOZ
+    {0.70,1.0}, // SEIZ
+    {0.70,1.0}, // NEIZ
+    {0.70,1.0}, // SWIZ
+    {0.70,1.0}  // NWIZ
   };
 
   //! acceptable numbers of good detectors for efficiency estimate
-  detector_range_t m_detector_efficiency_range = {9,13};
+  detector_range_t m_detector_efficiency_range = {9,15};
 
 };
 
