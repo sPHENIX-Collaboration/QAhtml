@@ -421,4 +421,11 @@ void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
   gPad->SetRightMargin(hist.margin);
   gPad->SetLogy(hist.logy);
   gPad->SetLogz(hist.logz);
+
+  //Histogram title settings
+  gPad->SetTopMargin(0.1); //make place for titles
+  gStyle->SetTitleAlign(13);
+  gStyle->SetTitleX(0.01);
+  gStyle->SetTitleY(0.99);
 }
+
