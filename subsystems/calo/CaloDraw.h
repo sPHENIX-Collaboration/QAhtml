@@ -61,7 +61,7 @@ class CaloDraw : public QADraw
   CaloGoodRunChecker* calo_checker = nullptr;
 
   // New member variable to store reference file path
-  std::string refFilePath = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/HIST_CALOQA_run2auau_ana462_2024p010_v001-00054909-9000.root";
+  std::string refFilePath = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/run3auau/physics/ana492_2025p003_v005/caloy2calib/run_00067500_00067600/HIST_CALOQA_run3auau_ana492_2025p003_v005-00067526-9999.root";
 
 };
 
