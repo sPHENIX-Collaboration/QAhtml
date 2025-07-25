@@ -41,7 +41,7 @@ class CaloGoodRunChecker
 
   void SetRefHistfile(std::string ref_hfile) {ref_histfile = ref_hfile;}
   std::string MakeHotColdDeadMapsRef();
-  std::string ref_histfile = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/HIST_CALOQA_run2auau_ana462_2024p010_v001-00054909-9000.root";
+  std::string ref_histfile = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/run3auau/physics/ana492_2025p003_v005/caloy2calib/run_00067500_00067600/HIST_CALOQA_run3auau_ana492_2025p003_v005-00067526-9999.root";
   std::string ref_histprefix = "h_CaloValid_";
   std::string ref_mapsfile_prefix = "HotColdDeadMaps_";
   std::string ref_mapsfile = "";
