@@ -427,5 +427,7 @@ void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
   gStyle->SetTitleAlign(13);
   gStyle->SetTitleX(0.01);
   gStyle->SetTitleY(0.99);
+
+  hist.hist->SetMarkerSize(0.8); //set a default smaller marker size, maybe add to HistAndOpt
 }
 
