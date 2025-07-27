@@ -26,7 +26,7 @@ elif histoarg == "cluster":
 elif histoarg == "seed":
     subsys = [{"siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"], "tpcsil" : ["HIST_DST_TRKR_SEED","TPCSILICONQA","draw_tpcsil.C"]}]
 elif histoarg == "bco":
-    subsys = [{"bco" : ["HIST_DST_STREAMING_EVENT_mvtx","MVTXBCO","draw_packets.C"]}, {"bco" : ["HIST_DST_STREAMING_EVENT_intt","INTTBCO","draw_packets.C"]},{"bco" : ["HIST_DST_STREAMING_EVENT_ebdc39","TPOTBCO","draw_packets.C"]}]
+    subsys = [{"bco" : ["HIST_DST_STREAMING_EVENT_mvtx","MVTXBCO","draw_packets.C"]}, {"bco" : ["HIST_DST_STREAMING_EVENT_intt","INTTBCO","draw_packets.C"]},{"bco" : ["HIST_DST_STREAMING_EVENT_ebdc39","TPOTBCO","draw_packets.C"]}, {"micromegas" : ["HIST_DST_STREAMING_EVENT_ebdc39","TPOTRAWHITQA","draw_micromegas.C"]}]
     
 print("subsys list is")
 print(subsys)
@@ -43,7 +43,7 @@ def get_aggregated_files(cursor, dsttype):
     return {(row.full_file_path) for row in cursor.fetchall()}
 
 def get_file(cursor, dsttype, runnumber):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and runnumber='{}')".format(dsttype,runnumber)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and runnumber='{}' and filename not like '%v666%')".format(dsttype,runnumber)
     if args.verbose:
         print(query)
     cursor.execute(query)
@@ -75,6 +75,7 @@ def main():
                     if aggfile.find("_run3physics") != -1:
                         continue
                     dbtag = getBuildDbTag(runtype, aggfile.split("/")[-1])
+                    
                     if runnumber in subsysAggRuns:
                         #only take the highest db tag, as that is what we end up plotting
                         if dbtag > subsysAggRunsDbtag[runnumber]:
@@ -155,14 +156,17 @@ def main():
                                 if file.find("_run3physics") != -1:
                                     continue
                                 dbtag = getBuildDbTag(runtype, filename)
-                                if dbtag.find("newcdbtag") != -1 and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
+                                print("dbtag is " + dbtag)
+                                print("filename is " + str(filename))
+                                print("dbtag to draw " + str(dbtagToDraw))
+                                print("file to draw " + str(fileToDraw))
+                                if (dbtag.find("nocdbtag") != -1 or dbtag.find("newcdbtag") != -1) and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
                                     fileToDraw = file
                                     dbtagToDraw = int(filename.split("_v")[1][0:3])
                                 
-                                elif(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
+                                elif dbtag.find("newcdbtag") != -1 and int(dbtag.split("p")[1]) > int(dbtagToDraw) :
                                     fileToDraw = file
                                     dbtagToDraw = int(dbtag.split("p")[1])
-
                             #Draw that one
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+fileToDraw+"\")"
                             if histoarg == "bco":

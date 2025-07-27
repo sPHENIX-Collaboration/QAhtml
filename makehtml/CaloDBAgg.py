@@ -121,6 +121,8 @@ def main():
                 newFileTime = 0
                 if reagg == False:
                     for newpath in filepaths:
+                        if not os.path.exists(newpath):
+                            continue
                         if newpath.find(latestdbtag) == -1:
                             continue
                         if os.path.getmtime(newpath) > newFileTime:
