@@ -151,8 +151,8 @@ def main():
                     command.append(str(newpath))
                     nfiles+=1
 
-                # wait for at least 4 files
-                if nfiles < 4:
+                # wait for at least 2 files
+                if nfiles < 2:
                     print("not enough files " + str(run))
                     continue
                 if args.verbose:

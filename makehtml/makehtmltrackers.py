@@ -133,7 +133,8 @@ def main():
                             if aggFile[0].find("_run3physics") != -1:
                                 continue
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\")"
-                            if histoarg == "bco":
+                            print("key is " + str(next(iter(dictionary))))
+                            if histoarg == "bco" and  next(iter(dictionary)) != "micromegas":
                                 macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+aggFile[0]+"\","+"\""+dictionary[s][0].split("_")[4]+"\")"
                             cmd = ["root.exe","-q",macro]
 
