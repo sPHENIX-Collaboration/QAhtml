@@ -109,6 +109,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#eta}",
       "N_{good}",
       "",
+      0.8,
       0.25,
       false,
       false
@@ -119,6 +120,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#eta}",
       "N_{good}",
       "",
+      0.8,
       0.25,
       false,
       false
@@ -129,6 +131,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#eta}",
       "N_{good}",
       "",
+      0.8,
       0.25,
       false,
       false
@@ -139,6 +142,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#varphi}",
       "N_{good}",
       "",
+      0.8,
       0.25,
       false,
       false
@@ -149,6 +153,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#varphi}",
       "N_{good}",
       "",
+      0.8,
       0.25,
       false,
       false
@@ -159,6 +164,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#varphi}",
       "N_{good}",
       "",
+      0.8,
       0.25,
       false,
       false
@@ -169,6 +175,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#eta}",
       "i_{#varphi}",
       "N_{good}",
+      0.8,
       0.25,
       false,
       false
@@ -179,6 +186,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#eta}",
       "i_{#varphi}",
       "N_{good}",
+      0.8,
       0.25,
       false,
       false
@@ -189,6 +197,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "i_{#eta}",
       "i_{#varphi}",
       "N_{good}",
+      0.8,
       0.25,
       false,
       false
@@ -199,6 +208,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "",
       "N_{twr}",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -209,6 +219,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "",
       "N_{twr}",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -219,6 +230,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "",
       "N_{twr}",
       "",
+      0.8,
       0.25,
       true,
       false
