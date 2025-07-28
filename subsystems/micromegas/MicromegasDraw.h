@@ -270,10 +270,10 @@ class MicromegasDraw : public QADraw
   range_list_t m_cluster_charge_range = {
     {450,800}, // SCOP
     {450,800}, // SCIP
-    {450,800}, // NCIP
+    {350,800}, // NCIP
     {450,800}, // NCOP
     {450,800}, // SEIP
-    {350,800}, // NEIP
+    {450,800}, // NEIP
     {450,800}, // SWIP
     {450,800}, // NWIP
     {400,750}, // SCOZ
