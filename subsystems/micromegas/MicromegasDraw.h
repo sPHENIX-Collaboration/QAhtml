@@ -273,7 +273,7 @@ class MicromegasDraw : public QADraw
     {450,800}, // NCIP
     {450,800}, // NCOP
     {450,800}, // SEIP
-    {450,800}, // NEIP
+    {350,800}, // NEIP
     {450,800}, // SWIP
     {450,800}, // NWIP
     {400,750}, // SCOZ
