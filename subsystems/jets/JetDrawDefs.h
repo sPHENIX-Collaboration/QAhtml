@@ -176,6 +176,7 @@ namespace JetDrawDefs
     std::string titlex {""};      ///< x-axis title
     std::string titley {""};      ///< y-axis title
     std::string titlez {""};      ///< z-axis title
+    float       marker {0.8};     ///< marker size
     float       margin {0.25};    ///< right margin of pad
     bool        logy   {false};   ///< make y axis log
     bool        logz   {false};   ///< make z axis log

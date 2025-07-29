@@ -119,6 +119,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "Seed #eta_{raw} [Rads.]",
       "Seed #phi_{raw} [Rads.]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -129,6 +130,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "Seed p_{T,raw} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -139,6 +141,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "Seed p_{T,raw} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -149,6 +152,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "N Seed per Event",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -159,6 +163,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "Seed #eta_{sub} [Rads.]",
       "Seed #phi_{sub} [Rads.]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -169,6 +174,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "Seed p_{T,sub} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -179,6 +185,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "Seed p_{T,sub} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -189,6 +196,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "N Seed per Event",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false

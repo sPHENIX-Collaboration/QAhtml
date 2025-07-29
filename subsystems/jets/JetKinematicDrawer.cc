@@ -149,6 +149,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet #eta",
       "Jet #phi",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -159,6 +160,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet #eta",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -169,6 +171,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet #eta",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -179,6 +182,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet p_{T} [GeV/c]",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -189,6 +193,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet p_{T} [GeV/c]",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -199,6 +204,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet p_{T} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false

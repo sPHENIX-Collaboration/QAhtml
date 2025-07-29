@@ -149,6 +149,7 @@ void JetVsTrackSumDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#Sigmap_{T}^{trk} / p_{T}^{jet}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -159,6 +160,7 @@ void JetVsTrackSumDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#Sigmap_{T}^{trk} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -169,6 +171,7 @@ void JetVsTrackSumDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet}",
       "#Sigmap_{T}^{trk}",
       "Counts",
+      0.8,
       0.25,
       false,
       true

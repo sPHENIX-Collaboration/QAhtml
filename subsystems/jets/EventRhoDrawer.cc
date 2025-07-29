@@ -115,6 +115,7 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "#rho_{area}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -125,6 +126,7 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "#rho_{mult}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -135,6 +137,7 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "#sigma_{area}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -145,6 +148,7 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       "#sigma_{mult}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
