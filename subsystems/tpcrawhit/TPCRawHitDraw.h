@@ -27,9 +27,9 @@ class TPCRawHitDraw : public QADraw
   int MakeCanvas(const std::string &name, int num);
   int DrawSectorInfo();
   int DrawOnlMon();
-  TCanvas *TC[25]{};
-  TPad *transparent[25]{};
-  TPad *Pad[25][6]{};
+  TCanvas *TC[26]{};
+  TPad *transparent[26]{};
+  TPad *Pad[26][6]{};
   const char *histprefix;
 };
 

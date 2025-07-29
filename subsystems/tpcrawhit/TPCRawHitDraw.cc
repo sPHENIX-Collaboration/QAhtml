@@ -840,9 +840,206 @@ int TPCRawHitDraw::DrawOnlMon()
 
   TC[24]->Update(); 
  
+  if (! gROOT->FindObject("run_summary"))
+  {
+    MakeCanvas("run_summary", 25);
+  }
+  TC[25]->Clear("D");
+  //fracOutN, fracOutS
+  float fracOutTotal = (outN + outS)/(2*halfFEEs);
+  std::ostringstream fractotalstream, fracnstream, fracsstream;
+  std::string fractotalstring, fracnstring, fracsstring;
+  if (fracOutTotal < 0.06)
+  {
+    fractotalstream << "Total Fraction of FEEs Out: " << fracOutTotal << "(Good Run)" << std::endl;
+    fractotalstring = fractotalstream.str();
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kGreen);
+    title->DrawLatex(0.15, 0.9, fractotalstring.c_str()); 
+  }
+  else if (fracOutTotal == 1)
+  {
+    fractotalstream << "Total Fraction of FEEs Out: " << fracOutTotal << "(Bad Run, TPC Likely Off)" << std::endl; 
+    fractotalstring = fractotalstream.str();
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kRed);
+    title->DrawLatex(0.15, 0.9, fractotalstring.c_str()); 
+  }
+  else
+  {
+    fractotalstream << "Total Fraction of FEEs Out: " << fracOutTotal << "(Bad Run, High Number of FEEs Out)" << std::endl; 
+    fractotalstring = fractotalstream.str(); 
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kOrange);
+    title->DrawLatex(0.15, 0.9, fractotalstring.c_str()); 
+  }
+
+  if (fracOutN < 0.06)
+  {
+    fracnstream << "Fraction of North FEEs Out: " << fracOutN << "(Good)" << std::endl;
+    fracnstring = fracnstream.str();
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kGreen);
+    title->DrawLatex(0.15, 0.85, fracnstring.c_str()); 
+  }
+  else if (fracOutN == 1)
+  {
+    fracnstream << "Fraction of North FEEs Out: " << fracOutN << "(Bad, North Likely Off)" << std::endl; 
+    fracnstring = fracnstream.str();
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kRed);
+    title->DrawLatex(0.15, 0.85, fracnstring.c_str()); 
+  }
+  else
+  {
+    fracnstream << "Fraction of North FEEs Out: " << fracOutN << "(Bad, High Number of N FEEs Out)" << std::endl; 
+    fracnstring = fracnstream.str(); 
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kOrange);
+    title->DrawLatex(0.15, 0.85, fracnstring.c_str()); 
+  }
+
+  if (fracOutS < 0.06)
+  {
+    fracsstream << "Fraction of South FEEs Out: " << fracOutS << "(Good)" << std::endl;
+    fracsstring = fracsstream.str();
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kGreen);
+    title->DrawLatex(0.15, 0.80, fracsstring.c_str()); 
+  }
+  else if (fracOutS == 1)
+  {
+    fracsstream << "Fraction of South FEEs Out: " << fracOutS << "(Bad, South Likely Off)" << std::endl; 
+    fracsstring = fracsstream.str();
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kRed);
+    title->DrawLatex(0.15, 0.80, fracsstring.c_str()); 
+  }
+  else
+  {
+    fracsstream << "Fraction of South FEEs Out: " << fracOutS << "(Bad, High Number of S FEEs Out)" << std::endl; 
+    fracsstring = fracsstream.str(); 
+    TLatex *title = new TLatex();
+    title->SetTextSize(0.04);
+    title->SetNDC();
+    title->SetTextColor(kOrange);
+    title->DrawLatex(0.15, 0.80, fracsstring.c_str()); 
+  }
+  TLatex *title = new TLatex();
+  title->SetTextSize(0.04);
+  title->SetNDC();
+  title->DrawLatex(0.15, 0.75, "North - Left Figure, South - Right Figure"); 
+ 
+  Pad[25][0]->cd();
+  if (h_northHits)
+  {
+    h_northHits->DrawCopy("COLZ");
+
+    Double_t sec_gap_inner = (2*M_PI - 0.5024*12.0)/12.0;
+    Double_t sec_gap_outer = (2*M_PI - 0.5097*12.0)/12.0;
+    Double_t sec_gap = (sec_gap_inner + sec_gap_outer)/2.0;
+    Double_t sec_phi = (0.5024 + 0.5097)/2.0;
+    TLine *lines[12];
+    for(int ln=0;ln<12;ln++)
+    {
+      lines[ln] = new TLine(311.05*cos((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)),311.05*sin((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)),759.11*cos((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)),759.11*sin((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)));
+    }
+    TEllipse *e1 = new TEllipse(0.0,0.0,311.05,311.05);
+    TEllipse *e2 = new TEllipse(0.0,0.0,(402.49+411.53)/2.0,(402.49+411.53)/2.0);
+    TEllipse *e3 = new TEllipse(0.0,0.0,(583.67+574.75)/2.0,(583.67+574.75)/2.0);
+    TEllipse *e4 = new TEllipse(0.0,0.0,759.11,759.11);
+    e1->SetFillStyle(0);
+    e2->SetFillStyle(0);
+    e3->SetFillStyle(0);
+    e4->SetFillStyle(0);
+
+    e1->Draw("same");
+    e2->Draw("same");
+    e3->Draw("same");
+    e4->Draw("same");
+    for(int ln2=0;ln2<12;ln2++)
+    {
+      lines[ln2]->Draw("same"); 
+    }
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  Pad[25][1]->cd();
+  if (h_southHits)
+  {
+    h_southHits->DrawCopy("COLZ");
+
+    Double_t sec_gap_inner = (2*M_PI - 0.5024*12.0)/12.0;
+    Double_t sec_gap_outer = (2*M_PI - 0.5097*12.0)/12.0;
+    Double_t sec_gap = (sec_gap_inner + sec_gap_outer)/2.0;
+    Double_t sec_phi = (0.5024 + 0.5097)/2.0;
+    TLine *lines[12];
+    for(int ln=0;ln<12;ln++)
+    {
+      lines[ln] = new TLine(311.05*cos((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)),311.05*sin((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)),759.11*cos((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)),759.11*sin((sec_phi+sec_gap)/2.0+ln*(sec_phi+sec_gap)));
+    }
+    TEllipse *e1 = new TEllipse(0.0,0.0,311.05,311.05);
+    TEllipse *e2 = new TEllipse(0.0,0.0,(402.49+411.53)/2.0,(402.49+411.53)/2.0);
+    TEllipse *e3 = new TEllipse(0.0,0.0,(583.67+574.75)/2.0,(583.67+574.75)/2.0);
+    TEllipse *e4 = new TEllipse(0.0,0.0,759.11,759.11);
+    e1->SetFillStyle(0);
+    e2->SetFillStyle(0);
+    e3->SetFillStyle(0);
+    e4->SetFillStyle(0);
+
+    e1->Draw("same");
+    e2->Draw("same");
+    e3->Draw("same");
+    e4->Draw("same");
+    for(int ln2=0;ln2<12;ln2++)
+    {
+      lines[ln2]->Draw("same"); 
+    }
+    gPad->SetRightMargin(0.15);
+  }
+  else
+  {
+    // histogram is missing
+    return -1;
+  }
+  TText PrintRun2;
+  PrintRun2.SetTextFont(62);
+  PrintRun2.SetTextSize(0.04);
+  PrintRun2.SetNDC();  // set to normalized coordinates
+  PrintRun2.SetTextAlign(23); // center/top alignment
+  std::ostringstream runnostream2;
+  std::string runstring2;
+  runnostream2 << Name() << "_summary Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring2 = runnostream2.str();
+  transparent[25]->cd();
+  PrintRun2.DrawText(0.5, 1., runstring2.c_str());
+
+  TC[25]->Update(); 
+ 
   std::cout << "DrawOnlMon Ending" << std::endl;
   return 0;
 }
+
 int TPCRawHitDraw::MakeHtml(const std::string &what)
 {
   int iret = Draw(what);
@@ -892,6 +1089,9 @@ int TPCRawHitDraw::MakeHtml(const std::string &what)
     }
     pngfile = cl->htmlRegisterPage(*this, "rawhit_xy", "25", "png");
     cl->CanvasToPng(TC[24], pngfile);
+    
+    pngfile = cl->htmlRegisterPage(*this, "run_summary", "26", "png");
+    cl->CanvasToPng(TC[25], pngfile);
   }
   return 0;
 }

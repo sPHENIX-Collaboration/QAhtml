@@ -32,6 +32,60 @@ class MicromegasDraw : public QADraw
   using detector_range_t = std::pair<int, int>;
 
   //! acceptable cluster multiplicity range
+  void set_gl1_drop_rate_range( const range_t& value )
+  {
+    for( size_t i=0; i<m_gl1_drop_rate_range.size(); ++i )
+    { m_gl1_drop_rate_range[i] = value; }
+  }
+
+  //! acceptable gl1 drop rate range
+  void set_gl1_drop_rate_range( size_t i, const range_t& value )
+  {
+    assert( i<m_gl1_drop_rate_range.size());
+    m_gl1_drop_rate_range[i] = value;
+  }
+
+  //! acceptable number of good packets for gl1 drop rate
+  void set_packet_gl1_drop_rate_range( int n_questionable, int n_good )
+  { m_packet_gl1_drop_rate_range = {n_questionable,n_good}; }
+
+  //! acceptable per packet waveform drop rate range
+  void set_waveform_drop_rate_range( const range_t& value )
+  {
+    for( size_t i=0; i<m_waveform_drop_rate_range.size(); ++i )
+    { m_waveform_drop_rate_range[i] = value; }
+  }
+
+  //! acceptable per packet waveform drop rate range
+  void set_waveform_drop_rate_range( size_t i, const range_t& value )
+  {
+    assert( i<m_waveform_drop_rate_range.size());
+    m_waveform_drop_rate_range[i] = value;
+  }
+
+  //! acceptable number of good packets for waveform drop rate
+  void set_packet_wf_drop_rate_range( int n_questionable, int n_good )
+  { m_packet_wf_drop_rate_range = {n_questionable,n_good}; }
+
+  //! acceptable per fee waveform drop rate range
+  void set_fee_waveform_drop_rate_range( const range_t& value )
+  {
+    for( size_t i=0; i<m_fee_waveform_drop_rate_range.size(); ++i )
+    { m_fee_waveform_drop_rate_range[i] = value; }
+  }
+
+  //! acceptable per fee waveform drop rate range
+  void set_fee_waveform_drop_rate_range( size_t i, const range_t& value )
+  {
+    assert( i<m_fee_waveform_drop_rate_range.size());
+    m_fee_waveform_drop_rate_range[i] = value;
+  }
+
+  //! acceptable number of good fee for waveform drop rate
+  void set_fee_wf_drop_rate_range( int n_questionable, int n_good )
+  { m_fee_wf_drop_rate_range = {n_questionable,n_good}; }
+
+  //! acceptable cluster multiplicity range
   void set_cluster_multiplicity_range( const range_t& value )
   {
     for( size_t i=0; i<m_cluster_multiplicity_range.size(); ++i )
@@ -112,6 +166,9 @@ class MicromegasDraw : public QADraw
   // create canbas
   TCanvas* create_canvas(const std::string &name);
 
+  // draw run and time in a given pad
+  void draw_title( TPad*);
+
   //! bco information
   int draw_bco_info();
 
@@ -164,63 +221,98 @@ class MicromegasDraw : public QADraw
   detector_range_t m_fee_wf_drop_rate_range = {8,13};
 
   //! acceptable cluster multiplicity range
-  range_list_t m_cluster_multiplicity_range = range_list_t(m_nfee_active, {1.5,4});
+  range_list_t m_cluster_multiplicity_range ={
+    {1.5,3.}, // SCOP
+    {1.5,3.}, // SCIP
+    {1.5,3.}, // NCIP
+    {1.5,3.}, // NCOP
+    {1.5,3.}, // SEIP
+    {1.5,3.}, // NEIP
+    {1.5,3.}, // SWIP
+    {1.5,3.}, // NWIP
+    {1.6,3.2}, // SCOZ
+    {1.6,3.2}, // SCIZ
+    {1.6,3.2}, // NCIZ
+    {1.6,3.2}, // NCOZ
+    {1.6,3.2}, // SEIZ
+    {1.6,3.2}, // NEIZ
+    {1.6,3.2}, // SWIZ
+    {1.6,3.2} // NWIZ
+  };
 
   //! acceptable numbers of good detectors for cluster multiplicity
-  detector_range_t m_detector_cluster_mult_range = {7,13};
+  detector_range_t m_detector_cluster_mult_range = {8,15};
 
   //! acceptable cluster size range
   range_list_t m_cluster_size_range = {
-    {2,4}, // SCOP
-    {2,4}, // SCIP
-    {2,4}, // NCIP
-    {2,4}, // NCOP
-    {2,4}, // SEIP
-    {2,4}, // NEIP
-    {2,4}, // SWIP
-    {2,4}, // NWIP
-    {1.5,3.5}, // SCOZ
-    {1.5,3.5}, // SCIZ
-    {1.5,3.5}, // NCIZ
-    {1.5,3.5}, // NCOZ
-    {1.5,3.5}, // SEIZ
-    {1.5,3.5}, // NEIZ
-    {1.5,3.5}, // SWIZ
-    {1.5,3.5}  // NWIZ
+    {2., 3.5}, // SCOP
+    {2., 3.5}, // SCIP
+    {2., 3.5}, // NCIP
+    {2., 3.5}, // NCOP
+    {2., 3.5}, // SEIP
+    {2., 3.5}, // NEIP
+    {2., 3.5}, // SWIP
+    {2., 3.5}, // NWIP
+    {1.5,3.}, // SCOZ
+    {1.5,3.}, // SCIZ
+    {1.5,3.}, // NCIZ
+    {1.5,3.}, // NCOZ
+    {1.5,3.}, // SEIZ
+    {1.5,3.}, // NEIZ
+    {1.5,3.}, // SWIZ
+    {1.5,3.} // NWIZ
   };
 
   //! acceptable numbers of good detectors for cluster size
-  detector_range_t m_detector_cluster_size_range = {8,13};
+  detector_range_t m_detector_cluster_size_range = {8,15};
 
   //! acceptable cluster charge range
-  range_list_t m_cluster_charge_range = range_list_t(m_nfee_active, {300,700});
+  range_list_t m_cluster_charge_range = {
+    {450,800}, // SCOP
+    {450,800}, // SCIP
+    {350,800}, // NCIP
+    {450,800}, // NCOP
+    {450,800}, // SEIP
+    {450,800}, // NEIP
+    {450,800}, // SWIP
+    {450,800}, // NWIP
+    {400,750}, // SCOZ
+    {400,750}, // SCIZ
+    {400,750}, // NCIZ
+    {400,750}, // NCOZ
+    {400,750}, // SEIZ
+    {400,750}, // NEIZ
+    {400,750}, // SWIZ
+    {400,750} // NWIZ
+  };
+
 
   //! acceptable numbers of good detectors for cluster charge
-  detector_range_t m_detector_cluster_charge_range = {8,13};
+  detector_range_t m_detector_cluster_charge_range = {8,15};
 
   //! acceptable efficiency range
   range_list_t m_efficiency_range =
   {
-    {0.6,1.0}, // SCOP
-    {0.6,1.0}, // SCIP
-    {0.5,1.0}, // NCIP
-    {0.6,1.0}, // NCOP
-    {0.6,1.0}, // SEIP
-    {0.6,1.0}, // NEIP
-    {0.5,1.0}, // SWIP
-    {0.4,1.0}, // NWIP
-    {0.4,1.0}, // SCOZ
-    {0.6,1.0}, // SCIZ
-    {0.6,1.0}, // NCIZ
-    {0.6,1.0}, // NCOZ
-    {0.6,1.0}, // SEIZ
-    {0.6,1.0}, // NEIZ
-    {0.6,1.0}, // SWIZ
-    {0.6,1.0}  // NWIZ
+    {0.65,1.0}, // SCOP
+    {0.65,1.0}, // SCIP
+    {0.60,1.0}, // NCIP
+    {0.65,1.0}, // NCOP
+    {0.65,1.0}, // SEIP
+    {0.65,1.0}, // NEIP
+    {0.65,1.0}, // SWIP
+    {0.65,1.0}, // NWIP
+    {0.40,1.0}, // SCOZ
+    {0.70,1.0}, // SCIZ
+    {0.70,1.0}, // NCIZ
+    {0.70,1.0}, // NCOZ
+    {0.70,1.0}, // SEIZ
+    {0.70,1.0}, // NEIZ
+    {0.70,1.0}, // SWIZ
+    {0.70,1.0}  // NWIZ
   };
 
   //! acceptable numbers of good detectors for efficiency estimate
-  detector_range_t m_detector_efficiency_range = {9,13};
+  detector_range_t m_detector_efficiency_range = {9,15};
 
 };
 

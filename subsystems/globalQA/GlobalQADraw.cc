@@ -771,8 +771,8 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
 
     if(_max2 < _max1) _histmax = _max1;
 
-    h_GlobalQA_sEPD_adcsum_n->GetXaxis()->SetRangeUser(-10, 30000);
-    h_GlobalQA_sEPD_adcsum_s->GetXaxis()->SetRangeUser(-10, 30000);
+    h_GlobalQA_sEPD_adcsum_n->GetXaxis()->SetRangeUser(0, 1.5e6);
+    h_GlobalQA_sEPD_adcsum_s->GetXaxis()->SetRangeUser(0, 1.5e6);
     h_GlobalQA_sEPD_adcsum_n->GetYaxis()->SetRangeUser(0, _histmax + _add);
     h_GlobalQA_sEPD_adcsum_s->GetYaxis()->SetRangeUser(0, _histmax + _add);
 
@@ -787,6 +787,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h_GlobalQA_sEPD_adcsum_s->SetMarkerColor(kRed);
     h_GlobalQA_sEPD_adcsum_s->SetMarkerStyle(20);
     h_GlobalQA_sEPD_adcsum_s->SetMarkerSize(0.8);
+    h_GlobalQA_sEPD_adcsum_s->SetStats(0);
 
     leg10->AddEntry(h_GlobalQA_sEPD_adcsum_s,"South","l");
     h_GlobalQA_sEPD_adcsum_s->DrawCopy();
@@ -796,6 +797,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h_GlobalQA_sEPD_adcsum_n->SetMarkerColor(kBlue);
     h_GlobalQA_sEPD_adcsum_n->SetMarkerStyle(20);
     h_GlobalQA_sEPD_adcsum_n->SetMarkerSize(0.8);
+    h_GlobalQA_sEPD_adcsum_n->SetStats(0);
 
     leg10->AddEntry(h_GlobalQA_sEPD_adcsum_n,"North","l");
     h_GlobalQA_sEPD_adcsum_n->DrawCopy("same");
@@ -812,13 +814,17 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
   {
 
     h2_GlobalQA_sEPD_adcsum_ns->SetTitle("sEPD North-South Correlation");
-    h2_GlobalQA_sEPD_adcsum_ns->GetXaxis()->SetRangeUser(-10, 30000);
-    h2_GlobalQA_sEPD_adcsum_ns->GetYaxis()->SetRangeUser(-10, 30000);
+    h2_GlobalQA_sEPD_adcsum_ns->GetXaxis()->SetRangeUser(0, 1.5e6);
+    h2_GlobalQA_sEPD_adcsum_ns->GetYaxis()->SetRangeUser(0, 1.5e6);
     h2_GlobalQA_sEPD_adcsum_ns->SetXTitle("sEPD south ADC sum");
     h2_GlobalQA_sEPD_adcsum_ns->SetYTitle("sEPD north ADC sum");
+    h2_GlobalQA_sEPD_adcsum_ns->SetStats(0);
+    
+    Pad[2][1]->UseCurrentStyle();
+    Pad[2][1]->SetLogz();
+    Pad[2][1]->SetRightMargin(0.15);
+    
     h2_GlobalQA_sEPD_adcsum_ns->DrawCopy("COLZ");
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
 
   }
   else
@@ -839,6 +845,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h2_GlobalQA_sEPD_ADC_channel_south->GetZaxis()->SetTitle("Mean ADC");
     h2Profile_GlobalQA_sEPD_tiles_south->SetXTitle("#eta bin");
     h2Profile_GlobalQA_sEPD_tiles_south->SetYTitle("#phi bin");
+    h2Profile_GlobalQA_sEPD_tiles_south->SetStats(0);
     h2_GlobalQA_sEPD_ADC_channel_south->SetXTitle("#eta bin");
     h2_GlobalQA_sEPD_ADC_channel_south->SetYTitle("#phi bin");
     h2Profile_GlobalQA_sEPD_tiles_south->DrawCopy("COLZ");
@@ -874,6 +881,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h2_GlobalQA_sEPD_ADC_channel_north->GetZaxis()->SetTitle("Mean ADC");
     h2Profile_GlobalQA_sEPD_tiles_north->SetXTitle("#eta bin");
     h2Profile_GlobalQA_sEPD_tiles_north->SetYTitle("#phi bin");
+    h2Profile_GlobalQA_sEPD_tiles_north->SetStats(0);
     h2_GlobalQA_sEPD_ADC_channel_north->SetXTitle("#eta bin");
     h2_GlobalQA_sEPD_ADC_channel_north->SetYTitle("#phi bin");
     h2Profile_GlobalQA_sEPD_tiles_north->DrawCopy("COLZ ");
@@ -1094,6 +1102,8 @@ int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
     }
   }
 
+  // Temporarily commenting out failure map drawing to prevent color palette issues
+  /*
   if (!gROOT->FindObject("Global4")) {
     MakeCanvas("Global4", 3);
   }
@@ -1139,6 +1149,7 @@ int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
   tn.DrawText(0.3, 0.92, "North");
 
   TC[3]->Update();
+  */
   return 0;
 }
 

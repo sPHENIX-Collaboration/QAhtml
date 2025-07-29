@@ -85,7 +85,7 @@ int BCODraw::MakeCanvas(const std::string &name, int num)
   TC[num] = new TCanvas(name.c_str(), (boost::format("BCO Plots %d") % num).str().c_str(), -1, 0, (int) (xsize / 1.2) , (int) (ysize / 1.2));
   gSystem->ProcessEvents();
 
-  if (num == 0 || num == 2 || num == 5)
+  if (num == 0 || num == 2)
   {
     Pad[num][0] = new TPad((boost::format("mypad%d0") % num).str().c_str(), "put", 0.05, 0.25, 0.45, 0.75, 0);
     Pad[num][1] = new TPad((boost::format("mypad%d1") % num).str().c_str(), "a", 0.5, 0.25, 0.95, 0.75, 0);
@@ -134,6 +134,31 @@ int BCODraw::MakeCanvas(const std::string &name, int num)
     Pad[num][5]->Draw();
     Pad[num][6]->Draw();
     Pad[num][7]->Draw();
+
+  } else if( num == 5 ) {
+
+    // copied fron MicromegasDraw
+    auto cv = TC[num];
+    static constexpr int ncol=2;
+    static constexpr int nrow=2;
+    static constexpr double max_height = 0.94;
+    cv->Divide( ncol, nrow );
+
+    for( int i = 0; i < ncol*nrow; ++i )
+    {
+      auto pad = cv->GetPad( i+1 );
+      int col = i%ncol;
+      int row = i/ncol;
+      const double xmin = double(col)/ncol;
+      const double xmax = double(col+1)/ncol;
+
+      const double ymin = max_height*(1. - double(row+1)/nrow);
+      const double ymax = max_height*(1. - double(row)/nrow);
+      pad->SetPad( xmin, ymin, xmax, ymax );
+
+      // assign
+      Pad[num][i]= static_cast<TPad*>(pad);
+    }
   }
 
   // this one is used to plot the run number on the canvas
@@ -570,103 +595,166 @@ int BCODraw::DrawTPC()
   return 0;
 }
 
+//_____________________________________________________________________________________________________
 int BCODraw::DrawTPOT()
 {
   std::cout << "BCO DrawTPOT() Beginning" << std::endl;
-  QADrawClient *cl = QADrawClient::instance();
-  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
-  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
-  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
-  auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
-  if (h_waveform_bco_dropped && h_waveform_pool_dropped && h_waveform_total && h_gl1_raw)
-    {
-      auto h_drop= new TH1F("h_drop", "Drop Rate", 3, 0, 3);
-      h_drop->GetXaxis()->SetBinLabel(1, "5001");
-      h_drop->GetXaxis()->SetBinLabel(2, "5002");
-      h_drop->GetXaxis()->SetBinLabel(3, "all");
-      h_drop->GetXaxis()->SetTitle("Packet");
-      h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
-      h_drop->SetTitle("Fraction of Dropped Waveforms by packet");
+  auto cl = QADrawClient::instance();
 
-      h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/h_waveform_total->GetBinContent(1));
-      h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/h_waveform_total->GetBinContent(2));
-      h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(h_waveform_total->GetBinContent(1)+h_waveform_total->GetBinContent(2)) );
-
-      auto h_gl1= new TH1F("h_gl1", "Match Rate", 3, 0, 3);
-      h_gl1->GetXaxis()->SetBinLabel(1, "5001");
-      h_gl1->GetXaxis()->SetBinLabel(2, "5002");
-      h_gl1->GetXaxis()->SetBinLabel(3, "all");
-
-      h_gl1->SetBinContent(3,double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
-      h_gl1->SetBinContent(2,double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
-      h_gl1->SetBinContent(1,double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
-
-      if (! gROOT->FindObject("tpot_evt_building_1"))
+  // get canvas or create
+  if (! gROOT->FindObject("tpot_evt_building_1"))
 	{
 	  MakeCanvas("tpot_evt_building_1", 5);
 	}
-      TC[5]->Clear("D");
-      Pad[5][0]->cd();
-      h_drop->SetMinimum(0);
-      h_drop->SetMaximum(1.6);
-      h_drop->SetFillColor(42);
-      h_drop->SetFillStyle(3002);
-      h_drop->DrawCopy();
 
-      TLegend* legend_drop = new TLegend(0.56, 0.6, 0.85, 0.84);
-      legend_drop->SetHeader("Values", "C");
-      legend_drop->SetTextSize(0.045);
-      legend_drop->SetBorderSize(0);
-      legend_drop->SetFillStyle(0);
+  // fill style and color
+  static constexpr int fill_style = 3002;
+  static constexpr int fill_color = 42;
 
-      for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
-	{
-	  legend_drop->AddEntry((TObject*)0, Form("%s: %.4f", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
-	}
-      legend_drop->Draw();
+  // maximum number of packets
+  static constexpr int m_npackets_active = 2;
 
-      Pad[5][1]->cd();
-      h_gl1->GetXaxis()->SetTitle("Packet");
-      h_gl1->GetYaxis()->SetTitle("GL1 BCO Match Rate");
-      h_gl1->SetTitle("GL1 BCO Matching Tagger Rate by packet");
-      h_gl1->SetFillColor(42);
-      h_gl1->SetFillStyle(3002);
-      h_gl1->SetMinimum(0);
-      h_gl1->SetMaximum(1.6);
-      h_gl1->DrawCopy();
+  //! number of fee boards
+  static constexpr int m_nfee_max = 26;
 
-      auto legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
-      legend_gl1->SetHeader("Values", "C");
-      legend_gl1->SetTextSize(0.045);
-      legend_gl1->SetBorderSize(0);
-      legend_gl1->SetFillStyle(0);
+  // clear
+  TC[5]->Clear("D");
 
-      for (int i = 1; i <= h_gl1->GetNbinsX(); ++i)
-	{
-	  legend_gl1->AddEntry((TObject*)0, Form("%s: %.4f", h_gl1->GetXaxis()->GetBinLabel(i), h_gl1->GetBinContent(i)), "");
-	}
-      legend_gl1->Draw();
-    }
-  else
+
+  // GLI BCO matching rate
+  auto h_gl1_raw = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_packet_stat"));
+  if (h_gl1_raw)
+  {
+    auto h_gl1= new TH1F("h_gl1", "Match Rate", m_npackets_active+1, 0, m_npackets_active+1);
+    h_gl1->SetStats(0);
+    h_gl1->GetXaxis()->SetTitle("Packet");
+    h_gl1->GetYaxis()->SetTitle("GL1 BCO drop rate");
+    h_gl1->SetTitle("GL1 BCO drop rate by packet");
+
+    h_gl1->GetXaxis()->SetBinLabel(1, "5001");
+    h_gl1->GetXaxis()->SetBinLabel(2, "5002");
+    h_gl1->GetXaxis()->SetBinLabel(3, "all");
+
+    h_gl1->SetBinContent(1,1.-double(h_gl1_raw->GetBinContent(2))/h_gl1_raw->GetBinContent(1));
+    h_gl1->SetBinContent(2,1.-double(h_gl1_raw->GetBinContent(3))/h_gl1_raw->GetBinContent(1));
+    h_gl1->SetBinContent(3,1.-double(h_gl1_raw->GetBinContent(4))/h_gl1_raw->GetBinContent(1));
+
+    Pad[5][0]->cd();
+    h_gl1->SetMinimum(1e-5);
+    h_gl1->SetMaximum(1.1);
+    h_gl1->SetFillStyle(fill_style);
+    h_gl1->SetFillColor(fill_color);
+    h_gl1->Draw();
+    gPad->SetLogy();
+
+    auto legend_gl1 = new TLegend(0.65, 0.6, 0.85, 0.84);
+    legend_gl1->SetHeader("Values", "C");
+    legend_gl1->SetTextSize(0.045);
+    legend_gl1->SetBorderSize(0);
+    legend_gl1->SetFillStyle(0);
+
+    for (int i = 1; i <= h_gl1->GetNbinsX(); ++i)
     {
-      // histogram is missing
-      return -1;
+      legend_gl1->AddEntry((TObject*)0, Form("%s: %5.3g", h_gl1->GetXaxis()->GetBinLabel(i), h_gl1->GetBinContent(i)), "");
     }
+    legend_gl1->Draw();
+
+    gPad->Update();
+  }
+
+  // per packet BCO drop
+  auto h_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_bco"));
+  auto h_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_dropped_pool"));
+  auto h_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_waveform_count_total"));
+  if (h_waveform_bco_dropped && h_waveform_pool_dropped && h_waveform_total )
+  {
+    auto h_drop= new TH1F("h_drop", "Drop Rate", m_npackets_active+1, 0, m_npackets_active+1);
+    h_drop->SetStats(0);
+    h_drop->GetXaxis()->SetBinLabel(1, "5001");
+    h_drop->GetXaxis()->SetBinLabel(2, "5002");
+    h_drop->GetXaxis()->SetBinLabel(3, "all");
+    h_drop->GetXaxis()->SetTitle("Packet");
+    h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
+    h_drop->SetTitle("Fraction of Dropped Waveforms by packet");
+
+    const double total1 = h_waveform_total->GetBinContent(1);
+    if(total1>0)
+    { h_drop->SetBinContent(1, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1))/total1); }
+
+    const double total2 = h_waveform_total->GetBinContent(2);
+    if( total2>0 )
+    { h_drop->SetBinContent(2, double(h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/total2); }
+
+    if( total1+total2>0)
+    { h_drop->SetBinContent(3, double(h_waveform_bco_dropped->GetBinContent(1)+ h_waveform_pool_dropped->GetBinContent(1)+h_waveform_bco_dropped->GetBinContent(2)+ h_waveform_pool_dropped->GetBinContent(2))/(total1+total2) ); }
+
+    Pad[5][2]->cd();
+    h_drop->SetMinimum(1e-5);
+    h_drop->SetMaximum(1.1);
+    h_drop->SetFillStyle(fill_style);
+    h_drop->SetFillColor(fill_color);
+    h_drop->Draw();
+
+    gPad->SetLogy();
+
+    auto legend_drop = new TLegend(0.56, 0.6, 0.85, 0.84);
+    legend_drop->SetHeader("Values", "C");
+    legend_drop->SetTextSize(0.045);
+    legend_drop->SetBorderSize(0);
+    legend_drop->SetFillStyle(0);
+
+    gPad->Update();
+
+    for (int i = 1; i <= h_drop->GetNbinsX(); ++i)
+    {
+      legend_drop->AddEntry((TObject*)0, Form("%s: %5.3g", h_drop->GetXaxis()->GetBinLabel(i), h_drop->GetBinContent(i)), "");
+    }
+    legend_drop->Draw();
+  }
+
+  // per FEE BCO drop
+  auto h_fee_waveform_bco_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_dropped_bco"));
+  auto h_fee_waveform_pool_dropped = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_dropped_pool"));
+  auto h_fee_waveform_total = static_cast<TH1*>(cl->getHisto("h_MicromegasBCOQA_fee_waveform_count_total"));
+  if (h_fee_waveform_bco_dropped && h_fee_waveform_pool_dropped && h_fee_waveform_total )
+  {
+    auto h_drop= new TH1F("h_drop_fee", "Drop Rate", m_nfee_max, 0, m_nfee_max);
+    h_drop->SetStats(0);
+    h_drop->GetXaxis()->SetTitle("FEE ID");
+    h_drop->GetYaxis()->SetTitle("Waveform Drop Rate");
+    h_drop->SetTitle("Fraction of Dropped Waveforms by fee");
+
+    for( int i = 0; i< m_nfee_max; ++i )
+    {
+      const double total = h_fee_waveform_total->GetBinContent(i+1);
+      if( total > 0 )
+      { h_drop->SetBinContent(i+1, double(h_fee_waveform_bco_dropped->GetBinContent(i+1)+ h_fee_waveform_pool_dropped->GetBinContent(i+1))/total); }
+    }
+
+    Pad[5][3]->cd();
+    h_drop->SetMinimum(1e-5);
+    h_drop->SetMaximum(1.1);
+    h_drop->SetFillStyle(fill_style);
+    h_drop->SetFillColor(fill_color);
+    h_drop->Draw();
+
+    gPad->SetLogy();
+    gPad->Update();
+  }
+
+  std::ostringstream runnostream1;
+  runnostream1 << Name() << "_tpot evt building Run " << cl->RunNumber();
+  const auto runstring1 = runnostream1.str();
+  transparent[5]->cd();
 
   TText PrintRun;
   PrintRun.SetTextFont(62);
   PrintRun.SetTextSize(0.04);
   PrintRun.SetNDC();  // set to normalized coordinates
   PrintRun.SetTextAlign(23); // center/top alignment
-  std::ostringstream runnostream1;
-  std::string runstring1;
-  runnostream1 << Name() << "_tpot evt building Run " << cl->RunNumber();
-  runstring1 = runnostream1.str();
-  transparent[5]->cd();
   PrintRun.DrawText(0.5, 1., runstring1.c_str());
 
   TC[5]->Update();
-  std::cout << "DrawTPOT Ending" << std::endl;
   return 0;
 }
 
