@@ -34,10 +34,17 @@ class TpcSeedsDraw : public QADraw
   int DrawVertexInfo();
   int DrawdEdxInfo1();
   int DrawdEdxInfo2();
-  TCanvas *TC[8]{};
-  TPad *transparent[8]{};
-  TPad *Pad[8][26]{};
+  int Drawsummary();
+  TCanvas *TC[9]{};
+  TPad *transparent[9]{};
+  TPad *Pad[9][26]{};
   const char *histprefix;
+  double xpos_z0 = -1;
+  double xpos_z4 = -1;
+  double xpos_z5 = -1;
+  double xpos_z9 = -1;
+  double z9_to_z5_ratio = -1;
+  double z0_to_z4_ratio = -1;
 };
 
 #endif
