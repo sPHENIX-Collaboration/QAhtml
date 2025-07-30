@@ -21,7 +21,8 @@ libqadrawjet_la_LIBADD = \
 jetincludedir=$(pkgincludedir)/jet
 
 jetinclude_HEADERS = \
-  JetDraw.h 
+  JetDraw.h \
+  JetDrawDefs.h
 
 libqadrawjet_la_SOURCES = \
   JetDraw.cc 

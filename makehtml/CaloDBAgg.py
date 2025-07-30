@@ -96,6 +96,8 @@ def main():
                 latestdbtag= ""
                 latestdbtagInt=0
                 for newpath in filepaths:
+                    if not os.path.exists(newpath):
+                        continue
                     thistag = getBuildDbTag(runtype,newpath)
                     tags = thistag.split("_")
                     if tags[1].find("nocdbtag") != -1:
