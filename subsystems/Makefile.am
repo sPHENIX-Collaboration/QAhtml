@@ -7,11 +7,13 @@ include_HEADERS =
 SUBDIRS = \
   bco \
   calo \
+  calofitting \
   example \
-	globalQA \
+  globalQA \
   intt \
   inttrawhit \
   jets \
+  kfparticle \
   micromegas \
   mvtx \
   mvtxrawhit \
@@ -21,4 +23,5 @@ SUBDIRS = \
   tpcrawhit \
   tpcseeds \
   tpcsil \
+  tracking \
   vertex

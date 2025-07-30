@@ -26,11 +26,13 @@ AC_CONFIG_FILES([
   subsystems/Makefile
   subsystems/bco/Makefile
   subsystems/calo/Makefile
+  subsystems/calofitting/Makefile
   subsystems/example/Makefile
   subsystems/globalQA/Makefile
   subsystems/intt/Makefile
   subsystems/inttrawhit/Makefile
   subsystems/jets/Makefile
+  subsystems/kfparticle/Makefile
   subsystems/micromegas/Makefile
   subsystems/mvtx/Makefile
   subsystems/mvtxrawhit/Makefile
@@ -40,6 +42,7 @@ AC_CONFIG_FILES([
   subsystems/tpcrawhit/Makefile
   subsystems/tpcseeds/Makefile
   subsystems/tpcsil/Makefile
+  subsystems/tracking/Makefile
   subsystems/vertex/Makefile
 ])
 

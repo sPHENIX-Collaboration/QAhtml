@@ -11,7 +11,7 @@ public:
 
 protected:
   int DrawCanvas() override;
-  int MakeCanvas() override;
+  int MakeCanvas(int=-1, int=-1) override;
 
   using SingleCanvasDrawer::m_canvas; // base class owned
   using SingleCanvasDrawer::m_name;

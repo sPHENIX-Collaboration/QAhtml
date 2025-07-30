@@ -9,8 +9,9 @@ import argparse
 import hashlib
 
 NROCS = [1,6,8,24]
+NENDPOINTS=[1,1,1,2]
 nsubsys = 4
-hist_types = ["HIST_DST_STREAMING_EVENT_TPOT","HIST_DST_STREAMING_EVENT_MVTX", "HIST_DST_STREAMING_EVENT_INTT","HIST_DST_STREAMING_EVENT_TPC"]
+hist_types = ["HIST_DST_STREAMING_EVENT_ebdc39","HIST_DST_STREAMING_EVENT_mvtx", "HIST_DST_STREAMING_EVENT_intt","HIST_DST_STREAMING_EVENT_ebdc"]
 
 runtypes = ["_run3auau"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
@@ -22,16 +23,19 @@ parser.add_argument("-t","--test",help="run a verbose test without actually aggr
 args = parser.parse_args()
 if args.test and not args.verbose:
     args.verbose = True
+
 print("Verbose is " + str(args.verbose))
 print("Test is " + str(args.test))
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
-    dsttype = type + runtype
-    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset order by runnumber desc;".format(dsttype)
+    dsttype = type
+    query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber, tag order by runnumber desc;".format(dsttype)
     if args.verbose:
         print(query)
     cursor.execute(query)
-    runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
+    runnumbers = {(row.runnumber, row.tag) for row in cursor.fetchall()}
+    if args.verbose:
+        print(runnumbers)
     return runnumbers
 
 
@@ -56,52 +60,68 @@ def main():
     for runtype in runtypes:
         for subsystemID in range(nsubsys):
             nrocs = NROCS[subsystemID]
+            neps = NENDPOINTS[subsystemID]
             hist = hist_types[subsystemID]
             # just use the 0th one to get the run/db range once per subsystem instead of for each ROC
-            dummyhisttype = hist+"0"
-            if hist.find("TPC") != -1:
-                dummyhisttype = hist+"00"
-            if hist.find("TPOT") != -1:
-                dummyhisttype = hist
+            dummyhisttype = ""
+            if hist.find("mvtx") != -1 or hist.find("intt") != -1:
+                dummyhisttype = hist+"0"
+            elif hist.find("39") != -1:
+                dummyhisttype=hist
+            else:
+                dummyhisttype = hist + "00_0"
+            
             for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype):
                 
-                if run < 59000:
+                if run < 64000:
                     continue
                 if args.verbose:
                     print("Checking run " + str(run))
                 filesToAdd = []
                 for ROC in range(nrocs):
-                    histtype = hist
-                    if hist.find("TPOT") == -1:
-                        histtype = hist+str(ROC)
-                    if hist.find("TPC") != -1:
-                        histtype = hist+"{:02d}".format(ROC)
-                    histtype += runtype
-                    thisfile = get_aggregated_file(FCReadCursor, histtype, run)
-                    if len(thisfile) > 0:
-                        filesToAdd.append(thisfile)
+                    for EP in range(neps):
+                        histtype = hist
+                        if hist.find("ebdc") != -1 and hist.find("39") == -1:
+                            histtype = hist+"{:02d}".format(ROC)+"_"+str(EP)
+                        elif hist.find("ebdc") == -1:
+                            histtype=hist+str(ROC)
+                    
+                       
+                        thisfile = get_aggregated_file(FCReadCursor, histtype, run)
+                        if len(thisfile) > 0:
+                            filesToAdd.append(thisfile)
                 if args.verbose :
                     print("files to add is:")
                     print(filesToAdd)
                 if len(filesToAdd) == 0:
                     # nothing to add, move on
                     continue
-                
+                baddbentry = False
+                for thefile in filesToAdd:
+                    if thefile.find("/") == -1:
+                        baddbentry = True
+                if baddbentry == True:
+                    if args.verbose == True:
+                        print("bad db entry")
+                    continue
                 tags = (filesToAdd[0]).split(os.sep)
-                index = tags.index(runtype[1:])
+                index = tags.index("production")+1
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
                 anadbtag = dbtag
                 dsttypetag = hist[5:]
                 rundirtag = tags[index+4]
                 # make an analogous path to the production DST in sphenix/data
+                if anadbtag is None:
+                    anadbtag = tags[index+2]
+            
                 completeAggDir = aggDirectory + collisiontag + "/" + beamtag + "/" + anadbtag + "/" + dsttypetag + "/" + rundirtag + "/"
                 if args.verbose == True:
                     print("aggregated directory")
                     print(completeAggDir)
                 
                 #check for a similar file in this dir
-                filepathWildcard = completeAggDir + hist + "*" + dbtag + "*" + str(run) + "*"
+                filepathWildcard = completeAggDir + hist + "*" + anadbtag + "*" + str(run) + "*"
                 if not os.path.isdir(completeAggDir):
                     if args.verbose == True:
                         print("making a new aggregated dir")
@@ -137,7 +157,7 @@ def main():
                 if reagg == False:
                     continue
 
-                lfn = hist + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
+                lfn = hist + runtype + "_" + anadbtag + "-{:08d}-9999.root".format(run)
                 
                 path = completeAggDir + lfn
                 if args.verbose == True:
@@ -154,6 +174,7 @@ def main():
                     print("for lfn: " + lfn)
                     print("ROCs available: ")
                     print(filesToAdd)
+                    continue
                 if args.verbose:
                     print("executing command for "+str(len(filesToAdd)) + " files")
                     print(command)
@@ -200,7 +221,7 @@ def main():
                     dsttype=EXCLUDED.dsttype,
                     events=EXCLUDED.events
                     ;
-                    """.format(lfn,run,size,dbtag,hist)
+                    """.format(lfn,run,size,anadbtag,hist)
                     if args.verbose :
                         print(insertquery)
                     FCWriteCursor.execute(insertquery)

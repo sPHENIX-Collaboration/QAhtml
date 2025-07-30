@@ -37,11 +37,11 @@ INTTRawHitSummaryDrawer::~INTTRawHitSummaryDrawer()
   // Do nothing
 }
 
-int INTTRawHitSummaryDrawer::MakeCanvas()
+int INTTRawHitSummaryDrawer::MakeCanvas(int width, int height)
 {
   std::cout << PHWHERE << " Beginning" << std::endl;
 
-  if(SingleCanvasDrawer::MakeCanvas())
+  if(SingleCanvasDrawer::MakeCanvas(width, height))
   {
     return 0;
   }

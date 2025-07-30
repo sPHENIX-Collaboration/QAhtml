@@ -21,11 +21,39 @@ libqadrawjet_la_LIBADD = \
 jetincludedir=$(pkgincludedir)/jet
 
 jetinclude_HEADERS = \
+  BaseJetDrawer.h \
+  BaseJetDraw.h \
+  BeamBackgroundDrawer.h \
+  CaloJetDraw.h \
+  DijetQADrawer.h \
+  EventRhoDrawer.h \
+  JetCstDrawer.h \
   JetDraw.h \
-  JetDrawDefs.h
+  JetDrawDefs.h \
+  JetKinematicDrawer.h \
+  JetSeedDrawer.h \
+  JetVsTrackSumDrawer.h \
+  PhotonKinematicDrawer.h \
+  StatusMapDrawer.h \
+  TrackInJetDrawer.h \
+  TrackJetDraw.h
 
 libqadrawjet_la_SOURCES = \
-  JetDraw.cc 
+  BaseJetDrawer.cc \
+  BaseJetDraw.cc \
+  BeamBackgroundDrawer.cc \
+  CaloJetDraw.cc \
+  DijetQADrawer.cc \
+  EventRhoDrawer.cc \
+  JetCstDrawer.cc \
+  JetKinematicDrawer.cc \
+  JetDraw.cc \
+  JetSeedDrawer.cc \
+  JetVsTrackSumDrawer.cc \
+  PhotonKinematicDrawer.cc \
+  StatusMapDrawer.cc \
+  TrackInJetDrawer.cc \
+  TrackJetDraw.cc
 
 noinst_PROGRAMS = \
   testexternals

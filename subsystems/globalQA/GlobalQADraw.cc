@@ -373,7 +373,6 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
 
 
   // Plot the charge sum correlation distribution 
-  TLegend * leg03 = new TLegend(0.6, 0.6, 0.9, 0.9);
   Pad[0][2]->cd();
   if (h2_GlobalQA_mbd_charge_NS_correlation && h_GlobalQA_mbd_charge_sum )
   {  
@@ -386,7 +385,7 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     gPad->UseCurrentStyle();
     gPad->SetLogz();
 
-    if (run_type == 1)
+    if (run_type == 1)  // pp
     {
       // rebin the hist by a factor of 4 in both dimensions
       TH2F *h2_GlobalQA_mbd_charge_NS_correlation_rebinned = (TH2F*)h2_GlobalQA_mbd_charge_NS_correlation->Rebin2D(4,4, nullptr);
@@ -397,25 +396,9 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
       // h2_GlobalQA_mbd_charge_NS_correlation->DrawCopy("COLZ");
       h2_GlobalQA_mbd_charge_NS_correlation_rebinned->DrawCopy("COLZ");
     }
-    else if (run_type == 0)
+    else if (run_type == 0) // AuAu
     {
-      TH2F *h2_GlobalQA_mbd_charge_NS_correlation_auau = new TH2F("h2_GlobalQA_mbd_charge_NS_correlation_auau","h2_GlobalQA_mbd_charge_NS_correlation_auau", 150, 0, 1500, 150, 0, 1500);
-
-      for (int xbin = 1; xbin <= h2_GlobalQA_mbd_charge_NS_correlation->GetNbinsX(); xbin++)
-      {
-        for (int ybin = 1; ybin <= h2_GlobalQA_mbd_charge_NS_correlation->GetNbinsY(); ybin++) 
-        {
-
-          double content = h2_GlobalQA_mbd_charge_NS_correlation->GetBinContent(xbin, ybin);
-          double error = h2_GlobalQA_mbd_charge_NS_correlation->GetBinError(xbin, ybin);
-
-          h2_GlobalQA_mbd_charge_NS_correlation_auau->Fill(h2_GlobalQA_mbd_nhits_NS_correlation->GetXaxis()->GetBinCenter(xbin), h2_GlobalQA_mbd_nhits_NS_correlation->GetYaxis()->GetBinCenter(ybin), content);
-          //get the error 
-          h2_GlobalQA_mbd_charge_NS_correlation_auau->SetBinError(h2_GlobalQA_mbd_charge_NS_correlation_auau->FindBin(h2_GlobalQA_mbd_charge_NS_correlation->GetXaxis()->GetBinCenter(xbin),h2_GlobalQA_mbd_charge_NS_correlation_auau->GetYaxis()->GetBinCenter(ybin)), error);
-
-        }
-
-      }
+      TH2 *h2_GlobalQA_mbd_charge_NS_correlation_auau = (TH2*)h2_GlobalQA_mbd_charge_NS_correlation->Clone("h2_GlobalQA_mbd_charge_NS_correlation");
 
       h2_GlobalQA_mbd_charge_NS_correlation_auau->SetTitle("MBD North-South Charge Correlation");
       h2_GlobalQA_mbd_charge_NS_correlation_auau->SetXTitle("MBD south charge sum");
@@ -423,19 +406,16 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
 
       h2_GlobalQA_mbd_charge_NS_correlation_auau->DrawCopy("COLZ");
       //h2_GlobalQA_mbd_charge_NS_correlation_auau->DrawCopy("E");  
-
-
-      leg03->Draw();
     }
   }
   else
   {
     return -1;
-
   }
 
   // Plot the hit distribution
   TLegend * leg04 = new TLegend(0.6, 0.6, 0.9, 0.9);
+  leg04->SetFillStyle(0);
   Pad[0][3]->cd();
   if (h_GlobalQA_mbd_nhit_s && h_GlobalQA_mbd_nhit_n)
   {
@@ -508,7 +488,6 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
       h_GlobalQA_mbd_nhit_n_auau->DrawCopy("hist same");
 
     }
-
     leg04->Draw();
   }
   else
@@ -591,6 +570,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
 
 
     }
+
+    leg01->SetFillStyle(0);
     leg01->Draw();
 
   }
@@ -601,7 +582,6 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
   }
 
   // Plot the hits correlation
-  TLegend * leg05 = new TLegend(0.6, 0.6, 0.9, 0.9);
   Pad[0][5]->cd();
   if (h2_GlobalQA_mbd_nhits_NS_correlation)
   {
@@ -615,8 +595,6 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
       h2_GlobalQA_mbd_nhits_NS_correlation->SetYTitle("MBD north nhits(Run_pp)");
 
       h2_GlobalQA_mbd_nhits_NS_correlation->DrawCopy("COLZ");
-
-      leg05->Draw();
     }
     else if(run_type==0)
     {
@@ -627,8 +605,6 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
       h2_GlobalQA_mbd_nhits_NS_correlation_rebinned->SetYTitle("MBD north nhits(Run_AuAu)");
 
       h2_GlobalQA_mbd_nhits_NS_correlation_rebinned->DrawCopy("COLZ");
-
-      leg05->Draw();
     }
   }
   else
@@ -795,8 +771,8 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
 
     if(_max2 < _max1) _histmax = _max1;
 
-    h_GlobalQA_sEPD_adcsum_n->GetXaxis()->SetRangeUser(-10, 30000);
-    h_GlobalQA_sEPD_adcsum_s->GetXaxis()->SetRangeUser(-10, 30000);
+    h_GlobalQA_sEPD_adcsum_n->GetXaxis()->SetRangeUser(0, 1.5e6);
+    h_GlobalQA_sEPD_adcsum_s->GetXaxis()->SetRangeUser(0, 1.5e6);
     h_GlobalQA_sEPD_adcsum_n->GetYaxis()->SetRangeUser(0, _histmax + _add);
     h_GlobalQA_sEPD_adcsum_s->GetYaxis()->SetRangeUser(0, _histmax + _add);
 
@@ -811,6 +787,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h_GlobalQA_sEPD_adcsum_s->SetMarkerColor(kRed);
     h_GlobalQA_sEPD_adcsum_s->SetMarkerStyle(20);
     h_GlobalQA_sEPD_adcsum_s->SetMarkerSize(0.8);
+    h_GlobalQA_sEPD_adcsum_s->SetStats(0);
 
     leg10->AddEntry(h_GlobalQA_sEPD_adcsum_s,"South","l");
     h_GlobalQA_sEPD_adcsum_s->DrawCopy();
@@ -820,6 +797,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h_GlobalQA_sEPD_adcsum_n->SetMarkerColor(kBlue);
     h_GlobalQA_sEPD_adcsum_n->SetMarkerStyle(20);
     h_GlobalQA_sEPD_adcsum_n->SetMarkerSize(0.8);
+    h_GlobalQA_sEPD_adcsum_n->SetStats(0);
 
     leg10->AddEntry(h_GlobalQA_sEPD_adcsum_n,"North","l");
     h_GlobalQA_sEPD_adcsum_n->DrawCopy("same");
@@ -836,13 +814,17 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
   {
 
     h2_GlobalQA_sEPD_adcsum_ns->SetTitle("sEPD North-South Correlation");
-    h2_GlobalQA_sEPD_adcsum_ns->GetXaxis()->SetRangeUser(-10, 30000);
-    h2_GlobalQA_sEPD_adcsum_ns->GetYaxis()->SetRangeUser(-10, 30000);
+    h2_GlobalQA_sEPD_adcsum_ns->GetXaxis()->SetRangeUser(0, 1.5e6);
+    h2_GlobalQA_sEPD_adcsum_ns->GetYaxis()->SetRangeUser(0, 1.5e6);
     h2_GlobalQA_sEPD_adcsum_ns->SetXTitle("sEPD south ADC sum");
     h2_GlobalQA_sEPD_adcsum_ns->SetYTitle("sEPD north ADC sum");
+    h2_GlobalQA_sEPD_adcsum_ns->SetStats(0);
+    
+    Pad[2][1]->UseCurrentStyle();
+    Pad[2][1]->SetLogz();
+    Pad[2][1]->SetRightMargin(0.15);
+    
     h2_GlobalQA_sEPD_adcsum_ns->DrawCopy("COLZ");
-    gPad->UseCurrentStyle();
-    gPad->SetRightMargin(0.15);
 
   }
   else
@@ -863,6 +845,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h2_GlobalQA_sEPD_ADC_channel_south->GetZaxis()->SetTitle("Mean ADC");
     h2Profile_GlobalQA_sEPD_tiles_south->SetXTitle("#eta bin");
     h2Profile_GlobalQA_sEPD_tiles_south->SetYTitle("#phi bin");
+    h2Profile_GlobalQA_sEPD_tiles_south->SetStats(0);
     h2_GlobalQA_sEPD_ADC_channel_south->SetXTitle("#eta bin");
     h2_GlobalQA_sEPD_ADC_channel_south->SetYTitle("#phi bin");
     h2Profile_GlobalQA_sEPD_tiles_south->DrawCopy("COLZ");
@@ -898,6 +881,7 @@ int GlobalQADraw::DrawsEPD(const std::string & /*what*/)
     h2_GlobalQA_sEPD_ADC_channel_north->GetZaxis()->SetTitle("Mean ADC");
     h2Profile_GlobalQA_sEPD_tiles_north->SetXTitle("#eta bin");
     h2Profile_GlobalQA_sEPD_tiles_north->SetYTitle("#phi bin");
+    h2Profile_GlobalQA_sEPD_tiles_north->SetStats(0);
     h2_GlobalQA_sEPD_ADC_channel_north->SetXTitle("#eta bin");
     h2_GlobalQA_sEPD_ADC_channel_north->SetYTitle("#phi bin");
     h2Profile_GlobalQA_sEPD_tiles_north->DrawCopy("COLZ ");
@@ -1118,6 +1102,8 @@ int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
     }
   }
 
+  // Temporarily commenting out failure map drawing to prevent color palette issues
+  /*
   if (!gROOT->FindObject("Global4")) {
     MakeCanvas("Global4", 3);
   }
@@ -1163,6 +1149,7 @@ int GlobalQADraw::DrawsEPD_fits(const std::string& /*what*/) {
   tn.DrawText(0.3, 0.92, "North");
 
   TC[3]->Update();
+  */
   return 0;
 }
 

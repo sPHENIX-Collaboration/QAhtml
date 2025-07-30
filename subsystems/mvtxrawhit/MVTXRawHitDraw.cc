@@ -135,6 +135,7 @@ int MVTXRawHitDraw::DrawChipInfo()
   Pad[0][0]->cd();
   if (h_nhits_layer0 && h_nhits_layer1 && h_nhits_layer2)
   {
+    h_nhits_layer0->GetXaxis()->SetNdivisions(505);
     h_nhits_layer0->SetTitle("MVTX Raw Hit Number");
     h_nhits_layer0->SetXTitle("Hit number");
     h_nhits_layer0->SetYTitle("Entries");
@@ -182,6 +183,7 @@ int MVTXRawHitDraw::DrawChipInfo()
   Pad[0][2]->cd();
   if (h_strobe_bc)
   {
+    h_strobe_bc->GetXaxis()->SetNdivisions(505);
     h_strobe_bc->SetTitle("MVTX Strobe BC");
     h_strobe_bc->SetXTitle("MVTX Strobe BC");
     h_strobe_bc->SetYTitle("Entries");
@@ -196,6 +198,7 @@ int MVTXRawHitDraw::DrawChipInfo()
   Pad[0][3]->cd();
   if (h_chip_bc)
   {
+    h_chip_bc->GetXaxis()->SetNdivisions(505);
     h_chip_bc->SetTitle("MVTX Chip BC");
     h_chip_bc->SetXTitle("MVTX Chip BC");
     h_chip_bc->SetYTitle("Entries");

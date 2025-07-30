@@ -15,13 +15,13 @@ if args.test and not args.verbose:
     args.verbose = True
     
 runtypes = ["_run3auau"]
-subsys = { "calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"], "globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"], "jets" : ["HIST_JETS","JETSQA","draw_jet.C"] }
+subsys = { "calofitting" : ["HIST_CALOFITTINGQA","CALOFITTINGQA","draw_calo_fitting.C"],"calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"], "globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"],"jets" : ["HIST_JETS","JETSQA","draw_calo_jet.C"] }
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
 
 def get_aggregated_files(cursor, dsttype):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999) order by full_file_path desc".format(dsttype)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999)".format(dsttype)
     if args.verbose :
         print(query)
     cursor.execute(query)
@@ -53,6 +53,8 @@ def main():
             subsysAggRunsDbtag = {}
             for aggfile in full_paths:
                 runnumber = int(aggfile.split("/")[-1].split("-")[1])
+                if runnumber < 66000:
+                    continue
                 dbtag = getBuildDbTag(runtype, aggfile.split("/")[-1])
                 if runnumber in subsysAggRuns:
                     #only take the highest db tag, as that is what we end up plotting
@@ -110,14 +112,24 @@ def main():
                             subprocess.run(cmd)
                             updatedRuns.append(run)
                     else :
-                        dbtagToDraw = "001"
+                        dbtagToDraw = "000"
                         fileToDraw = ""
+                        if args.verbose:
+                            print("file options")
+                            print(aggFile)
                         # find the file with the most recent db tag
                         for file in aggFile:
                             # find the db string
                             filename = file.split("/")[-1]
                             dbtag = getBuildDbTag(runtype, filename)
-                            if(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
+                            print("dbtag is " + dbtag)
+                            print("dbtag to draw is " + str(dbtagToDraw))
+                            print("file to draw is " +fileToDraw)
+                            if dbtag.find("newcdbtag") != -1 and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
+                                fileToDraw = file
+                                dbtagToDraw = int(filename.split("_v")[1][0:3])
+                                
+                            elif(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
                                 fileToDraw = file
                                 dbtagToDraw = int(dbtag.split("p")[1])
                         #Draw that one
@@ -137,6 +149,6 @@ def main():
                 print("run numbers updated")
                 print(updatedRuns)
     conn.close()
-    
+    print("Finished script")
 if __name__ == "__main__":
     main()

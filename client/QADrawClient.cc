@@ -321,11 +321,13 @@ std::string QADrawClient::ExtractBuild(const std::string& filename)
       std::string token = tokens[i];
       if(token.find("new") != std::string::npos)
 	{
-	  build = "new " + tokens[i+1];
+	  build = "new " + tokens[i+1] + " " + tokens[i+2];
+	  break;
 	}
       else if (token.find("ana") != std::string::npos)
 	{
-	  build = token + " " + tokens[i+1];; 
+	  build = token + " " + tokens[i+1] + " " + tokens[i+2];
+	  break;
 	}
     }
  
@@ -436,6 +438,7 @@ int QADrawClient::CanvasToPng(TCanvas *canvas, std::string const &pngfilename)
   img->WriteImage(pngfilename.c_str());
   delete img;
   remove(tmpname);*/
+
   // NOLINTNEXTLINE(hicpp-no-malloc)
   //free(tmpname);
   
