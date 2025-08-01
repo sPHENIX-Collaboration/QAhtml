@@ -10,6 +10,7 @@
 #include <TH2.h>
 #include <THStack.h>
 #include <TLegend.h>
+#include <TLine.h>
 #include <TPaveLabel.h>
 #include <TPad.h>
 #include <TStyle.h>
@@ -69,15 +70,29 @@ int TPCLasersDraw::MakeCanvas(const std::string &name, int num)
   {
     TC[num]->Divide(2,1);
   }
+  if(num == 3 || num == 4)
+  {
+    TC[num]->Divide(4,3);
+  }
   gSystem->ProcessEvents();
 
   if(num < 2)
   {
     Pad[num][0] = new TPad("mypad0","South",0.51,0.0,0.95,0.95,0);
     Pad[num][1] = new TPad("mypad1","North",0.0,0.0,0.49,0.95,0);
-    
+
+
     Pad[num][0]->Draw();
     Pad[num][1]->Draw();
+  }
+  if(num == 3 || num == 4)
+  {
+    for(int sec = 0; sec<12; sec++)
+    {
+      Pad[num][sec] = new TPad((boost::format("mypad%i_%s") % sec % (num == 3 ? "South" : "North")).str().c_str(),(boost::format("%s") % (num == 3 ? "South" : "North")).str().c_str(),1.0*(sec%4)*0.25,1.0*(2-sec/4)*0.31,1.0*((sec%4)+1)*0.25,1.0*((2-sec/4)+1)*0.31,0);
+
+      Pad[num][sec]->Draw();
+    }
   }
 
   transparent = new TPad("transparent", "this does not show", 0, 0, 1, 1);
@@ -104,6 +119,7 @@ int TPCLasersDraw::DrawLaserInfo()
   TH2* h_TPCWheel[2];
   TH2* h_saturation[2];
   TH1* h_nLaserClusters[2];
+  TH1 *h_timeSamples[2][12][3];
   TH2* dummyHist[2];
   TPaveLabel* labels[2][12];
   
@@ -111,7 +127,11 @@ int TPCLasersDraw::DrawLaserInfo()
   
   double maxZ = 0.0;
   double maxZ_sat = 0.0;
+  double maxY[2][12] = {0.0};
   //double maxY = 0.0;
+
+  int nGoodModules = 0;
+  int nGoodTimeSamples = 0;
   
   for (int side = 0; side < 2; side++)
   {
@@ -120,6 +140,17 @@ int TPCLasersDraw::DrawLaserInfo()
     if(h_TPCWheel[side]->GetMaximum() > maxZ)
     {
       maxZ = h_TPCWheel[side]->GetMaximum();
+    }
+
+    for(int XX=1; XX <= h_TPCWheel[side]->GetNbinsX(); XX++)
+    {
+      for(int YY=1; YY <= h_TPCWheel[side]->GetNbinsY(); YY++)
+      {
+	if(h_TPCWheel[side]->GetBinContent(XX,YY) > 1000)
+	{
+	  nGoodModules++;
+	}
+      }
     }
 
     h_saturation[side] = dynamic_cast<TH2 *>(cl->getHisto(histprefix + std::string("saturation_") + (side == 1 ? "North" : "South")));
@@ -140,6 +171,31 @@ int TPCLasersDraw::DrawLaserInfo()
     dummyHist[side]->GetYaxis()->SetLabelSize(0.0);
     for(int sec=0; sec<12; sec++)
     {
+      h_timeSamples[side][sec][0] = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("sample_R1_") + (side == 1 ? "North_" : "South_") + (boost::format("%i") % sec).str().c_str()));
+      if(h_timeSamples[side][sec][0]->GetMaximum() > maxY[side][sec])
+      {
+	maxY[side][sec] = h_timeSamples[side][sec][0]->GetMaximum();
+      }
+      h_timeSamples[side][sec][1] = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("sample_R2_") + (side == 1 ? "North_" : "South_") + (boost::format("%i") % sec).str().c_str()));
+      if(h_timeSamples[side][sec][1]->GetMaximum() > maxY[side][sec])
+      {
+	maxY[side][sec] = h_timeSamples[side][sec][1]->GetMaximum();
+      }
+      h_timeSamples[side][sec][2] = dynamic_cast<TH1 *>(cl->getHisto(histprefix + std::string("sample_R3_") + (side == 1 ? "North_" : "South_") + (boost::format("%i") % sec).str().c_str()));
+      if(h_timeSamples[side][sec][2]->GetMaximum() > maxY[side][sec])
+      {
+	maxY[side][sec] = h_timeSamples[side][sec][2]->GetMaximum();
+      }
+
+      for(int mod=0; mod<3; mod++)
+      {
+	double binCenter = h_timeSamples[side][sec][mod]->GetBinCenter(h_timeSamples[side][sec][mod]->GetMaximumBin());
+	if(binCenter >= 325 && binCenter <= 335)
+	{
+	  nGoodTimeSamples++;
+	}
+      }
+      
       int sector = sec;
       if(side == 0) sector += 12;
       labels[side][sec] = new TPaveLabel(labelNumbers[sec][0], labelNumbers[sec][1], labelNumbers[sec][2], labelNumbers[sec][3],(boost::format("%02i") % sector).str().c_str());
@@ -324,7 +380,181 @@ int TPCLasersDraw::DrawLaserInfo()
   TC[2]->Update(); 
 
 
+  MakeCanvas("laser_time_sample_South",3);
+  TC[3]->Clear("D");
+
+  TLine *lLow[2][12];
+  TLine *lHigh[2][12];
   
+  for(int sec = 0; sec<12; sec++)
+  {
+    
+    Pad[3][sec]->cd();
+    Pad[3][sec]->SetLogy();
+    //TC[3]->cd(sec+1);
+    gPad->SetLeftMargin(0.1);
+    gPad->SetBottomMargin(0.05);
+    h_timeSamples[0][sec][0]->SetLineColor(kRed);
+    h_timeSamples[0][sec][1]->SetLineColor(kBlue);
+    h_timeSamples[0][sec][2]->SetLineColor(kGreen+2);
+    
+    h_timeSamples[0][sec][0]->GetYaxis()->SetRangeUser(0.1,1.1*maxY[0][sec]);
+    h_timeSamples[0][sec][0]->Draw("HIST");
+    h_timeSamples[0][sec][1]->Draw("HIST SAME");
+    h_timeSamples[0][sec][2]->Draw("HIST SAME");
+
+    if(sec == 0)
+    {
+      TLegend *legS = new TLegend(0.75,0.6,1,1);
+      legS->AddEntry(h_timeSamples[0][sec][0],"R1","l");
+      legS->AddEntry(h_timeSamples[0][sec][1],"R2","l");
+      legS->AddEntry(h_timeSamples[0][sec][2],"R3","l");
+      legS->Draw("SAME");
+    }
+
+    lLow[0][sec] = new TLine(325,0,325,1.1*maxY[0][sec]);
+    lLow[0][sec]->SetLineColor(kBlack);
+    lLow[0][sec]->Draw("Same");
+    
+    lHigh[0][sec] = new TLine(335,0,335,1.1*maxY[0][sec]);
+    lHigh[0][sec]->SetLineColor(kBlack);
+    lHigh[0][sec]->Draw("Same");
+    
+    
+     TPaveText *title = new TPaveText();
+     title->SetTextSize(0.06);
+     title->SetX1NDC(0.3);
+     title->SetX2NDC(0.7);
+     title->SetY1NDC(0.95);
+     title->SetY2NDC(1.0);
+     title->SetFillStyle(0);
+     title->SetBorderSize(0);
+     title->SetTextAlign(22);
+     title->AddText((boost::format("TPC Sector %i") % sec).str().c_str());
+     title->Draw("same");
+  }
+  
+
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();  // set to normalized coordinates                                                                                                                                                   
+  PrintRun.SetTextAlign(23); // center/top alignment                                                                                                                                                     
+  std::ostringstream runnostream4;
+  std::string runstring4;
+  runnostream4 << Name() << "_laserSouthTimeSamples Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring4 = runnostream4.str();
+  transparent->cd();
+  PrintRun.DrawText(0.5, 1., runstring4.c_str());
+
+  TC[3]->Update();
+
+  MakeCanvas("laser_time_sample_North",4);
+  TC[4]->Clear("D");
+
+  for(int sec = 0; sec<12; sec++)
+  {
+    Pad[4][sec]->cd();
+    Pad[4][sec]->SetLogy();
+    //TC[4]->cd(sec+1);
+    gPad->SetLeftMargin(0.1);
+    gPad->SetBottomMargin(0.05);
+    h_timeSamples[1][sec][0]->SetLineColor(kRed);
+    h_timeSamples[1][sec][1]->SetLineColor(kBlue);
+    h_timeSamples[1][sec][2]->SetLineColor(kGreen+2);
+
+    h_timeSamples[1][sec][0]->GetYaxis()->SetRangeUser(0.1,1.1*maxY[1][sec]);
+    h_timeSamples[1][sec][0]->Draw("HIST");
+    h_timeSamples[1][sec][1]->Draw("HIST SAME");
+    h_timeSamples[1][sec][2]->Draw("HIST SAME");
+
+    if(sec == 0)
+    {
+      TLegend *legS = new TLegend(0.75,0.6,1,1);
+      legS->AddEntry(h_timeSamples[1][sec][0],"R1","l");
+      legS->AddEntry(h_timeSamples[1][sec][1],"R2","l");
+      legS->AddEntry(h_timeSamples[1][sec][2],"R3","l");
+      legS->Draw("SAME");
+    }
+
+    lLow[1][sec] = new TLine(325,0,325,1.1*maxY[1][sec]);
+    lLow[1][sec]->SetLineColor(kBlack);
+    lLow[1][sec]->Draw("Same");
+    
+    lHigh[1][sec] = new TLine(335,0,335,1.1*maxY[1][sec]);
+    lHigh[1][sec]->SetLineColor(kBlack);
+    lHigh[1][sec]->Draw("Same");
+    
+    
+     TPaveText *title = new TPaveText();
+     title->SetTextSize(0.06);
+     title->SetX1NDC(0.3);
+     title->SetX2NDC(0.7);
+     title->SetY1NDC(0.95);
+     title->SetY2NDC(1.0);
+     title->SetFillStyle(0);
+     title->SetBorderSize(0);
+     title->SetTextAlign(22);
+     title->AddText((boost::format("TPC Sector %i") % sec).str().c_str());
+     title->Draw("same");
+  }
+  
+
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();  // set to normalized coordinates                                                                                                                                                   
+  PrintRun.SetTextAlign(23); // center/top alignment                                                                                                                                                     
+  std::ostringstream runnostream5;
+  std::string runstring5;
+  runnostream5 << Name() << "_laserNorthTimeSamples Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring5 = runnostream5.str();
+  transparent->cd();
+  PrintRun.DrawText(0.5, 1., runstring5.c_str());
+
+  TC[4]->Update();
+
+
+  MakeCanvas("laserSummary",5);
+  TC[5]->Clear("D");
+
+  TPaveText *laserSummary = new TPaveText();
+  laserSummary->SetX1NDC(0.0);
+  laserSummary->SetX2NDC(1.0);
+  laserSummary->SetY1NDC(0.0);
+  laserSummary->SetY2NDC(1.0);
+  TText *t0 = laserSummary->AddText((boost::format("TPC Laser Summary: TPC Laser QA is %s") % (nGoodModules == 72 && nGoodTimeSamples == 72 ? "Good" : "Bad")).str().c_str());
+  t0->SetTextColor(kGreen+1);
+  if(nGoodModules < 72 || nGoodTimeSamples < 72)
+  {
+    t0->SetTextColor(kRed);
+  }
+  TText *t1 = laserSummary->AddText((boost::format("TPC Lasers have good ADC in %i/72 modules") % nGoodModules).str().c_str());
+  t1->SetTextColor(kGreen+1);
+  if(nGoodModules < 72)
+  {
+    t1->SetTextColor(kRed);
+  }
+  TText *t2 = laserSummary->AddText((boost::format("TPC Lasers have good timing in %i/72 modules") % nGoodTimeSamples).str().c_str());
+  t2->SetTextColor(kGreen+1);
+  if(nGoodTimeSamples<72)
+  {
+    t2->SetTextColor(kRed);
+  }
+  laserSummary->Draw();
+
+  PrintRun.SetTextFont(62);
+  PrintRun.SetTextSize(0.04);
+  PrintRun.SetNDC();  // set to normalized coordinates                                                                                                                                            
+ 
+  PrintRun.SetTextAlign(23); // center/top alignment                                                                                                                                            
+
+  std::ostringstream runnostream6;
+  std::string runstring6;
+  runnostream6 << Name() << "_laserSummary Run " << cl->RunNumber() << ", build " << cl->build();
+  runstring6 = runnostream6.str();
+  transparent->cd();
+  PrintRun.DrawText(0.5, 1., runstring6.c_str());
+
+  TC[5]->Update();
   
   std::cout << "DrawLaserInfo Ending" << std::endl;
   return 0;
@@ -346,15 +576,24 @@ int TPCLasersDraw::MakeHtml(const std::string &what)
   // Register the 1st canvas png file to the menu and produces the png file.
   if (what == "ALL")
   {
-    pngfile = cl->htmlRegisterPage(*this, "laser_adc", "1", "png");
-    cl->CanvasToPng(TC[0], pngfile);
+    pngfile = cl->htmlRegisterPage(*this, "laser_summary", "1", "png");
+    cl->CanvasToPng(TC[5], pngfile);
 
-    pngfile = cl->htmlRegisterPage(*this, "laser_saturation", "2", "png");
+    pngfile = cl->htmlRegisterPage(*this, "laser_adc", "2", "png");
+    cl->CanvasToPng(TC[0], pngfile);
+    
+    pngfile = cl->htmlRegisterPage(*this, "laser_saturation", "3", "png");
     cl->CanvasToPng(TC[1], pngfile);
 
-    pngfile = cl->htmlRegisterPage(*this, "laser_num_clusters", "3", "png");
+    pngfile = cl->htmlRegisterPage(*this, "laser_num_clusters", "4", "png");
     cl->CanvasToPng(TC[2], pngfile);
-  }
+
+    pngfile = cl->htmlRegisterPage(*this, "laser_time_sample_South", "5", "png");
+    cl->CanvasToPng(TC[3], pngfile);
+
+    pngfile = cl->htmlRegisterPage(*this, "laser_time_sample_North", "6", "png");
+    cl->CanvasToPng(TC[4], pngfile);
+}
   return 0;
 }
 
