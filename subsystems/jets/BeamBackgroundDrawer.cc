@@ -102,6 +102,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       "",
       "N_{evt}",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -112,6 +113,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       "",
       "N_{evt}",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -122,6 +124,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       "N_{twr}",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -132,6 +135,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       "i_{#varphi}",
       "N_{twr}",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -142,6 +146,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       "i_{#eta}",
       "i_{#varphi}",
       "N_{twr}",
+      0.8,
       0.25,
       false,
       true
