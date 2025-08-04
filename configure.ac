@@ -28,6 +28,7 @@ AC_CONFIG_FILES([
   subsystems/calo/Makefile
   subsystems/calofitting/Makefile
   subsystems/example/Makefile
+  subsystems/filetransfer/Makefile
   subsystems/globalQA/Makefile
   subsystems/intt/Makefile
   subsystems/inttrawhit/Makefile
