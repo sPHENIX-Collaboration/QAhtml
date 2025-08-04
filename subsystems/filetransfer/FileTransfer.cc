@@ -94,10 +94,10 @@ int runnumber = QADrawClient::instance()->RunNumber();
     { std::cout << "runnumber: " << runnumber << std::endl; }
 
     // create histograms
-    std::unique_ptr<TH1> h_expected(create_subsytems_histogram( "h_expected", "total number of segments", default_subsystems ) );
-    std::unique_ptr<TH1> h_ref(create_subsytems_histogram( "h_ref", "total number of segments", default_subsystems ) );
-    std::unique_ptr<TH1> h_transfered(create_subsytems_histogram( "h_transfered", "transfered segments", default_subsystems ) );
-    std::unique_ptr<TH1> h_transfered_first_segment(create_subsytems_histogram( "h_first_segment_transfered", "first segment transfered", default_subsystems ) );
+    TH1* h_expected = create_subsytems_histogram( "h_expected", "total number of segments", default_subsystems ) ;
+    TH1* h_ref = create_subsytems_histogram( "h_ref", "total number of segments", default_subsystems ) ;
+    TH1* h_transfered = create_subsytems_histogram( "h_transfered", "transfered segments", default_subsystems ) ;
+   TH1* h_transfered_first_segment = create_subsytems_histogram( "h_first_segment_transfered", "first segment transfered", default_subsystems ) ;
 
     // counters
     unsigned int n_segments_expected = 0;
@@ -199,19 +199,14 @@ int runnumber = QADrawClient::instance()->RunNumber();
     } else {
       incomplete_db_runs.insert(runnumber);
     }
-/*
-    m_h_expected = std::move(h_expected);
-    m_h_ref = std::move(h_ref);
-    m_h_transfered = std::move(h_transfered);
-    m_h_transfered_first_segment = std::move(h_transfered_first_segment);*/
 
 
  // make canvas and save
-      TC[0]->Divide(1,2 );
+      //TC[0]->Divide(1,2 );
 
       // adjust pad dimensions
-      TC[0]->GetPad(1)->SetPad(0, 0.3, 1, 1);
-      TC[0]->GetPad(2)->SetPad(0, 0, 1, 0.3);
+      //TC[0]->GetPad(1)->SetPad(0, 0.3, 1, 1);
+      //TC[0]->GetPad(2)->SetPad(0, 0, 1, 0.3);
 
       // status histogram
       Pad[0]->cd();
@@ -224,7 +219,7 @@ int runnumber = QADrawClient::instance()->RunNumber();
       h_expected->DrawCopy("hist");
 
       h_ref->SetFillStyle(3001);
-      h_ref->SetFillColor(kYellow-9);
+      h_ref->SetFillColor(kYellow-7);
       h_ref->DrawCopy("hist same");
 
       h_transfered->SetFillStyle(3001);
@@ -232,24 +227,26 @@ int runnumber = QADrawClient::instance()->RunNumber();
       h_transfered->DrawCopy("hist same");
 
       h_transfered_first_segment->SetFillStyle(3001);
-      h_transfered_first_segment->SetFillColor(kGreen-5);
+      h_transfered_first_segment->SetFillColor(kGreen+2);
       h_transfered_first_segment->DrawCopy("hist same");
 
       // legend
       auto legend = new TLegend( 0.7, 0.7, 0.95, 0.85, "", "NDC" );
       legend->SetFillStyle(0);
-      legend->AddEntry( h_expected.get(), "expected files", "f" );
-      legend->AddEntry( h_ref.get(), "files in DB", "f" );
-      legend->AddEntry( h_transfered.get(), "transfered", "f" );
-      legend->AddEntry( h_transfered_first_segment.get(), "first segment transfered", "f" );
+      legend->AddEntry( h_expected, "expected files", "f" );
+      legend->AddEntry( h_ref, "files in DB", "f" );
+      legend->AddEntry( h_transfered, "transfered", "f" );
+      legend->AddEntry( h_transfered_first_segment, "first segment transfered", "f" );
       legend->Draw();
 
-      gPad->SetBottomMargin(0.15);
-      gPad->SetLogy();
+      Pad[0]->SetBottomMargin(0.15);
+      Pad[0]->SetLeftMargin(0.1);
+      Pad[0]->SetRightMargin(0.03);
+      Pad[0]->SetLogy();
 
       // summary
       Pad[1]->cd();
-      std::unique_ptr<TPaveText> text( new TPaveText(0.1,0.1,0.9,0.9, "NDC" ) );
+      TPaveText* text = new TPaveText(0.1,0.1,0.9,0.9, "NDC" ) ;
       text->SetFillColor(0);
       text->SetFillStyle(0);
       text->SetBorderSize(0);
@@ -300,8 +297,8 @@ int FileTransfer::MakeCanvas(const std::string &name)
   {
     // xpos (-1) negative: do not draw menu bar
     TC[0] = new TCanvas(name.c_str(), "FileTransfers", -1, 0, (int) (xsize / 1.2), (int) (ysize / 1.2));
-    Pad[0] = new TPad("pad0", "filetransfer0", 0.05, 0.05, 0.47, 0.97, 0);
-    Pad[1] = new TPad("pad1", "filetransfer1", 0.52, 0.05, 0.95, 0.97, 0);
+    Pad[0] = new TPad("pad0", "filetransfer0", 0.01, 0.35, 0.99, 0.97, 0);
+    Pad[1] = new TPad("pad1", "filetransfer1", 0.05, 0.05, 0.95, 0.3, 0);
     Pad[0]->Draw();
     Pad[1]->Draw();
   }
@@ -313,9 +310,10 @@ int FileTransfer::DrawTransfer(const std::string & /*what*/)
 {
   MakeCanvas("filetransfer");
 
-  //TC[0]->Clear("D");
+  TC[0]->Clear("D");
   CheckFileTransfer();
-
+  Pad[0]->Update();
+  Pad[1]->Update();
   //TC[0]->Update();
   return 0;
 }

@@ -34,7 +34,6 @@ class FileTransfer : public QADraw
   TPad *transparent[1]{};
   TPad *Pad[4]{};
   int verbosity = 0;
-  std::unique_ptr<TH1> m_h_expected, m_h_ref, m_h_transfered, m_h_transfered_first_segment;
 };
 
 #endif
