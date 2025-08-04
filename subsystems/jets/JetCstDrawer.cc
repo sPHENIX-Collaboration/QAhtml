@@ -149,6 +149,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -159,6 +160,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -169,6 +171,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -179,6 +182,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -189,6 +193,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Calo Layer",
       "N Constituents",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -199,6 +204,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet E Fraction",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -209,6 +215,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet E Fraction",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -219,6 +226,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet E Fraction",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -229,6 +237,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Calo Layer",
       "Jet E Fraction",
       "Counts",
+      0.8,
       0.25,
       false,
       true

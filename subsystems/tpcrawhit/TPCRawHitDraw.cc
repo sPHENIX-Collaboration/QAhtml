@@ -32,6 +32,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 TPCRawHitDraw::TPCRawHitDraw(const std::string &name)
   : QADraw(name)
@@ -849,32 +850,36 @@ int TPCRawHitDraw::DrawOnlMon()
   float fracOutTotal = (outN + outS)/(2*halfFEEs);
   std::ostringstream fractotalstream, fracnstream, fracsstream;
   std::string fractotalstring, fracnstring, fracsstring;
+  std::stringstream totalFrac, northFrac, southFrac;
+  totalFrac << std::fixed << std::setprecision(3) << fracOutTotal; 
+  northFrac << std::fixed << std::setprecision(3) << fracOutN; 
+  southFrac << std::fixed << std::setprecision(3) << fracOutS; 
   if (fracOutTotal < 0.06)
   {
-    fractotalstream << "Total Fraction of FEEs Out: " << fracOutTotal << "(Good Run)" << std::endl;
+    fractotalstream << "Total Fraction of FEEs Out: " << totalFrac.str() << "(Good Run)" << std::endl;
     fractotalstring = fractotalstream.str();
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kGreen);
     title->DrawLatex(0.15, 0.9, fractotalstring.c_str()); 
   }
   else if (fracOutTotal == 1)
   {
-    fractotalstream << "Total Fraction of FEEs Out: " << fracOutTotal << "(Bad Run, TPC Likely Off)" << std::endl; 
+    fractotalstream << "Total Fraction of FEEs Out: " << totalFrac.str() << "(Bad Run, TPC Likely Off)" << std::endl; 
     fractotalstring = fractotalstream.str();
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kRed);
     title->DrawLatex(0.15, 0.9, fractotalstring.c_str()); 
   }
   else
   {
-    fractotalstream << "Total Fraction of FEEs Out: " << fracOutTotal << "(Bad Run, High Number of FEEs Out)" << std::endl; 
+    fractotalstream << "Total Fraction of FEEs Out: " << totalFrac.str() << "(Bad Run, High Number of FEEs Out)" << std::endl; 
     fractotalstring = fractotalstream.str(); 
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kOrange);
     title->DrawLatex(0.15, 0.9, fractotalstring.c_str()); 
@@ -882,30 +887,30 @@ int TPCRawHitDraw::DrawOnlMon()
 
   if (fracOutN < 0.06)
   {
-    fracnstream << "Fraction of North FEEs Out: " << fracOutN << "(Good)" << std::endl;
+    fracnstream << "Fraction of North FEEs Out: " << northFrac.str() << "(Good)" << std::endl;
     fracnstring = fracnstream.str();
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kGreen);
     title->DrawLatex(0.15, 0.85, fracnstring.c_str()); 
   }
   else if (fracOutN == 1)
   {
-    fracnstream << "Fraction of North FEEs Out: " << fracOutN << "(Bad, North Likely Off)" << std::endl; 
+    fracnstream << "Fraction of North FEEs Out: " << northFrac.str() << "(Bad, North Likely Off)" << std::endl; 
     fracnstring = fracnstream.str();
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kRed);
     title->DrawLatex(0.15, 0.85, fracnstring.c_str()); 
   }
   else
   {
-    fracnstream << "Fraction of North FEEs Out: " << fracOutN << "(Bad, High Number of N FEEs Out)" << std::endl; 
+    fracnstream << "Fraction of North FEEs Out: " << northFrac.str() << "(Bad, High Number of N FEEs Out)" << std::endl; 
     fracnstring = fracnstream.str(); 
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kOrange);
     title->DrawLatex(0.15, 0.85, fracnstring.c_str()); 
@@ -913,36 +918,36 @@ int TPCRawHitDraw::DrawOnlMon()
 
   if (fracOutS < 0.06)
   {
-    fracsstream << "Fraction of South FEEs Out: " << fracOutS << "(Good)" << std::endl;
+    fracsstream << "Fraction of South FEEs Out: " << southFrac.str() << "(Good)" << std::endl;
     fracsstring = fracsstream.str();
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kGreen);
     title->DrawLatex(0.15, 0.80, fracsstring.c_str()); 
   }
   else if (fracOutS == 1)
   {
-    fracsstream << "Fraction of South FEEs Out: " << fracOutS << "(Bad, South Likely Off)" << std::endl; 
+    fracsstream << "Fraction of South FEEs Out: " << southFrac.str() << "(Bad, South Likely Off)" << std::endl; 
     fracsstring = fracsstream.str();
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kRed);
     title->DrawLatex(0.15, 0.80, fracsstring.c_str()); 
   }
   else
   {
-    fracsstream << "Fraction of South FEEs Out: " << fracOutS << "(Bad, High Number of S FEEs Out)" << std::endl; 
+    fracsstream << "Fraction of South FEEs Out: " << southFrac.str() << "(Bad, High Number of S FEEs Out)" << std::endl; 
     fracsstring = fracsstream.str(); 
     TLatex *title = new TLatex();
-    title->SetTextSize(0.04);
+    title->SetTextSize(0.035);
     title->SetNDC();
     title->SetTextColor(kOrange);
     title->DrawLatex(0.15, 0.80, fracsstring.c_str()); 
   }
   TLatex *title = new TLatex();
-  title->SetTextSize(0.04);
+  title->SetTextSize(0.035);
   title->SetNDC();
   title->DrawLatex(0.15, 0.75, "North - Left Figure, South - Right Figure"); 
  

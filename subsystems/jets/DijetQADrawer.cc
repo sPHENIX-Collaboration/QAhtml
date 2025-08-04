@@ -150,6 +150,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "A_{jj}",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -160,6 +161,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "A_{jj}",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -170,6 +172,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet,lead} [GeV/c]",
       "A_{jj}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -180,6 +183,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet,lead} [GeV/c]",
       "A_{jj}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -190,6 +194,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "|#Delta#varphi| [rad.]",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -200,6 +205,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "|#Delta#varphi| [rad.]",
       "A_{jj}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -210,6 +216,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "|#Delta#varphi| [rad.]",
       "A_{jj}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -220,6 +227,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "|#Delta#varphi| [rad.]",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -230,6 +238,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet,lead} [GeV/c]",
       "|#Delta#varphi| [rad.]",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -240,6 +249,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet,lead} [GeV/c]",
       "|#Delta#varphi [rad.]",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -250,6 +260,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "x_{j}",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -260,6 +271,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "x_{j}",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -270,6 +282,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet,lead}",
       "x_{j}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -280,6 +293,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet,lead}",
       "x_{j}",
       "counts",
+      0.8,
       0.25,
       false,
       true

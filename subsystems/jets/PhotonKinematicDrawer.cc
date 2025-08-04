@@ -117,6 +117,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#chi^{2}",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -127,6 +128,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "E_{T} [GeV]",
       "#chi^{2}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -137,6 +139,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#eta",
       "#chi^{2}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -147,6 +150,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#varphi [rad.]",
       "#chi^{2}",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -157,6 +161,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "E_{T} [GeV]",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -167,6 +172,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#eta",
       "E_{T} [GeV]",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -177,6 +183,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#varphi [rad.]",
       "E_{T} [GeV]",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -187,6 +194,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#varphi [rad.]",
       "#eta",
       "counts",
+      0.8,
       0.25,
       false,
       true
@@ -197,6 +205,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#eta",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -207,6 +216,7 @@ void PhotonKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*
       "#varphi [rad.]",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
