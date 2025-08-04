@@ -1,7 +1,6 @@
 // Jennifer James <jennifer.l.james@vanderbilt.edu>, McKenna Sleeth, Derek Anderson, Mariia Mitrankova
 
 #include "CaloJetDraw.h"
-
 #include "BaseJetDrawer.h"
 #include "BeamBackgroundDrawer.h"
 #include "DijetQADrawer.h"
@@ -64,7 +63,7 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
   m_drawers["RHO"] = std::make_unique<EventRhoDrawer>("EventRho",
                                                       name,
                                                       type,
-                                                      "h_eventwiserho",
+                                                      "h_eventwisecalorho",
                                                       debug);
 
   // for jet kinematic plots

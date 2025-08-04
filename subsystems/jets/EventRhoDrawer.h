@@ -18,8 +18,8 @@ class EventRhoDrawer : public BaseJetDrawer
     EventRhoDrawer(const std::string& name = "EventRho",
                    const std::string& modu = "JetDraw",
                    const std::string& type = "towersub1_antikt",
-                   const std::string& pref = "h_eventwiserho",
-                   const bool debug = false);
+                   const std::string& pref = "h_eventwisecalorho",
+                   const bool debug = true);
     ~EventRhoDrawer();
 
     // public inherited methods
