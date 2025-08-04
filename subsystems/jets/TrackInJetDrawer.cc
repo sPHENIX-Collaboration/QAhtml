@@ -149,6 +149,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "r [cm]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -159,6 +160,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "z [cm]",
       "r [cm]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -169,6 +171,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "x [cm]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -179,6 +182,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "y [cm]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -189,6 +193,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "x [cm]",
       "y [cm]",
       "",
+      0.8,
       0.25,
       false,
       true
@@ -199,6 +204,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "z [cm]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -209,6 +215,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "N_{trk}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -219,6 +226,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#eta^{jet}",
       "N_{trk}",
       "",
+      0.8,
       0.25,
       false,
       true
@@ -229,6 +237,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{jet} [GeV/c]",
       "N_{trk}",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -239,6 +248,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#eta^{jet}",
       "p_{T}^{jet}",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -249,6 +259,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#eta^{trk}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -259,6 +270,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#varphi^{trk} [rad.]",
       "#eta^{trk}",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -269,6 +281,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#varphi^{trk} [rad.]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -279,6 +292,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "p_{T}^{trk} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -289,6 +303,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#chi^{2}/NDF",
       "p_{T}^{trk} [GeV/c]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -299,6 +314,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "#chi^{2}/NDF",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -309,6 +325,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "z = p^{trk}#upointp^{jet}/|p^{jet}|^{2}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -319,6 +336,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "j_{T} = |p^{jet}#timesp^{trk}|/|p^{jet}|^{2}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false

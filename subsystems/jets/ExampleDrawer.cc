@@ -230,6 +230,7 @@ void ExampleDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "A", // the title of the x axis we're going to give it
       "Counts", // the title of the y axis we're going to give it
       "", // the title of the z axis (can be blank for 1D histograms or profiles)
+      0.8, // the marker size of the histogram
       0.25, // the right margin of the pad we're going to draw on
       true, // make y axis log?
       false // make z axis log?
@@ -241,6 +242,7 @@ void ExampleDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "B",
       "counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -252,6 +254,7 @@ void ExampleDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "A",
       "AB",
       "Counts",
+      0.8,
       0.25,
       false, // NOTE: we are NOT making the y axis log
       true // but we ARE making the z axis log
@@ -263,6 +266,7 @@ void ExampleDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "A",
       "AB",
       "Counts",
+      0.8,
       0.25,
       false,
       true
