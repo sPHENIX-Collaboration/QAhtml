@@ -58,7 +58,7 @@ def main():
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
             for run, dbtag in runs_dbtags:
                 print("Processing run " + str(run))
-                if run < 66000:
+                if run < 69000:
                     continue
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
@@ -107,7 +107,9 @@ def main():
                         continue
                     thistag = getBuildDbTag(runtype,newpath)
                     tags = thistag.split("_")
-                   
+                    if args.verbose:
+                        print("tags are")
+                        print(tags)
                     if tags[1].find("cdbtag") != -1:
                         latestdbtag=thistag
                         break
@@ -121,6 +123,8 @@ def main():
                 newFileTime = 0
                 if reagg == False:
                     for newpath in filepaths:
+                        if not os.path.exists(newpath):
+                            continue
                         if newpath.find(latestdbtag) == -1:
                             continue
                         if os.path.getmtime(newpath) > newFileTime:
@@ -149,8 +153,8 @@ def main():
                     command.append(str(newpath))
                     nfiles+=1
 
-                # wait for at least 4 files
-                if nfiles < 4:
+                # wait for at least 2 files
+                if nfiles < 2:
                     print("not enough files " + str(run))
                     continue
                 if args.verbose:

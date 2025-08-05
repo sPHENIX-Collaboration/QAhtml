@@ -125,11 +125,12 @@ def main():
                             print("dbtag is " + dbtag)
                             print("dbtag to draw is " + str(dbtagToDraw))
                             print("file to draw is " +fileToDraw)
+                            print("this file is " + filename)
                             if dbtag.find("newcdbtag") != -1 and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
                                 fileToDraw = file
                                 dbtagToDraw = int(filename.split("_v")[1][0:3])
                                 
-                            elif(int(dbtag.split("p")[1]) > int(dbtagToDraw)) :
+                            elif dbtag.find("newcdbtag") == -1 and int(dbtag.split("p")[1]) > int(dbtagToDraw) :
                                 fileToDraw = file
                                 dbtagToDraw = int(dbtag.split("p")[1])
                         #Draw that one
