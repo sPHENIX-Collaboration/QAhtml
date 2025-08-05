@@ -25,7 +25,7 @@ class BaseJetDrawer
     BaseJetDrawer(const std::string& name = "Base",
                   const std::string& modu = "JetDraw",
                   const std::string& type = "towersub1_antikt",
-                  const std::string& pref = "h_eventwiserho",
+                  const std::string& pref = "h_eventwisecalorho",
                   const bool debug = false,
                   const bool local = false);
     ~BaseJetDrawer() {};

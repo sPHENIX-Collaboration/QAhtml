@@ -66,9 +66,9 @@ namespace JetDrawDefs
   inline std::vector<uint32_t> VecTrigToDrawAuAu()
   {
     static const std::vector<uint32_t> vecTrigToDrawAuAu = {
-      JetQADefs::GL1::MBDNSVtx10,  // actually 10 cm
-      JetQADefs::GL1::MBDNSVtx30,  // actually 60 cm
-      JetQADefs::GL1::MBDNSVtx60,   // actually 150 cm
+      JetQADefs::GL1::MBDNS2Vtx10,  // actually 10 cm
+      //JetQADefs::GL1::MBDNSVtx30,  // actually 60 cm
+      JetQADefs::GL1::MBDNS2Vtx150,   // actually 150 cm
       999  // FIXME swap out for official tag when ready
     };
     return vecTrigToDrawAuAu;
@@ -112,9 +112,9 @@ namespace JetDrawDefs
       {JetQADefs::GL1::MBDNSJet2, "JetCoin8GeV"},
       {JetQADefs::GL1::MBDNSJet3, "JetCoin10GeV"},
       {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"},
-      {JetQADefs::GL1::MBDNSVtx10, "MBDNSVtx10"},
-      {JetQADefs::GL1::MBDNSVtx30, "MBDNSVtx30"},
-      {JetQADefs::GL1::MBDNSVtx60, "MBDNSVtx60"},
+      {JetQADefs::GL1::MBDNS2Vtx10, "MBDNS2Vtx10"},
+      //{JetQADefs::GL1::MBDNSVtx30, "MBDNSVtx30"},
+      {JetQADefs::GL1::MBDNS2Vtx150, "MBDNS2Vtx150"},
       {999, "Inclusive"}  // FIXME this should be implemented in core & macros
     };
     return mapTrigToName;
@@ -131,9 +131,9 @@ namespace JetDrawDefs
       {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
       {JetQADefs::GL1::MBDNSJet3, "mbdnsjet3"},
       {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"},
-      {JetQADefs::GL1::MBDNSVtx10, "mbdnsvtx10"},
-      {JetQADefs::GL1::MBDNSVtx30, "mbdnsvtx30"},
-      {JetQADefs::GL1::MBDNSVtx60, "mbdnsvtx60"},
+      {JetQADefs::GL1::MBDNS2Vtx10, "mbdns2vtx10"},
+      //{JetQADefs::GL1::MBDNSVtx30, "mbdns2vtx30"},
+      {JetQADefs::GL1::MBDNS2Vtx150, "mbdns2vtx150"},
       {999, "inclusive"}  // FIXME this should be implmenented in core & macros
     };
     return mapTrigToTag;
