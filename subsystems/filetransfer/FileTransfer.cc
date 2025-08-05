@@ -271,9 +271,9 @@ int runnumber = QADrawClient::instance()->RunNumber();
 
       if( n_segments_transfered == n_segments_total )
       {
-        text->AddText( Form("Number of files transfered: %i/%i - good",n_segments_transfered,n_segments_total ))->SetTextColor(kGreen+1);
+        text->AddText( Form("Number of all segment files transfered: %i/%i - good",n_segments_transfered,n_segments_total ))->SetTextColor(kGreen+1);
       } else {
-        text->AddText( Form("Number of files transfered: %i/%i - bad",n_segments_transfered,n_segments_total ))->SetTextColor(kRed+1);
+        text->AddText( Form("Number of all segment files transfered: %i/%i - bad",n_segments_transfered,n_segments_total ))->SetTextColor(kRed+1);
       }
 
       if( n_first_segment_transfered == n_first_segment_total )
