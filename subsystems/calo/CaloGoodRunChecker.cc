@@ -2,6 +2,8 @@
 #include <emcnoisytowerfinder/emcNoisyTowerFinder.h>
 #include <qahtml/QADrawClient.h>
 
+#include <phool/RunnumberRange.h>
+
 #include <odbc++/connection.h>
 #include <odbc++/drivermanager.h>
 #include <odbc++/errorhandler.h>
@@ -249,6 +251,11 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
     cemc_fails_badtowers = true;
   }
   int MAXCOLDDEADTOWERS = 500;
+  auto cl = QADrawClient::instance();
+  if ( cl->RunNumber() > RunnumberRange::RUN3AUAU_FIRST )
+  {
+    MAXCOLDDEADTOWERS = 640;
+  }
   if ((cemc_cold_towers + cemc_dead_towers) > MAXCOLDDEADTOWERS)
   {
     cemc_fails_badtowers = true;
