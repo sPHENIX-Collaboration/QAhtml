@@ -27,6 +27,8 @@
 
 #include <boost/format.hpp>
 
+#include <phool/RunnumberRange.h>
+
 #include <cmath>
 #include <ctime>
 #include <fstream>
@@ -412,8 +414,14 @@ int CaloDraw::DrawCemc()
     cold_towers = calo_checker->cemc_cold_towers;
   }
   myText(0.75, 0.70, kBlack, Form("This run: %d dead, %d hot, %d cold", dead_towers, hot_towers, cold_towers), 0.06);
-  myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
-
+  if ( cl->RunNumber() < RunnumberRange::RUN3AUAU_FIRST )
+  {
+    myText(0.75, 0.62, kBlack, "Expected: 128 dead, 0 hot, 0 cold", 0.06);
+  }
+  else
+  {
+    myText(0.75, 0.62, kBlack, "Expected: 640 dead, 0 hot, 0 cold", 0.06);
+  }
   Pad[6][3]->cd();
   TH1F *emcal_proj_masked = nullptr;
   if (h_hitmask) emcal_proj_masked = (TH1F*) proj(h_hitmask)->Clone("h_emcal_proj_masked");
