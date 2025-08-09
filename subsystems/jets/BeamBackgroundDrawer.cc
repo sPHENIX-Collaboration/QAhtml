@@ -158,10 +158,16 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
   {
     if (hists[i].hist)
     {
-      hists[i].hist->SetTitle(hists[i].title.c_str());
-      hists[i].hist->GetXaxis()->SetTitle(hists[i].titlex.c_str());
-      hists[i].hist->GetYaxis()->SetTitle(hists[i].titley.c_str());
-      if (hists[i].titlez.c_str()) hists[i].hist->GetZaxis()->SetTitle(hists[i].titlez.c_str());
+      // make hist title
+      const std::string title = hists[i].title
+                              + ";"
+                              + hists[i].titlex
+                              + ";"
+                              + hists[i].titley
+                              + ";"
+                              + hists[i].titlez;
+
+      hists[i].hist->SetTitle(title.data());
     }
   }
 
