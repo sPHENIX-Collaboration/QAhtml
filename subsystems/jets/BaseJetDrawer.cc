@@ -290,18 +290,8 @@ void BaseJetDrawer::DrawHistOnPad(const std::size_t iHist,
   plot.histPad->cd(iPad);
   if (hists.at(iHist).hist)
   {
-    // make hist title
-    const std::string title = hists[iHist].title
-                            + ";"
-                            + hists[iHist].titlex
-                            + ";"
-                            + hists[iHist].titley
-                            + ";"
-                            + hists[iHist].titlez;
-
     // update pad style and draw
     UpdatePadStyle(hists.at(iHist));
-    hists[iHist].hist->SetTitle(title.data());
     hists[iHist].hist->DrawCopy("SAME");
   }
   else
@@ -423,11 +413,34 @@ void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
   gPad->SetLogz(hist.logz);
 
   //Histogram title settings
-  gPad->SetTopMargin(0.1); //make place for titles
+  UpdateTitle(hist);
+  gPad->SetTopMargin(0.14); //make place for titles
   gStyle->SetTitleAlign(13);
   gStyle->SetTitleX(0.01);
   gStyle->SetTitleY(0.99);
 
-  hist.hist->SetMarkerSize(hist.marker); 
+  hist.hist->SetMarkerSize(hist.marker);
 }
 
+// ----------------------------------------------------------------------------
+//! Update histogram and axis titles based on options
+// ----------------------------------------------------------------------------
+void BaseJetDrawer::UpdateTitle(const JetDrawDefs::HistAndOpts& hist)
+{
+  // set histogram and axis titles to those in each drawer,
+  // otherwise keep original titles from coresoftware
+  const bool doQAtitle = true; 
+  if (hist.hist && doQAtitle)
+  {
+    // make hist title
+    const std::string title = hist.title
+                            + ";"
+                            + hist.titlex
+                            + ";"
+                            + hist.titley
+                            + ";"
+                            + hist.titlez;
+
+    hist.hist->SetTitle(title.data());
+  }
+}
