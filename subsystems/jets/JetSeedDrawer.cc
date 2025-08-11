@@ -127,7 +127,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_rawpt")),
       "Raw Seed p_{T}",
-      "Seed p_{T,raw} [GeV/c]",
+      "Seed p_{T,raw} [GeV]",
       "Counts",
       "",
       0.8,
@@ -138,7 +138,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_rawptall")),
       "Raw Seed p_{T} (all jet seeds)",
-      "Seed p_{T,raw} [GeV/c]",
+      "Seed p_{T,raw} [GeV]",
       "Counts",
       "",
       0.8,
@@ -171,7 +171,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_subpt")),
       "Subtracted Seed p_{T}",
-      "Seed p_{T,sub} [GeV/c]",
+      "Seed p_{T,sub} [GeV]",
       "Counts",
       "",
       0.8,
@@ -182,7 +182,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_subptall")),
       "Subtracted Seed p_{T} (all jet seeds)",
-      "Seed p_{T,sub} [GeV/c]",
+      "Seed p_{T,sub} [GeV]",
       "Counts",
       "",
       0.8,

@@ -131,7 +131,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "streaksideband_nstreakperphi")),
-      "N streaky towers per i_{#vaprhi}",
+      "N streaky towers per i_{#varphi}",
       "i_{#varphi}",
       "N_{twr}",
       "",
@@ -152,6 +152,24 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       true
     }
   };
+
+  // make histogram titles and axis titles
+  for (std::size_t i = 0; i < hists.size(); ++i)
+  {
+    if (hists[i].hist)
+    {
+      // make hist title
+      const std::string title = hists[i].title
+                              + ";"
+                              + hists[i].titlex
+                              + ";"
+                              + hists[i].titley
+                              + ";"
+                              + hists[i].titlez;
+
+      hists[i].hist->SetTitle(title.data());
+    }
+  }
 
   // draw nevt hists on one page
   DrawHists("BeamBackground_NEvts", {0, 1}, hists);

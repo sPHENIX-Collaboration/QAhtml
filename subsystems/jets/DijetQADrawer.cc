@@ -169,7 +169,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_Ajj_pt")),
       "A_{jj} vs. p_{T}^{jet,lead} for all jet pairs",
-      "p_{T}^{jet,lead} [GeV/c]",
+      "p_{T}^{jet,lead} [GeV]",
       "A_{jj}",
       "counts",
       0.8,
@@ -180,7 +180,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_Ajj_pt_l")),
       "A_{jj} vs. p_{T}^{jet,lead} for leading jet pair in event",
-      "p_{T}^{jet,lead} [GeV/c]",
+      "p_{T}^{jet,lead} [GeV]",
       "A_{jj}",
       "counts",
       0.8,
@@ -235,7 +235,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_dphi_pt")),
       "|#Delta#varphi| vs. p_{T}^{jet,lead} for all jet pairs",
-      "p_{T}^{jet,lead} [GeV/c]",
+      "p_{T}^{jet,lead} [GeV]",
       "|#Delta#varphi| [rad.]",
       "counts",
       0.8,
@@ -246,7 +246,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_dphi_pt_l")),
       "|#Delta#varphi| vs. p_{T}^{jet,lead} for leading jet pair",
-      "p_{T}^{jet,lead} [GeV/c]",
+      "p_{T}^{jet,lead} [GeV]",
       "|#Delta#varphi [rad.]",
       "counts",
       0.8,
@@ -279,7 +279,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_xj_pt")),
       "x_{j} vs. p_{T}^{jet,lead} for all jet pairs",
-      "p_{T}^{jet,lead}",
+      "p_{T}^{jet,lead} [GeV]",
       "x_{j}",
       "counts",
       0.8,
@@ -290,7 +290,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_xj_pt_l")),
       "x_{j} vs. p_{T}^{jet,lead} for leading jet pair",
-      "p_{T}^{jet,lead}",
+      "p_{T}^{jet,lead} [GeV]",
       "x_{j}",
       "counts",
       0.8,
