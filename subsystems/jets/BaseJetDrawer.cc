@@ -165,13 +165,17 @@ void BaseJetDrawer::DrawRunAndBuild(const std::string& what,
   // connect to draw client
   QADrawClient* cl = QADrawClient::instance();
 
+  // Get build and dbtag from production info histogram
+  TH1I* prodHist = dynamic_cast<TH1I*>(cl->getHisto("h_QAHistManagerDef_ProductionInfo"));
+  std::string prodInfo = prodHist->GetTitle();
+
   // Generate run string from client
   std::ostringstream runnostream;
-  runnostream << cl->RunNumber() << ", build " << cl->build();
+  runnostream << cl->RunNumber() << ", " << prodInfo;
 
   // prepend module name, component, and other info as needed
   std::string runstring = m_name;
-  runstring.append("_" + what);
+  //runstring.append("_" + what); // this is redundant, keeping in case needed
   if (trig > -1)
   {
     runstring.append("_" + JetDrawDefs::MapTrigToName().at(trig));
@@ -182,15 +186,15 @@ void BaseJetDrawer::DrawRunAndBuild(const std::string& what,
   }
 
   // now add run
-  runstring += " Run ";
+  runstring += ", Run ";
   runstring += runnostream.str();
 
   // create TText for info
   TText PrintRun;
   PrintRun.SetTextFont(62);
-  PrintRun.SetTextSize(0.04);
+  PrintRun.SetTextSize(0.25);
   PrintRun.SetNDC();          // set to normalized coordinates
-  PrintRun.SetTextAlign(12);  // center/center alignment
+  PrintRun.SetTextAlign(22);  // center/center alignment
 
   // and finally draw on pad
   pad->cd();
