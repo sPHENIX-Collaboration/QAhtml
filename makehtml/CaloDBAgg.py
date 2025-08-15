@@ -193,8 +193,8 @@ def main():
                     FCWritecursor.commit()
 
                     insertquery="""
-                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',9999,'{}','{}','{}')
+                    insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
+                    values ('{}','{}',9999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
@@ -204,7 +204,7 @@ def main():
                     dsttype=EXCLUDED.dsttype,
                     events=EXCLUDED.events
                     ;
-                    """.format(lfn,run,size,dbtag,histtype)
+                    """.format(lfn,run,size,dbtag,histtype, collisiontag)
                     if args.verbose :
                         print(insertquery)
                     FCWritecursor.execute(insertquery)
