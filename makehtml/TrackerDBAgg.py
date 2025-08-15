@@ -37,7 +37,7 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
 
 def getPaths(cursor, run, dataset, type, runtype):
     dsttype = type
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' and files.lfn=datasets.filename".format(run,runtype, dsttype,dataset)
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999".format(run,runtype, dsttype,dataset)
     if args.verbose == True:
         print(query)
     cursor.execute(query)
@@ -80,7 +80,7 @@ def main():
                 anadbtag = dbtag
                 dsttypetag = tags[index+3]
                 rundirtag = tags[index+4]
-                
+             
                 # make an analogous path to the production DST in sphenix/data
                 completeAggDir = aggDirectory + collisiontag + "/" + beamtag + "/" + anadbtag + "/" + dsttypetag + "/" + rundirtag + "/"
                 if args.verbose == True:
@@ -124,9 +124,9 @@ def main():
                 newFileTime = 0
                 if reagg == False:
                     for newpath in filepaths:
-                        if not os.path.exists(newpath):
-                            continue
                         if newpath.find(latestdbtag) == -1:
+                            continue
+                        if not os.path.exists(newpath):
                             continue
                         if os.path.getmtime(newpath) > newFileTime:
                             newFileTime = os.path.getmtime(newpath)
@@ -152,6 +152,8 @@ def main():
                     # make sure the file has the same db tag
                     if newpath.find(latestdbtag) == -1: 
                        continue
+                    if not os.path.exists(newpath):
+                        continue
                     command.append(str(newpath))
                     nfiles+=1
                     # don't need loads of statistics for these, and it just clogs the aggregation processing
@@ -160,7 +162,8 @@ def main():
                             break;
                     elif nfiles > 100:
                         break
-                
+                if nfiles < 2:
+                    continue
                 if args.verbose:
                     print("executing command")
                     print(command)
@@ -196,8 +199,8 @@ def main():
                     FCWritecursor.commit()
 
                     insertquery="""
-                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',9999,'{}','{}','{}')
+                    insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
+                    values ('{}','{}',9999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
@@ -207,7 +210,7 @@ def main():
                     dsttype=EXCLUDED.dsttype,
                     events=EXCLUDED.events
                     ;
-                    """.format(lfn,run,size,dbtag,histtype)
+                    """.format(lfn,run,size,dbtag,histtype, collisiontag)
                     if args.verbose :
                         print(insertquery)
                     FCWritecursor.execute(insertquery)

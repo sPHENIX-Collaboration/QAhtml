@@ -21,7 +21,7 @@ subsys = {"filetransfer" : ["FILETRANSFERQA","draw_filetransfer.C"]}
 runtypes = ["_run3auau"]
 
 def get_unique_run_dataset_pairs(cursor):
-    query = "SELECT DISTINCT runnumber FROM datasets WHERE runnumber > 70000 and runnumber < 100000 and dataset='physics' order by runnumber;"
+    query = "SELECT DISTINCT runnumber FROM datasets WHERE runnumber > 69000 and runnumber < 100000 and dataset='physics' order by runnumber;"
     if args.verbose:
         print(query)
     cursor.execute(query)
