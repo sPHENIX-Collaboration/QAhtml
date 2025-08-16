@@ -33,7 +33,7 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
     return runnumbers
 
 def getPaths(cursor, run, dataset, type, runtype):
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename".format(run,runtype,type,dataset)
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999".format(run,runtype,type,dataset)
     if args.verbose == True:
         print(query)
     cursor.execute(query)
@@ -106,6 +106,8 @@ def main():
                     if not os.path.exists(newpath):
                         continue
                     thistag = getBuildDbTag(runtype,newpath)
+                    if args.verbose:
+                        print("thistag is " + thistag)
                     tags = thistag.split("_")
                     if args.verbose:
                         print("tags are")
@@ -154,7 +156,7 @@ def main():
                     nfiles+=1
 
                 # wait for at least 2 files
-                if nfiles < 2:
+                if nfiles < 3:
                     print("not enough files " + str(run))
                     continue
                 if args.verbose:
@@ -191,8 +193,8 @@ def main():
                     FCWritecursor.commit()
 
                     insertquery="""
-                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',9999,'{}','{}','{}')
+                    insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
+                    values ('{}','{}',9999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
@@ -202,7 +204,7 @@ def main():
                     dsttype=EXCLUDED.dsttype,
                     events=EXCLUDED.events
                     ;
-                    """.format(lfn,run,size,dbtag,histtype)
+                    """.format(lfn,run,size,dbtag,histtype, collisiontag)
                     if args.verbose :
                         print(insertquery)
                     FCWritecursor.execute(insertquery)
