@@ -355,10 +355,15 @@ int MVTXDraw::DrawSummaryInfo()
     l->DrawLatex(textposx, 0.80, (boost::format("Cluster #phi fit A+B#timescos(#phi+C): #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g, B/A = %.5g") % chi2ndf % scaledchi2ndf % BoverA).str().c_str());
     l->SetTextColor(c_good);
     l->DrawLatex(textposx, 0.74, Form("#chi^{2}/ndf GOOD (scaled #chi^{2}/ndf < %.5g); ", scaledchi2ndf_good));
-    if (BoverA > bovera_high || BoverA < bovera_low)
+    if (BoverA > bovera_high_bad || BoverA < bovera_low)
     {
       l->SetTextColor(c_bad);
-      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE/BAD (%.5g, %.5g)", BoverA, bovera_low, bovera_high_bad));
+    }
+    else if ((BoverA > bovera_high && BoverA < bovera_high_bad) || BoverA < bovera_low)
+    {
+      l->SetTextColor(c_ok);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE/QUESTIONABLE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
     }
     else
     {
@@ -383,10 +388,15 @@ int MVTXDraw::DrawSummaryInfo()
     l->DrawLatex(textposx, 0.80, (boost::format("Cluster #phi fit A+B#timescos(#phi+C): #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g, B/A = %.5g") % chi2ndf % scaledchi2ndf % BoverA).str().c_str());
     l->SetTextColor(c_ok);
     l->DrawLatex(textposx, 0.74, Form("#chi^{2}/ndf OK (%g #leq scaled #chi^{2}/ndf < %g)", scaledchi2ndf_good, scaledchi2ndf_bad));
-    if (BoverA > bovera_high || BoverA < bovera_low)
+    if (BoverA > bovera_high_bad || BoverA < bovera_low)
     {
       l->SetTextColor(c_bad);
-      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE/BAD (%.5g, %.5g)", BoverA, bovera_low, bovera_high_bad));
+    }
+    else if ((BoverA > bovera_high && BoverA < bovera_high_bad) || BoverA < bovera_low)
+    {
+      l->SetTextColor(c_ok);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE/QUESTIONABLE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
     }
     else
     {
@@ -411,10 +421,15 @@ int MVTXDraw::DrawSummaryInfo()
     l->DrawLatex(textposx, 0.80, (boost::format("Cluster #phi fit A+B#timescos(#phi+C): #chi^{2}/ndf = %.5g, scaled #chi^{2}/ndf = %.5g, B/A = %.5g") % chi2ndf % scaledchi2ndf % BoverA).str().c_str());
     l->SetTextColor(c_bad);
     l->DrawLatex(textposx, 0.74, Form("#chi^{2}/ndf BAD (scaled #chi^{2}/ndf #geq %g)", scaledchi2ndf_bad));
-    if (BoverA > bovera_high || BoverA < bovera_low)
+    if (BoverA > bovera_high_bad || BoverA < bovera_low)
     {
       l->SetTextColor(c_bad);
-      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE/BAD (%.5g, %.5g)", BoverA, bovera_low, bovera_high_bad));
+    }
+    else if ((BoverA > bovera_high && BoverA < bovera_high_bad) || BoverA < bovera_low)
+    {
+      l->SetTextColor(c_ok);
+      l->DrawLatex(textposx, 0.68, Form("B/A = %.5g OUT OF RANGE/QUESTIONABLE (%.5g, %.5g)", BoverA, bovera_low, bovera_high));
     }
     else
     {
