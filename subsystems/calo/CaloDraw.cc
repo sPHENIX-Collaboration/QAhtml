@@ -420,7 +420,7 @@ int CaloDraw::DrawCemc()
   }
   else
   {
-    myText(0.75, 0.62, kBlack, "Expected: 640 dead, 0 hot, 0 cold", 0.06);
+    myText(0.75, 0.62, kBlack, "Expected: 700 dead, 0 hot, 0 cold", 0.06);
   }
   Pad[6][3]->cd();
   TH1F *emcal_proj_masked = nullptr;
