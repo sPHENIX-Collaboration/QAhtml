@@ -254,7 +254,7 @@ void CaloGoodRunChecker::CemcCheckGoodRun()
   auto cl = QADrawClient::instance();
   if ( cl->RunNumber() > RunnumberRange::RUN3AUAU_FIRST )
   {
-    MAXCOLDDEADTOWERS = 640;
+    MAXCOLDDEADTOWERS = 700;
   }
   if ((cemc_cold_towers + cemc_dead_towers) > MAXCOLDDEADTOWERS)
   {
