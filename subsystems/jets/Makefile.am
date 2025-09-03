@@ -36,7 +36,8 @@ jetinclude_HEADERS = \
   PhotonKinematicDrawer.h \
   StatusMapDrawer.h \
   TrackInJetDrawer.h \
-  TrackJetDraw.h
+  TrackJetDraw.h \
+  UEvsEtaDrawer.h
 
 libqadrawjet_la_SOURCES = \
   BaseJetDrawer.cc \
@@ -53,7 +54,8 @@ libqadrawjet_la_SOURCES = \
   PhotonKinematicDrawer.cc \
   StatusMapDrawer.cc \
   TrackInJetDrawer.cc \
-  TrackJetDraw.cc
+  TrackJetDraw.cc \
+  UEvsEtaDrawer.cc
 
 noinst_PROGRAMS = \
   testexternals

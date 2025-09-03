@@ -10,6 +10,7 @@
 #include "JetSeedDrawer.h"
 #include "PhotonKinematicDrawer.h"
 #include "StatusMapDrawer.h"
+#include "UEvsEtaDrawer.h"
 #include <map>
 #include <memory>
 
@@ -28,6 +29,7 @@
  *    - "CONSTITUENTS" = draw jet calorimeter constituent plots,
  *    - "SEED" = draw jet seed plots (AuAu only),
  *    - "DIJET" = draw dijet qa plots,
+ *    - "UEETA" = draw underlying event vs eta plots,
  *    - "ALL" = draw all of the above.
  *
  *  Note that "ALL" doesn't have an associated drawer class, since
@@ -95,6 +97,14 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                              type,
                                                              "h_constituentsinjets",
                                                              debug);
+
+  // for underlying event vs eta plots
+  m_drawers["UEETA"] = std::make_unique<UEvsEtaDrawer>("UEvsEta",
+                                                      name,
+                                                      type,
+                                                      "h_uevsetacent",
+                                                      debug);
+
 }
 
 // ----------------------------------------------------------------------------
