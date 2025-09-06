@@ -146,7 +146,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_cemc")),
       "Jet N Constituents in CEMC",
-      "N Constituents",
+      "N_{CEMC} Constituents",
       "Counts",
       "",
       0.8,
@@ -157,7 +157,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_ihcal")),
       "Jet N Constituents in IHCal",
-      "N Constituents",
+      "N_{IHCal} Constituents",
       "Counts",
       "",
       0.8,
@@ -168,7 +168,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_ohcal")),
       "Jet N Constituents in OHCal",
-      "N Constituents",
+      "N_{OHCal} Constituents",
       "Counts",
       "",
       0.8,
@@ -179,7 +179,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_total")),
       "Jet N Constituents",
-      "N Constituents",
+      "N_{Total} Constituents",
       "Counts",
       "",
       0.8,
@@ -201,7 +201,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_cemc")),
       "Jet E Fraction in CEMC",
-      "Jet E Fraction",
+      "Jet E_{CEMC} Fraction",
       "Counts",
       "",
       0.8,
@@ -212,7 +212,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_ihcal")),
       "Jet E Fraction in IHCal",
-      "Jet E Fraction",
+      "Jet E_{IHCal} Fraction",
       "Counts",
       "",
       0.8,
@@ -223,7 +223,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_ohcal")),
       "Jet E Fraction in OHCal",
-      "Jet E Fraction",
+      "Jet E_{OHcal} Fraction",
       "Counts",
       "",
       0.8,
