@@ -10,6 +10,7 @@
 #include "JetSeedDrawer.h"
 #include "PhotonKinematicDrawer.h"
 #include "StatusMapDrawer.h"
+#include "UEvsEtaDrawer.h"
 #include <map>
 #include <memory>
 
@@ -22,12 +23,13 @@
  *  implemented ones:
  *    - "BEAM" = draw beam background plots,
  *    - "STATUS" = draw calo status map plots,
- *    - "PHOTON" = draw photon kinematic plots,
+ *    - "EMCLUSTER" = draw emcluster kinematic plots,
  *    - "RHO" = draw event-wise rho plots,
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "CONSTITUENTS" = draw jet calorimeter constituent plots,
  *    - "SEED" = draw jet seed plots (AuAu only),
  *    - "DIJET" = draw dijet qa plots,
+ *    - "UEETA" = draw underlying event vs eta plots,
  *    - "ALL" = draw all of the above.
  *
  *  Note that "ALL" doesn't have an associated drawer class, since
@@ -53,10 +55,10 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                           debug);
 
   // for photon kinematic plots
-  m_drawers["PHOTON"] = std::make_unique<PhotonKinematicDrawer>("PhotonKinematics",
+  m_drawers["EMCLUSTER"] = std::make_unique<PhotonKinematicDrawer>("PhotonKinematics",
                                                                 name,
                                                                 "emcal_cluster",
-                                                                "h_photonjetskinematics",
+                                                                "h_emclusterkinematics",
                                                                 debug);
 
   // for event-wise rho plots
@@ -95,6 +97,14 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                              type,
                                                              "h_constituentsinjets",
                                                              debug);
+
+  // for underlying event vs eta plots
+  m_drawers["UEETA"] = std::make_unique<UEvsEtaDrawer>("UEvsEta",
+                                                      name,
+                                                      type,
+                                                      "h_uevsetacent",
+                                                      debug);
+
 }
 
 // ----------------------------------------------------------------------------
