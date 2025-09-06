@@ -55,7 +55,7 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                           debug);
 
   // for photon kinematic plots
-  m_drawers["EMCLUSTER"] = std::make_unique<PhotonKinematicDrawer>("PhotonKinematics",
+  m_drawers["EMCLUSTER"] = std::make_unique<PhotonKinematicDrawer>("EMClusterKinematics",
                                                                 name,
                                                                 "emcal_cluster",
                                                                 "h_emclusterkinematics",
