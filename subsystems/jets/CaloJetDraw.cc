@@ -23,7 +23,7 @@
  *  implemented ones:
  *    - "BEAM" = draw beam background plots,
  *    - "STATUS" = draw calo status map plots,
- *    - "PHOTON" = draw photon kinematic plots,
+ *    - "EMCLUSTER" = draw emcluster kinematic plots,
  *    - "RHO" = draw event-wise rho plots,
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "CONSTITUENTS" = draw jet calorimeter constituent plots,
@@ -55,10 +55,10 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                           debug);
 
   // for photon kinematic plots
-  m_drawers["PHOTON"] = std::make_unique<PhotonKinematicDrawer>("PhotonKinematics",
+  m_drawers["EMCLUSTER"] = std::make_unique<PhotonKinematicDrawer>("EMClusterKinematics",
                                                                 name,
                                                                 "emcal_cluster",
-                                                                "h_photonjetskinematics",
+                                                                "h_emclusterkinematics",
                                                                 debug);
 
   // for event-wise rho plots

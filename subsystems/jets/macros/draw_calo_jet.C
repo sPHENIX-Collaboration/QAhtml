@@ -22,7 +22,7 @@ R__LOAD_LIBRARY(libqadrawjet.so)
 void draw_calo_jet(const std::string& infile,
                    const std::string& outfile,
                    const bool do_debug = false,
-                   const bool do_html = false)
+                   const bool do_html = true)
 {
 
   // set plotting style to sPHENIX

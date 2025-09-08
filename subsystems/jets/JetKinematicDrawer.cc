@@ -143,6 +143,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
 
   // grab histograms to draw and set options
   JetDrawDefs::VHistAndOpts1D hists = {
+    //// Page 1
     {
       dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_etavsphi")),
       "Jet #eta vs. #phi",
@@ -154,6 +155,30 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       false,
       true
     },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetptvseta")),
+      "Jet p_{T} vs. #eta",
+      "Jet #eta",
+      "Jet p_{T} [GeV]",
+      "Counts",
+      0.8,
+      0.25,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetptvsphi")),
+      "Jet p_{T} vs. #phi",
+      "Jet #phi",
+      "Jet p_{T} [GeV]",
+      "Counts",
+      0.8,
+      0.25,
+      false,
+      true
+    },
+    
+    //// Page 2
     {
       dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvseta")),
       "Jet Mass vs #eta",
@@ -212,10 +237,12 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
   };
 
   // draw all kinematic hists on 1 page
-  DrawHists("JetKinematics", {0, 1, 3, 5}, hists, trig, res);
+  DrawHists("JetKinematicsOne", {0, 1, 2, 7}, hists, trig, res);
+
+  DrawHists("JetKinematicsTwo", {3, 5}, hists, trig, res);
 
   // draw profiles on relevant pads
-  DrawHistOnPad(2, 2, hists, m_plots.GetBackPlotPad());
-  DrawHistOnPad(4, 3, hists, m_plots.GetBackPlotPad());
+  DrawHistOnPad(3, 3, hists, m_plots.GetBackPlotPad());
+  DrawHistOnPad(5, 4, hists, m_plots.GetBackPlotPad());
   return;
 }

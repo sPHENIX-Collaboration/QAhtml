@@ -209,7 +209,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "N_{twr}",
       "",
       0.8,
-      0.25,
+      0.20,
       true,
       false
     },
@@ -220,7 +220,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "N_{twr}",
       "",
       0.8,
-      0.25,
+      0.20,
       true,
       false
     },
@@ -231,7 +231,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "N_{twr}",
       "",
       0.8,
-      0.25,
+      0.20,
       true,
       false
     }
