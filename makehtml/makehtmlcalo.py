@@ -55,6 +55,8 @@ def main():
                 runnumber = int(aggfile.split("/")[-1].split("-")[1])
                 if runnumber < 66000:
                     continue
+                if args.verbose:
+                    print("agg file is " +aggfile)
                 dbtag = getBuildDbTag(runtype, aggfile.split("/")[-1])
                 if runnumber in subsysAggRuns:
                     #only take the highest db tag, as that is what we end up plotting
