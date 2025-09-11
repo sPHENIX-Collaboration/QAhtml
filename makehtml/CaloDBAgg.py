@@ -8,7 +8,7 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = ["HIST_CALOQA", "HIST_CALOFITTINGQA","HIST_JETS"]
+track_hist_types = ["HIST_CALOQA","HIST_CALOFITTINGQA","HIST_JETS"]
 runtypes = ["run3auau"]
 
 
@@ -56,9 +56,14 @@ def main():
     for runtype in runtypes:
         for histtype in track_hist_types:
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
+            if args.verbose :
+                print(runs_dbtags)
             for run, dbtag in runs_dbtags:
                 print("Processing run " + str(run))
-                if run < 69000:
+                if run < 71000:
+                    continue
+                if str(dbtag).find("ana") == -1 and str(dbtag).find("new") == -1:
+                    print ("weird db tag " + str(dbtag) + ", skipping")
                     continue
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
