@@ -38,6 +38,8 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
 def getPaths(cursor, run, dataset, type, runtype):
     dsttype = type
     query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999".format(run,runtype, dsttype,dataset)
+    if dsttype.find("CLUSTER") != -1:
+        query += " AND datasets.segment<10"
     if args.verbose == True:
         print(query)
     cursor.execute(query)
@@ -64,7 +66,7 @@ def main():
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
           
             for run, dbtag in runs_dbtags:
-                if run < 66000:
+                if run < 70000:
                     continue
                 print("Processing run " + str(run))
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
@@ -158,7 +160,7 @@ def main():
                     nfiles+=1
                     # don't need loads of statistics for these, and it just clogs the aggregation processing
                     if histtype.find("CLUSTER") != -1:
-                        if nfiles == 10:
+                        if nfiles == 3:
                             break;
                     elif nfiles > 100:
                         break
