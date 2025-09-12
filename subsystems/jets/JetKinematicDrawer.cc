@@ -242,7 +242,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
   DrawHists("JetKinematicsTwo", {3, 5}, hists, trig, res);
 
   // draw profiles on relevant pads
-  DrawHistOnPad(3, 3, hists, m_plots.GetBackPlotPad());
-  DrawHistOnPad(5, 4, hists, m_plots.GetBackPlotPad());
+  DrawHistOnPad(4, 1, hists, m_plots.GetBackPlotPad());
+  DrawHistOnPad(6, 2, hists, m_plots.GetBackPlotPad());
   return;
 }
