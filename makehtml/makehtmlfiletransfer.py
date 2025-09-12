@@ -21,7 +21,7 @@ subsys = {"filetransfer" : ["FILETRANSFERQA","draw_filetransfer.C"]}
 runtypes = ["_run3auau"]
 
 def get_unique_run_dataset_pairs(cursor):
-    query = "SELECT DISTINCT runnumber FROM datasets WHERE runnumber > 69000 and runnumber < 100000 and dataset='physics' order by runnumber;"
+    query = "SELECT DISTINCT runnumber FROM datasets WHERE runnumber > 69000 and runnumber < 100000 and dataset='physics' order by runnumber desc;"
     if args.verbose:
         print(query)
     cursor.execute(query)
@@ -30,7 +30,7 @@ def get_unique_run_dataset_pairs(cursor):
     return runnumbers
 
 def get_times(cursor, runnumber):
-    query = "SELECT full_file_path,time from files where lfn in (select filename from datasets files where runnumber='{}')".format(runnumber)
+    query = "SELECT full_file_path,time from files where lfn in (select filename from datasets files where runnumber='{}') and full_file_path not like '%fromhpss%'".format(runnumber)
     if args.verbose:
         print(query)
     cursor.execute(query)
