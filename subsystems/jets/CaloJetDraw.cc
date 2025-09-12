@@ -8,7 +8,7 @@
 #include "JetCstDrawer.h"
 #include "JetKinematicDrawer.h"
 #include "JetSeedDrawer.h"
-#include "PhotonKinematicDrawer.h"
+#include "EMClusterKinematicDrawer.h"
 #include "StatusMapDrawer.h"
 #include "UEvsEtaDrawer.h"
 #include <map>
@@ -55,7 +55,7 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                           debug);
 
   // for photon kinematic plots
-  m_drawers["EMCLUSTER"] = std::make_unique<PhotonKinematicDrawer>("EMClusterKinematics",
+  m_drawers["EMCLUSTER"] = std::make_unique<EMClusterKinematicDrawer>("EMClusterKinematics",
                                                                 name,
                                                                 "emcal_cluster",
                                                                 "h_emclusterkinematics",

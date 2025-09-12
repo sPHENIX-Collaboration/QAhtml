@@ -152,7 +152,8 @@ void JetVsTrackSumDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_sumtrkpt")),
@@ -163,7 +164,8 @@ void JetVsTrackSumDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_sumtrkvsjetpt")),
@@ -174,6 +176,7 @@ void JetVsTrackSumDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     }
   };

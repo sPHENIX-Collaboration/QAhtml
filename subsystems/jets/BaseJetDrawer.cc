@@ -424,6 +424,8 @@ void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
   gStyle->SetTitleY(0.99);
 
   hist.hist->SetMarkerSize(hist.marker);
+
+  NormalizeHist(hist);
 }
 
 // ----------------------------------------------------------------------------
@@ -446,5 +448,17 @@ void BaseJetDrawer::UpdateTitle(const JetDrawDefs::HistAndOpts& hist)
                             + hist.titlez;
 
     hist.hist->SetTitle(title.data());
+  }
+}
+
+// ----------------------------------------------------------------------------
+//! Normalized histogram based on options
+// ----------------------------------------------------------------------------
+void BaseJetDrawer::NormalizeHist(const JetDrawDefs::HistAndOpts& hist)
+{
+  const bool doNorm = hist.norm;
+  if (hist.hist && hist.hist->Integral() != 0 && doNorm)
+  {
+      hist.hist->Scale(1.0 / hist.hist->Integral());
   }
 }

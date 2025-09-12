@@ -153,6 +153,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -164,6 +165,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -175,6 +177,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     
@@ -188,6 +191,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -199,7 +203,8 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
-      true
+      true,
+      false
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_jetmassvspt")),
@@ -210,6 +215,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -221,7 +227,8 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
-      true
+      true,
+      false
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histPrefix + "_spectra")),
@@ -232,7 +239,8 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     }
   };
 

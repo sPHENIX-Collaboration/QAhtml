@@ -153,7 +153,8 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_Ajj_l")),
@@ -164,7 +165,8 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_Ajj_pt")),
@@ -175,6 +177,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -186,6 +189,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -197,7 +201,8 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_dphi_Ajj")),
@@ -208,6 +213,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -219,6 +225,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -230,7 +237,8 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_dphi_pt")),
@@ -241,6 +249,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -252,6 +261,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -263,7 +273,8 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_xj_l")),
@@ -274,7 +285,8 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_xj_pt")),
@@ -285,6 +297,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -296,6 +309,7 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     }
   };

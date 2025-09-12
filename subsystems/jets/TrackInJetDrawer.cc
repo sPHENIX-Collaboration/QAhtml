@@ -152,7 +152,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_allclustposrvsz_injet")),
@@ -163,6 +164,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -174,7 +176,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_allclustposy_injet")),
@@ -185,7 +188,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_allclustposyvsx_injet")),
@@ -196,6 +200,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -207,7 +212,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_alljetntrks_injet")),
@@ -218,7 +224,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_alljetntrksvseta_injet")),
@@ -229,6 +236,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -240,6 +248,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -251,6 +260,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -262,7 +272,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_alltracketavsphi_injet")),
@@ -273,6 +284,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -284,7 +296,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_alltrackpt_injet")),
@@ -295,7 +308,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_alltrackptvsqual_injet")),
@@ -306,6 +320,7 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -317,7 +332,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_alltrackz_injet")),
@@ -328,7 +344,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_alltrackjt_injet")),
@@ -339,7 +356,8 @@ void TrackInJetDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     }
   };
 

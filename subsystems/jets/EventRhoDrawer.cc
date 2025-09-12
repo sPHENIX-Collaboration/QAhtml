@@ -118,7 +118,8 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_rhomult")),
@@ -129,7 +130,8 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_sigmaarea")),
@@ -140,7 +142,8 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_sigmamult")),
@@ -151,7 +154,8 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     }
   };
 

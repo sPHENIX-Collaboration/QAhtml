@@ -120,7 +120,8 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_chi2_energy")),
@@ -131,6 +132,7 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -142,6 +144,7 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -153,6 +156,7 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -164,7 +168,8 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_energy_eta")),
@@ -175,6 +180,7 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -186,6 +192,7 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -197,6 +204,7 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -208,7 +216,8 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_phi_with_cuts")),
@@ -219,7 +228,8 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     }
   };
 

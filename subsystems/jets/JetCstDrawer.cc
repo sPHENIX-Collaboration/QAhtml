@@ -152,7 +152,8 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_ihcal")),
@@ -163,7 +164,8 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_ohcal")),
@@ -174,7 +176,8 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncsts_total")),
@@ -185,7 +188,8 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_ncstsvscalolayer")),
@@ -196,6 +200,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -207,7 +212,8 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_ihcal")),
@@ -218,7 +224,8 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjet_ohcal")),
@@ -229,7 +236,8 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_efracjetvscalolayer")),
@@ -240,6 +248,7 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       0.8,
       0.25,
       false,
+      true,
       true
     }
   };
