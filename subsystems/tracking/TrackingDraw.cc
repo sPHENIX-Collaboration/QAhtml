@@ -15,14 +15,14 @@ TrackingDraw::TrackingDraw(const std::string &name)
 {
 	m_options["p"] = new Tracking1dPmDrawer("p");
 	m_options["pt"] = new Tracking1dPmDrawer("pt");
+	m_options["pt_err"] = new Tracking2dPmDrawer("pt_err");
 	m_options["eta"] = new Tracking1dPmDrawer("eta");
+	m_options["phi_eta"] = new Tracking2dPmDrawer("phi_eta");
 	m_options["mvtx_states"] = new Tracking1dPmDrawer("mvtx_states");
 	m_options["intt_states"] = new Tracking1dPmDrawer("intt_states");
 	m_options["tpc_states"] = new Tracking1dPmDrawer("tpc_states");
 	m_options["tpot_states"] = new Tracking1dPmDrawer("tpot_states");
 	m_options["quality"] = new Tracking1dPmDrawer("quality");
-
-	m_options["phi_eta"] = new Tracking2dPmDrawer("phi_eta");
 
 	DBVarInit();
 }
