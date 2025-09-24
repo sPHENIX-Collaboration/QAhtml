@@ -1651,25 +1651,25 @@ int TpcSeedsDraw::Drawsummary()
 
     text->AddText( "TpcSeedsQA summary:" );
 
-    if (dEdxratio_south_status)
+    if (dEdxratio_north_status)
     {
-      text->AddText( Form("dEdx HighZ/LowZ ratio at south = %.2f - GOOD", z9_to_z5_ratio) )
+      text->AddText( Form("dEdx HighZ/LowZ ratio at north = %.2f - GOOD", z9_to_z5_ratio) )
       ->SetTextColor(kGreen+2);
     }
     else
     {
-      text->AddText( Form("dEdx HighZ/LowZ ratio at south = %.2f - BAD", z9_to_z5_ratio) )
+      text->AddText( Form("dEdx HighZ/LowZ ratio at north = %.2f - BAD", z9_to_z5_ratio) )
       ->SetTextColor(kRed+2);    
     }
 
-    if (dEdxratio_north_status)
+    if (dEdxratio_south_status)
     {
-      text->AddText( Form("dEdx HighZ/LowZ ratio at north = %.2f - GOOD", z0_to_z4_ratio) )
+      text->AddText( Form("dEdx HighZ/LowZ ratio at south = %.2f - GOOD", z0_to_z4_ratio) )
       ->SetTextColor(kGreen+2);
     }
     else
     {
-      text->AddText( Form("dEdx HighZ/LowZ ratio at north = %.2f - BAD", z0_to_z4_ratio) )
+      text->AddText( Form("dEdx HighZ/LowZ ratio at south = %.2f - BAD", z0_to_z4_ratio) )
       ->SetTextColor(kRed+2);    
     }
 
