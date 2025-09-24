@@ -98,6 +98,7 @@ class BaseJetDrawer
     void MakeCanvas(const std::string& name, const int nHist);
     void UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist);
     void UpdateTitle(const JetDrawDefs::HistAndOpts& hist);
+    void NormalizeHist(const JetDrawDefs::HistAndOpts& hist);
 
 };  // end BaseJetDrawer
 

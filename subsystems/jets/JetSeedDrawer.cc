@@ -122,6 +122,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -133,7 +134,8 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_rawptall")),
@@ -144,7 +146,8 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_rawseedcount")),
@@ -155,7 +158,8 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_subetavsphi")),
@@ -166,6 +170,7 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -177,7 +182,8 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_subptall")),
@@ -188,7 +194,8 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_subseedcount")),
@@ -199,7 +206,8 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       true,
-      false
+      false,
+      true
     }
   };
 

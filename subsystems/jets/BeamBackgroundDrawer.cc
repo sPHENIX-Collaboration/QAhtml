@@ -105,6 +105,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       0.8,
       0.25,
       true,
+      false,
       false
     },
     {
@@ -116,6 +117,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       0.8,
       0.25,
       true,
+      false,
       false
     },
     {
@@ -127,6 +129,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       0.8,
       0.25,
       true,
+      false,
       false
     },
     {
@@ -138,6 +141,7 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       0.8,
       0.25,
       true,
+      false,
       false
     },
     {
@@ -149,7 +153,8 @@ void BeamBackgroundDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*r
       0.8,
       0.25,
       false,
-      true
+      true,
+      false
     }
   };
 

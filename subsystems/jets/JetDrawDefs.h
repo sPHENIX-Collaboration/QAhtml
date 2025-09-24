@@ -180,6 +180,7 @@ namespace JetDrawDefs
     float       margin {0.25};    ///< right margin of pad
     bool        logy   {false};   ///< make y axis log
     bool        logz   {false};   ///< make z axis log
+    bool        norm   {false};   ///< normalize histogram
   };
 
   // vector of histogram and options

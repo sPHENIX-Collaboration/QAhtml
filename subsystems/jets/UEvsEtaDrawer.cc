@@ -107,7 +107,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
   // connect to draw client
   QADrawClient* cl = QADrawClient::instance();
 
-  // grab histograms to draw and set options XXX
+  // grab histograms to draw and set options
   JetDrawDefs::VHistAndOpts1D hists = {
     // v2, psi2
     {
@@ -119,6 +119,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -130,6 +131,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     // emcal
@@ -142,6 +144,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -153,6 +156,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -164,6 +168,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     // ihcal
@@ -176,6 +181,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -187,6 +193,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -198,6 +205,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     // ohcal
@@ -210,6 +218,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -221,6 +230,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
       true
     },
     {
@@ -232,6 +242,44 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      true,
+      true
+    },
+    // all centrality plots
+    {
+      dynamic_cast<TH1*>(cl->getHisto(histName + "_emcaleta")),
+      "UE vs. #eta, EMCal",
+      "#eta",
+      "Underlying Event",
+      "counts",
+      0.8,
+      0.25,
+      false,
+      true,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(histName + "_ihcaleta")),
+      "UE vs. #eta, IHCal",
+      "#eta",
+      "Underlying Event",
+      "counts",
+      0.8,
+      0.25,
+      false,
+      true,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(histName + "_ohcaleta")),
+      "UE vs. #eta, OHCal",
+      "#eta",
+      "Underlying Event",
+      "counts",
+      0.8,
+      0.25,
+      false,
+      true,
       true
     }
   };
@@ -239,6 +287,7 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
   // draw v2 psi2 plots on one page
   DrawHists("UEvsEta_v2psi2", {0, 1}, hists, trig);
 
+  /* Drop centrality dependent plots until centrality info is fixed
   // draw emcal plots on one page
   DrawHists("UEvsEta_EMCal", {2, 3, 4}, hists, trig);
 
@@ -247,6 +296,10 @@ void UEvsEtaDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
 
   // draw ohcal plots on one page
   DrawHists("UEvsEta_OHCal", {8, 9, 10}, hists, trig);
+  */
+
+  // draw all centrality plots on one page
+  DrawHists("UEvsEta_AllCent", {11, 12, 13}, hists, trig);
 
   return;
 }

@@ -112,6 +112,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      false,
       false
     },
     {
@@ -122,6 +123,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "",
       0.8,
       0.25,
+      false,
       false,
       false
     },
@@ -134,6 +136,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      false,
       false
     },
     {
@@ -144,6 +147,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "",
       0.8,
       0.25,
+      false,
       false,
       false
     },
@@ -156,6 +160,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      false,
       false
     },
     {
@@ -166,6 +171,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "",
       0.8,
       0.25,
+      false,
       false,
       false
     },
@@ -178,6 +184,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      false,
       false
     },
     {
@@ -188,6 +195,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       "N_{good}",
       0.8,
       0.25,
+      false,
       false,
       false
     },
@@ -200,6 +208,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.25,
       false,
+      false,
       false
     },
     {
@@ -211,6 +220,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.20,
       true,
+      false,
       false
     },
     {
@@ -222,6 +232,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.20,
       true,
+      false,
       false
     },
     {
@@ -233,6 +244,7 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       0.8,
       0.20,
       true,
+      false,
       false
     }
   };
