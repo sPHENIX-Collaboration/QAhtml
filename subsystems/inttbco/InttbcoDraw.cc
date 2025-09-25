@@ -19,8 +19,11 @@
 #include <TColor.h>
 #include <TLegend.h>
 
+<<<<<<< HEAD
 #include <boost/format.hpp>
 
+=======
+>>>>>>> refs/remotes/origin/main
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -38,7 +41,11 @@ InttbcoDraw::~InttbcoDraw()
   //
 }
 
+<<<<<<< HEAD
 int InttbcoDraw::MakeCanvas(int width, int height)
+=======
+int InttbcoDraw::MakeCanvas(const std::string &name)
+>>>>>>> refs/remotes/origin/main
 {
   
   if(SingleCanvasDrawer::MakeCanvas(width, height))
@@ -76,6 +83,10 @@ int InttbcoDraw::MakeCanvas(int width, int height)
 int InttbcoDraw::DrawCanvas(){
   std::cout << "INTT DrawClusterInfo() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
+<<<<<<< HEAD
+=======
+  TH1F *h_ = dynamic_cast <TH1F *> (cl->getHisto(histprefix + std::string("clusterPhi_incl")));
+>>>>>>> refs/remotes/origin/main
   
   TH1I* h_InttCalib_BCOOffSet[8];
   for (int i =0; i<8; i++){
@@ -94,6 +105,7 @@ int InttbcoDraw::DrawCanvas(){
     h_InttCalib_BCOOffSet[i]->Draw("HIST,P");
     latex.DrawLatex(0.6, 0.7, Form("INTT%d",i));
   }
+<<<<<<< HEAD
 
   TText PrintRun;
   PrintRun.SetTextFont(62);
@@ -111,6 +123,8 @@ int InttbcoDraw::DrawCanvas(){
   m_canvas->Update();
 
   return 0;
+=======
+>>>>>>> refs/remotes/origin/main
 }
 
 
