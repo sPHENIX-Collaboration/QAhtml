@@ -13,6 +13,7 @@ SUBDIRS = \
   globalQA \
   intt \
   inttrawhit \
+  inttbco \
   jets \
   kfparticle \
   micromegas \
