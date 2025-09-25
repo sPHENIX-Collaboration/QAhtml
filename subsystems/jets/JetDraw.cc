@@ -35,7 +35,7 @@ JetDraw::JetDraw(const std::string &name)
   : QADraw(name)
   , m_do_debug(false)
   , m_jet_type("towersub1_antikt")
-  , m_rho_prefix("h_eventwiserho")
+  , m_rho_prefix("h_eventwisecalorho")
   , m_constituent_prefix("h_constituentsinjets")
   , m_kinematic_prefix("h_jetkinematiccheck")
   , m_seed_prefix("h_jetseedcount")
@@ -392,6 +392,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw)
       "#rho_{area}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -402,6 +403,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw)
       "#rho_{mult}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -412,6 +414,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw)
       "#sigma_{area}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -422,6 +425,7 @@ int JetDraw::DrawRho(const uint32_t trigToDraw)
       "#sigma_{mult}",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -482,6 +486,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -492,6 +497,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -502,6 +508,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -512,6 +519,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "N Constituents",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -522,6 +530,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "Calo Layer",
       "N Constituents",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -532,6 +541,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "Jet E Fraction",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -542,6 +552,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "Jet E Fraction",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -552,6 +563,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "Jet E Fraction",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -562,6 +574,7 @@ int JetDraw::DrawConstituents(const uint32_t trigToDraw, const JetRes resToDraw)
       "Calo Layer",
       "Jet E Fraction",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -629,6 +642,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
       "Jet #eta",
       "Jet #phi",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -639,6 +653,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
       "Jet #eta",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -649,6 +664,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
       "Jet #eta",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -659,6 +675,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
       "Jet p_{T} [GeV/c]",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -669,6 +686,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
       "Jet p_{T} [GeV/c]",
       "Jet Mass [GeV/c^{2}]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -679,6 +697,7 @@ int JetDraw::DrawJetKinematics(const uint32_t trigToDraw, const JetRes resToDraw
       "Jet p_{T} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -743,6 +762,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "Seed #eta_{raw} [Rads.]",
       "Seed #phi_{raw} [Rads.]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -753,6 +773,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "Seed p_{T,raw} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -763,6 +784,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "Seed p_{T,raw} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -773,6 +795,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "N Seed per Event",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -783,6 +806,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "Seed #eta_{sub} [Rads.]",
       "Seed #phi_{sub} [Rads.]",
       "Counts",
+      0.8,
       0.25,
       false,
       true
@@ -793,6 +817,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "Seed p_{T,sub} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -803,6 +828,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "Seed p_{T,sub} [GeV/c]",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false
@@ -813,6 +839,7 @@ int JetDraw::DrawJetSeed(const uint32_t trigToDraw, const JetRes resToDraw)
       "N Seed per Event",
       "Counts",
       "",
+      0.8,
       0.25,
       true,
       false

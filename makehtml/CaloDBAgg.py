@@ -8,8 +8,8 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = ["HIST_CALOFITTINGQA","HIST_CALOQA", "HIST_JETS"]
-runtypes = ["_run3auau"]
+track_hist_types = ["HIST_CALOQA","HIST_CALOFITTINGQA","HIST_JETS"]
+runtypes = ["run3auau"]
 
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
@@ -23,16 +23,17 @@ print("Test is " + str(args.test))
 
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
-    dsttype = type + runtype
-    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber,dataset;".format(dsttype)
+    dsttype = type
+    query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber,tag order by runnumber desc;".format(dsttype)
+    if args.verbose:
+        print(query)
     cursor.execute(query)
-    runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
+    runnumbers = {(row.runnumber, row.tag) for row in cursor.fetchall()}
     
     return runnumbers
 
 def getPaths(cursor, run, dataset, type, runtype):
-    dsttype = type + runtype
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND files.lfn=datasets.filename".format(run,dataset,dsttype)
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999".format(run,runtype,type,dataset)
     if args.verbose == True:
         print(query)
     cursor.execute(query)
@@ -41,8 +42,9 @@ def getPaths(cursor, run, dataset, type, runtype):
 
 def getBuildDbTag(type, filename):
     parts = filename.split(os.sep)
-    index = parts.index(type[1:])
-    return parts[index+2]
+    index = parts.index(type)
+    
+    return parts[index+3]
 
 def main():   
     import time
@@ -54,19 +56,29 @@ def main():
     for runtype in runtypes:
         for histtype in track_hist_types:
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
+            if args.verbose :
+                print(runs_dbtags)
             for run, dbtag in runs_dbtags:
                 print("Processing run " + str(run))
+                if run < 71000:
+                    continue
+                if str(dbtag).find("ana") == -1 and str(dbtag).find("new") == -1:
+                    print ("weird db tag " + str(dbtag) + ", skipping")
+                    continue
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
                     print("all total filepaths")
                     print(filepaths)
-
+                if(len(filepaths) == 0):
+                    continue
                 tags = next(iter(filepaths)).split(os.sep)
-                index = tags.index(runtype[1:])
+                
+                index = tags.index(runtype)
+                
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
                 anadbtag = dbtag
-                dsttypetag = tags[index+3]
+                dsttypetag = tags[index+2]
                 rundirtag = tags[index+4]
                 
                 # make an analogous path to the production DST in sphenix/data
@@ -99,8 +111,14 @@ def main():
                     if not os.path.exists(newpath):
                         continue
                     thistag = getBuildDbTag(runtype,newpath)
+                    if args.verbose:
+                        print("thistag is " + thistag)
                     tags = thistag.split("_")
-                    if tags[1].find("nocdbtag") != -1:
+                    if args.verbose:
+                        print("tags are")
+                        print(tags)
+                    if tags[1].find("cdbtag") != -1:
+                        latestdbtag=thistag
                         break
                     if int(tags[1].split("p")[1]) > latestdbtagInt:
                         latestdbtag=thistag
@@ -112,6 +130,8 @@ def main():
                 newFileTime = 0
                 if reagg == False:
                     for newpath in filepaths:
+                        if not os.path.exists(newpath):
+                            continue
                         if newpath.find(latestdbtag) == -1:
                             continue
                         if os.path.getmtime(newpath) > newFileTime:
@@ -127,7 +147,7 @@ def main():
                     continue
                 filestoadd = []
                 nfiles = 0
-                lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
+                lfn = histtype + "_" + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
                 path = completeAggDir + lfn
 
                 if args.verbose == True:
@@ -140,8 +160,8 @@ def main():
                     command.append(str(newpath))
                     nfiles+=1
 
-                # wait for at least 10 files
-                if nfiles < 10:
+                # wait for at least 2 files
+                if nfiles < 3:
                     print("not enough files " + str(run))
                     continue
                 if args.verbose:
@@ -178,8 +198,8 @@ def main():
                     FCWritecursor.commit()
 
                     insertquery="""
-                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',9999,'{}','{}','{}')
+                    insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
+                    values ('{}','{}',9999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
@@ -189,7 +209,7 @@ def main():
                     dsttype=EXCLUDED.dsttype,
                     events=EXCLUDED.events
                     ;
-                    """.format(lfn,run,size,dbtag,histtype)
+                    """.format(lfn,run,size,dbtag,histtype, collisiontag)
                     if args.verbose :
                         print(insertquery)
                     FCWritecursor.execute(insertquery)

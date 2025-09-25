@@ -62,7 +62,9 @@ class MVTXDraw : public QADraw
     float probOccupancygt0p003_95percentile = 6.8786e-05; // 95% of the runs have probability of chips with occupancy > 0.003 less than this value
     // float bovera_high = 0.28; // before Run49961, keep for record
     // float bovera_low = 0.24; // before Run49961, keep for record
-    float bovera_high = 0.1; // after Run49961, ad-hoc value
+    // float bovera_high = 0.1; // after Run49961, ad-hoc value
+    float bovera_high_bad = 0.20; // For Run2025, ad-hoc value
+    float bovera_high = 0.15; // For Run2025, ad-hoc value
     float bovera_low = 0.05; // after Run49961, ad-hoc value
     float avgnclus_theshold = 38041.6;
 

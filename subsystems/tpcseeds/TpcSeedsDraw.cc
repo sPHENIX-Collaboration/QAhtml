@@ -95,6 +95,11 @@ int TpcSeedsDraw::Draw(const std::string &what)
         iret += DrawdEdxInfo2();
         idraw++;
     }
+    if (what == "ALL" || what == "SUMMARY")
+    {
+        iret += Drawsummary();
+        idraw++;
+    }
     if (!idraw)
     {
         std::cout << " Unimplemented Drawing option: " << what << std::endl;
@@ -109,39 +114,58 @@ int TpcSeedsDraw::MakeCanvas(const std::string &name, int num)
     QADrawClient *cl = QADrawClient::instance();
     int xsize = cl->GetDisplaySizeX();
     int ysize = cl->GetDisplaySizeY();
-    // xpos (-1) negative: do not draw menu bar
-    TC[num] = new TCanvas(name.c_str(), (boost::format("Tpc Seeds Plots %d") % num).str().c_str(), -1, 0, (int)(xsize), (int)(ysize * 2.2));
-    TC[num]->SetCanvasSize(xsize, ysize * 2.2);
-    gSystem->ProcessEvents();
 
-    int nrow = 4;
-    if (num==6) nrow = 5;
-    double yoffset = 0.02;
-    double ywidth=(1.-yoffset-yoffset)/(double)nrow;
-    double x1=0, y1=0, x2=0, y2=0;
-    for (int i=0; i<2*nrow; i++)
+    if (num!=8)
     {
-        if (i%2==0)
-        {
-          x1=0.5;
-          x2=0.95;
-        }
-        else if (i%2==1)
-        {
-          x1=0.05;
-          x2=0.5;
-        }
-        y1=0.02+(i/2)*ywidth;
-        y2=0.02+(i/2+1)*ywidth;
+      // xpos (-1) negative: do not draw menu bar
+      TC[num] = new TCanvas(name.c_str(), (boost::format("Tpc Seeds Plots %d") % num).str().c_str(), -1, 0, (int)(xsize), (int)(ysize * 1.5));
+      TC[num]->SetCanvasSize(xsize, ysize * 1.5);
+      gSystem->ProcessEvents();
 
-        Pad[num][2*nrow-1-i] = new TPad(
-                                (boost::format("mypad_%1%_%2%") % num % i).str().c_str(),
-                                "pad",
-                                x1, y1, x2, y2
-                                );
+      int nrow = 4;
+      if (num==6) nrow = 5;
+      double yoffset = 0.02;
+      double ywidth=(1.-yoffset-yoffset)/(double)nrow;
+      double x1=0, y1=0, x2=0, y2=0;
+      for (int i=0; i<2*nrow; i++)
+      {
+          if (i%2==0)
+          {
+            x1=0.5;
+            x2=0.95;
+          }
+          else if (i%2==1)
+          {
+            x1=0.05;
+            x2=0.5;
+          }
+          y1=0.02+(i/2)*ywidth;
+          y2=0.02+(i/2+1)*ywidth;
+
+          Pad[num][2*nrow-1-i] = new TPad(
+                                  (boost::format("mypad_%1%_%2%") % num % i).str().c_str(),
+                                  "pad",
+                                  x1, y1, x2, y2
+                                  );
+      }
+  
+      for (int i=0; i<2*nrow; i++) Pad[num][2*nrow-1-i]->Draw();
+  
     }
+    else if (num==8) //summary page
+    {
+      // xpos (-1) negative: do not draw menu bar
+      TC[num] = new TCanvas(name.c_str(), (boost::format("Tpc Seeds Plots %d") % num).str().c_str(), -1, 0, (int)(1.5*xsize), (int)(ysize));
+      TC[num]->SetCanvasSize(1.5*xsize, ysize);
+      gSystem->ProcessEvents();
 
-    for (int i=0; i<2*nrow; i++) Pad[num][2*nrow-1-i]->Draw();
+      Pad[num][0] = new TPad(
+                     (boost::format("mypad_%1%_%2%") % num % 0).str().c_str(),
+                     "pad",
+                     0.05, 0.02, 0.95, 0.98
+                     );
+      Pad[num][0]->Draw();
+    }
 
     // this one is used to plot the run number on the canvas
     transparent[num] = new TPad((boost::format("transparent%d") % num).str().c_str(), "this does not show", 0, 0, 1, 1);
@@ -199,7 +223,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
         h_ntrack1d_neg->SetMarkerColor(kBlue);
         h_ntrack1d_neg->SetLineColor(kBlue);
         h_ntrack1d_neg->DrawCopy("same");
-        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        auto legend = new TLegend(0.35, 0.7, 0.83, 0.9);
         legend->AddEntry(h_ntrack1d, "Positive + Negative", "pl");
         legend->AddEntry(h_ntrack1d_pos, "Positive charged", "pl");
         legend->AddEntry(h_ntrack1d_neg, "Negative charged", "pl");
@@ -232,7 +256,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
         h_ntrack1d_ptg1_neg->SetMarkerColor(kBlue);
         h_ntrack1d_ptg1_neg->SetLineColor(kBlue);
         h_ntrack1d_ptg1_neg->DrawCopy("same");
-        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        auto legend = new TLegend(0.35, 0.7, 0.83, 0.9);
         legend->AddEntry(h_ntrack1d_ptg1, "Positive + Negative", "pl");
         legend->AddEntry(h_ntrack1d_ptg1_pos, "Positive charged", "pl");
         legend->AddEntry(h_ntrack1d_ptg1_neg, "Negative charged", "pl");
@@ -265,7 +289,7 @@ int TpcSeedsDraw::DrawTrackletInfo()
         h_pt_neg->SetMarkerColor(kBlue);
         h_pt_neg->SetLineColor(kBlue);
         h_pt_neg->DrawCopy("same");
-        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        auto legend = new TLegend(0.35, 0.7, 0.83, 0.9);
         legend->AddEntry(h_pt, "Positive + Negative", "pl");
         legend->AddEntry(h_pt_pos, "Positive charged", "pl");
         legend->AddEntry(h_pt_neg, "Negative charged", "pl");
@@ -441,7 +465,7 @@ int TpcSeedsDraw::DrawClusterInfo1()
         h_ntpc_neg->SetMarkerColor(kBlue);
         h_ntpc_neg->SetLineColor(kBlue);
         h_ntpc_neg->DrawCopy("same");
-        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        auto legend = new TLegend(0.45, 0.7, 0.83, 0.9);
         legend->AddEntry(h_ntpc_pos, "Positive charged", "pl");
         legend->AddEntry(h_ntpc_neg, "Negative charged", "pl");
         legend->Draw();
@@ -468,7 +492,7 @@ int TpcSeedsDraw::DrawClusterInfo1()
         h_ntpot_neg->SetMarkerColor(kBlue);
         h_ntpot_neg->SetLineColor(kBlue);
         h_ntpot_neg->DrawCopy("same");
-        auto legend = new TLegend(0.55, 0.7, 0.83, 0.9);
+        auto legend = new TLegend(0.45, 0.7, 0.83, 0.9);
         legend->AddEntry(h_ntpc_pos, "Positive charged", "pl");
         legend->AddEntry(h_ntpc_neg, "Negative charged", "pl");
         legend->Draw();
@@ -1300,7 +1324,7 @@ int TpcSeedsDraw::DrawdEdxInfo1()
 
         int gzmin = -100 + i * 20;
         int gzmax = -100 + ( i + 1 ) * 20;
-        TPaveText *pt = new TPaveText(0.2, 0.7, 0.45, 0.9, "brNDC");
+        TPaveText *pt = new TPaveText(0.2, 0.8, 0.45, 0.9, "brNDC");
         pt->AddText(Form("Cluster gz in [%d,%d] cm", gzmin, gzmax));
         pt->SetTextAlign(12);
         pt->SetTextFont(42);
@@ -1400,22 +1424,23 @@ int TpcSeedsDraw::DrawdEdxInfo2()
       landauFit_z0->Draw("same");
       landauFit_z4->Draw("same");
 
-      float xpos_z0 = landauFit_z0->GetParameter(0);
-      float xpos_z4 = landauFit_z4->GetParameter(0);
-      float z0_to_z4_ratio = xpos_z0 / xpos_z4;
+      xpos_z0 = landauFit_z0->GetParameter(0);
+      xpos_z4 = landauFit_z4->GetParameter(0);
+      z0_to_z4_ratio = xpos_z0 / xpos_z4;
       if (std::isnan(z0_to_z4_ratio))
       {
         xpos_z0 = -1;
         xpos_z4 = -1;
       }
 
-      TPaveText *pt = new TPaveText(0.48, 0.6, 0.9, 0.9, "brNDC");
-      pt->AddText("Negative tracks p > 0.2 GeV");
+      TPaveText *pt = new TPaveText(0.45, 0.6, 0.9, 0.9, "brNDC");
+      pt->AddText("South");
+      pt->AddText("Negative track p>0.2 GeV");
       pt->AddText(Form("Laudau Fit"));
-      pt->AddText(Form("Mean #color[2]{HighZ} / #color[4]{LowZ} = %.2f",z0_to_z4_ratio));
+      pt->AddText(Form("Mean #color[2]{HighZ}/#color[4]{LowZ} = %.2f",z0_to_z4_ratio));
       pt->SetTextAlign(12);
       pt->SetTextFont(42);
-      pt->SetTextSize(0.05);
+      pt->SetTextSize(0.04);
       pt->SetFillStyle(0);
       pt->SetBorderSize(0);
       pt->Draw();
@@ -1489,22 +1514,23 @@ int TpcSeedsDraw::DrawdEdxInfo2()
       landauFit_z9->Draw("same");
       landauFit_z5->Draw("same");
 
-      float xpos_z9 = landauFit_z9->GetParameter(0);
-      float xpos_z5 = landauFit_z5->GetParameter(0);
-      float z9_to_z5_ratio = xpos_z9 / xpos_z5;
+      xpos_z9 = landauFit_z9->GetParameter(0);
+      xpos_z5 = landauFit_z5->GetParameter(0);
+      z9_to_z5_ratio = xpos_z9 / xpos_z5;
       if (std::isnan(z9_to_z5_ratio))
       {
         xpos_z9 = -1;
         xpos_z5 = -1;
       }
 
-      TPaveText *pt = new TPaveText(0.48, 0.6, 0.9, 0.9, "brNDC");
-      pt->AddText("Negative tracks p > 0.2 GeV");
+      TPaveText *pt = new TPaveText(0.45, 0.6, 0.9, 0.9, "brNDC");
+      pt->AddText("North");
+      pt->AddText("Negative track p>0.2 GeV");
       pt->AddText(Form("Laudau Fit"));
-      pt->AddText(Form("Mean #color[2]{HighZ} / #color[4]{LowZ} = %.2f",z9_to_z5_ratio));
+      pt->AddText(Form("Mean #color[2]{HighZ}/#color[4]{LowZ} = %.2f",z9_to_z5_ratio));
       pt->SetTextAlign(12);
       pt->SetTextFont(42);
-      pt->SetTextSize(0.05);
+      pt->SetTextSize(0.04);
       pt->SetFillStyle(0);
       pt->SetBorderSize(0);
       pt->Draw();
@@ -1566,6 +1592,140 @@ int TpcSeedsDraw::DrawdEdxInfo2()
     return 0;
 }
 
+int TpcSeedsDraw::Drawsummary()
+{
+    std::cout << "Tpc Seeds Drawsummary() Beginning" << std::endl;
+    QADrawClient *cl = QADrawClient::instance();
+
+    bool dEdxratio_south_status=false, dEdxratio_north_status=false;
+    bool dEdxMPV_south_status=false, dEdxMPV_north_status=false;
+    if (z9_to_z5_ratio>0 && z9_to_z5_ratio<1.4)
+    {
+      dEdxratio_north_status = true;
+    }
+    else
+    {
+      dEdxratio_north_status = false;
+    }
+    if (z0_to_z4_ratio>0 && z0_to_z4_ratio<1.4)
+    {
+      dEdxratio_south_status = true;
+    }
+    else
+    {
+      dEdxratio_south_status = false;
+    }
+    if (xpos_z9>300 && xpos_z5>300)
+    {
+      dEdxMPV_north_status = true;
+    }
+    else
+    {
+      dEdxMPV_north_status = false;
+    }
+    if (xpos_z0>300 && xpos_z4>300)
+    {
+      dEdxMPV_south_status = true;
+    }
+    else
+    {
+      dEdxMPV_south_status = false;
+    }
+
+    const int index_page = 8;
+
+    if (!gROOT->FindObject("summary"))
+    {
+        MakeCanvas("summary", index_page);
+    }
+    TC[index_page]->Clear("D");
+
+    Pad[index_page][0]->cd();
+
+    auto text = new TPaveText(0.02,0.1,0.98,0.9, "NDC" );
+    text->SetFillColor(0);
+    text->SetFillStyle(0);
+    text->SetBorderSize(0);
+    text->SetTextAlign(11);
+    text->SetTextSize(0.03);
+
+    text->AddText( "TpcSeedsQA summary:" );
+
+    if (dEdxratio_north_status)
+    {
+      text->AddText( Form("dEdx HighZ/LowZ ratio at north = %.2f - GOOD", z9_to_z5_ratio) )
+      ->SetTextColor(kGreen+2);
+    }
+    else
+    {
+      text->AddText( Form("dEdx HighZ/LowZ ratio at north = %.2f - BAD", z9_to_z5_ratio) )
+      ->SetTextColor(kRed+2);    
+    }
+
+    if (dEdxratio_south_status)
+    {
+      text->AddText( Form("dEdx HighZ/LowZ ratio at south = %.2f - GOOD", z0_to_z4_ratio) )
+      ->SetTextColor(kGreen+2);
+    }
+    else
+    {
+      text->AddText( Form("dEdx HighZ/LowZ ratio at south = %.2f - BAD", z0_to_z4_ratio) )
+      ->SetTextColor(kRed+2);    
+    }
+
+    if (dEdxMPV_north_status)
+    {
+      text->AddText( Form("dEdx MPV for HighZ (%.2f) and LowZ (%.2f) at north - GOOD", xpos_z9, xpos_z5) )
+      ->SetTextColor(kGreen+2);
+    }
+    else
+    {
+      text->AddText( Form("dEdx MPV for HighZ (%.2f) and LowZ (%.2f) at north - BAD", xpos_z9, xpos_z5) )
+      ->SetTextColor(kRed+2);    
+    }
+
+    if (dEdxMPV_south_status)
+    {
+      text->AddText( Form("dEdx MPV for HighZ (%.2f) and LowZ (%.2f) at south - GOOD", xpos_z0, xpos_z4) )
+      ->SetTextColor(kGreen+2);
+    }
+    else
+    {
+      text->AddText( Form("dEdx MPV for HighZ (%.2f) and LowZ (%.2f) at south - BAD", xpos_z0, xpos_z4) )
+      ->SetTextColor(kRed+2);    
+    }
+
+    if (dEdxratio_north_status && dEdxratio_south_status && dEdxMPV_north_status && dEdxMPV_south_status)
+    {
+      text->AddText( Form("Overall status - GOOD") )
+      ->SetTextColor(kGreen+2);
+    }
+    else
+    {
+      text->AddText( Form("Overall status - BAD") )
+      ->SetTextColor(kRed+2);
+    }
+
+    text->Draw();
+
+    TText PrintRun;
+    PrintRun.SetTextFont(62);
+    PrintRun.SetTextSize(0.03);
+    PrintRun.SetNDC();         // set to normalized coordinates
+    PrintRun.SetTextAlign(23); // center/top alignment
+    std::ostringstream runnostream1;
+    std::string runstring1;
+    runnostream1 << Name() << "_tpcseeds summary Run " << cl->RunNumber() << ", build " << cl->build();
+    runstring1 = runnostream1.str();
+    transparent[index_page]->cd();
+    PrintRun.DrawText(0.5, 1., runstring1.c_str());
+
+    TC[index_page]->Update();
+
+    std::cout << "Drawsummary Ending" << std::endl;
+    return 0;
+}
+
 int TpcSeedsDraw::MakeHtml(const std::string &what)
 {
     int iret = Draw(what);
@@ -1624,6 +1784,12 @@ int TpcSeedsDraw::MakeHtml(const std::string &what)
     {
         pngfile = cl->htmlRegisterPage(*this, "dEdx_info2", "8", "png");
         cl->CanvasToPng(TC[7], pngfile);
+    }
+
+    if (what == "ALL" || what == "SUMMARY")
+    {
+        pngfile = cl->htmlRegisterPage(*this, "run_summary", "9", "png");
+        cl->CanvasToPng(TC[8], pngfile);
     }
 
     return 0;

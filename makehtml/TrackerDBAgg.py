@@ -8,7 +8,7 @@ import time
 import argparse
 import hashlib
 
-runtypes = ["_run3auau"]
+runtypes = ["run3auau"]
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
@@ -27,16 +27,19 @@ elif args.histotype == "seed":
     track_hist_types = ["HIST_DST_TRKR_SEED"]
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
-    dsttype = type + runtype
-    query = "SELECT runnumber, dataset FROM datasets WHERE dsttype='{}' GROUP BY runnumber, dataset order by runnumber desc;".format(dsttype)
-   
+    dsttype = type
+    query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber, tag order by runnumber desc;".format(dsttype)
+    if args.verbose:
+        print(query)
     cursor.execute(query)
-    runnumbers = {(row.runnumber, row.dataset) for row in cursor.fetchall()}
+    runnumbers = {(row.runnumber, row.tag) for row in cursor.fetchall()}
     return runnumbers
 
 def getPaths(cursor, run, dataset, type, runtype):
-    dsttype = type + runtype
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND files.lfn=datasets.filename".format(run,dataset,dsttype)
+    dsttype = type
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999".format(run,runtype, dsttype,dataset)
+    if dsttype.find("CLUSTER") != -1:
+        query += " AND datasets.segment<10"
     if args.verbose == True:
         print(query)
     cursor.execute(query)
@@ -45,7 +48,8 @@ def getPaths(cursor, run, dataset, type, runtype):
 
 def getBuildDbTag(type, filename):
     parts = filename.split(os.sep)
-    index = parts.index(type[1:])
+    index = parts.index(type)
+    
     return parts[index+2]
 
 def main():
@@ -60,22 +64,25 @@ def main():
             if args.verbose == True:
                 print("hist type is: " + histtype)
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
-
+          
             for run, dbtag in runs_dbtags:
+                if run < 70000:
+                    continue
                 print("Processing run " + str(run))
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
                     print("all total filepaths")
                     print(filepaths)
-                    
+                if(len(filepaths) == 0):
+                    continue
                 tags = next(iter(filepaths)).split(os.sep)
-                index = tags.index(runtype[1:])
+                index = tags.index(runtype)
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
                 anadbtag = dbtag
                 dsttypetag = tags[index+3]
                 rundirtag = tags[index+4]
-                
+             
                 # make an analogous path to the production DST in sphenix/data
                 completeAggDir = aggDirectory + collisiontag + "/" + beamtag + "/" + anadbtag + "/" + dsttypetag + "/" + rundirtag + "/"
                 if args.verbose == True:
@@ -102,9 +109,11 @@ def main():
                 latestdbtag= ""
                 latestdbtagInt = 0
                 for newpath in filepaths:
+                    
                     thistag = getBuildDbTag(runtype, newpath)
                     tags = thistag.split("_")
-                    if tags[1].find("nocdbtag") != -1:
+                    
+                    if tags[1].find("cdbtag") != -1:
                         latestdbtag=thistag
                         break
                     if int(tags[1].split("p")[1]) > latestdbtagInt:
@@ -117,9 +126,9 @@ def main():
                 newFileTime = 0
                 if reagg == False:
                     for newpath in filepaths:
-                        if not os.path.exists(newpath):
-                            continue
                         if newpath.find(latestdbtag) == -1:
+                            continue
+                        if not os.path.exists(newpath):
                             continue
                         if os.path.getmtime(newpath) > newFileTime:
                             newFileTime = os.path.getmtime(newpath)
@@ -133,7 +142,7 @@ def main():
                     continue
                 filestoadd = []
                 nfiles = 0
-                lfn = histtype + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
+                lfn = histtype + "_" + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
                 
                 path = completeAggDir + lfn
 
@@ -145,17 +154,17 @@ def main():
                     # make sure the file has the same db tag
                     if newpath.find(latestdbtag) == -1: 
                        continue
+                    if not os.path.exists(newpath):
+                        continue
                     command.append(str(newpath))
                     nfiles+=1
                     # don't need loads of statistics for these, and it just clogs the aggregation processing
                     if histtype.find("CLUSTER") != -1:
-                        if nfiles == 10:
+                        if nfiles == 3:
                             break;
                     elif nfiles > 100:
                         break
-                # wait for at least 10 files
-                if nfiles < 10:
-                    print("not enough files")
+                if nfiles < 2:
                     continue
                 if args.verbose:
                     print("executing command")
@@ -192,8 +201,8 @@ def main():
                     FCWritecursor.commit()
 
                     insertquery="""
-                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',9999,'{}','{}','{}')
+                    insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
+                    values ('{}','{}',9999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
@@ -203,7 +212,7 @@ def main():
                     dsttype=EXCLUDED.dsttype,
                     events=EXCLUDED.events
                     ;
-                    """.format(lfn,run,size,dbtag,histtype)
+                    """.format(lfn,run,size,dbtag,histtype, collisiontag)
                     if args.verbose :
                         print(insertquery)
                     FCWritecursor.execute(insertquery)
@@ -211,5 +220,6 @@ def main():
                     FCWritecursor.commit()
     conn.close()
     FCWrite.close()
+    print("ALL DONE")
 if __name__ == "__main__":
     main()

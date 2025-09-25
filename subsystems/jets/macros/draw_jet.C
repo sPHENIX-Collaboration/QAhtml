@@ -65,14 +65,14 @@ void draw_jet(const std::string& infile,
   {
     jets -> Draw("ALL");
     if (do_debug) std::cout << " --- Drew plots" << std::endl;
-  }
 
-  // save histograms
-  TFile* output = new TFile(outfile.data(), "recreate");
-  jets -> SaveCanvasesToFile(output);
-  if (do_debug)
-  {
-     std::cout << " --- Save plots to file" << std::endl;
+    // save histograms
+    TFile* output = new TFile(outfile.data(), "recreate");
+    jets -> SaveCanvasesToFile(output);
+    if (do_debug)
+    {
+      std::cout << " --- Save plots to file" << std::endl;
+    }
   }
 
   // delete QADrawClient instance

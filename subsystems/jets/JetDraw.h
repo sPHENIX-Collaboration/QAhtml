@@ -103,7 +103,7 @@ class JetDraw : public QADraw
     ///! prefix of jet seed qa histograms
     std::string m_seed_prefix;
 
-    ///! summary of overall jet qa goodness
+    ///! summary of overall jet qa goodness (currently unused)
     TCanvas* m_jetSummary{nullptr};
 
     ///! event-wise rho canvases
@@ -123,7 +123,9 @@ class JetDraw : public QADraw
       JetQADefs::GL1::MBDNSJet1,
       JetQADefs::GL1::MBDNSJet2,
       JetQADefs::GL1::MBDNSJet3,
-      JetQADefs::GL1::MBDNSJet4
+      JetQADefs::GL1::MBDNSJet4,
+      JetQADefs::GL1::MBDNS2Vtx10,
+      JetQADefs::GL1::MBDNS2Vtx150
     };
 
     ///! resolutions we want to draw
@@ -155,7 +157,9 @@ class JetDraw : public QADraw
       {JetQADefs::GL1::MBDNSJet1, "JetCoin6GeV"},
       {JetQADefs::GL1::MBDNSJet2, "JetCoin8GeV"},
       {JetQADefs::GL1::MBDNSJet3, "JetCoin10GeV"},
-      {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"}
+      {JetQADefs::GL1::MBDNSJet4, "JetCoin12GeV"},
+      {JetQADefs::GL1::MBDNS2Vtx10, "MBDNS2Vtx10"},
+      {JetQADefs::GL1::MBDNS2Vtx150, "MBDNS2Vtx150"}
     };
 
     ///! map trig to tag (FIXME use those from Jet_QA.C)
@@ -164,7 +168,9 @@ class JetDraw : public QADraw
       {JetQADefs::GL1::MBDNSJet1, "mbdnsjet1"},
       {JetQADefs::GL1::MBDNSJet2, "mbdnsjet2"},
       {JetQADefs::GL1::MBDNSJet3, "mbdnsjet3"},
-      {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"}
+      {JetQADefs::GL1::MBDNSJet4, "mbdnsjet4"},
+      {JetQADefs::GL1::MBDNS2Vtx10, "mbdns2vtx10"},
+      {JetQADefs::GL1::MBDNS2Vtx150, "mbdns2vtx150"}
     };
 };
 

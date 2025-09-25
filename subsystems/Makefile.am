@@ -5,13 +5,16 @@ include_HEADERS =
 ###USE ALPHABETICAL ORDER FOR MAKEFILE LIST
 
 SUBDIRS = \
+  filetransfer \
   bco \
   calo \
+  calofitting \
   example \
-	globalQA \
+  globalQA \
   intt \
   inttrawhit \
   jets \
+  kfparticle \
   micromegas \
   mvtx \
   mvtxrawhit \
@@ -21,4 +24,5 @@ SUBDIRS = \
   tpcrawhit \
   tpcseeds \
   tpcsil \
+  tracking \
   vertex

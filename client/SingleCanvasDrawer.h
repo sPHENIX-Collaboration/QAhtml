@@ -16,7 +16,7 @@ public:
   virtual int DrawCanvas();
 
 protected:
-  virtual int MakeCanvas();
+  virtual int MakeCanvas(int=-1, int=-1);
 
   TCanvas* m_canvas{nullptr};
   std::string m_name;
