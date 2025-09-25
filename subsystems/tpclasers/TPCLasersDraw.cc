@@ -190,7 +190,7 @@ int TPCLasersDraw::DrawLaserInfo()
       for(int mod=0; mod<3; mod++)
       {
 	double binCenter = h_timeSamples[side][sec][mod]->GetBinCenter(h_timeSamples[side][sec][mod]->GetMaximumBin());
-	if(binCenter >= 325 && binCenter <= 335)
+	if(binCenter >= 320 && binCenter <= 330)
 	{
 	  nGoodTimeSamples++;
 	}
@@ -412,11 +412,11 @@ int TPCLasersDraw::DrawLaserInfo()
       legS->Draw("SAME");
     }
 
-    lLow[0][sec] = new TLine(325,0,325,1.1*maxY[0][sec]);
+    lLow[0][sec] = new TLine(320,0,320,1.1*maxY[0][sec]);
     lLow[0][sec]->SetLineColor(kBlack);
     lLow[0][sec]->Draw("Same");
     
-    lHigh[0][sec] = new TLine(335,0,335,1.1*maxY[0][sec]);
+    lHigh[0][sec] = new TLine(330,0,330,1.1*maxY[0][sec]);
     lHigh[0][sec]->SetLineColor(kBlack);
     lHigh[0][sec]->Draw("Same");
     
@@ -476,11 +476,11 @@ int TPCLasersDraw::DrawLaserInfo()
       legS->Draw("SAME");
     }
 
-    lLow[1][sec] = new TLine(325,0,325,1.1*maxY[1][sec]);
+    lLow[1][sec] = new TLine(320,0,320,1.1*maxY[1][sec]);
     lLow[1][sec]->SetLineColor(kBlack);
     lLow[1][sec]->Draw("Same");
     
-    lHigh[1][sec] = new TLine(335,0,335,1.1*maxY[1][sec]);
+    lHigh[1][sec] = new TLine(330,0,330,1.1*maxY[1][sec]);
     lHigh[1][sec]->SetLineColor(kBlack);
     lHigh[1][sec]->Draw("Same");
     
