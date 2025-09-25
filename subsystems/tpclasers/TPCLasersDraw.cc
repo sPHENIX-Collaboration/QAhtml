@@ -122,6 +122,9 @@ int TPCLasersDraw::DrawLaserInfo()
   TH1 *h_timeSamples[2][12][3];
   TH2* dummyHist[2];
   TPaveLabel* labels[2][12];
+
+  int minTimeSample = 320;
+  int maxTimeSample = 330;
   
   double labelNumbers[12][4] = {{1.046586,-0.1938999,1.407997,0.2144871},{0.962076,0.4382608,1.323487,0.8466479},{0.4801947,0.8802139,0.8416056,1.288601},{-0.1823921,1.011681,0.1790189,1.425662},{-0.8449788,0.8690253,-0.4835679,1.288601},{-1.30879,0.441058,-0.9473786,0.8550394},{-1.411009,-0.2050886,-1.049598,0.2144871},{-1.302585,-0.7757116,-0.9471979,-0.3561359},{-0.8449788,-1.309971,-0.4835679,-0.8848013},{-0.1823921,-1.426557,0.1790189,-1.006982},{0.4801947,-1.309076,0.8416056,-0.8839062},{0.9622567,-0.7785088,1.323668,-0.3533387}};
   
@@ -190,7 +193,7 @@ int TPCLasersDraw::DrawLaserInfo()
       for(int mod=0; mod<3; mod++)
       {
 	double binCenter = h_timeSamples[side][sec][mod]->GetBinCenter(h_timeSamples[side][sec][mod]->GetMaximumBin());
-	if(binCenter >= 325 && binCenter <= 335)
+	if(binCenter >= minTimeSample && binCenter <= maxTimeSample)
 	{
 	  nGoodTimeSamples++;
 	}
@@ -412,11 +415,11 @@ int TPCLasersDraw::DrawLaserInfo()
       legS->Draw("SAME");
     }
 
-    lLow[0][sec] = new TLine(325,0,325,1.1*maxY[0][sec]);
+    lLow[0][sec] = new TLine(minTimeSample,0,minTimeSample,1.1*maxY[0][sec]);
     lLow[0][sec]->SetLineColor(kBlack);
     lLow[0][sec]->Draw("Same");
     
-    lHigh[0][sec] = new TLine(335,0,335,1.1*maxY[0][sec]);
+    lHigh[0][sec] = new TLine(maxTimeSample,0,maxTimeSample,1.1*maxY[0][sec]);
     lHigh[0][sec]->SetLineColor(kBlack);
     lHigh[0][sec]->Draw("Same");
     
@@ -476,11 +479,11 @@ int TPCLasersDraw::DrawLaserInfo()
       legS->Draw("SAME");
     }
 
-    lLow[1][sec] = new TLine(325,0,325,1.1*maxY[1][sec]);
+    lLow[1][sec] = new TLine(minTimeSample,0,minTimeSample,1.1*maxY[1][sec]);
     lLow[1][sec]->SetLineColor(kBlack);
     lLow[1][sec]->Draw("Same");
     
-    lHigh[1][sec] = new TLine(335,0,335,1.1*maxY[1][sec]);
+    lHigh[1][sec] = new TLine(maxTimeSample,0,maxTimeSample,1.1*maxY[1][sec]);
     lHigh[1][sec]->SetLineColor(kBlack);
     lHigh[1][sec]->Draw("Same");
     
