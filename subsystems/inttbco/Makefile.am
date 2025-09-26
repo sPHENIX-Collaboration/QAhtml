@@ -15,7 +15,7 @@ libqadrawinttbco_la_LIBADD = \
   -lqadrawclient \
   -lqadrawdb
 
-inttincludedir=$(pkgincludedir)/intt
+inttincludedir=$(pkgincludedir)/inttbco
 
 inttinclude_HEADERS = \
   InttbcoDraw.h
