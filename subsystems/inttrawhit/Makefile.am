@@ -26,12 +26,14 @@ inttrawhitincludedir=$(pkgincludedir)/intt
 inttrawhitinclude_HEADERS = \
   INTTRawHitChipDrawer.h \
   INTTRawHitSummaryDrawer.h \
+  InttbcoDraw.h	\	
   INTTRawHitDraw.h
 
 libqadrawinttrawhit_la_SOURCES = \
   INTTRawHitChipDrawer.cc \
   INTTRawHitSummaryDrawer.cc \
-  INTTRawHitDraw.cc
+  InttbcoDraw.cc \
+  INTTRawHitDraw.cc 
 
 noinst_PROGRAMS = \
   testexternals
