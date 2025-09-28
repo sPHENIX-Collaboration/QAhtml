@@ -30,7 +30,6 @@ DrawTimingOkay::MakeCanvas (
 	int height
 ) {
 	if (SingleCanvasDrawer::MakeCanvas(width, height)) return 0;
-	m_canvas->SetTitle("INTT Timing");
 
 	m_canvas->cd();
 	m_title_pad = new TPad (
@@ -104,7 +103,7 @@ DrawTimingOkay::DrawCanvas (
 		intt_peaks.insert(sorted_server_peak_counts[felix_server].rbegin()->second);
 	}
 
-	bool timing_okay = intt_peaks.size() != 1;
+	bool timing_okay = intt_peaks.size() == 1;
 	for (auto const& peak_map : sorted_server_peak_counts) {
 		if (m_max_acceptable_peaks < peak_map.size()) timing_okay = false;
 	}

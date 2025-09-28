@@ -27,7 +27,6 @@ DrawServerHitmaps::MakeCanvas (
 	int height
 ) {
 	if (SingleCanvasDrawer::MakeCanvas(width, height)) return 0;
-	m_canvas->SetTitle("INTT Hitmaps");
 
 	m_canvas->cd();
 	m_title_pad = new TPad (

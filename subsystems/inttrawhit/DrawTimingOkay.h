@@ -27,7 +27,5 @@ private:
 	TPad* m_text_pad{};
 
 	// The number of unique peaks among a server's felix channel bco distribution
-	// before we say there is a problem
-	// This must be at least 1, as there is always at least 1 unique peak
-	static int const m_max_acceptable_peaks = 3; // At most 2 felix channels can have different peaks
+	static int const m_max_acceptable_peaks = 3; // Any one server can have at most 2 felix channels with different peaks than the rest
 };

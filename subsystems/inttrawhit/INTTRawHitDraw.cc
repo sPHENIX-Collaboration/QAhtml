@@ -1,8 +1,9 @@
 #include "INTTRawHitDraw.h"
 
+#include "DrawTimingOkay.h"
 #include "DrawServerHitmaps.h"
 #include "DrawFeeTiming.h"
-#include "DrawTimingOkay.h"
+#include "InttbcoDraw.h"
 //...
 
 #include <qahtml/QADrawClient.h>
@@ -15,17 +16,15 @@
 INTTRawHitDraw::INTTRawHitDraw(const std::string &name)
   : QADraw(name)
 {
-  std::string option_name;
-
-  option_name = "intt_hitmaps";
-  m_options[option_name] = new DrawServerHitmaps(option_name);
-
-  option_name = "intt_timing_okay";
-  m_options[option_name] = new DrawTimingOkay(option_name);
+  m_options = {
+    {"intt_timing_okay", new DrawTimingOkay("intt_timing_okay")},
+    {"intt_hitmaps", new DrawServerHitmaps("intt_hitmaps")},
+    {"intt_bco_draw", new InttbcoDraw("intt_bco_draw")},
+  };
 
   for(int felix_server = 0; felix_server < 8; ++felix_server)
   {
-    option_name = (boost::format("intt_%01d_timing") % felix_server).str();
+    std::string option_name = (boost::format("intt_%01d_timing") % felix_server).str();
     m_options[option_name] = new DrawFeeTiming(option_name, felix_server);
   }
 

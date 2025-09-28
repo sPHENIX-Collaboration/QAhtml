@@ -51,7 +51,6 @@ DrawFeeTiming::MakeCanvas (
 	int height
 ) {
 	if (SingleCanvasDrawer::MakeCanvas(width, height)) return 0;
-	m_canvas->SetTitle((boost::format("intt%01d Timing") % m_felix_server).str().c_str());
 
 	m_canvas->cd();
 	m_title_pad = new TPad (
