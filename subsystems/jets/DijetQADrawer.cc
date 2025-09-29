@@ -314,16 +314,34 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     }
   };
 
+  // reference histograms, using same index as hists
+  auto refs = BuildRefHists(hists);
+
   // draw all pair ajj and xj hists on one page
   DrawHists("DijetAllPair_AjjAndXj", {0, 2, 10, 12}, hists, trig, res);
+
+  // draw reference hists on relevant pads
+  DrawHistOnPad( 0, 1, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(10, 3, refs, m_plots.GetBackPlotPad());
 
   // draw lead pair ajj and xj hists on one page
   DrawHists("DijetLeadPair_AjjAndXj", {1, 3, 11, 13}, hists, trig, res);
 
+  // draw reference hists on relevant pads
+  DrawHistOnPad( 1, 1, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(11, 3, refs, m_plots.GetBackPlotPad());
+  
   // draw all pair dphi on one page
   DrawHists("DijetAllPair_DeltaPhi", {4, 5, 8}, hists, trig, res);
 
+  // draw reference hists on relevant pads
+  DrawHistOnPad(4, 1, refs, m_plots.GetBackPlotPad());
+  
   // draw lead pair dphi on one page
   DrawHists("DijetLeadPair_DeltaPhi", {7, 6, 9}, hists, trig, res);
+
+  // draw reference hists on relevant pads
+  DrawHistOnPad(7, 1, refs, m_plots.GetBackPlotPad());
+
   return;
 }

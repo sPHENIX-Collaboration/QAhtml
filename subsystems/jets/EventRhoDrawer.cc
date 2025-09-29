@@ -106,7 +106,7 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
 
   // connect to draw client
   QADrawClient* cl = QADrawClient::instance();
-
+  
   // grab histograms to draw and set options
   JetDrawDefs::VHistAndOpts1D hists = {
     {
@@ -159,7 +159,17 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
     }
   };
 
+  // reference histograms, using same index as hists
+  auto refs = BuildRefHists(hists);
+
   // draw rho plots on one page
   DrawHists("EvtRho", {0, 1, 2, 3}, hists, trig);
+
+  // draw reference hists on relevant pads
+  DrawHistOnPad(0, 1, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(1, 2, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(2, 3, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(3, 4, refs, m_plots.GetBackPlotPad());
+
   return;
 }

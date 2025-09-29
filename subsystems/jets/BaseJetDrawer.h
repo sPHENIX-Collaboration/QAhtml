@@ -4,6 +4,7 @@
 #define BASE_JET_DRAWER_H
 
 #include "JetDrawDefs.h"
+#include "TFile.h"
 #include <string>
 
 class QADraw;
@@ -99,6 +100,11 @@ class BaseJetDrawer
     void UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist);
     void UpdateTitle(const JetDrawDefs::HistAndOpts& hist);
     void NormalizeHist(const JetDrawDefs::HistAndOpts& hist);
+
+    JetDrawDefs::VHistAndOpts1D BuildRefHists(const JetDrawDefs::VHistAndOpts1D& hists);
+
+    // QA reference file path
+    std::string refFilePath = "/sphenix/user/jlnliu/sphnx_software/macros/JetProduction/TestRef/HIST_JETQA-00068490-000000.root";
 
 };  // end BaseJetDrawer
 

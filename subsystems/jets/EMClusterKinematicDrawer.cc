@@ -233,13 +233,28 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
     }
   };
 
+  // reference histograms, using same index as hists
+  auto refs = BuildRefHists(hists);
+
   // draw chi2 plots on one page
   DrawHists("EMClusterKinematics_Chi2", {0, 1, 2, 3}, hists, trig);
+
+  // draw reference hists on relevant pads
+  DrawHistOnPad(0, 1, refs, m_plots.GetBackPlotPad());
 
   // draw et plots on one page
   DrawHists("EMClusterKinematics_Energy", {5, 6, 4}, hists, trig);
 
+  // draw reference hists on relevant pads
+  DrawHistOnPad(4, 3, refs, m_plots.GetBackPlotPad());
+
   // draw eta/phi plots on one page
   DrawHists("EMClusterKinematics_EtaPhi", {8, 9, 7}, hists, trig);
+
+  // draw reference hists on relevant pads
+  DrawHistOnPad(8, 1, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(9, 2, refs, m_plots.GetBackPlotPad());
+
+
   return;
 }

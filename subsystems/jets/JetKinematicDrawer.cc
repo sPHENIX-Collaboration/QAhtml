@@ -236,7 +236,7 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
       "Jet p_{T} [GeV]",
       "Counts",
       "",
-      0.8,
+      1.0, //larger marker size
       0.25,
       true,
       false,
@@ -244,13 +244,21 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     }
   };
 
-  // draw all kinematic hists on 1 page
+  // reference histograms, using same index as hists
+  auto refs = BuildRefHists(hists);
+
+  // draw first page
   DrawHists("JetKinematicsOne", {0, 1, 2, 7}, hists, trig, res);
 
+  // draw reference hists on relevant pads
+  DrawHistOnPad(7, 4, refs, m_plots.GetBackPlotPad());
+
+  // draw second page with jet mass hists
   DrawHists("JetKinematicsTwo", {3, 5}, hists, trig, res);
 
   // draw profiles on relevant pads
   DrawHistOnPad(4, 1, hists, m_plots.GetBackPlotPad());
   DrawHistOnPad(6, 2, hists, m_plots.GetBackPlotPad());
+  
   return;
 }
