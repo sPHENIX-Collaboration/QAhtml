@@ -1,7 +1,9 @@
 #include "INTTRawHitDraw.h"
 
-#include "INTTRawHitChipDrawer.h"
-#include "INTTRawHitSummaryDrawer.h"
+#include "DrawTimingOkay.h"
+#include "DrawServerHitmaps.h"
+#include "DrawFeeTiming.h"
+#include "InttbcoDraw.h"
 //...
 
 #include <qahtml/QADrawClient.h>
@@ -14,17 +16,17 @@
 INTTRawHitDraw::INTTRawHitDraw(const std::string &name)
   : QADraw(name)
 {
-  // chip
-  for(int felix = 0; felix < 8; ++felix)
-  {
-    std::string opt_key = (boost::format("chip_info_%01d") % felix).str();
-    std::string opt_name = (boost::format("intt_chip_info_%01d") % felix).str();
-    m_options[opt_key] = new INTTRawHitChipDrawer(opt_name, felix);
-  }
+  m_options = {
+    {"intt_timing_okay", new DrawTimingOkay("intt_timing_okay")},
+    {"intt_hitmaps", new DrawServerHitmaps("intt_hitmaps")},
+    {"intt_bco_draw", new InttbcoDraw("intt_bco_draw")},
+  };
 
-  // summary
-  m_options["summary_info"] = new INTTRawHitSummaryDrawer("intt_cluster_info");
-  //...
+  for(int felix_server = 0; felix_server < 8; ++felix_server)
+  {
+    std::string option_name = (boost::format("intt_%01d_timing") % felix_server).str();
+    m_options[option_name] = new DrawFeeTiming(option_name, felix_server);
+  }
 
   DBVarInit();
 
@@ -51,23 +53,23 @@ int INTTRawHitDraw::Draw(const std::string &what)
   for(auto const& [name, option] : m_options)
   {
     if(what != "ALL" && what != name)continue;
-	// I've seen people returning -1 on error instead of 1
-	// Increment if the return value is nonzero
+    // I've seen people returning -1 on error instead of 1
+    // Increment if the return value is nonzero
     iret += (option->DrawCanvas() != 0);
-	++idraw;
+    ++idraw;
   }
 
   if(!idraw)
   {
     std::cerr << "Unimplemented drawing option:\n"
-	          << "\t" << what << "\n"
-	          << "Implemented options:\n"
-	          << "\tALL" << std::endl;
-	for(auto const& [name, option] : m_options)
-	{
-		std::cerr << "\t" << name << std::endl;
-	}
-	++iret;
+              << "\t" << what << "\n"
+              << "Implemented options:\n"
+              << "\tALL" << std::endl;
+    for(auto const& [name, option] : m_options)
+    {
+        std::cerr << "\t" << name << std::endl;
+    }
+    ++iret;
   }
 
   return iret;
@@ -81,33 +83,33 @@ int INTTRawHitDraw::MakeHtml(const std::string &what)
   int idraw = 0;
   for(auto const& [name, option] : m_options)
   {
-	++idraw;
+    ++idraw;
     if(what != "ALL" && what != name)continue;
 
-	// I've seen people returning -1 on error instead of 1
-	// Increment if the return value is nonzero
-	int rv = option->DrawCanvas() != 0;
+    // I've seen people returning -1 on error instead of 1
+    // Increment if the return value is nonzero
+    int rv = option->DrawCanvas() != 0;
     iret += rv;
 
-	// on error no html output please
-	if(rv || !option->GetCanvas())continue;
+    // on error no html output please
+    if(rv || !option->GetCanvas())continue;
 
     // Registers the canvas png file to the menu and produces the png file
-	std::string pngfile = cl->htmlRegisterPage(*this, name, std::to_string(idraw), "png");
+    std::string pngfile = cl->htmlRegisterPage(*this, name, std::to_string(idraw), "png");
     cl->CanvasToPng(option->GetCanvas(), pngfile);
   }
 
   if(!idraw)
   {
     std::cerr << "Unimplemented drawing option:\n"
-	          << "\t" << what << "\n"
-	          << "Implemented options:\n"
-	          << "\tALL" << std::endl;
-	for(auto const& [name, option] : m_options)
-	{
-		std::cerr << "\t" << name << std::endl;
-	}
-	++iret;
+              << "\t" << what << "\n"
+              << "Implemented options:\n"
+              << "\tALL" << std::endl;
+    for(auto const& [name, option] : m_options)
+    {
+        std::cerr << "\t" << name << std::endl;
+    }
+    ++iret;
   }
 
   return iret;

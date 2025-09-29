@@ -77,11 +77,11 @@ int InttbcoDraw::MakeCanvas(int width, int height)
 }
 
 int InttbcoDraw::DrawCanvas(){
-  std::cout << "INTT DrawClusterInfo() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
   TH1I* h_InttCalib_BCOOffSet[8];
   for (int i =0; i<8; i++){
     h_InttCalib_BCOOffSet[i]=dynamic_cast<TH1I*>(cl->getHisto(Form("h_InttCalib_BCOOffSet_INTT%d",i)));
+    if (!h_InttCalib_BCOOffSet[i]) return 1;
   }
   MakeCanvas();
   m_canvas->Clear("D");

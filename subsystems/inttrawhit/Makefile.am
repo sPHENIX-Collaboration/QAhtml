@@ -24,16 +24,18 @@ libqadrawinttrawhit_la_LIBADD = \
 inttrawhitincludedir=$(pkgincludedir)/intt
 
 inttrawhitinclude_HEADERS = \
-  INTTRawHitChipDrawer.h \
-  INTTRawHitSummaryDrawer.h \
+  DrawFeeTiming.h \
+  DrawServerHitmaps.h \
+  DrawTimingOkay.h \
   InttbcoDraw.h	\	
   INTTRawHitDraw.h
 
 libqadrawinttrawhit_la_SOURCES = \
-  INTTRawHitChipDrawer.cc \
-  INTTRawHitSummaryDrawer.cc \
+  DrawFeeTiming.cc \
+  DrawServerHitmaps.cc \
+  DrawTimingOkay.cc \
   InttbcoDraw.cc \
-  INTTRawHitDraw.cc 
+  INTTRawHitDraw.cc
 
 noinst_PROGRAMS = \
   testexternals
