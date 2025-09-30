@@ -526,12 +526,12 @@ JetDrawDefs::VHistAndOpts1D BaseJetDrawer::BuildRefHists(const JetDrawDefs::VHis
  *  \           ...   other text options
  */
 void BaseJetDrawer::DrawTextOnPad(const std::size_t iPad, 
-		                  JetDrawDefs::PlotPads& plot,
-				  double x, 
-				  double y, 
-				  int color, 
-				  const char *text, 
-				  double tsize)
+                                  JetDrawDefs::PlotPads& plot,
+                                  double x, 
+                                  double y, 
+                                  int color, 
+                                  const char *text, 
+                                  double tsize)
 {
   plot.histPad->cd(iPad);
   
