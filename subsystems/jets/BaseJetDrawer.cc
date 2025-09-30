@@ -514,3 +514,33 @@ JetDrawDefs::VHistAndOpts1D BaseJetDrawer::BuildRefHists(const JetDrawDefs::VHis
 
   return refs;
 }
+
+
+// ----------------------------------------------------------------------------
+//! Draw text on a pad
+// ----------------------------------------------------------------------------
+/*! Same note as DrawHistOnPad
+ *
+ *  \param[in]  iPad  index of pad to draw histogram on
+ *  \param[out] plot  canvas containing pad to be drawn on
+ *  \           ...   other text options
+ */
+void BaseJetDrawer::DrawTextOnPad(const std::size_t iPad, 
+		                  JetDrawDefs::PlotPads& plot,
+				  double x, 
+				  double y, 
+				  int color, 
+				  const char *text, 
+				  double tsize)
+{
+  plot.histPad->cd(iPad);
+  
+  TLatex l;
+  l.SetTextAlign(22);
+  l.SetTextSize(tsize);
+  l.SetNDC();
+  l.SetTextColor(color);
+  l.DrawLatex(x, y, text);
+
+  plot.canvas->Update();
+}

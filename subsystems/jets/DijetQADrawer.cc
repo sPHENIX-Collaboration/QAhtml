@@ -322,26 +322,40 @@ void DijetQADrawer::DoDrawing(const uint32_t trig, const uint32_t res)
 
   // draw reference hists on relevant pads
   DrawHistOnPad( 0, 1, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.40, kBlack, "Current Run");
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.35, kRed, "Reference Run");
+
   DrawHistOnPad(10, 3, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
 
   // draw lead pair ajj and xj hists on one page
   DrawHists("DijetLeadPair_AjjAndXj", {1, 3, 11, 13}, hists, trig, res);
 
   // draw reference hists on relevant pads
   DrawHistOnPad( 1, 1, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.40, kBlack, "Current Run");
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.35, kRed, "Reference Run");
+
   DrawHistOnPad(11, 3, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
   
   // draw all pair dphi on one page
   DrawHists("DijetAllPair_DeltaPhi", {4, 5, 8}, hists, trig, res);
 
   // draw reference hists on relevant pads
   DrawHistOnPad(4, 1, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.40, kBlack, "Current Run");
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.35, kRed, "Reference Run");
   
   // draw lead pair dphi on one page
   DrawHists("DijetLeadPair_DeltaPhi", {7, 6, 9}, hists, trig, res);
 
   // draw reference hists on relevant pads
   DrawHistOnPad(7, 1, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.40, kBlack, "Current Run");
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.35, kRed, "Reference Run");
 
   return;
 }
