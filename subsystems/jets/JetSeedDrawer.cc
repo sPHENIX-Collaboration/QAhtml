@@ -211,10 +211,40 @@ void JetSeedDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
     }
   };
 
+  // reference histograms, using same index as hists
+  auto refs = BuildRefHists(hists);
+
   // draw raw seed hists
   DrawHists("JetSeeds_Raw", {0, 1, 2, 3}, hists, trig);
 
+  // draw reference hists on relevant pads
+  DrawHistOnPad(1, 2, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(2, 3, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(3, 4, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
   // draw subtracted seed hists
   DrawHists("JetSeeds_Sub", {4, 5, 6, 7}, hists, trig);
+  
+  // draw reference hists on relevant pads
+  DrawHistOnPad(5, 2, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+ 
+  DrawHistOnPad(6, 3, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(7, 4, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  
   return;
 }

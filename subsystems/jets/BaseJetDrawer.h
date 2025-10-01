@@ -4,6 +4,7 @@
 #define BASE_JET_DRAWER_H
 
 #include "JetDrawDefs.h"
+#include "TFile.h"
 #include <string>
 
 class QADraw;
@@ -99,6 +100,19 @@ class BaseJetDrawer
     void UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist);
     void UpdateTitle(const JetDrawDefs::HistAndOpts& hist);
     void NormalizeHist(const JetDrawDefs::HistAndOpts& hist);
+
+    JetDrawDefs::VHistAndOpts1D BuildRefHists(const JetDrawDefs::VHistAndOpts1D& hists);
+
+    void DrawTextOnPad(const std::size_t iPad,
+                       JetDrawDefs::PlotPads& plot,
+                       double x,
+                       double y,
+                       int color,
+                       const char *text,
+                       double tsize = 0.04);
+
+    // QA reference file path
+    std::string refFilePath = "/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v001/golden_run_test/AddedSegments/HIST_JETQA-00072592-99999.root";
 
 };  // end BaseJetDrawer
 

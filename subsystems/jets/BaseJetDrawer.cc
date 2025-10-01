@@ -251,6 +251,12 @@ void BaseJetDrawer::DrawHists(const std::string& what,
     m_plots.GetBackPlotPad().histPad->cd(iPad + 1);
     if (hists.at(indices[iPad]).hist)
     {
+      // apply global style ONCE each pad
+      gStyle->SetOptTitle(1);
+      gROOT->ForceStyle();
+      gPad->UseCurrentStyle();
+      gPad->Update();
+
       UpdatePadStyle(hists.at(indices[iPad]));
       hists.at(indices[iPad]).hist->DrawCopy("COLZ");
     }
@@ -408,10 +414,6 @@ void BaseJetDrawer::MakeCanvas(const std::string& name, const int nHist)
 // ----------------------------------------------------------------------------
 void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
 {
-  gStyle->SetOptTitle(1);
-  gROOT->ForceStyle();
-  gPad->UseCurrentStyle();
-  gPad->Update();
   gPad->SetRightMargin(hist.margin);
   gPad->SetLogy(hist.logy);
   gPad->SetLogz(hist.logz);
@@ -461,4 +463,84 @@ void BaseJetDrawer::NormalizeHist(const JetDrawDefs::HistAndOpts& hist)
   {
       hist.hist->Scale(1.0 / hist.hist->Integral());
   }
+}
+
+// ----------------------------------------------------------------------------
+//! Build reference histograms
+// ----------------------------------------------------------------------------
+JetDrawDefs::VHistAndOpts1D BaseJetDrawer::BuildRefHists(const JetDrawDefs::VHistAndOpts1D& hists)
+{
+  // read reference file 
+  TFile *refFile = TFile::Open(refFilePath.c_str(), "READ");
+  if (!refFile || refFile->IsZombie()) {
+    std::cerr << "Error: Could not open reference file: " << refFilePath << std::endl;
+    return {};
+  }
+
+  // reference histograms
+  JetDrawDefs::VHistAndOpts1D refs(hists.size());
+  for (size_t i = 0; i < hists.size(); i++)
+  {
+    const auto &ho = hists[i];
+    // skip empty and non 1D histograms
+    if (!ho.hist || ho.hist->GetDimension() != 1) continue;
+
+    TH1* refh_tmp = dynamic_cast<TH1*>(refFile->Get(ho.hist->GetName()));
+    if (!refh_tmp) continue;
+
+    TH1* refh = (TH1*)refh_tmp->Clone();
+    refh->SetDirectory(nullptr);  // detach from TFile
+
+    refs[i] = JetDrawDefs::HistAndOpts{
+      refh,
+      ho.title,
+      ho.titlex,
+      ho.titley,
+      ho.titlez,
+      0.5, //ho.marker, smaller marker size
+      ho.margin,
+      ho.logy,
+      ho.logz,
+      ho.norm
+    };
+
+    // set reference hists style
+    refs[i].hist->SetMarkerColor(kRed);
+    refs[i].hist->SetLineColor(kRed);
+  }
+  
+  refFile->Close();
+  delete refFile;
+
+  return refs;
+}
+
+
+// ----------------------------------------------------------------------------
+//! Draw text on a pad
+// ----------------------------------------------------------------------------
+/*! Same note as DrawHistOnPad
+ *
+ *  \param[in]  iPad  index of pad to draw histogram on
+ *  \param[out] plot  canvas containing pad to be drawn on
+ *  \           ...   other text options
+ */
+void BaseJetDrawer::DrawTextOnPad(const std::size_t iPad, 
+                                  JetDrawDefs::PlotPads& plot,
+                                  double x, 
+                                  double y, 
+                                  int color, 
+                                  const char *text, 
+                                  double tsize)
+{
+  plot.histPad->cd(iPad);
+  
+  TLatex l;
+  l.SetTextAlign(22);
+  l.SetTextSize(tsize);
+  l.SetNDC();
+  l.SetTextColor(color);
+  l.DrawLatex(x, y, text);
+
+  plot.canvas->Update();
 }

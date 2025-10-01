@@ -253,11 +253,44 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
     }
   };
 
+  // reference histograms, using same index as hists
+  auto refs = BuildRefHists(hists);
+
   // draw 1d ncst hists on a page
   DrawHists("JetCsts_NCsts", {0, 1, 2, 3}, hists, trig, res);
 
+  // draw e fraction reference hists on relevant pads
+  DrawHistOnPad(0, 1, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(1, 2, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(2, 3, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(3, 4, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
   // draw e fraction on a page
   DrawHists("JetCsts_EFrac", {5, 6, 7}, hists, trig, res);
+
+  // draw e fraction reference hists on relevant pads
+  DrawHistOnPad(5, 1, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(6, 2, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+
+  DrawHistOnPad(7, 3, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
 
   // draw ncst and e faction vs. calo layer on a page
   DrawHists("JetCsts_VsCaloLayer", {4, 8}, hists, trig, res);
