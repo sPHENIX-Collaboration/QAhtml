@@ -246,14 +246,17 @@ void JetKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
 
   // reference histograms, using same index as hists
   auto refs = BuildRefHists(hists);
+  std::string currRunMsg = "Current Run " + std::to_string(cl->RunNumber());
+  std::string refRunMsg  = "Reference Run " + refRunNum;
 
   // draw first page
   DrawHists("JetKinematicsOne", {0, 1, 2, 7}, hists, trig, res);
 
   // draw reference hists on relevant pads
   DrawHistOnPad(7, 4, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(7, 4, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
 
   // draw second page with jet mass hists
   DrawHists("JetKinematicsTwo", {3, 5}, hists, trig, res);
