@@ -885,7 +885,7 @@ int TPCRawHitDraw::DrawOnlMon()
     title->DrawLatex(0.15, 0.9, fractotalstring.c_str()); 
   }
 
-  if (fracOutN < 0.06)
+  if (fracOutN < 0.12)
   {
     fracnstream << "Fraction of North FEEs Out: " << northFrac.str() << "(Good)" << std::endl;
     fracnstring = fracnstream.str();
@@ -916,7 +916,7 @@ int TPCRawHitDraw::DrawOnlMon()
     title->DrawLatex(0.15, 0.85, fracnstring.c_str()); 
   }
 
-  if (fracOutS < 0.06)
+  if (fracOutS < 0.12)
   {
     fracsstream << "Fraction of South FEEs Out: " << southFrac.str() << "(Good)" << std::endl;
     fracsstring = fracsstream.str();
