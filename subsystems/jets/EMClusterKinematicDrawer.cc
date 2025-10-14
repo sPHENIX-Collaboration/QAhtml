@@ -235,34 +235,40 @@ void EMClusterKinematicDrawer::DoDrawing(const uint32_t trig, const uint32_t /*r
 
   // reference histograms, using same index as hists
   auto refs = BuildRefHists(hists);
+  std::string currRunMsg = "Current Run " + std::to_string(cl->RunNumber());
+  std::string refRunMsg  = "Reference Run " + refRunNum;
 
   // draw chi2 plots on one page
   DrawHists("EMClusterKinematics_Chi2", {0, 1, 2, 3}, hists, trig);
 
   // draw reference hists on relevant pads
   DrawHistOnPad(0, 1, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(0, 1, hists, m_plots.GetBackPlotPad()); //draw current run on top of ref
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
 
   // draw et plots on one page
   DrawHists("EMClusterKinematics_Energy", {5, 6, 4}, hists, trig);
 
   // draw reference hists on relevant pads
   DrawHistOnPad(4, 3, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(4, 3, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
 
   // draw eta/phi plots on one page
   DrawHists("EMClusterKinematics_EtaPhi", {8, 9, 7}, hists, trig);
 
   // draw reference hists on relevant pads
   DrawHistOnPad(8, 1, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(8, 1, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
   
   DrawHistOnPad(9, 2, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(9, 2, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
 
   return;
 }

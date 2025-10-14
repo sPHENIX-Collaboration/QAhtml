@@ -161,26 +161,32 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
 
   // reference histograms, using same index as hists
   auto refs = BuildRefHists(hists);
+  std::string currRunMsg = "Current Run " + std::to_string(cl->RunNumber());
+  std::string refRunMsg  = "Reference Run " + refRunNum;
 
   // draw rho plots on one page
   DrawHists("EvtRho", {0, 1, 2, 3}, hists, trig);
 
   // draw reference hists on relevant pads
   DrawHistOnPad(0, 1, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(0, 1, hists, m_plots.GetBackPlotPad()); //draw current run on top of ref
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
   
   DrawHistOnPad(1, 2, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(1, 2, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
 
   DrawHistOnPad(2, 3, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(2, 3, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
 
   DrawHistOnPad(3, 4, refs, m_plots.GetBackPlotPad());
-  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, "Current Run");
-  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, "Reference Run");
+  DrawHistOnPad(3, 4, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
 
   return;
 }

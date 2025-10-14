@@ -497,7 +497,7 @@ JetDrawDefs::VHistAndOpts1D BaseJetDrawer::BuildRefHists(const JetDrawDefs::VHis
       ho.titlex,
       ho.titley,
       ho.titlez,
-      0.5, //ho.marker, smaller marker size
+      1.0, //ho.marker, smaller marker size
       ho.margin,
       ho.logy,
       ho.logz,
@@ -530,7 +530,7 @@ void BaseJetDrawer::DrawTextOnPad(const std::size_t iPad,
                                   double x, 
                                   double y, 
                                   int color, 
-                                  const char *text, 
+                                  const std::string& text, 
                                   double tsize)
 {
   plot.histPad->cd(iPad);
@@ -540,7 +540,7 @@ void BaseJetDrawer::DrawTextOnPad(const std::size_t iPad,
   l.SetTextSize(tsize);
   l.SetNDC();
   l.SetTextColor(color);
-  l.DrawLatex(x, y, text);
+  l.DrawLatex(x, y, text.c_str());
 
   plot.canvas->Update();
 }
