@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 [[ -e htmlrunningfiletransfer ]] && exit 0
 echo $$ > htmlrunningfiletransfer
-source ./setup_all.sh
+source $(pwd)/setup_all.sh
 ROOT_INCLUDE_PATH=${OPT_SPHENIX}/include:${ROOT_INCLUDE_PATH}
 Xvfb :7 -nolisten tcp &
 export DISPLAY=unix:7
