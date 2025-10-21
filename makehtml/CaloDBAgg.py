@@ -40,11 +40,30 @@ def getPaths(cursor, run, dataset, type, runtype):
     filepaths = {(row.full_file_path) for row in cursor.fetchall()}
     return filepaths
 
+def getBuildDbTagFC(cursor, filename):
+    query = "select lfn from files where full_file_path='{}'".format(filename)
+    if args.verbose == True:
+        print(query)
+    cursor.execute(query)
+    lfn = (list({(row.lfn) for row in cursor.fetchall()}))[0]
+
+    query = "select tag from datasets where filename='{}'".format(lfn)
+    if args.verbose == True:
+        print(query)
+    cursor.execute(query)
+    tag = (list({(row.tag) for row in cursor.fetchall()}))[0]
+    return tag
+
 def getBuildDbTag(type, filename):
     parts = filename.split(os.sep)
     index = parts.index(type)
-    
-    return parts[index+3]
+    dbtag = parts[index+3]
+    print("dbtag is " +dbtag)
+    if dbtag.find("ana") == -1 and dbtag.find("new") == -1:
+        dbtag = parts[index+2]
+        print("changed dbtag to " + dbtag)
+    print("returning "+ dbtag)
+    return dbtag
 
 def main():   
     import time
@@ -60,7 +79,7 @@ def main():
                 print(runs_dbtags)
             for run, dbtag in runs_dbtags:
                 print("Processing run " + str(run))
-                if run < 71000:
+                if run < 75000:
                     continue
                 if str(dbtag).find("ana") == -1 and str(dbtag).find("new") == -1:
                     print ("weird db tag " + str(dbtag) + ", skipping")
@@ -110,7 +129,9 @@ def main():
                 for newpath in filepaths:
                     if not os.path.exists(newpath):
                         continue
-                    thistag = getBuildDbTag(runtype,newpath)
+                    if args.verbose:
+                        print("This file is " + newpath)
+                    thistag = getBuildDbTagFC(cursor,newpath)
                     if args.verbose:
                         print("thistag is " + thistag)
                     tags = thistag.split("_")
