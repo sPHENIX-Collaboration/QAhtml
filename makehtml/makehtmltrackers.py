@@ -36,14 +36,14 @@ runtypes = ["_run3auau"]
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
 def get_aggregated_files(cursor, dsttype):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999)".format(dsttype)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and (segment=9999 or segment=99999)) and full_file_path like '/sphenix/data/data02/sphnxpro/QAhtml%'".format(dsttype)
     if args.verbose :
         print(query)
     cursor.execute(query)
     return {(row.full_file_path) for row in cursor.fetchall()}
 
 def get_file(cursor, dsttype, runnumber):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and runnumber='{}' and filename not like '%v666%')".format(dsttype,runnumber)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and (segment=9999 or segment=99999) and runnumber='{}' and (runnumber >= 75000 or filename not like '%v666%')) and full_file_path like '/sphenix/data/data02/sphnxpro/QAhtml%'".format(dsttype,runnumber)
     if args.verbose:
         print(query)
     cursor.execute(query)
@@ -161,11 +161,11 @@ def main():
                                 print("filename is " + str(filename))
                                 print("dbtag to draw " + str(dbtagToDraw))
                                 print("file to draw " + str(fileToDraw))
-                                if (dbtag.find("nocdbtag") != -1 or dbtag.find("newcdbtag") != -1) and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
+                                if (dbtag.find("nocdbtag") != -1 or dbtag.find("newcdbtag") != -1) and int(filename.split("_v")[1][0:3]) >= int(dbtagToDraw):
                                     fileToDraw = file
                                     dbtagToDraw = int(filename.split("_v")[1][0:3])
                                 
-                                elif dbtag.find("newcdbtag") != -1 and int(dbtag.split("p")[1]) > int(dbtagToDraw) :
+                                elif dbtag.find("newcdbtag") != -1 and dbtagToDraw != 666 and int(dbtag.split("p")[1]) > int(dbtagToDraw) :
                                     fileToDraw = file
                                     dbtagToDraw = int(dbtag.split("p")[1])
                             #Draw that one
