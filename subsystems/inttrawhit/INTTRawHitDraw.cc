@@ -1,8 +1,9 @@
 #include "INTTRawHitDraw.h"
 
-#include "DrawTimingOkay.h"
-#include "DrawServerHitmaps.h"
 #include "DrawFeeTiming.h"
+#include "DrawBarrelHitmaps.h"
+#include "DrawServerHitmaps.h"
+#include "DrawTimingOkay.h"
 #include "InttbcoDraw.h"
 //...
 
@@ -17,8 +18,9 @@ INTTRawHitDraw::INTTRawHitDraw(const std::string &name)
   : QADraw(name)
 {
   m_options = {
+    {"intt_barrel_hitmaps", new DrawBarrelHitmaps("intt_barrel_hitmaps")},
+    {"intt_server_hitmaps", new DrawServerHitmaps("intt_server_hitmaps")},
     {"intt_timing_okay", new DrawTimingOkay("intt_timing_okay")},
-    {"intt_hitmaps", new DrawServerHitmaps("intt_hitmaps")},
     {"intt_bco_draw", new InttbcoDraw("intt_bco_draw")},
   };
 

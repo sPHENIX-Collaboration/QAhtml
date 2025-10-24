@@ -24,13 +24,15 @@ libqadrawinttrawhit_la_LIBADD = \
 inttrawhitincludedir=$(pkgincludedir)/intt
 
 inttrawhitinclude_HEADERS = \
+  DrawBarrelHitmaps.h \
   DrawFeeTiming.h \
   DrawServerHitmaps.h \
   DrawTimingOkay.h \
-  InttbcoDraw.h	\	
+  InttbcoDraw.h \
   INTTRawHitDraw.h
 
 libqadrawinttrawhit_la_SOURCES = \
+  DrawBarrelHitmaps.cc \
   DrawFeeTiming.cc \
   DrawServerHitmaps.cc \
   DrawTimingOkay.cc \
