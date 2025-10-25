@@ -7,10 +7,10 @@
 
 class TPad;
 
-class DrawTimingOkay : public SingleCanvasDrawer {
+class DrawBarrelHitmaps : public SingleCanvasDrawer {
 public:
-	DrawTimingOkay(std::string const&);
-	virtual ~DrawTimingOkay() = default;
+	DrawBarrelHitmaps(std::string const&);
+	virtual ~DrawBarrelHitmaps() = default;
 
 	int DrawCanvas() override;
 
@@ -24,8 +24,5 @@ private:
 	static std::string constexpr m_prefix = "h_InttQa";
 
 	TPad* m_title_pad{};
-	TPad* m_text_pad{};
-
-	// The minimum number of felix channels common to the mode of the timing peaks
-	static int const m_min_timed_channels = 12; // Any one server must have at least 12 of 14 channels with a common peak
+	TPad* m_hist_pad{};
 };

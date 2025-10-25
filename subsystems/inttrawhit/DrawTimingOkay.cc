@@ -105,7 +105,7 @@ DrawTimingOkay::DrawCanvas (
 
 	bool timing_okay = intt_peaks.size() == 1;
 	for (auto const& peak_map : sorted_server_peak_counts) {
-		if (m_max_acceptable_peaks < peak_map.size()) timing_okay = false;
+		if (peak_map.rbegin()->first < m_min_timed_channels) timing_okay = false;
 	}
 
 	m_text_pad->cd();
@@ -124,19 +124,19 @@ DrawTimingOkay::DrawCanvas (
 	okay_text.SetTextSize(0.05);
 	okay_text.SetTextColor(kBlack);
 	for (int felix_server = 0; felix_server < 8; ++felix_server) {
-		auto const& sorted_peak_counts = sorted_server_peak_counts[felix_server];
+		auto const& peak_map = sorted_server_peak_counts[felix_server];
 		std::stringstream peak_stream;
 		peak_stream
 			<< (boost::format("intt%01d peak (counts): ") % felix_server).str();
-		for (auto itr = sorted_peak_counts.rbegin();;) {
+		for (auto itr = peak_map.rbegin();;) {
 			peak_stream
 				<< itr->second
 				<< " (" << itr->first << ")";
-			if (++itr == sorted_peak_counts.rend()) break;
+			if (++itr == peak_map.rend()) break;
 			peak_stream
 				<< ", ";
 		}
-		if (m_max_acceptable_peaks < sorted_peak_counts.size()) {
+		if (peak_map.rbegin()->first < m_min_timed_channels) {
 			okay_text.SetTextColor(kRed+1);
 		} else {
 			okay_text.SetTextColor(kGreen+1);
