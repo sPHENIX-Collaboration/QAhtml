@@ -350,49 +350,58 @@ int BCODraw::DrawINTT()
 {
   std::cout << "BCO DrawINTT() Beginning" << std::endl;
   QADrawClient *cl = QADrawClient::instance();
-
   const int ninttpackets = 8;
   const int ninttfees = 14;
-  auto h_inttrefgl1 = dynamic_cast <TH1 *> (cl->getHisto("h_InttPoolQA_RefGL1BCO"));
-  TH1* h_allfeestagged[ninttpackets];
+  TH1 *h_allfeestagged[ninttpackets];
   TH1* h_perfee[ninttpackets][ninttfees];
+  TH1 *h_gl1ref[ninttpackets];
   std::ostringstream name;
   bool missinghisto = false;
-  for(int i=0; i<ninttpackets; i++)
+
+  for (int i = 0; i < ninttpackets; i++)
+  {
+    name.str("");
+    name << "h_InttPoolQA_RefGL1BCO_server" << i;
+    h_gl1ref[i] = dynamic_cast<TH1 *>(cl->getHisto(name.str().c_str()));
+
+    name.str("");
+    name << "h_InttPoolQA_TagBCOAllFees_Server" << i;
+    h_allfeestagged[i] = dynamic_cast<TH1 *>(cl->getHisto(name.str().c_str()));
+    for (int j = 0; j < ninttfees; j++)
     {
-       name.str("");
-       name <<"h_InttPoolQA_TagBCOAllFees_Server"<<i;
-       h_allfeestagged[i] = dynamic_cast<TH1*>(cl->getHisto(name.str().c_str()));
-       for(int j=0; j<ninttfees; j++)
-	 {
-	   name.str("");
-	   name << "h_InttPoolQA_TagBCO_server"<<i<<"_fee"<<j;
-	   h_perfee[i][j] = dynamic_cast<TH1*>(cl->getHisto(name.str().c_str()));
-	   if(!h_allfeestagged[i] || !h_perfee[i][j])
-	     {
-	       missinghisto = true;
-	     }
-	 }
+      name.str("");
+      name << "h_InttPoolQA_TagBCO_server" << i << "_fee" << j;
+      h_perfee[i][j] = dynamic_cast<TH1 *>(cl->getHisto(name.str().c_str()));
+      if (!h_allfeestagged[i] || !h_perfee[i][j])
+      {
+        missinghisto = true;
+      }
+    }
+    if (!h_gl1ref[i])
+    {
+      missinghisto = true;
+    }  
     }
 
-  if (!missinghisto)
-  {
-    const int inttgl1 = h_inttrefgl1->GetEntries() / ninttpackets;
+    if (!missinghisto)
+    {
+      int inttgl1[ninttpackets] = {0};
+      float allfeestagged[ninttpackets] = {0};
+      float perfee[ninttpackets][14] = {{0}};
+      TGraph *grs[ninttpackets];
 
-    float allfeestagged[ninttpackets] = {0};
-    float perfee[ninttpackets][14] = {{0}};
-    TGraph *grs[ninttpackets];
-
-    for(int i=0; i<ninttpackets; i++)
+      for (int i = 0; i < ninttpackets; i++)
       {
-	allfeestagged[i] = h_allfeestagged[i]->GetEntries();
-	allfeestagged[i] /= inttgl1;
+        inttgl1[i] = h_gl1ref[i]->GetEntries();
+
+        allfeestagged[i] = h_allfeestagged[i]->GetEntries();
+	allfeestagged[i] /= inttgl1[i];
 	float x[14];
 	for(int j=0; j<14; j++)
 	  {
 	    perfee[i][j] = h_perfee[i][j]->GetEntries();
 
-	    perfee[i][j] /= inttgl1;
+	    perfee[i][j] /= inttgl1[i];
 	    x[j] = j;
 	  }
 
