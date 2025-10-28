@@ -37,7 +37,7 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
 
 def getPaths(cursor, run, dataset, type, runtype):
     dsttype = type
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999".format(run,runtype, dsttype,dataset)
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999 and datasets.segment!=99999".format(run,runtype, dsttype,dataset)
     if dsttype.find("CLUSTER") != -1:
         query += " AND datasets.segment<10"
     if args.verbose == True:
@@ -142,7 +142,7 @@ def main():
                     continue
                 filestoadd = []
                 nfiles = 0
-                lfn = histtype + "_" + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
+                lfn = histtype + "_" + runtype + "_" + dbtag + "-{:08d}-99999.root".format(run)
                 
                 path = completeAggDir + lfn
 
@@ -202,7 +202,7 @@ def main():
 
                     insertquery="""
                     insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
-                    values ('{}','{}',9999,'{}','{}','{}','{}')
+                    values ('{}','{}',99999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
