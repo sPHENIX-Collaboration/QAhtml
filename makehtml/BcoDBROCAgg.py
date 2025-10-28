@@ -157,7 +157,7 @@ def main():
                 if reagg == False:
                     continue
 
-                lfn = hist + runtype + "_" + anadbtag + "-{:08d}-9999.root".format(run)
+                lfn = hist + runtype + "_" + anadbtag + "-{:08d}-99999.root".format(run)
                 
                 path = completeAggDir + lfn
                 if args.verbose == True:
@@ -211,7 +211,7 @@ def main():
 
                     insertquery="""
                     insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',9999,'{}','{}','{}')
+                    values ('{}','{}',99999,'{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
