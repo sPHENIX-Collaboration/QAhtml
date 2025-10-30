@@ -854,7 +854,7 @@ int TPCRawHitDraw::DrawOnlMon()
   totalFrac << std::fixed << std::setprecision(3) << fracOutTotal; 
   northFrac << std::fixed << std::setprecision(3) << fracOutN; 
   southFrac << std::fixed << std::setprecision(3) << fracOutS; 
-  if (fracOutTotal < 0.06)
+  if (fracOutTotal < 0.12)
   {
     fractotalstream << "Total Fraction of FEEs Out: " << totalFrac.str() << "(Good Run)" << std::endl;
     fractotalstring = fractotalstream.str();
