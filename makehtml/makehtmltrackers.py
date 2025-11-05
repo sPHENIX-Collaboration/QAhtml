@@ -56,6 +56,14 @@ def getBuildDbTag(type, filename):
     if args.verbose == True:
         print("db tag is " + parts[index+2])
     return parts[index+2]
+def getBuildTag(type, filename):
+    parts = filename.split("_")
+    print(parts)
+    index = parts.index(type[1:])
+    print(index)
+    if args.verbose == True:
+        print("ana tag is " + parts[index+1])
+    return parts[index+1]
 
 def main():
     conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
@@ -157,10 +165,11 @@ def main():
                                 if file.find("_run3physics") != -1:
                                     continue
                                 dbtag = getBuildDbTag(runtype, filename)
-                                print("dbtag is " + dbtag)
-                                print("filename is " + str(filename))
-                                print("dbtag to draw " + str(dbtagToDraw))
-                                print("file to draw " + str(fileToDraw))
+                                if args.verbose:
+                                    print("dbtag is " + dbtag)
+                                    print("filename is " + str(filename))
+                                    print("dbtag to draw " + str(dbtagToDraw))
+                                    print("file to draw " + str(fileToDraw))
                                 if (dbtag.find("nocdbtag") != -1 or dbtag.find("newcdbtag") != -1) and int(filename.split("_v")[1][0:3]) >= int(dbtagToDraw):
                                     fileToDraw = file
                                     dbtagToDraw = int(filename.split("_v")[1][0:3])
@@ -168,6 +177,17 @@ def main():
                                 elif dbtag.find("newcdbtag") != -1 and dbtagToDraw != 666 and int(dbtag.split("p")[1]) > int(dbtagToDraw) :
                                     fileToDraw = file
                                     dbtagToDraw = int(dbtag.split("p")[1])
+                            if fileToDraw == "":
+                                # same db tag, check if ana build is different
+                                for file in aggFile:
+                                    filename = file.split("/")[-1]
+                                    if file.find("_run3physics") != -1:
+                                        continue
+                                    dbtag = getBuildTag(runtype, filename)
+                                    anabuildnum = dbtag[-3:]
+                                    if int(anabuildnum) > int(dbtagToDraw):
+                                        dbtagToDraw = anabuildnum
+                                        fileToDraw = file
                             #Draw that one
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+fileToDraw+"\")"
                             if histoarg == "bco":
