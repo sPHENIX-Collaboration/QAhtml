@@ -298,6 +298,11 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
     }
   };
 
+  // reference histograms, using same index as hists
+  auto refs = BuildRefHists(hists);
+  std::string currRunMsg = "Current Run " + std::to_string(cl->RunNumber());
+  std::string refRunMsg  = "Reference Run " + refRunNum;
+
   // draw emcal hists on one page
   DrawHists("CaloStatusMap_EMCal", {9, 0, 3, 6}, hists);
 
@@ -309,6 +314,27 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
   
   // draw tower energy hists on one page
   DrawHists("CaloStatusMap_TowerE", {15, 12, 13, 14}, hists);
-  
+
+  // draw e fraction reference hists on relevant pads
+  DrawHistOnPad(15, 1, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(15, 1, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
+
+  DrawHistOnPad(12, 2, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(12, 2, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
+
+  DrawHistOnPad(13, 3, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(13, 3, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
+
+  DrawHistOnPad(14, 4, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(14, 4, hists, m_plots.GetBackPlotPad());
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
+
   return;
 }
