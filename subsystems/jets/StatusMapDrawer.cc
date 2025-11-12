@@ -246,6 +246,55 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
       true,
       false,
       false
+    },
+    // tower energy plot
+    {
+      dynamic_cast<TH1*>(cl->getHisto(makeHistName("towere", "cemc"))),
+      "EMCal total tower energy",
+      "Total Tower E(GeV)",
+      "Normalized Counts",
+      "",
+      0.8,
+      0.20,
+      true,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(makeHistName("towere", "hcalin"))),
+      "IHCal total tower energy",
+      "Total Tower E(GeV)",
+      "Normalized Counts",
+      "",
+      0.8,
+      0.20,
+      true,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(makeHistName("towere", "hcalout"))),
+      "OHCal total tower energy",
+      "Total Tower E(GeV)",
+      "Normalized Counts",
+      "",
+      0.8,
+      0.20,
+      true,
+      false,
+      true
+    },
+    {
+      dynamic_cast<TH1*>(cl->getHisto(makeHistName("towere", "allcalo"))),
+      "Sum all calo total tower energy",
+      "Total Tower E(GeV)",
+      "Normalized Counts",
+      "",
+      0.8,
+      0.20,
+      true,
+      false,
+      true
     }
   };
 
@@ -257,5 +306,9 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
 
   // draw ohcal hists on one page
   DrawHists("CaloStatusMap_OHCal", {11, 2, 5, 8}, hists);
+  
+  // draw tower energy hists on one page
+  DrawHists("CaloStatusMap_TowerE", {15, 12, 13, 14}, hists);
+  
   return;
 }
