@@ -108,7 +108,7 @@ class BaseJetDrawer
                        double x,
                        double y,
                        int color,
-		       const std::string& text,
+                       const std::string& text,
                        double tsize = 0.04);
 
     // QA reference file path
