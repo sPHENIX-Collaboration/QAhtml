@@ -19,12 +19,26 @@ histoarg = args.histotype
 
 # subsys dir name : [file prefix, output hist png file prefix, qahtml draw macro]
 subsys = []
-if histoarg == "hit":
-    subsys = [{"mvtxrawhit" : ["HIST_DST_TRKR_CLUSTER","MVTXRAWHITQA","draw_mvtx_rawhit.C"], "inttrawhit" : ["HIST_DST_TRKR_CLUSTER","INTTRAWHITQA","draw_intt_rawhit.C"], "tpcrawhit" : ["HIST_DST_TRKR_CLUSTER","TpcRawHitQA","draw_tpc_rawhit.C"]}]
-elif histoarg == "cluster":
-    subsys = [{"mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"], "intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"], "tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"],"micromegas" : ["HIST_DST_TRKR_CLUSTER","TPOTQA","draw_micromegas.C"], "tpclasers" : ["HIST_DST_TRKR_CLUSTER","LASERQA","draw_tpclasers.C"]}]
-elif histoarg == "seed":
-    subsys = [{"siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"], "tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"], "tpcsil" : ["HIST_DST_TRKR_SEED","TPCSILICONQA","draw_tpcsil.C"]}]
+if histoarg == "mvtxhit":
+    subsys = [{"mvtxrawhit" : ["HIST_DST_TRKR_CLUSTER","MVTXRAWHITQA","draw_mvtx_rawhit.C"]}]
+if histoarg == "intthit":
+    subsys = [{"inttrawhit" : ["HIST_DST_TRKR_CLUSTER","INTTRAWHITQA","draw_intt_rawhit.C"]}]
+elif histoarg == "tpchit":
+    subsys = [{"tpcrawhit" : ["HIST_DST_TRKR_CLUSTER","TpcRawHitQA","draw_tpc_rawhit.C"]}]
+elif histoarg == "tpccluster":
+    subsys = [{"tpc" : ["HIST_DST_TRKR_CLUSTER","TPCQA","draw_tpc.C"]}]
+elif histoarg == "tpclaser":
+    subsys = [{"tpclasers" : ["HIST_DST_TRKR_CLUSTER","LASERQA","draw_tpclasers.C"]}]
+elif histoarg == "mvtxcluster":
+    subsys = [{"mvtx" : ["HIST_DST_TRKR_CLUSTER","MVTXQA","draw_mvtx.C"]}]
+elif histoarg == "inttcluster":
+    subsys = [{"intt" : ["HIST_DST_TRKR_CLUSTER","INTTQA","draw_intt.C"]}]
+elif histoarg == "tpotcluster":
+    subsys = [{"micromegas" : ["HIST_DST_TRKR_CLUSTER","TPOTQA","draw_micromegas.C"]}]
+elif histoarg == "silseed":
+    subsys = [{"siliconseeds" : ["HIST_DST_TRKR_SEED","SILICONSEEDSQA","draw_siliconseeds.C"]}]
+elif histoarg == "tpcseed":
+    subsys = [{"tpcseeds": ["HIST_DST_TRKR_SEED","TPCSEEDSQA","draw_tpcseeds.C"], "tpcsil" : ["HIST_DST_TRKR_SEED","TPCSILICONQA","draw_tpcsil.C"]}]
 elif histoarg == "bco":
     subsys = [{"bco" : ["HIST_DST_STREAMING_EVENT_mvtx","MVTXBCO","draw_packets.C"]}, {"bco" : ["HIST_DST_STREAMING_EVENT_intt","INTTBCO","draw_packets.C"]},{"bco" : ["HIST_DST_STREAMING_EVENT_ebdc39","TPOTBCO","draw_packets.C"]}, {"micromegas" : ["HIST_DST_STREAMING_EVENT_ebdc39","TPOTRAWHITQA","draw_micromegas.C"]}]
     
@@ -56,6 +70,14 @@ def getBuildDbTag(type, filename):
     if args.verbose == True:
         print("db tag is " + parts[index+2])
     return parts[index+2]
+def getBuildTag(type, filename):
+    parts = filename.split("_")
+    print(parts)
+    index = parts.index(type[1:])
+    print(index)
+    if args.verbose == True:
+        print("ana tag is " + parts[index+1])
+    return parts[index+1]
 
 def main():
     conn = pyodbc.connect("DSN=FileCatalog_read;UID=phnxrc;READONLY=True")
@@ -157,10 +179,11 @@ def main():
                                 if file.find("_run3physics") != -1:
                                     continue
                                 dbtag = getBuildDbTag(runtype, filename)
-                                print("dbtag is " + dbtag)
-                                print("filename is " + str(filename))
-                                print("dbtag to draw " + str(dbtagToDraw))
-                                print("file to draw " + str(fileToDraw))
+                                if args.verbose:
+                                    print("dbtag is " + dbtag)
+                                    print("filename is " + str(filename))
+                                    print("dbtag to draw " + str(dbtagToDraw))
+                                    print("file to draw " + str(fileToDraw))
                                 if (dbtag.find("nocdbtag") != -1 or dbtag.find("newcdbtag") != -1) and int(filename.split("_v")[1][0:3]) >= int(dbtagToDraw):
                                     fileToDraw = file
                                     dbtagToDraw = int(filename.split("_v")[1][0:3])
@@ -168,6 +191,17 @@ def main():
                                 elif dbtag.find("newcdbtag") != -1 and dbtagToDraw != 666 and int(dbtag.split("p")[1]) > int(dbtagToDraw) :
                                     fileToDraw = file
                                     dbtagToDraw = int(dbtag.split("p")[1])
+                            if fileToDraw == "":
+                                # same db tag, check if ana build is different
+                                for file in aggFile:
+                                    filename = file.split("/")[-1]
+                                    if file.find("_run3physics") != -1:
+                                        continue
+                                    dbtag = getBuildTag(runtype, filename)
+                                    anabuildnum = dbtag[-3:]
+                                    if int(anabuildnum) > int(dbtagToDraw):
+                                        dbtagToDraw = anabuildnum
+                                        fileToDraw = file
                             #Draw that one
                             macro = "/sphenix/u/sphnxpro/qahtml/QAhtml/subsystems/"+s+"/macros/"+dictionary[s][2]+"(\""+fileToDraw+"\")"
                             if histoarg == "bco":

@@ -9,13 +9,25 @@ import pyodbc
 
 parser = argparse.ArgumentParser(description="Create the HTML files with QA histograms files for all events in a run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
+parser.add_argument("-ht","--histotype",help="histotype to draw, calo, fitting, global")
 parser.add_argument("-t","--test",help="run a verbose test without actually creating the HTML", action="store_true")
 args = parser.parse_args()
 if args.test and not args.verbose:
     args.verbose = True
     
 runtypes = ["_run3auau"]
-subsys = { "calofitting" : ["HIST_CALOFITTINGQA","CALOFITTINGQA","draw_calo_fitting.C"],"calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"], "globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"],"jets" : ["HIST_JETS","JETSQA","draw_calo_jet.C"] }
+subsys = {}
+if args.histotype == "calofitting":
+    subsys = { "calofitting" : ["HIST_CALOFITTINGQA","CALOFITTINGQA","draw_calo_fitting.C"]}
+elif args.histotype == "calo":
+    subsys = {"calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"]}
+elif args.histotype == "global":
+    subsys = {"globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"],"jets" : ["HIST_JETS","JETSQA","draw_calo_jet.C"] }
+else:
+    print("not a supported QA module yet")
+
+print ("subsys list is ")
+print(subsys)
 
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
