@@ -18,7 +18,7 @@ else
     exit 1
 fi
 
-python3 makehtmlcalo.py -v -t -ht $histtype >& /sphenix/user/sphnxpro/htmllogs/makehtml$histtype.log
+python3 makehtmlcalo.py -ht $histtype >& /sphenix/user/sphnxpro/htmllogs/makehtml$histtype.log
 kill $!
 rm htmlrunning$histtype
 rm -f deadHotTowers*HIST_CALO*.root # -f: no error if no files exist
