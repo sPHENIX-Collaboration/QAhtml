@@ -400,7 +400,7 @@ sub print_start_1 {
   print "<html>\n";
   print "<head>\n";
   print "<link rel=\"stylesheet\" href=\"$css\" type=\"text/css\">\n";
-  print "<title>PHENIX Offline Production HTML Output for Run $run</title>\n";
+  print "<title>sPHENIX Offline Production HTML Output for Run $run</title>\n";
 
   print_copyright();
 
@@ -547,7 +547,7 @@ sub select_run {
   print html_doctype("Transitional");
   print "<html>\n<head>\n";
   print "<link rel=\"stylesheet\" href=\"mon.css\" type=\"text/css\">\n";
-  print "<title>PHENIX OffMon HTML Output : Run Selection</title>\n";
+  print "<title>sPHENIX OffMon HTML Output : Run Selection</title>\n";
   print "</head>\n<body class=\"runselect\">\n";
 
   print "<P>Please click on a run range below to expand it (by default the latest runs are expanded), and then click on a run number to browse it.\n";
@@ -584,7 +584,7 @@ sub show_contacts {
   print html_doctype("Transitional");
   print "<html>\n<head>\n";
   print "<link rel=\"stylesheet\" href=\"mon.css\" type=\"text/css\">\n";
-  print "<title>The humans behind the PHENIX Offline Production</title>\n";
+  print "<title>The humans behind the sPHENIX Offline Production</title>\n";
   print "</head>\n<body class=\"contacts\">\n";
 
   print "<P>The humans behind the sPHENIX QA...<BR><HR>";
