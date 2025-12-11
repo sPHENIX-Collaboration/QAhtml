@@ -6,7 +6,11 @@ import os
 import os.path
 import subprocess
 import pyodbc
+from datetime import datetime
 
+# Current date and time
+now = datetime.now()
+print("Starting this script at "+str(datetime.now()))
 parser = argparse.ArgumentParser(description="Create the HTML files with QA histograms files for all events in a run.")
 parser.add_argument("-v","--verbose",help="add additional printing", action="store_true")
 parser.add_argument("-ht","--histotype",help="histotype to draw, calo, fitting, global")
