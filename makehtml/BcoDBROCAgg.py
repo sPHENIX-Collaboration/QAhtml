@@ -13,7 +13,7 @@ NENDPOINTS=[1,1,1,2]
 nsubsys = 4
 hist_types = ["HIST_DST_STREAMING_EVENT_ebdc39","HIST_DST_STREAMING_EVENT_mvtx", "HIST_DST_STREAMING_EVENT_intt","HIST_DST_STREAMING_EVENT_ebdc"]
 
-runtypes = ["_run3auau"]
+runtypes = ["_run3pp","_run3auau"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     
 
@@ -73,7 +73,7 @@ def main():
             
             for run, dbtag in get_unique_run_dataset_pairs(FCReadCursor, dummyhisttype, runtype):
                 
-                if run < 64000:
+                if run < 79000:
                     continue
                 if args.verbose:
                     print("Checking run " + str(run))
@@ -121,7 +121,7 @@ def main():
                     print(completeAggDir)
                 
                 #check for a similar file in this dir
-                filepathWildcard = completeAggDir + hist + "*" + anadbtag + "*" + str(run) + "*"
+                filepathWildcard = completeAggDir + hist + "*" + runtype + "*" +anadbtag + "*" + str(run) + "*"
                 if not os.path.isdir(completeAggDir):
                     if args.verbose == True:
                         print("making a new aggregated dir")
@@ -210,8 +210,8 @@ def main():
                     FCWriteCursor.commit()
 
                     insertquery="""
-                    insert into datasets (filename,runnumber,segment,size,dataset,dsttype)
-                    values ('{}','{}',99999,'{}','{}','{}')
+                    insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
+                    values ('{}','{}',99999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set
@@ -221,7 +221,7 @@ def main():
                     dsttype=EXCLUDED.dsttype,
                     events=EXCLUDED.events
                     ;
-                    """.format(lfn,run,size,anadbtag,hist)
+                    """.format(lfn,run,size,anadbtag,hist,collisiontag)
                     if args.verbose :
                         print(insertquery)
                     FCWriteCursor.execute(insertquery)
