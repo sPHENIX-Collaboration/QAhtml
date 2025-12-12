@@ -1,5 +1,5 @@
 #include <qahtml/QADrawClient.h>
-#include <globalqa/GlobalQADraw.h>
+#include <qahtml/globalqa/GlobalQADraw.h>
 #include <sPhenixStyle.C>
 R__LOAD_LIBRARY(libqadrawglobalqa.so)
 R__LOAD_LIBRARY(libRooFit.so)
@@ -14,7 +14,8 @@ void draw_GlobalQA(const char *rootfile) {
   cl->ReadHistogramsFromFile(rootfile);
   cl->Verbosity(1);
   cl->MakeHtml();
+  //cl->MakeHtml("MBD");
   delete cl;
-  gSystem->Exit(0);
+  //gSystem->Exit(0);
   return ;
 }
