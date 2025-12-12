@@ -70,6 +70,7 @@ DrawTimingOkay::DrawCanvas (
 
 	// For each felix server, get the distribution of peaks over felix channels
 	std::array<std::map<int, int>, 8> server_peak_counts;
+	std::array<int, 8> masked_felix_channels{};
 	for (int felix_server = 0; felix_server < 8; ++felix_server) {
 		for (int felix_channel = 0; felix_channel < 14; ++felix_channel) {
 			std::string hist_name = (boost::format("%s_bco_distribution_server%01d_channel%02d") % m_prefix % felix_server % felix_channel).str();
@@ -81,8 +82,12 @@ DrawTimingOkay::DrawCanvas (
 					<< std::endl;
 				return 1;
 			}
-			double peak_bin = hist->GetMaximumBin();
-			++server_peak_counts[felix_server][hist->GetBinCenter(peak_bin)];
+
+			// Do not consider felix channels which are completely masked
+			bool masked = (hist->GetEntries() == 0);
+			if (masked) { ++masked_felix_channels[felix_server]; }
+			int peak_bin = masked ? -1 : hist->GetBinCenter(hist->GetMaximumBin());
+			++server_peak_counts[felix_server][peak_bin];
 		}
 	}
 
@@ -97,15 +102,34 @@ DrawTimingOkay::DrawCanvas (
 
 	// Now for the whole of the intt, get the distribution of peaks over felix servers
 	// For each felix server, choose the mode of felix channel peaks as the server peak
-	// Because they're sorted by count now, we can get a reverse iterator to find the mode
 	std::set<int> intt_peaks;
-	for (int felix_server = 0; felix_server < 8; ++felix_server) {
-		intt_peaks.insert(sorted_server_peak_counts[felix_server].rbegin()->second);
+	for (auto const& peak_map : sorted_server_peak_counts) {
+		// We are interested in the first unmasked channel we find sorting by count
+		// the for loop makes this control flow syntactically easier to implement
+		for (auto itr = peak_map.rbegin(); itr != peak_map.rend(); ++itr) {
+			// Ignore masked/empty felix channels
+			if (itr->second == -1) { continue; }
+			intt_peaks.insert(itr->second);
+			break;
+		}
 	}
 
+	// The overall timing check is that there is that the modal peak of all felix servers is the same
 	bool timing_okay = intt_peaks.size() == 1;
-	for (auto const& peak_map : sorted_server_peak_counts) {
-		if (peak_map.rbegin()->first < m_min_timed_channels) timing_okay = false;
+	std::array<bool, 8> timing_okay_by_channel{};
+	for (int felix_server = 0; felix_server < 8; ++felix_server) {
+		// The internal check is that enough felix channels share a common peak position
+		auto const& peak_map = sorted_server_peak_counts[felix_server];
+		int num_masked = masked_felix_channels[felix_server];
+		// We are interested in the first unmasked channel we find sorting by count
+		// the for loop makes this control flow syntactically easier to implement
+		for (auto itr = peak_map.rbegin(); itr != peak_map.rend(); ++itr) {
+			// Ignore masked/empty channels, subtract the number of masked channels from the requirement
+			if (itr->second == -1) { continue; }
+			timing_okay_by_channel[felix_server] = !(itr->first < m_min_timed_channels - num_masked);
+			timing_okay = (timing_okay && timing_okay_by_channel[felix_server]);
+			break;
+		}
 	}
 
 	m_text_pad->cd();
@@ -130,17 +154,13 @@ DrawTimingOkay::DrawCanvas (
 			<< (boost::format("intt%01d peak (counts): ") % felix_server).str();
 		for (auto itr = peak_map.rbegin();;) {
 			peak_stream
-				<< itr->second
+				<< ((itr->second == -1) ? std::string{"masked"} : std::to_string(itr->second))
 				<< " (" << itr->first << ")";
 			if (++itr == peak_map.rend()) break;
 			peak_stream
 				<< ", ";
 		}
-		if (peak_map.rbegin()->first < m_min_timed_channels) {
-			okay_text.SetTextColor(kRed+1);
-		} else {
-			okay_text.SetTextColor(kGreen+1);
-		}
+		okay_text.SetTextColor(timing_okay_by_channel[felix_server] ? kGreen+1 : kRed+1);
 		okay_text.DrawText(0.25, 0.75 - (felix_server + 0.5) / 16, peak_stream.str().c_str());
 	}
 
