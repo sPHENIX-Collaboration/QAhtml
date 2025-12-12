@@ -38,7 +38,7 @@ qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
 def get_aggregated_files(cursor, dsttype, runtype):
     runtype_nounderscore = runtype[1:]
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and dataset='{}')".format(dsttype,runtype_nounderscore)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and dataset='{}' and filename not like '%auau%')".format(dsttype,runtype_nounderscore)
     if args.verbose :
         print(query)
     cursor.execute(query)
@@ -54,6 +54,7 @@ def get_file(cursor, dsttype, runnumber):
 
 def getBuildDbTag(type, filename):
     parts = filename.split("_")
+    
     index = parts.index(type[1:])
     if args.verbose == True:
         print("db tag is " + parts[index+2])
@@ -137,14 +138,20 @@ def main():
                             print("file options")
                             print(aggFile)
                         # find the file with the most recent db tag
+                        
                         for file in aggFile:
                             # find the db string
+                            # To remove later, this is to get by
+                            # chris' accidental production of pp files with auau
+                            if file.find("auau") != -1:
+                                continue
                             filename = file.split("/")[-1]
                             dbtag = getBuildDbTag(runtype, filename)
-                            print("dbtag is " + dbtag)
-                            print("dbtag to draw is " + str(dbtagToDraw))
-                            print("file to draw is " +fileToDraw)
-                            print("this file is " + filename)
+                            if args.verbose:
+                                print("dbtag is " + dbtag)
+                                print("dbtag to draw is " + str(dbtagToDraw))
+                                print("file to draw is " +fileToDraw)
+                                print("this file is " + filename)
                             if dbtag.find("newcdbtag") != -1 and int(filename.split("_v")[1][0:3]) > int(dbtagToDraw):
                                 fileToDraw = file
                                 dbtagToDraw = int(filename.split("_v")[1][0:3])
