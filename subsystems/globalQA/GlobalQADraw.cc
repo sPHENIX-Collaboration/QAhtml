@@ -293,10 +293,15 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     run_type = 1; //pp run 
     std::cout<<"MBDRun_pp :"<<cl->RunNumber()<<std::endl;
   }
+  else if(cl->RunNumber()>53900 && cl->RunNumber()<=78954)
+  { 
+    run_type = 0 ; //AuAu run2 and run3 
+    std::cout<<"MBDRun_AuAu :"<<cl->RunNumber()<<std::endl;
+  }
   else
   {
-    run_type = 0 ; //AuAu run 
-    std::cout<<"MBDRun_AuAu :"<<cl->RunNumber()<<std::endl;
+    run_type = 1; //pp run3
+    std::cout<<"MBDRun_pp :"<<cl->RunNumber()<<std::endl;
   }
 
 
@@ -387,14 +392,15 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
 
     if (run_type == 1)  // pp
     {
-      // rebin the hist by a factor of 4 in both dimensions
-      TH2F *h2_GlobalQA_mbd_charge_NS_correlation_rebinned = (TH2F*)h2_GlobalQA_mbd_charge_NS_correlation->Rebin2D(4,4, nullptr);
+      TH2 *h2_GlobalQA_mbd_charge_NS_correlation_pp = (TH2*)h2_GlobalQA_mbd_charge_NS_correlation->Clone("h2_GlobalQA_mbd_charge_NS_correlation");
 
-      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->SetTitle("MBD North-South Charge Correlation");
-      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->SetXTitle("MBD south charge sum");
-      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->SetYTitle("MBD north charge sum");
-      // h2_GlobalQA_mbd_charge_NS_correlation->DrawCopy("COLZ");
-      h2_GlobalQA_mbd_charge_NS_correlation_rebinned->DrawCopy("COLZ");
+      h2_GlobalQA_mbd_charge_NS_correlation_pp->SetTitle("MBD North-South Charge Correlation");
+      h2_GlobalQA_mbd_charge_NS_correlation_pp->SetXTitle("MBD south charge sum");
+      h2_GlobalQA_mbd_charge_NS_correlation_pp->SetYTitle("MBD north charge sum");
+
+      h2_GlobalQA_mbd_charge_NS_correlation_pp->GetXaxis()->SetRangeUser(0., 80.);
+      h2_GlobalQA_mbd_charge_NS_correlation_pp->GetYaxis()->SetRangeUser(0., 80.);
+      h2_GlobalQA_mbd_charge_NS_correlation_pp->DrawCopy("COLZ");
     }
     else if (run_type == 0) // AuAu
     {
@@ -447,6 +453,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
       //MBD south arm
       TH1F *h_GlobalQA_mbd_nhit_s_auau = new TH1F("h_GlobalQA_mbd_nhit_s_auau","h_GlobalQA_mbd_nhit_s_auau", 64, 0, 64);
       //fill
+      //std::cout << "XXX " << h_GlobalQA_mbd_nhit_s->GetNbinsX() << std::endl;
+
       for (int xbin = 1; xbin <= h_GlobalQA_mbd_nhit_s->GetNbinsX(); xbin++)
       {
         double content = h_GlobalQA_mbd_nhit_s->GetBinContent(xbin);
@@ -509,6 +517,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
     {
 
       h_GlobalQA_mbd_charge_s->SetLineColor(kRed);
+      h_GlobalQA_mbd_charge_s->GetXaxis()->SetRangeUser(0.,160.);
+
       leg01->AddEntry(h_GlobalQA_mbd_charge_s,"South","l");
       h_GlobalQA_mbd_charge_s->DrawCopy("hist");
 
@@ -594,6 +604,8 @@ int GlobalQADraw::DrawMBD(const std::string & /*what*/)
       h2_GlobalQA_mbd_nhits_NS_correlation->SetXTitle("MBD south nhits(Run_pp)");
       h2_GlobalQA_mbd_nhits_NS_correlation->SetYTitle("MBD north nhits(Run_pp)");
 
+      h2_GlobalQA_mbd_nhits_NS_correlation->GetXaxis()->SetRangeUser(0., 50.);
+      h2_GlobalQA_mbd_nhits_NS_correlation->GetYaxis()->SetRangeUser(0., 50.);
       h2_GlobalQA_mbd_nhits_NS_correlation->DrawCopy("COLZ");
     }
     else if(run_type==0)
