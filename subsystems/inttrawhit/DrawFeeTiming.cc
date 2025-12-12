@@ -132,6 +132,13 @@ DrawFeeTiming::DrawCanvas (
 				<< std::endl;
 			return 1;
 		}
+
+		// Do not consider felix channels which are completely masked
+		if (hist->GetEntries() == 0) {
+			peak_positions[felix_channel] = -1;
+			continue;
+		}
+
 		double peak_bin = hist->GetMaximumBin();
 		++peak_counts[hist->GetBinCenter(peak_bin)];
 		peak_positions[felix_channel] = hist->GetBinCenter(peak_bin);
@@ -231,9 +238,12 @@ DrawFeeTiming::DrawCanvas (
 			text.SetTextColor(kRed+1);
 		}
 
+		std::string peak_position_str = peak_positions[felix_channel] == -1 ?
+			"empty":
+			(boost::format("%d") % peak_positions[felix_channel]).str();
 		text.DrawText (
 			0.6, (felix_channel + 0.5) / 14,
-			(boost::format("FCh %02d (%d)") % felix_channel % peak_positions[felix_channel]).str().c_str()
+			(boost::format("FCh %02d (%s)") % felix_channel % peak_position_str).str().c_str()
 		);
 	}
 
