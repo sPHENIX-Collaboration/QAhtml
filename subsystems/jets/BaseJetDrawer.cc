@@ -478,9 +478,9 @@ JetDrawDefs::VHistAndOpts1D BaseJetDrawer::BuildRefHists(const JetDrawDefs::VHis
   if (m_do_debug)
   {
     std::cout << std::boolalpha
-	      << "  -- Reading Reference File\n" 
+              << "  -- Reading Reference File\n" 
               << "  -- Drawers: run is pp? : " << is_pp 
-	      << std::endl;
+              << std::endl;
   }
 
   // get reference run info according to run number
