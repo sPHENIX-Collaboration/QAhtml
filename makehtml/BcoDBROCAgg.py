@@ -13,7 +13,7 @@ NENDPOINTS=[1,1,1,2]
 nsubsys = 4
 hist_types = ["HIST_DST_STREAMING_EVENT_ebdc39","HIST_DST_STREAMING_EVENT_mvtx", "HIST_DST_STREAMING_EVENT_intt","HIST_DST_STREAMING_EVENT_ebdc"]
 
-runtypes = ["_run3pp","_run3auau"]
+runtypes = ["_run3pp"]
 aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
     
 
@@ -88,6 +88,8 @@ def main():
                     
                        
                         thisfile = get_aggregated_file(FCReadCursor, histtype, run)
+                        if thisfile.find("run3auau") != -1:
+                            continue
                         if len(thisfile) > 0:
                             filesToAdd.append(thisfile)
                 if args.verbose :
