@@ -141,7 +141,7 @@ std::string CaloGoodRunChecker::MakeHotColdDeadMaps()
   calo->set_ohcal();
   hothistname = "h_CaloValid_ihcal_etaphi";
   calo->FindHot(histfile, outfile_ihcal, hothistname);
-  hothistname = "h_CaloValid_ihcal_etaphi";
+  hothistname = "h_CaloValid_ohcal_etaphi";
   calo->FindHot(histfile, outfile_ohcal, hothistname); 
   // consolidate the maps into one file -- need to rename the histograms
   TFile* fcemc = new TFile(outfile_cemc.c_str(), "READ");
