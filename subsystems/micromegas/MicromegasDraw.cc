@@ -194,26 +194,7 @@ MicromegasDraw::MicromegasDraw(const std::string &name)
 //____________________________________________________________________________________________________
 int MicromegasDraw::Init()
 {
-  // get runnumber from DrawClient
-  const auto cl = QADrawClient::instance();
-  const auto runnumber = cl->RunNumber();
-
-  std::cout << "MicromegasDraw::Init - runnumber: " << runnumber << std::endl;
-
-  // initialize variables
-  if( runnumber >= RunnumberRange::RUN3PP_FIRST )
-  {
-    // run3 pp cuts
-    setup_cuts_run3_pp();
-
-  } else {
-    /*
-     * for all other runnumbers assume run3 au+au.
-     * this could be changed in the future
-     */
-    setup_cuts_run3_auau();
-  }
-
+  setup_cuts();
   return 0;
 
 }
@@ -221,6 +202,9 @@ int MicromegasDraw::Init()
 //____________________________________________________________________________________________________
 int MicromegasDraw::Draw(const std::string &what)
 {
+  // initialize cuts
+  setup_cuts();
+
   /* SetsPhenixStyle(); */
   int iret = 0;
   int idraw = 0;
@@ -1019,6 +1003,32 @@ int MicromegasDraw::MakeHtml(const std::string &what)
   }
 
   return 0;
+}
+
+//________________________________________________________________
+void MicromegasDraw::setup_cuts()
+{
+
+  // get runnumber from DrawClient
+  const auto cl = QADrawClient::instance();
+  const auto runnumber = cl->RunNumber();
+
+  std::cout << "MicromegasDraw::setup_cuts - runnumber: " << runnumber << std::endl;
+
+  // initialize variables
+  if( runnumber >= RunnumberRange::RUN3PP_FIRST )
+  {
+    // run3 pp cuts
+    setup_cuts_run3_pp();
+
+  } else {
+    /*
+     * for all other runnumbers assume run3 au+au.
+     * this could be changed in the future
+     */
+    setup_cuts_run3_auau();
+  }
+
 }
 
 //________________________________________________________________

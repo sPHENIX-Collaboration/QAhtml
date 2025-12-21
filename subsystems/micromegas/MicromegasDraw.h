@@ -39,6 +39,7 @@ class MicromegasDraw : public QADraw
    */
   using detector_range_t = std::pair<int, int>;
 
+  /*
   //! acceptable cluster multiplicity range
   void set_gl1_drop_rate_range( const range_t& value )
   {
@@ -165,12 +166,17 @@ class MicromegasDraw : public QADraw
   void set_detector_efficiency_range( int n_questionable, int n_good )
   { m_detector_efficiency_range = {n_questionable,n_good}; }
 
+  */
+
   private:
 
-  // set cuts for run3 Au+Au
+  //! generic setting up cuts
+  void setup_cuts();
+
+  //! set cuts for run3 Au+Au
   void setup_cuts_run3_auau();
 
-  // set cuts for run3 p+p
+  //! set cuts for run3 p+p
   void setup_cuts_run3_pp();
 
   TH1* get_detector_average(TH2*, double /*offset*/ = 0);
