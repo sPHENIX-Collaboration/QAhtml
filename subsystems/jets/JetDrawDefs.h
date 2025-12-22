@@ -169,8 +169,9 @@ namespace JetDrawDefs
   {
     if (IsPP(run)) {
       return {
-        "53880", //pp reference run TBD
-        "/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/ana509_2024p022_v001/testing/Added/HIST_JETQA-00053880-99999.root"
+        "79226", //pp reference run TBD
+        "/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v008/pptesting/Added/HIST_JETQA-00079226-99999.root"
+        //"/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/ana509_2024p022_v001/testing/Added/HIST_JETQA-00053880-99999.root"
       };
     } else {
       return {
