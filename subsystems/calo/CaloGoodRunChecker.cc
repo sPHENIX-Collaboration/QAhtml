@@ -478,7 +478,7 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
 	  if (ihcal_hcdmap->GetBinContent(i) == 3) ihcal_cold_towers++;
 	}
     }
-  int MAXHOTTOWERS = 6; //6
+  int MAXHOTTOWERS = 10; //6
   if (ihcal_hot_towers > MAXHOTTOWERS)
     {
       ihcal_fails_badtowers = true;
@@ -689,7 +689,7 @@ void CaloGoodRunChecker::ohcalCheckGoodRun()
           if (ohcal_hcdmap->GetBinContent(i) == 3) ohcal_cold_towers++;
         }
     }
-  int MAXHOTTOWERS = 6;
+  int MAXHOTTOWERS = 10;
   if (ohcal_hot_towers > MAXHOTTOWERS)
     {
       ohcal_fails_badtowers = true;
