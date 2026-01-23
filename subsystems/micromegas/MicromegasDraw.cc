@@ -1055,22 +1055,22 @@ void MicromegasDraw::setup_cuts_run3_pp()
 
   //! acceptable cluster multiplicity range
   m_cluster_multiplicity_range ={
-    {1.2,3.7}, // SCOP
-    {1.2,3.7}, // SCIP
-    {1.2,3.7}, // NCIP
-    {1.2,3.7}, // NCOP
-    {1.2,3.7}, // SEIP
-    {1.2,3.7}, // NEIP
-    {1.2,3.7}, // SWIP
-    {1.2,3.7}, // NWIP
-    {0.5,3.7}, // SCOZ
-    {1.2,3.7}, // SCIZ
-    {1.2,3.7}, // NCIZ
-    {1.2,3.7}, // NCOZ
-    {1.2,3.7}, // SEIZ
-    {1.2,3.7}, // NEIZ
-    {1.2,3.7}, // SWIZ
-    {1.2,3.7} // NWIZ
+    {1.2,5}, // SCOP
+    {1.2,5}, // SCIP
+    {1.2,5}, // NCIP
+    {1.2,5}, // NCOP
+    {1.2,5}, // SEIP
+    {1.2,5}, // NEIP
+    {1.2,5}, // SWIP
+    {1.2,5}, // NWIP
+    {0.5,5}, // SCOZ
+    {1.2,5}, // SCIZ
+    {1.2,5}, // NCIZ
+    {1.2,5}, // NCOZ
+    {1.2,5}, // SEIZ
+    {1.2,5}, // NEIZ
+    {1.2,5}, // SWIZ
+    {1.2,5} // NWIZ
   };
 
   //! acceptable numbers of good detectors for cluster multiplicity
