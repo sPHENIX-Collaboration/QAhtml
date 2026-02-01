@@ -483,7 +483,7 @@ void CaloGoodRunChecker::ihcalCheckGoodRun()
     {
       ihcal_fails_badtowers = true;
     }
-  int MAXCOLDDEADTOWERS = 60; //31
+  int MAXCOLDDEADTOWERS = 84; //31 //60
   if ((ihcal_cold_towers + ihcal_dead_towers) > MAXCOLDDEADTOWERS)
     {
       ihcal_fails_badtowers = true;
