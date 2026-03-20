@@ -19,7 +19,7 @@ args = parser.parse_args()
 if args.test and not args.verbose:
     args.verbose = True
     
-runtypes = ["_run3pp", "_run3auau"]
+runtypes = ["_run3oo","_run3pp", "_run3auau"]
 subsys = {}
 if args.histotype == "calofitting":
     subsys = { "calofitting" : ["HIST_CALOFITTINGQA","CALOFITTINGQA","draw_calo_fitting.C"]}
@@ -32,20 +32,20 @@ else:
 
 print ("subsys list is ")
 print(subsys)
-
+print("QA_HTMLDIR is " +os.environ.get("QA_HTMLDIR"))
 qapath = os.environ.get("QA_HTMLDIR")+"/physics"
 
 
 def get_aggregated_files(cursor, dsttype, runtype):
     runtype_nounderscore = runtype[1:]
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and dataset='{}' and filename not like '%auau%')".format(dsttype,runtype_nounderscore)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=99999 and dataset='{}')".format(dsttype,runtype_nounderscore)
     if args.verbose :
         print(query)
     cursor.execute(query)
     return {(row.full_file_path) for row in cursor.fetchall()}
 
 def get_file(cursor, dsttype, runnumber):
-    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=9999 and runnumber='{}')".format(dsttype,runnumber)
+    query = "SELECT full_file_path FROM files WHERE lfn in (select filename from datasets files where dsttype='{}' and segment=99999 and runnumber='{}')".format(dsttype,runnumber)
     if args.verbose:
         print(query)
     cursor.execute(query)
@@ -71,8 +71,7 @@ def main():
             subsysAggRunsDbtag = {}
             for aggfile in full_paths:
                 runnumber = int(aggfile.split("/")[-1].split("-")[1])
-                if runnumber < 78000:
-                    continue
+             
                 if args.verbose:
                     print("agg file is " +aggfile)
                 dbtag = getBuildDbTag(runtype, aggfile.split("/")[-1])
@@ -99,8 +98,7 @@ def main():
                     if args.verbose:
                         print("checking rundir "+rundir)
                     runnum = int(rundir.split("/")[-1])
-                    if runnum < 57000:
-                        continue
+                    
                     qafiles = glob.glob(qapath+"/"+d+"/"+rundir+"/"+subsys[s][1]+"*")
                     maxmodtime = 0
                     for f in qafiles :
@@ -116,8 +114,7 @@ def main():
             updatedRuns = []
             for run in subsysAggRuns:
                 if (not run in qaFilesModified) or (qaFilesModified[run] < subsysAggRuns[run]) :
-                    if run < 57000:
-                        continue
+                   
                     aggFile=get_file(cursor, subsys[s][0], run)
                     if len(aggFile) == 0:
                         print("There is no aggregated histos file for run " + str(run))
