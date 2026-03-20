@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source  /opt/sphenix/core/bin/sphenix_setup.sh -n new
+export QA_MAIN=/sphenix/u/sphnxpro/qahtml/install
+export QA_HTMLDIR=${1}
+export QA_REAL_HTML=1
+source $(pwd)/setup_qahtml.sh

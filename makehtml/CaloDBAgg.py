@@ -8,8 +8,8 @@ import time
 import argparse
 import hashlib
 
-track_hist_types = ["HIST_CALOQA","HIST_CALOFITTINGQA","HIST_JETS"]
-runtypes = ["run3pp","run3auau"]
+track_hist_types = ["HIST_CALOFITTINGQA","HIST_CALOQA","HIST_JETS"]
+runtypes = ["run3oo","run3pp","run3auau"]
 
 
 parser = argparse.ArgumentParser(description="Aggregate the QA histogram files produced for each DST segment of a run into a single QA histogram file per run.")
@@ -24,7 +24,7 @@ print("Test is " + str(args.test))
 
 def get_unique_run_dataset_pairs(cursor, type, runtype):
     dsttype = type
-    query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' GROUP BY runnumber,tag order by runnumber desc;".format(dsttype)
+    query = "SELECT runnumber, tag FROM datasets WHERE dsttype='{}' and tag like '%pro%' GROUP BY runnumber,tag order by runnumber desc;".format(dsttype)
     if args.verbose:
         print(query)
     cursor.execute(query)
@@ -33,7 +33,7 @@ def get_unique_run_dataset_pairs(cursor, type, runtype):
     return runnumbers
 
 def getPaths(cursor, run, dataset, type, runtype):
-    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=9999".format(run,runtype,type,dataset)
+    query = "SELECT files.full_file_path FROM files,datasets WHERE datasets.runnumber={} AND datasets.dataset='{}' AND datasets.dsttype='{}' AND datasets.tag='{}' AND files.lfn=datasets.filename AND datasets.segment!=99999".format(run,runtype,type,dataset)
     if args.verbose == True:
         print(query)
     cursor.execute(query)
@@ -72,18 +72,17 @@ def main():
     FCWrite = pyodbc.connect("DSN=FileCatalog;UID=phnxrc")
     FCWritecursor = FCWrite.cursor()
     aggDirectory = "/sphenix/data/data02/sphnxpro/QAhtml/aggregated/"
+ 
     for runtype in runtypes:
+      
         for histtype in track_hist_types:
             runs_dbtags = get_unique_run_dataset_pairs(cursor, histtype, runtype)
             if args.verbose :
                 print(runs_dbtags)
             for run, dbtag in runs_dbtags:
                 print("Processing run " + str(run))
-                if run < 78000:
-                    continue
-                if str(dbtag).find("ana") == -1 and str(dbtag).find("new") == -1:
-                    print ("weird db tag " + str(dbtag) + ", skipping")
-                    continue
+              
+                fquit = 1
                 filepaths = getPaths(cursor, run, dbtag, histtype, runtype)
                 if args.verbose == True:
                     print("all total filepaths")
@@ -93,11 +92,13 @@ def main():
                 tags = next(iter(filepaths)).split(os.sep)
                 
                 index = tags.index(runtype)
-                
+                if args.verbose:
+                    print("tags are ")
+                    print(tags)
                 collisiontag = tags[index]
                 beamtag = tags[index+1]
                 anadbtag = dbtag
-                dsttypetag = tags[index+2]
+                dsttypetag = tags[index+3]
                 rundirtag = tags[index+4]
                 
                 # make an analogous path to the production DST in sphenix/data
@@ -141,7 +142,10 @@ def main():
                     if tags[1].find("cdbtag") != -1:
                         latestdbtag=thistag
                         break
-                    if int(tags[1].split("p")[1]) > latestdbtagInt:
+                    elif tags[1].find ("pcdb") != -1:
+                        latestdbtag = thistag
+                        latestdbtagInt = int(tags[1].split("b")[1])
+                    elif int(tags[1].split("p")[1]) > latestdbtagInt:
                         latestdbtag=thistag
                         latestdbtagInt = int(tags[1].split("p")[1])
 
@@ -168,7 +172,7 @@ def main():
                     continue
                 filestoadd = []
                 nfiles = 0
-                lfn = histtype + "_" + runtype + "_" + dbtag + "-{:08d}-9999.root".format(run)
+                lfn = histtype + "_" + runtype + "_" + dbtag + "-{:08d}-99999.root".format(run)
                 path = completeAggDir + lfn
 
                 if args.verbose == True:
@@ -220,7 +224,7 @@ def main():
 
                     insertquery="""
                     insert into datasets (filename,runnumber,segment,size,tag,dsttype,dataset)
-                    values ('{}','{}',9999,'{}','{}','{}','{}')
+                    values ('{}','{}',99999,'{}','{}','{}','{}')
                     on conflict
                     on constraint datasets_pkey
                     do update set

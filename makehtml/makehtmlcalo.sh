@@ -1,8 +1,10 @@
 #!/bin/bash
-histtype=$1
+histtype=${1}
+QA_HTML_DIR=${2}
 [[ -e htmlrunning${histtype} ]] && exit 0
 echo $$ > htmlrunning${histtype}
-source ./setup_all.sh
+source ./setup_all_offline.sh ${QA_HTML_DIR}
+
 if [ $histtype = "calofitting" ]; then
     Xvfb :16 -nolisten tcp &
     export DISPLAY=unix:16
@@ -22,5 +24,5 @@ python3 makehtmlcalo.py -ht $histtype >& /sphenix/user/sphnxpro/htmllogs/makehtm
 kill $!
 rm htmlrunning$histtype
 rm -f deadHotTowers*HIST_CALO*.root # -f: no error if no files exist
-# no echos - this will force an email from cron
-#echo "Finished"
+
+echo "Finished"
