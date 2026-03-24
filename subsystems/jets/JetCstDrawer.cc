@@ -255,6 +255,33 @@ void JetCstDrawer::DoDrawing(const uint32_t trig, const uint32_t res)
 
   // reference histograms, using same index as hists
   auto refs = BuildRefHists(hists);
+  /*  
+  struct XR { float xmin; float xmax; };
+  
+  // Example values (replace with your desired ranges)
+  const std::map<std::size_t, XR> ncst_ranges = {
+    {0, {0.f, 30.f}},  // N_CEMC constituents
+    {1, {0.f, 30.f}},  // N_IHCal constituents
+    {2, {0.f, 30.f}},  // N_OHCal constituents
+    {3, {0.f, 70.f}}   // N_Total constituents
+};
+  
+  for (const auto& [idx, r] : ncst_ranges)
+    {
+      if (idx < hists.size() && hists[idx].hist)
+	{
+	  hists[idx].use_xrange = true;
+	  hists[idx].xmin = r.xmin;
+	  hists[idx].xmax = r.xmax;
+	}
+      if (idx < refs.size() && refs[idx].hist)
+  {
+    refs[idx].use_xrange = true;
+    refs[idx].xmin = r.xmin;
+    refs[idx].xmax = r.xmax;
+  }
+    }
+  */
   std::string currRunMsg = "Current Run " + std::to_string(cl->RunNumber());
   std::string refRunMsg  = "Reference Run " + refRunNum;
 

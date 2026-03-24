@@ -74,6 +74,22 @@ namespace JetDrawDefs
     return vecTrigToDrawAuAu;
   }
 
+   // ==========================================================================
+  //! List of triggers to draw (o+o)
+  // ==========================================================================
+  /*! FIXME 999 = JetQADefs::GL1::Inclusive */
+  inline std::vector<uint32_t> VecTrigToDrawOO()
+  {
+    static const std::vector<uint32_t> vecTrigToDrawOO = {
+      JetQADefs::GL1::MBDNSJet1,
+      JetQADefs::GL1::MBDNSJet2,
+      JetQADefs::GL1::MBDNSJet3,
+      JetQADefs::GL1::MBDNSJet4,
+      999  // FIXME swap out for official tag when ready
+    };
+    return vecTrigToDrawOO;
+  }
+
   // ==========================================================================
   //! Map of resolution index onto name
   // ==========================================================================
@@ -146,12 +162,18 @@ namespace JetDrawDefs
    *    - Start: Run 30392 (1st recorded run of run 2, 02.26.2024)
    *    - Stop: Run 53880 (end of p+p running, 09.30.2024)
    *    - Restart: Run 78954 (end of Au+Au running, 12.08.2025)
-   *    - Stop: Run ____ (end of p+p running, TBD)
+   *    - Stop: Run 81644 (end of p+p running, 1.20.2026)
+   *    - Start o+o: Run 82374 (leave in p+p settings for now) 
    */
   inline bool IsPP(const int run)
   {
     return ((run > 30392) && (run <= 53880)) || 
-            (run > 78954) ;
+      ((run > 78954) && (run <= 81664)) ;
+  }
+  
+  inline bool IsOO(const int run)
+  {
+    return (run >= 82373)  ; //leave o+o runs in pp settings + UE from AuAU for now
   }
 
   // ==========================================================================
@@ -169,14 +191,25 @@ namespace JetDrawDefs
   {
     if (IsPP(run)) {
       return {
-        "79226", //pp reference run TBD
-        "/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v008/pptesting/Added/HIST_JETQA-00079226-99999.root"
-        //"/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/ana509_2024p022_v001/testing/Added/HIST_JETQA-00053880-99999.root"
+        "79897", //pp reference run TBD
+        "/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v008/pptesting/Added/reference/HIST_JETQA-00079897-99999.root"
       };
     } else {
       return {
-        "72592",
-        "/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v008/testing/Added/HIST_JETQA-00072592-99999.root"
+        "79897",
+        "/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v008/pptesting/Added/reference/HIST_JETQA-00079897-99999.root"
+      };
+    }
+    
+    if (IsOO(run)) {
+      return {
+	"82374", //oo reference for now
+	"/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v008/ootesting/Added/reference/HIST_JETQA-00082374-99999.root"
+      };
+    } else {
+      return {
+	"79897", //else compare to pp
+	"/sphenix/tg/tg01/jets/jamesj3j3/run25_jet_hists/new_newcdbtag_v008/pptesting/Added/reference/HIST_JETQA-00079897-99999.root"
       };
     }
   }
@@ -211,6 +244,16 @@ namespace JetDrawDefs
     bool        logy   {false};   ///< make y axis log
     bool        logz   {false};   ///< make z axis log
     bool        norm   {false};   ///< normalize histogram
+
+    // -------------------------------------------------------------------------
+    // Optional axis-range controls
+    // -------------------------------------------------------------------------
+    bool  use_xrange {false};     ///< apply custom x-range if true
+    bool  use_yrange {false};
+    float xmin {0.f};
+    float xmax {0.f};
+    float ymin {0.f};
+    float ymax {0.f};
   };
 
   // vector of histogram and options

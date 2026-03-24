@@ -300,6 +300,76 @@ void StatusMapDrawer::DoDrawing(const uint32_t /*trig*/, const uint32_t /*res*/)
 
   // reference histograms, using same index as hists
   auto refs = BuildRefHists(hists);
+
+  struct XR { float xmin; float xmax; };
+  struct YR { float ymin; float ymax; };
+  
+  //Ideal OO axis ranges for calo status mapper energy plots
+  const std::map<std::size_t, YR> towerE_yranges = {
+    {12, {0.000001f, 1.f}}, //EMCAL
+    {13, {0.000001f, 1.f}}, //IHCAL
+    {14, {0.000001f, 1.f}}, //OHCAL
+    {15, {0.000001f, 1.f}}  //Total
+  };
+  
+  const std::map<std::size_t, XR> towerE_ranges = {
+    {12, {-200.f, 350.f}},  // EMCal total tower energy
+    {13, {-200.f, 350.f}},  // IHCal total tower energy
+    {14, {-200.f, 350.f}},  // OHCal total tower energy
+    {15, {-200.f, 350.f}}   // Sum all calo total tower energy
+  };
+  /*
+  //Ideal  Au+Au ranges for calo status mapper energy plots
+  const std::map<std::size_t, XR> towerE_ranges = {
+    {12, {-200.f, 3000.f}},  // EMCal total tower energy
+    {13, {-200.f,  500.f}},  // IHCal total tower energy
+    {14, {-200.f,  500.f}},  // OHCal total tower energy
+    {15, {-200.f, 3000.f}}   // Sum all calo total tower energy
+  };
+  */
+  /*
+  //Ideal pp ranges for calo status mapper energy plots
+  const std::map<std::size_t, XR> towerE_ranges = {
+    {12, {-50.f, 250.f}},  // EMCal total tower energy
+    {13, {-5.f,  5.f}},  // IHCal total tower energy
+    {14, {-5.f,  50.f}},  // OHCal total tower energy
+    {15, {-50.f, 250.f}}   // Sum all calo total tower energy
+  };
+  */
+
+  
+  for (const auto& [idx, r] : towerE_yranges)
+    {
+      if (idx < hists.size() && hists[idx].hist)
+	{
+	  hists[idx].use_yrange = true;
+	  hists[idx].ymin = r.ymin;
+	  hists[idx].ymax = r.ymax;
+	}
+      if (idx < refs.size() && refs[idx].hist)
+	{
+	  refs[idx].use_yrange = true;
+	  refs[idx].ymin = r.ymin;
+	  refs[idx].ymax = r.ymax;
+	}
+    }
+
+  for (const auto& [idx, r] : towerE_ranges)
+    {
+      if (idx < hists.size() && hists[idx].hist)
+	{
+	  hists[idx].use_xrange = true;
+	  hists[idx].xmin = r.xmin;
+	  hists[idx].xmax = r.xmax;
+	}
+      if (idx < refs.size() && refs[idx].hist)
+	{
+	  refs[idx].use_xrange = true;
+	  refs[idx].xmin = r.xmin;
+	  refs[idx].xmax = r.xmax;
+	}
+    }
+
   std::string currRunMsg = "Current Run " + std::to_string(cl->RunNumber());
   std::string refRunMsg  = "Reference Run " + refRunNum;
 
