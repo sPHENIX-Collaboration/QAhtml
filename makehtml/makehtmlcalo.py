@@ -24,9 +24,9 @@ subsys = {}
 if args.histotype == "calofitting":
     subsys = { "calofitting" : ["HIST_CALOFITTINGQA","CALOFITTINGQA","draw_calo_fitting.C"]}
 elif args.histotype == "calo":
-    subsys = {"calo" : ["HIST_CALOQA","CALOQA","draw_calo.C"]}
-elif args.histotype == "global":
-    subsys = {"globalQA" : ["HIST_CALOQA","GLOBALQA","draw_GlobalQA.C"],"jets" : ["HIST_JETS","JETSQA","draw_calo_jet.C"] }
+    subsys = {"calo" : ["HIST_JETQA","CALOQA","draw_calo.C"],
+              "globalQA" : ["HIST_JETQA","GLOBALQA","draw_GlobalQA.C"],
+              "jets" : ["HIST_JETQA","JETSQA","draw_calo_jet.C"] }
 else:
     print("not a supported QA module yet")
 
