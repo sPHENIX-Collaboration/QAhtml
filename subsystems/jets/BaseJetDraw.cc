@@ -30,6 +30,7 @@ BaseJetDraw::BaseJetDraw(const std::string& name,
   , m_do_debug(debug)
   , m_do_local(local)
   , m_is_pp(true)
+  , m_is_oo(true)
 {
   Initialize();
 }
@@ -216,17 +217,42 @@ void BaseJetDraw::Initialize()
   // connect to draw client
   QADrawClient* cl = QADrawClient::instance();
 
-  // grab run number & set pp/AuAu mode accordingly
+  // grab run number & set pp/AuAu/oo mode accordingly
   m_is_pp = JetDrawDefs::IsPP(cl->RunNumber());
   if (m_do_debug)
-  {
-    std::cout << "  -- Is Run " << cl->RunNumber() << " p+p? " << m_is_pp << std::endl;
-  }
+    {
+      std::cout << "  -- Is Run " << cl->RunNumber() << " p+p? " << m_is_pp << std::endl;
+    }
+
+  m_is_oo = JetDrawDefs::IsOO(cl->RunNumber());
+  if (m_do_debug)
+    {
+      std::cout << " -- Is Run " << cl ->RunNumber() << " o+o? " << m_is_oo << std::endl;
+    }
 
   // now pick out appropriate trigger list
   if (m_is_pp)
   {
     auto triggers = JetDrawDefs::VecTrigToDrawPP();
+    m_vecTrigToDraw.clear();
+    m_vecTrigToDraw.insert(m_vecTrigToDraw.end(),
+                           triggers.begin(),
+                           triggers.end());
+  }
+  else
+  {
+    auto triggers = JetDrawDefs::VecTrigToDrawAuAu();
+    m_vecTrigToDraw.clear();
+    m_vecTrigToDraw.insert(m_vecTrigToDraw.end(),
+                           triggers.begin(),
+                           triggers.end());
+  }
+
+  
+  // now pick out appropriate trigger list
+  if (m_is_oo)
+  {
+    auto triggers = JetDrawDefs::VecTrigToDrawOO();
     m_vecTrigToDraw.clear();
     m_vecTrigToDraw.insert(m_vecTrigToDraw.end(),
                            triggers.begin(),

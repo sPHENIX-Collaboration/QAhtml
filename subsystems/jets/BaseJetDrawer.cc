@@ -215,9 +215,10 @@ void BaseJetDrawer::DrawRunAndBuild(const std::string& what,
  *  \param trig    trigger index (optional)
  *  \param res     jet resolution index (optional)
  */
+
 void BaseJetDrawer::DrawHists(const std::string& what,
                               const std::vector<std::size_t>& indices,
-                              const JetDrawDefs::VHistAndOpts1D& hists,
+                              JetDrawDefs::VHistAndOpts1D& hists,
                               const int trig,
                               const int res)
 {
@@ -287,7 +288,7 @@ void BaseJetDrawer::DrawHists(const std::string& what,
  */
 void BaseJetDrawer::DrawHistOnPad(const std::size_t iHist,
                                   const std::size_t iPad,
-                                  const JetDrawDefs::VHistAndOpts1D& hists,
+                                  JetDrawDefs::VHistAndOpts1D& hists,
                                   JetDrawDefs::PlotPads& plot)
 {
   // emit debugging message
@@ -412,7 +413,7 @@ void BaseJetDrawer::MakeCanvas(const std::string& name, const int nHist)
 // ----------------------------------------------------------------------------
 //! Update style of current pad based on options
 // ----------------------------------------------------------------------------
-void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
+void BaseJetDrawer::UpdatePadStyle( JetDrawDefs::HistAndOpts& hist)
 {
   gPad->SetRightMargin(hist.margin);
   gPad->SetLogy(hist.logy);
@@ -425,6 +426,16 @@ void BaseJetDrawer::UpdatePadStyle(const JetDrawDefs::HistAndOpts& hist)
   gStyle->SetTitleX(0.01);
   gStyle->SetTitleY(0.99);
 
+  // Optional x-axis range call (see JetDrawDefs.h) 
+  if (hist.use_xrange && hist.hist && (hist.xmax > hist.xmin))
+    {
+      hist.hist->GetXaxis()->SetRangeUser(hist.xmin, hist.xmax);
+    }
+  if (hist.use_yrange && hist.hist && (hist.ymax > hist.ymin))
+    {
+      hist.hist->GetYaxis()->SetRangeUser(hist.ymin, hist.ymax);
+    }
+  
   hist.hist->SetMarkerSize(hist.marker);
 
   NormalizeHist(hist);
@@ -456,7 +467,7 @@ void BaseJetDrawer::UpdateTitle(const JetDrawDefs::HistAndOpts& hist)
 // ----------------------------------------------------------------------------
 //! Normalized histogram based on options
 // ----------------------------------------------------------------------------
-void BaseJetDrawer::NormalizeHist(const JetDrawDefs::HistAndOpts& hist)
+void BaseJetDrawer::NormalizeHist( JetDrawDefs::HistAndOpts& hist)
 {
   const bool doNorm = hist.norm;
   if (hist.hist && hist.hist->Integral() != 0 && doNorm)
@@ -474,13 +485,18 @@ JetDrawDefs::VHistAndOpts1D BaseJetDrawer::BuildRefHists(const JetDrawDefs::VHis
   QADrawClient* cl = QADrawClient::instance();
   int runNum = cl->RunNumber();
   const bool is_pp = JetDrawDefs::IsPP(runNum);
-
+  const bool is_oo = JetDrawDefs::IsOO(runNum);
+  
   if (m_do_debug)
   {
     std::cout << std::boolalpha
               << "  -- Reading Reference File\n" 
               << "  -- Drawers: run is pp? : " << is_pp 
               << std::endl;
+    std::cout << std::boolalpha
+	      << "  -- Reading Reference File\n"
+	      << "  -- Drawers: run is oo? : " << is_oo
+	      << std::endl;
   }
 
   // get reference run info according to run number

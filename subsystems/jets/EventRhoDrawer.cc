@@ -95,19 +95,21 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
 {
   // emit debugging message
   if (m_do_debug)
-  {
-    std::cout << "  -- Drawing rho histograms (trig = " << trig << ")" << std::endl;
-  }
+    {
+      std::cout << "  -- Drawing rho histograms (trig = " << trig << ")" << std::endl;
+    }
 
   // for histogram names
   const std::string histName = m_hist_prefix
-                             + "_"
-                             + JetDrawDefs::MapTrigToTag().at(trig);
-
+    + "_"
+    + JetDrawDefs::MapTrigToTag().at(trig);
+  
   // connect to draw client
   QADrawClient* cl = QADrawClient::instance();
   
-  // grab histograms to draw and set options
+  // --------------------------------------------------------------------------
+  // Grab histograms to draw and set options
+  // --------------------------------------------------------------------------
   JetDrawDefs::VHistAndOpts1D hists = {
     {
       dynamic_cast<TH1*>(cl->getHisto(histName + "_rhoarea")),
@@ -159,34 +161,73 @@ void EventRhoDrawer::DoDrawing(const uint32_t trig, const uint32_t /*res*/)
     }
   };
 
-  // reference histograms, using same index as hists
+  // --------------------------------------------------------------------------
+  // Build reference histograms (same indexing as hists)
+  // --------------------------------------------------------------------------
   auto refs = BuildRefHists(hists);
+
+  // --------------------------------------------------------------------------
+  // X-axis ranges (per plot example)
+  //   0: rhoarea    -> 0 to 1
+  //   1: rhomult    -> 0 to 0.015
+  //   2: sigmaarea  -> 0 to 1
+  //   3: sigmamult  -> 0 to 0.08
+  // --------------------------------------------------------------------------
+  const float xmin[4] = {-5.f, -0.02f, -5.f, -0.02f};
+  const float xmax[4] = {20.f, 0.1f, 10.f, 0.25f}; //optimal OO xmax
+    // optimal AuAu xmax => {200.f, 0.5f, 200.f, 0.5f};
+    //optimal pp xmax =>  {5.f, 0.015f, 5.f, 0.08f};
+  
+  // current-run hists
+  for (std::size_t i = 0; i < hists.size() && i < 4; ++i)
+    {
+      hists[i].use_xrange = true;
+      hists[i].xmin = xmin[i];
+      hists[i].xmax = xmax[i];
+    }
+  
+  // reference hists (so overlay uses same axis)
+  for (std::size_t i = 0; i < refs.size() && i < 4; ++i)
+    {
+      refs[i].use_xrange = true;
+      refs[i].xmin = xmin[i];
+      refs[i].xmax = xmax[i];
+    }
+
+  // --------------------------------------------------------------------------
+  // Messages for overlaid ref/current run
+  // --------------------------------------------------------------------------
   std::string currRunMsg = "Current Run " + std::to_string(cl->RunNumber());
   std::string refRunMsg  = "Reference Run " + refRunNum;
 
-  // draw rho plots on one page
+  // --------------------------------------------------------------------------
+  // Draw rho plots on one page
+  // --------------------------------------------------------------------------
   DrawHists("EvtRho", {0, 1, 2, 3}, hists, trig);
-
-  // draw reference hists on relevant pads
   DrawHistOnPad(0, 1, refs, m_plots.GetBackPlotPad());
-  DrawHistOnPad(0, 1, hists, m_plots.GetBackPlotPad()); //draw current run on top of ref
+ 
+  // --------------------------------------------------------------------------
+  // Overlay reference + current on relevant pads + text
+  // --------------------------------------------------------------------------
+  DrawHistOnPad(0, 1, refs,  m_plots.GetBackPlotPad());
+  DrawHistOnPad(0, 1, hists, m_plots.GetBackPlotPad()); // current on top of ref
   DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
-  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
-  
-  DrawHistOnPad(1, 2, refs, m_plots.GetBackPlotPad());
+  DrawTextOnPad(1, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed,   refRunMsg);
+
+  DrawHistOnPad(1, 2, refs,  m_plots.GetBackPlotPad());
   DrawHistOnPad(1, 2, hists, m_plots.GetBackPlotPad());
   DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
-  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
+  DrawTextOnPad(2, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed,   refRunMsg);
 
-  DrawHistOnPad(2, 3, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(2, 3, refs,  m_plots.GetBackPlotPad());
   DrawHistOnPad(2, 3, hists, m_plots.GetBackPlotPad());
   DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
-  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
+  DrawTextOnPad(3, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed,   refRunMsg);
 
-  DrawHistOnPad(3, 4, refs, m_plots.GetBackPlotPad());
+  DrawHistOnPad(3, 4, refs,  m_plots.GetBackPlotPad());
   DrawHistOnPad(3, 4, hists, m_plots.GetBackPlotPad());
   DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.80, kBlack, currRunMsg);
-  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed, refRunMsg);
+  DrawTextOnPad(4, m_plots.GetBackPlotPad(), 0.60, 0.75, kRed,   refRunMsg);
 
   return;
 }
