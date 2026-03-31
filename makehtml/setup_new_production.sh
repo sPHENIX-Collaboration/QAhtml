@@ -29,5 +29,6 @@ fi
 
 echo "Starting drawing"
 sh $PWD/makehtmlcalo.sh calofitting ${newdir}
+sh $PWD/makehtmlcalo.sh calo ${newdir}
 
 echo "finished drawing new production "${triplet}
