@@ -20,7 +20,7 @@ R__LOAD_LIBRARY(libqadrawjet.so)
  *  \param      do_html  turn on (true)/ off (false) trying to make html page
  */
 void draw_calo_jet(const std::string& infile,
-                   const std::string& outfile,
+                   const std::string& outfile = "outfile.root",
                    const bool do_debug = false,
                    const bool do_html = true)
 {
