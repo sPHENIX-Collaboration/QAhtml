@@ -9,6 +9,7 @@
 #include "JetKinematicDrawer.h"
 #include "JetSeedDrawer.h"
 #include "EMClusterKinematicDrawer.h"
+#include "EMCalShowerShapesDrawer.h"
 #include "StatusMapDrawer.h"
 #include "UEvsEtaDrawer.h"
 #include <map>
@@ -24,6 +25,7 @@
  *    - "BEAM" = draw beam background plots,
  *    - "STATUS" = draw calo status map plots,
  *    - "EMCLUSTER" = draw emcluster kinematic plots,
+ *    - "EMSHOWERSHAPES" = draw EMCal shower-shape plots,
  *    - "RHO" = draw event-wise rho plots,
  *    - "KINEMATIC" = draw jet kinematic plots,
  *    - "CONSTITUENTS" = draw jet calorimeter constituent plots,
@@ -60,6 +62,13 @@ CaloJetDraw::CaloJetDraw(const std::string& name,
                                                                 "emcal_cluster",
                                                                 "h_emclusterkinematics",
                                                                 debug);
+
+  // for EMCal shower-shape plots
+  m_drawers["EMSHOWERSHAPES"] = std::make_unique<EMCalShowerShapesDrawer>("EMCalShowerShapes",
+                                                                            name,
+                                                                            "",
+                                                                            "h_emcalshowershapes",
+                                                                            debug);
 
   // for event-wise rho plots
   m_drawers["RHO"] = std::make_unique<EventRhoDrawer>("EventRho",
