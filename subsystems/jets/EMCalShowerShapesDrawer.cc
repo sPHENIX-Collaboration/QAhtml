@@ -116,8 +116,8 @@ void EMCalShowerShapesDrawer::DoDrawing(const uint32_t trig, const uint32_t /*re
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histBase + "_weta_cogx")),
-      "EMCal Cluster w_{#eta}^{cogx}",
-      "w_{#eta}^{cogx}",
+      "EMCal Cluster w#eta_cogx",
+      "w#eta_cogx",
       "Normalized Counts",
       "",
       0.8,
@@ -128,8 +128,8 @@ void EMCalShowerShapesDrawer::DoDrawing(const uint32_t trig, const uint32_t /*re
     },
     {
       dynamic_cast<TH1*>(cl->getHisto(histBase + "_wphi_cogx")),
-      "EMCal Cluster w_{#phi}^{cogx}",
-      "w_{#phi}^{cogx}",
+      "EMCal Cluster w#phi_cogx",
+      "w#phi_cogx",
       "Normalized Counts",
       "",
       0.8,
